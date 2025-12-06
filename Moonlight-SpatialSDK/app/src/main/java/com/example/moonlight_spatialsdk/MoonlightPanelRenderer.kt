@@ -15,7 +15,7 @@ class MoonlightPanelRenderer(
     private val activity: Activity,
     private val prefs: PreferenceConfiguration,
     private val crashListener: CrashListener,
-    private val perfOverlayListener: PerfOverlayListener = PerfOverlayListener { _, _, _, _ -> },
+    private val perfOverlayListener: PerfOverlayListener = PerfOverlayListener { _ -> },
     private val consecutiveCrashCount: Int = 0,
     private val meteredData: Boolean = false,
     private val requestedHdr: Boolean = false,

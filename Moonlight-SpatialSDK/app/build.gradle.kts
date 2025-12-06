@@ -21,8 +21,11 @@ android {
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-    // Update the ndkVersion to the right version for your app
-    // ndkVersion = "27.0.12077973"
+    // NDK version confirmed from Valinor project (working configuration for Quest 3/Pro)
+    ndkVersion = "29.0.14206865"
+    ndk {
+      abiFilters += listOf("arm64-v8a") // Quest 3/Pro only
+    }
   }
 
   packaging { resources.excludes.add("META-INF/LICENSE") }
@@ -44,6 +47,12 @@ android {
     targetCompatibility = JavaVersion.VERSION_17
   }
   kotlinOptions { jvmTarget = "17" }
+
+  externalNativeBuild {
+    ndkBuild {
+      path = file("src/main/jni/Android.mk")
+    }
+  }
 }
 
 //noinspection UseTomlInstead
@@ -79,6 +88,13 @@ dependencies {
   androidTestImplementation(libs.androidx.ui.test.junit4)
   debugImplementation(libs.androidx.ui.tooling)
   debugImplementation(libs.androidx.ui.test.manifest)
+
+  // Moonlight dependencies
+  implementation("org.bouncycastle:bcprov-jdk18on:1.77")
+  implementation("org.bouncycastle:bcpkix-jdk18on:1.77")
+  implementation("org.jcodec:jcodec:0.2.5")
+  implementation("com.squareup.okhttp3:okhttp:4.12.0")
+  implementation("org.jmdns:jmdns:3.5.9")
 }
 
 val projectDir = layout.projectDirectory

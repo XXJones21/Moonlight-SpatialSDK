@@ -42,6 +42,10 @@
     android:required="false"
   />
   <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+  <uses-permission android:name="android.permission.VIBRATE" />
   <uses-feature
     android:name="com.oculus.feature.RENDER_MODEL"
     android:required="false"
@@ -60,17 +64,31 @@
     />
     <meta-data android:name="com.oculus.vr.focusaware" android:value="true" />
     <activity
+      android:name=".PancakeActivity"
+      android:exported="true"
+      android:resizeableActivity="true"
+    >
+      <!-- Set the panel size when not in immersive (VR) mode -->
+      <layout android:defaultHeight="550dp" android:defaultWidth="800dp" />
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="com.oculus.intent.category.2D" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity>
+    <activity
       android:name="com.example.moonlight_spatialsdk.ImmersiveActivity"
+      android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
       android:launchMode="singleTask"
       android:excludeFromRecents="false"
       android:configChanges="screenSize|screenLayout|orientation|keyboardHidden|keyboard|navigation|uiMode"
       android:exported="true"
     >
-      <!-- This filter lets the apk show up as a launchable icon. -->
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="com.oculus.intent.category.VR" />
-        <category android:name="android.intent.category.LAUNCHER" />
+        <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </activity>
   </application>
