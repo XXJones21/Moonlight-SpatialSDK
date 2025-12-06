@@ -11,8 +11,11 @@ import com.limelight.nvstream.StreamConfiguration
 import com.limelight.nvstream.http.ComputerDetails
 import com.limelight.nvstream.http.LimelightCryptoProvider
 import com.limelight.nvstream.http.NvApp
+import com.limelight.nvstream.http.NvHTTP
+import com.limelight.nvstream.http.PairingManager
 import com.limelight.nvstream.jni.MoonBridge
 import com.limelight.preferences.PreferenceConfiguration
+import java.util.concurrent.Executors
 
 /**
  * Manages Moonlight streaming connection lifecycle for Spatial SDK.
@@ -30,6 +33,75 @@ class MoonlightConnectionManager(
     private var connection: NvConnection? = null
     private var isConnected: Boolean = false
     private val cryptoProvider: LimelightCryptoProvider = AndroidCryptoProvider(context)
+    private val executor = Executors.newSingleThreadExecutor()
+
+    /**
+     * Check if server requires pairing.
+     * 
+     * @param host Server hostname or IP address
+     * @param port Server port (typically 47989)
+     * @param callback Callback with pairing state (true if paired, false if needs pairing)
+     */
+    fun checkPairing(
+        host: String,
+        port: Int,
+        callback: (Boolean, String?) -> Unit
+    ) {
+        executor.execute {
+            try {
+                val computerDetails = ComputerDetails.AddressTuple(host, port)
+                val http = NvHTTP(computerDetails, 0, "0123456789ABCDEF", null, cryptoProvider)
+                val pairState = http.getPairState()
+                val isPaired = pairState == PairingManager.PairState.PAIRED
+                val error = if (isPaired) null else "Server requires pairing"
+                callback(isPaired, error)
+            } catch (e: Exception) {
+                callback(false, "Error checking pairing: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Pair with server using PIN.
+     * 
+     * @param host Server hostname or IP address
+     * @param port Server port (typically 47989)
+     * @param pin PIN code from server
+     * @param callback Callback with pairing result (true if successful, false with error message)
+     */
+    fun pairWithServer(
+        host: String,
+        port: Int,
+        pin: String,
+        callback: (Boolean, String?) -> Unit
+    ) {
+        executor.execute {
+            try {
+                val computerDetails = ComputerDetails.AddressTuple(host, port)
+                val http = NvHTTP(computerDetails, 0, "0123456789ABCDEF", null, cryptoProvider)
+                val pairingManager = PairingManager(http, cryptoProvider)
+                val serverInfo = http.getServerInfo(true)
+                val pairState = pairingManager.pair(serverInfo, pin)
+                
+                when (pairState) {
+                    PairingManager.PairState.PAIRED -> {
+                        callback(true, null)
+                    }
+                    PairingManager.PairState.PIN_WRONG -> {
+                        callback(false, "Incorrect PIN")
+                    }
+                    PairingManager.PairState.ALREADY_IN_PROGRESS -> {
+                        callback(false, "Pairing already in progress")
+                    }
+                    else -> {
+                        callback(false, "Pairing failed")
+                    }
+                }
+            } catch (e: Exception) {
+                callback(false, "Pairing error: ${e.message}")
+            }
+        }
+    }
 
     /**
      * Start a streaming session with the specified parameters.
@@ -47,6 +119,7 @@ class MoonlightConnectionManager(
         uniqueId: String,
         prefs: PreferenceConfiguration
     ) {
+        executor.execute {
         val computerDetails = ComputerDetails.AddressTuple(host, port)
         
         val streamConfig = StreamConfiguration.Builder()
@@ -61,26 +134,29 @@ class MoonlightConnectionManager(
             .setClientRefreshRateX100(prefs.fps * 100)
             .build()
         
-        connection = NvConnection(
-            context,
-            computerDetails,
-            0, // httpsPort (0 means use default)
-            uniqueId,
-            streamConfig,
-            cryptoProvider,
-            null // serverCert (null means use default)
-        )
-        
-        connection?.start(audioRenderer, decoderRenderer, this)
+            connection = NvConnection(
+                context,
+                computerDetails,
+                0, // httpsPort (0 means use default)
+                uniqueId,
+                streamConfig,
+                cryptoProvider,
+                null // serverCert (null means use default)
+            )
+            
+            connection?.start(audioRenderer, decoderRenderer, this)
+        }
     }
 
     /**
      * Stop the current streaming session and clean up resources.
      */
     fun stopStream() {
-        connection?.stop()
-        connection = null
-        isConnected = false
+        executor.execute {
+            connection?.stop()
+            connection = null
+            isConnected = false
+        }
     }
 
     /**

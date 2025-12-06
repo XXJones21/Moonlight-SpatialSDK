@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -32,13 +33,36 @@ import com.meta.spatial.uiset.theme.SpatialColorScheme
 import com.meta.spatial.uiset.theme.SpatialTheme
 import com.meta.spatial.uiset.theme.darkSpatialColorScheme
 import com.meta.spatial.uiset.theme.lightSpatialColorScheme
+import com.limelight.binding.audio.AndroidAudioRenderer
+import com.limelight.binding.video.CrashListener
+import com.limelight.binding.video.MediaCodecHelper
+import com.limelight.nvstream.http.PairingManager
+import com.limelight.preferences.PreferenceConfiguration
 
 class PancakeActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setTheme(R.style.PanelAppThemeTransparent)
+    
+    // Initialize MediaCodecHelper before creating any decoder renderers
+    MediaCodecHelper.initialize(this, "spatial-panel")
+    
+    val prefs = PreferenceConfiguration.readPreferences(this)
+    val panelRenderer = MoonlightPanelRenderer(
+        activity = this,
+        prefs = prefs,
+        crashListener = CrashListener { _ -> }
+    )
+    val connectionManager = MoonlightConnectionManager(
+        context = this,
+        activity = this,
+        decoderRenderer = panelRenderer.getDecoder(),
+        audioRenderer = AndroidAudioRenderer(this, false),
+        onStatusUpdate = null
+    )
     setContent {
       ConnectionPanel2D(
+          connectionManager = connectionManager,
           onConnect = { host, port, appId ->
             val immersiveIntent = Intent(this, ImmersiveActivity::class.java).apply {
               action = Intent.ACTION_MAIN
@@ -67,14 +91,19 @@ fun getPanelTheme(): SpatialColorScheme =
 
 @Composable
 fun ConnectionPanel2D(
+    connectionManager: MoonlightConnectionManager,
     onConnect: (String, Int, Int) -> Unit,
     onLaunchImmersive: () -> Unit
 ) {
   var host by remember { mutableStateOf("") }
   var port by remember { mutableStateOf("47989") }
   var appId by remember { mutableStateOf("0") }
+  var generatedPin by remember { mutableStateOf<String?>(null) }
   var connectionStatus by remember { mutableStateOf("Ready to connect") }
   var isConnected by remember { mutableStateOf(false) }
+  var needsPairing by remember { mutableStateOf(false) }
+  var isCheckingPairing by remember { mutableStateOf(false) }
+  var isPairing by remember { mutableStateOf(false) }
   
   val focusManager = LocalFocusManager.current
 
@@ -134,17 +163,75 @@ fun ConnectionPanel2D(
           value = appId,
           onValueChange = { appId = it },
           label = { Text("App ID (0 for desktop)") },
-          enabled = !isConnected,
+          enabled = !isConnected && !needsPairing,
           singleLine = true,
           keyboardOptions = KeyboardOptions(
               keyboardType = KeyboardType.Number,
-              imeAction = ImeAction.Done
+              imeAction = ImeAction.Next
           ),
           keyboardActions = KeyboardActions(
-              onDone = { focusManager.clearFocus() }
+              onNext = { focusManager.clearFocus() }
           ),
           modifier = Modifier.fillMaxWidth(),
       )
+
+      if (needsPairing) {
+        if (generatedPin == null) {
+          // Generate PIN when pairing is needed
+          LaunchedEffect(Unit) {
+            generatedPin = PairingManager.generatePinString()
+            isPairing = true
+            connectionStatus = "Enter PIN $generatedPin on your server..."
+            val portInt = port.toIntOrNull() ?: 47989
+            connectionManager.pairWithServer(host, portInt, generatedPin!!) { success, error ->
+              isPairing = false
+              if (success) {
+                connectionStatus = "Paired! Click Connect to continue"
+                needsPairing = false
+                generatedPin = null
+              } else {
+                when (error) {
+                  "Incorrect PIN" -> {
+                    connectionStatus = "PIN incorrect. Please try again."
+                    generatedPin = null // Regenerate PIN
+                  }
+                  "Pairing already in progress" -> {
+                    connectionStatus = "Another device is pairing. Please wait."
+                    generatedPin = null
+                  }
+                  else -> {
+                    connectionStatus = error ?: "Pairing failed. Please try again."
+                    generatedPin = null
+                  }
+                }
+              }
+            }
+          }
+        }
+        
+        if (generatedPin != null) {
+          Column(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.spacedBy(16.dp)
+          ) {
+            Text(
+                text = "Enter this PIN on your server:",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                text = generatedPin!!,
+                style = MaterialTheme.typography.headlineLarge,
+            )
+            if (isPairing) {
+              Text(
+                  text = "Waiting for PIN entry on server...",
+                  style = MaterialTheme.typography.bodySmall,
+              )
+            }
+          }
+        }
+      }
 
       if (isConnected) {
         SecondaryButton(
@@ -156,20 +243,46 @@ fun ConnectionPanel2D(
             },
         )
       } else {
-        PrimaryButton(
-            label = "Connect & Launch Immersive",
-            expanded = true,
-            onClick = {
-              val portInt = port.toIntOrNull() ?: 47989
-              val appIdInt = appId.toIntOrNull() ?: 0
-              if (host.isNotBlank()) {
-                connectionStatus = "Connecting..."
-                onConnect(host, portInt, appIdInt)
-              } else {
-                connectionStatus = "Error: Host cannot be empty"
-              }
-            },
-        )
+        if (isCheckingPairing || isPairing) {
+          PrimaryButton(
+              label = if (isCheckingPairing) "Checking..." else "Pairing...",
+              expanded = true,
+              onClick = { },
+          )
+        } else {
+          if (needsPairing) {
+            PrimaryButton(
+                label = "Pairing in progress...",
+                expanded = true,
+                onClick = { },
+            )
+          } else {
+            PrimaryButton(
+                label = "Connect & Launch Immersive",
+                expanded = true,
+                onClick = {
+                  val portInt = port.toIntOrNull() ?: 47989
+                  val appIdInt = appId.toIntOrNull() ?: 0
+                  if (host.isNotBlank()) {
+                    isCheckingPairing = true
+                    connectionStatus = "Checking pairing..."
+                    connectionManager.checkPairing(host, portInt) { isPaired, error ->
+                      isCheckingPairing = false
+                      if (isPaired) {
+                        connectionStatus = "Connecting..."
+                        onConnect(host, portInt, appIdInt)
+                      } else {
+                        needsPairing = true
+                        connectionStatus = error ?: "Server requires pairing. Generating PIN..."
+                      }
+                    }
+                  } else {
+                    connectionStatus = "Error: Host cannot be empty"
+                  }
+                },
+            )
+          }
+        }
       }
       
       Spacer(modifier = Modifier.height(16.dp))

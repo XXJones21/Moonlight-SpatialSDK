@@ -11,6 +11,7 @@ import androidx.core.net.toUri
 import com.limelight.binding.audio.AndroidAudioRenderer
 import com.limelight.binding.video.CrashListener
 import com.limelight.binding.video.MediaCodecDecoderRenderer
+import com.limelight.binding.video.MediaCodecHelper
 import com.limelight.preferences.PreferenceConfiguration
 import com.meta.spatial.castinputforward.CastInputForwardFeature
 import com.meta.spatial.compose.ComposeFeature
@@ -89,14 +90,14 @@ class ImmersiveActivity : AppSystemActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    
+    // Initialize MediaCodecHelper before creating any decoder renderers
+    MediaCodecHelper.initialize(this, "spatial-panel")
+    
     NetworkedAssetLoader.init(
         File(applicationContext.getCacheDir().canonicalPath),
         OkHttpAssetFetcher(),
     )
-
-    // Enable MR mode
-    systemManager.findSystem<LocomotionSystem>().enableLocomotion(false)
-    scene.enablePassthrough(true)
 
     // Check for connection parameters from PancakeActivity
     val host = intent.getStringExtra("host")
@@ -113,6 +114,10 @@ class ImmersiveActivity : AppSystemActivity() {
 
   override fun onSceneReady() {
     super.onSceneReady()
+
+    // Enable MR mode - scene and systemManager are now available
+    systemManager.findSystem<LocomotionSystem>().enableLocomotion(false)
+    scene.enablePassthrough(true)
 
     scene.setLightingEnvironment(
         ambientColor = Vector3(0f),
@@ -187,19 +192,27 @@ class ImmersiveActivity : AppSystemActivity() {
       return
     }
 
-    _connectionStatus.value = "Connecting..."
+    _connectionStatus.value = "Checking pairing..."
     _isConnected.value = false
 
-    val uniqueId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-        ?: "0123456789ABCDEF"
+    connectionManager.checkPairing(host, port) { isPaired, error ->
+      if (isPaired) {
+        _connectionStatus.value = "Connecting..."
+        val uniqueId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            ?: "0123456789ABCDEF"
 
-    connectionManager.startStream(
-        host = host,
-        port = port,
-        appId = appId,
-        uniqueId = uniqueId,
-        prefs = prefs
-    )
+        connectionManager.startStream(
+            host = host,
+            port = port,
+            appId = appId,
+            uniqueId = uniqueId,
+            prefs = prefs
+        )
+      } else {
+        _connectionStatus.value = error ?: "Server requires pairing. Please pair in 2D mode first."
+        _isConnected.value = false
+      }
+    }
   }
 
   private fun disconnect() {

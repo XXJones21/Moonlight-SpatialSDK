@@ -38,10 +38,6 @@ const val OPTIONS_PANEL_WIDTH = 0.85f
 const val OPTIONS_PANEL_HEIGHT = 0.75f
 
 @Composable
-fun getPanelTheme(): SpatialColorScheme =
-    if (isSystemInDarkTheme()) darkSpatialColorScheme() else lightSpatialColorScheme()
-
-@Composable
 @Preview(
     widthDp = (PanelConstants.DEFAULT_DP_PER_METER * OPTIONS_PANEL_WIDTH).toInt(),
     heightDp = (PanelConstants.DEFAULT_DP_PER_METER * OPTIONS_PANEL_HEIGHT).toInt(),
