@@ -3,7 +3,6 @@ package com.example.moonlight_spatialsdk
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -198,14 +197,11 @@ class ImmersiveActivity : AppSystemActivity() {
     connectionManager.checkPairing(host, port) { isPaired, error ->
       if (isPaired) {
         _connectionStatus.value = "Connecting..."
-        val uniqueId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-            ?: "0123456789ABCDEF"
 
         connectionManager.startStream(
             host = host,
             port = port,
             appId = appId,
-            uniqueId = uniqueId,
             prefs = prefs
         )
       } else {

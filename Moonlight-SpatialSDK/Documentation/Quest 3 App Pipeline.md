@@ -450,7 +450,10 @@ private val decoderRenderer: MediaCodecDecoderRenderer by lazy {
    - Uses client-generated PIN for pairing handshake
    - Server validates PIN (user must enter same PIN on server)
    - Establishes secure certificate pairing via challenge-response
-4. **If Paired**: Proceed with connection
+4. **Persist Identity & Certificate**:
+   - Single persistent client ID reused for all NvHTTP/NvConnection calls
+   - Paired server certificate cached and injected into every HTTP/connection attempt
+5. **If Paired**: Proceed with connection
    - Server certificate stored for future connections
    - No PIN required for subsequent connections
 
@@ -499,15 +502,15 @@ private val decoderRenderer: MediaCodecDecoderRenderer by lazy {
    c. Client automatically starts pairing with generated PIN (background thread)
    d. User enters same PIN on server (Sunshine/GFE pairing dialog)
    e. Server validates PIN during pairing handshake
-   f. On success: Launch ImmersiveActivity
+   f. On success: Store paired server certificate and reuse the same persistent client ID; then launch ImmersiveActivity
 5. If paired:
    a. Launch ImmersiveActivity with connection params
 
 **Immersive Mode (ImmersiveActivity)**:
 
 1. Activity receives connection params via Intent
-2. onCreate(): Check pairing status (background thread)
-3. If paired: Start stream connection (background thread)
+2. onCreate(): Check pairing status (background thread; UI updates marshalled to main thread)
+3. If paired: Start stream connection (background thread) using persistent client ID and cached server certificate
 4. onSceneReady(): Configure scene (passthrough, lighting)
 5. registerPanels(): Video panel created
 6. surfaceConsumer: Surface attached to decoder

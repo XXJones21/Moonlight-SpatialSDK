@@ -104,6 +104,7 @@ fun ConnectionPanel2D(
   var needsPairing by remember { mutableStateOf(false) }
   var isCheckingPairing by remember { mutableStateOf(false) }
   var isPairing by remember { mutableStateOf(false) }
+  var pairingAttemptKey by remember { mutableStateOf(0) }
   
   val focusManager = LocalFocusManager.current
 
@@ -177,8 +178,8 @@ fun ConnectionPanel2D(
 
       if (needsPairing) {
         if (generatedPin == null) {
-          // Generate PIN when pairing is needed
-          LaunchedEffect(Unit) {
+          // Generate PIN when pairing is needed - use pairingAttemptKey to prevent infinite loop
+          LaunchedEffect(pairingAttemptKey) {
             generatedPin = PairingManager.generatePinString()
             isPairing = true
             connectionStatus = "Enter PIN $generatedPin on your server..."
@@ -192,16 +193,13 @@ fun ConnectionPanel2D(
               } else {
                 when (error) {
                   "Incorrect PIN" -> {
-                    connectionStatus = "PIN incorrect. Please try again."
-                    generatedPin = null // Regenerate PIN
+                    connectionStatus = "PIN incorrect. Click 'Retry Pairing' to try again."
                   }
                   "Pairing already in progress" -> {
-                    connectionStatus = "Another device is pairing. Please wait."
-                    generatedPin = null
+                    connectionStatus = "Another device is pairing. Please wait, then tap Retry."
                   }
                   else -> {
-                    connectionStatus = error ?: "Pairing failed. Please try again."
-                    generatedPin = null
+                    connectionStatus = error ?: "Pairing failed. Click 'Retry Pairing' to try again."
                   }
                 }
               }
@@ -251,11 +249,22 @@ fun ConnectionPanel2D(
           )
         } else {
           if (needsPairing) {
-            PrimaryButton(
-                label = "Pairing in progress...",
-                expanded = true,
-                onClick = { },
-            )
+            if (isPairing) {
+              PrimaryButton(
+                  label = "Pairing in progress...",
+                  expanded = true,
+                  onClick = { },
+              )
+            } else {
+              PrimaryButton(
+                  label = "Retry Pairing",
+                  expanded = true,
+                  onClick = {
+                    pairingAttemptKey++ // Trigger new PIN generation
+                    generatedPin = null
+                  },
+              )
+            }
           } else {
             PrimaryButton(
                 label = "Connect & Launch Immersive",

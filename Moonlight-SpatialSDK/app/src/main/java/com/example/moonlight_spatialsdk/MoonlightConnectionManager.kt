@@ -2,6 +2,8 @@ package com.example.moonlight_spatialsdk
 
 import android.app.Activity
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import com.limelight.binding.audio.AndroidAudioRenderer
 import com.limelight.binding.crypto.AndroidCryptoProvider
 import com.limelight.binding.video.MediaCodecDecoderRenderer
@@ -34,6 +36,7 @@ class MoonlightConnectionManager(
     private var isConnected: Boolean = false
     private val cryptoProvider: LimelightCryptoProvider = AndroidCryptoProvider(context)
     private val executor = Executors.newSingleThreadExecutor()
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     /**
      * Check if server requires pairing.
@@ -50,13 +53,15 @@ class MoonlightConnectionManager(
         executor.execute {
             try {
                 val computerDetails = ComputerDetails.AddressTuple(host, port)
-                val http = NvHTTP(computerDetails, 0, "0123456789ABCDEF", null, cryptoProvider)
+                val uniqueId = IdentityStore.getOrCreateUniqueId(context)
+                val serverCert = IdentityStore.loadServerCert(context, host)
+                val http = NvHTTP(computerDetails, 0, uniqueId, serverCert, cryptoProvider)
                 val pairState = http.getPairState()
                 val isPaired = pairState == PairingManager.PairState.PAIRED
                 val error = if (isPaired) null else "Server requires pairing"
-                callback(isPaired, error)
+                postToMain { callback(isPaired, error) }
             } catch (e: Exception) {
-                callback(false, "Error checking pairing: ${e.message}")
+                postToMain { callback(false, "Error checking pairing: ${e.message}") }
             }
         }
     }
@@ -78,27 +83,30 @@ class MoonlightConnectionManager(
         executor.execute {
             try {
                 val computerDetails = ComputerDetails.AddressTuple(host, port)
-                val http = NvHTTP(computerDetails, 0, "0123456789ABCDEF", null, cryptoProvider)
+                val uniqueId = IdentityStore.getOrCreateUniqueId(context)
+                val serverCert = IdentityStore.loadServerCert(context, host)
+                val http = NvHTTP(computerDetails, 0, uniqueId, serverCert, cryptoProvider)
                 val pairingManager = PairingManager(http, cryptoProvider)
                 val serverInfo = http.getServerInfo(true)
                 val pairState = pairingManager.pair(serverInfo, pin)
                 
                 when (pairState) {
                     PairingManager.PairState.PAIRED -> {
-                        callback(true, null)
+                        pairingManager.pairedCert?.let { IdentityStore.saveServerCert(context, host, it) }
+                        postToMain { callback(true, null) }
                     }
                     PairingManager.PairState.PIN_WRONG -> {
-                        callback(false, "Incorrect PIN")
+                        postToMain { callback(false, "Incorrect PIN") }
                     }
                     PairingManager.PairState.ALREADY_IN_PROGRESS -> {
-                        callback(false, "Pairing already in progress")
+                        postToMain { callback(false, "Pairing already in progress") }
                     }
                     else -> {
-                        callback(false, "Pairing failed")
+                        postToMain { callback(false, "Pairing failed") }
                     }
                 }
             } catch (e: Exception) {
-                callback(false, "Pairing error: ${e.message}")
+                postToMain { callback(false, "Pairing error: ${e.message}") }
             }
         }
     }
@@ -116,12 +124,13 @@ class MoonlightConnectionManager(
         host: String,
         port: Int,
         appId: Int,
-        uniqueId: String,
         prefs: PreferenceConfiguration
     ) {
         executor.execute {
         val computerDetails = ComputerDetails.AddressTuple(host, port)
-        
+        val uniqueId = IdentityStore.getOrCreateUniqueId(context)
+        val serverCert = IdentityStore.loadServerCert(context, host)
+
         val streamConfig = StreamConfiguration.Builder()
             .setApp(NvApp("Moonlight", appId, false))
             .setResolution(prefs.width, prefs.height)
@@ -141,7 +150,7 @@ class MoonlightConnectionManager(
                 uniqueId,
                 streamConfig,
                 cryptoProvider,
-                null // serverCert (null means use default)
+                serverCert // serverCert (null means use default)
             )
             
             connection?.start(audioRenderer, decoderRenderer, this)
@@ -180,28 +189,28 @@ class MoonlightConnectionManager(
 
     // NvConnectionListener implementation
     override fun stageStarting(stageName: String) {
-        onStatusUpdate?.invoke("Starting: $stageName", false)
+        onStatusUpdate?.let { postToMain { it("Starting: $stageName", false) } }
     }
 
     override fun stageComplete(stageName: String) {
-        onStatusUpdate?.invoke("Completed: $stageName", false)
+        onStatusUpdate?.let { postToMain { it("Completed: $stageName", false) } }
     }
 
     override fun stageFailed(stageName: String, portFlags: Int, errorCode: Int) {
         isConnected = false
-        onStatusUpdate?.invoke("Failed: $stageName (error: $errorCode)", false)
+        onStatusUpdate?.let { postToMain { it("Failed: $stageName (error: $errorCode)", false) } }
         connection = null
     }
 
     override fun connectionStarted() {
         isConnected = true
-        onStatusUpdate?.invoke("Connected", true)
+        onStatusUpdate?.let { postToMain { it("Connected", true) } }
     }
 
     override fun connectionTerminated(errorCode: Int) {
         isConnected = false
         val message = if (errorCode == 0) "Disconnected" else "Connection terminated (error: $errorCode)"
-        onStatusUpdate?.invoke(message, false)
+        onStatusUpdate?.let { postToMain { it(message, false) } }
         connection = null
     }
 
@@ -211,11 +220,11 @@ class MoonlightConnectionManager(
             com.limelight.nvstream.jni.MoonBridge.CONN_STATUS_POOR -> "Connection: Poor"
             else -> "Connection: Unknown"
         }
-        onStatusUpdate?.invoke(status, true)
+        onStatusUpdate?.let { postToMain { it(status, true) } }
     }
 
     override fun displayMessage(message: String) {
-        onStatusUpdate?.invoke(message, isConnected)
+        onStatusUpdate?.let { postToMain { it(message, isConnected) } }
     }
 
     override fun displayTransientMessage(message: String) {
@@ -240,6 +249,14 @@ class MoonlightConnectionManager(
 
     override fun setControllerLED(controllerNumber: Short, r: Byte, g: Byte, b: Byte) {
         // Controller LED color changed
+    }
+
+    private fun postToMain(block: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            block()
+        } else {
+            mainHandler.post(block)
+        }
     }
 }
 
