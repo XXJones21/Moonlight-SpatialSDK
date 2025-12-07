@@ -5,6 +5,7 @@ import android.view.Surface
 import com.limelight.binding.video.CrashListener
 import com.limelight.binding.video.MediaCodecDecoderRenderer
 import com.limelight.binding.video.PerfOverlayListener
+import com.limelight.nvstream.jni.MoonBridge
 import com.limelight.preferences.PreferenceConfiguration
 
 /**
@@ -37,7 +38,16 @@ class MoonlightPanelRenderer(
   fun attachSurface(surface: Surface) {
     val holder = LegacySurfaceHolderAdapter(surface)
     decoderRenderer.setRenderTarget(holder)
-    // decoderRenderer.setup(...) is invoked by Moonlight connection flow (NvConnection/start)
+  }
+
+  fun preConfigureDecoder() {
+    val format = when (prefs.videoFormat) {
+      PreferenceConfiguration.FormatOption.FORCE_H264 -> MoonBridge.VIDEO_FORMAT_H264
+      PreferenceConfiguration.FormatOption.FORCE_HEVC -> MoonBridge.VIDEO_FORMAT_H265
+      PreferenceConfiguration.FormatOption.FORCE_AV1 -> MoonBridge.VIDEO_FORMAT_AV1_MAIN8
+      PreferenceConfiguration.FormatOption.AUTO -> MoonBridge.VIDEO_FORMAT_H265
+    }
+    decoderRenderer.setup(format, prefs.width, prefs.height, prefs.fps)
   }
 
   fun getDecoder(): MediaCodecDecoderRenderer = decoderRenderer
