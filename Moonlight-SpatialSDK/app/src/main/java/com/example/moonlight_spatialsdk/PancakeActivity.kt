@@ -18,10 +18,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
+import com.meta.spatial.uiset.dropdown.SpatialDropdown
+import com.meta.spatial.uiset.dropdown.foundation.SpatialDropdownItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +35,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import com.meta.spatial.uiset.button.PrimaryButton
 import com.meta.spatial.uiset.button.SecondaryButton
 import com.meta.spatial.uiset.theme.LocalColorScheme
@@ -127,30 +126,27 @@ private fun LabeledDropdown(
     selected: String,
     onSelect: (String) -> Unit,
 ) {
-  var expanded by remember { mutableStateOf(false) }
   Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
     Text(text = label, style = MaterialTheme.typography.bodySmall)
     Box(modifier = Modifier.fillMaxWidth()) {
-      OutlinedTextField(
-          value = selected,
-          onValueChange = { },
-          readOnly = true,
-          modifier = Modifier
-              .fillMaxWidth()
-              .clickable { expanded = true },
-          trailingIcon = { androidx.compose.material3.Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription = null) },
-      )
-      DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-        options.forEach { option ->
-          DropdownMenuItem(
-              text = { Text(option) },
-              onClick = {
-                onSelect(option)
-                expanded = false
-              },
-          )
-        }
+      val items = remember(options) { options.map { SpatialDropdownItem(title = it) } }
+      var currentSelected by remember(selected, items) {
+        mutableStateOf<SpatialDropdownItem?>(items.find { it.title == selected })
       }
+      
+      LaunchedEffect(selected) {
+        items.find { it.title == selected }?.let { currentSelected = it }
+      }
+      
+      SpatialDropdown(
+          title = currentSelected?.title ?: selected,
+          items = items,
+          selectedItem = currentSelected,
+          onItemSelected = { item ->
+            currentSelected = item
+            item.title?.let { onSelect(it) }
+          },
+      )
     }
   }
 }
