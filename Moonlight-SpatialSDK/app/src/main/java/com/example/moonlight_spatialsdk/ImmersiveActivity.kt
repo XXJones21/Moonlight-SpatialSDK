@@ -210,7 +210,7 @@ class ImmersiveActivity : AppSystemActivity() {
               System.out.println("=== SETTINGS_CREATOR_CALLED ===")
               android.util.Log.e(TAG, "=== SETTINGS_CREATOR_CALLED ===")
               MediaPanelSettings(
-                  shape = QuadShapeOptions(width = 1.6f, height = 0.9f),
+                  shape = computePanelShape(),
                   display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
                   rendering = MediaPanelRenderOptions(
                       isDRM = true,
@@ -220,6 +220,23 @@ class ImmersiveActivity : AppSystemActivity() {
             },
         ),
     )
+  }
+
+  /**
+   * Align panel physical shape with the negotiated video pixel aspect ratio.
+   * Spatial SDK docs recommend matching layout size to the stream to keep
+   * direct-to-surface output pixel-perfect.
+   */
+  private fun computePanelShape(): QuadShapeOptions {
+    val panelWidthMeters = 1.6f
+    val aspect =
+        if (prefs.height != 0) {
+          prefs.width.toFloat() / prefs.height.toFloat()
+        } else {
+          16f / 9f
+        }
+    val panelHeightMeters = panelWidthMeters / aspect
+    return QuadShapeOptions(width = panelWidthMeters, height = panelHeightMeters)
   }
 
   override fun onSpatialShutdown() {
