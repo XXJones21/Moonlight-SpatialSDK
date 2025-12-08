@@ -15,6 +15,26 @@
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
+// Fallbacks for older NDKs that don't expose color enums
+#ifndef AMEDIAFORMAT_COLOR_RANGE_FULL
+#define AMEDIAFORMAT_COLOR_RANGE_FULL 1
+#endif
+#ifndef AMEDIAFORMAT_COLOR_STANDARD_BT709
+#define AMEDIAFORMAT_COLOR_STANDARD_BT709 1
+#endif
+#ifndef AMEDIAFORMAT_COLOR_STANDARD_BT601_NTSC
+#define AMEDIAFORMAT_COLOR_STANDARD_BT601_NTSC 2
+#endif
+#ifndef AMEDIAFORMAT_COLOR_STANDARD_BT2020
+#define AMEDIAFORMAT_COLOR_STANDARD_BT2020 6
+#endif
+#ifndef AMEDIAFORMAT_COLOR_TRANSFER_SDR_VIDEO
+#define AMEDIAFORMAT_COLOR_TRANSFER_SDR_VIDEO 3
+#endif
+#ifndef AMEDIAFORMAT_COLOR_TRANSFER_ST2084
+#define AMEDIAFORMAT_COLOR_TRANSFER_ST2084 6
+#endif
+
 static ANativeWindow* g_window = NULL;
 static AMediaCodec* g_codec = NULL;
 static AMediaFormat* g_format = NULL;
@@ -26,6 +46,9 @@ static int g_height = 0;
 static int g_fps = 0;
 static int g_videoFormat = 0;
 static int64_t g_lastPtsUs = 0;
+static bool g_hdrEnabled = false;
+static uint8_t g_hdrStaticInfo[64];
+static size_t g_hdrStaticInfoLen = 0;
 
 static const char* mime_from_format(int videoFormat) {
     if ((videoFormat & 0x0F00) != 0) {
@@ -127,6 +150,12 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetup(JNIEnv* env, jclas
     if (fps > 0) {
         AMediaFormat_setInt32(g_format, AMEDIAFORMAT_KEY_FRAME_RATE, fps);
     }
+    if (g_hdrEnabled && g_hdrStaticInfoLen > 0) {
+        AMediaFormat_setInt32(g_format, AMEDIAFORMAT_KEY_COLOR_RANGE, AMEDIAFORMAT_COLOR_RANGE_FULL);
+        AMediaFormat_setInt32(g_format, AMEDIAFORMAT_KEY_COLOR_STANDARD, AMEDIAFORMAT_COLOR_STANDARD_BT2020);
+        AMediaFormat_setInt32(g_format, AMEDIAFORMAT_KEY_COLOR_TRANSFER, AMEDIAFORMAT_COLOR_TRANSFER_ST2084);
+        AMediaFormat_setBuffer(g_format, AMEDIAFORMAT_KEY_HDR_STATIC_INFO, g_hdrStaticInfo, g_hdrStaticInfoLen);
+    }
 
     media_status_t status = AMediaCodec_configure(g_codec, g_format, g_window, NULL, 0);
     if (status != AMEDIA_OK) {
@@ -135,7 +164,21 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetup(JNIEnv* env, jclas
         return -1;
     }
 
-    LOGI("nativeDecoderSetup complete mime=%s size=%dx%d fps=%d", mime, width, height, fps);
+    // Log negotiated formats to debug color handling
+    AMediaFormat* inFmt = AMediaCodec_getInputFormat(g_codec);
+    AMediaFormat* outFmt = AMediaCodec_getOutputFormat(g_codec);
+    if (inFmt) {
+        const char* dump = AMediaFormat_toString(inFmt);
+        LOGI("nativeDecoderSetup input format: %s", dump ? dump : "(null)");
+        AMediaFormat_delete(inFmt);
+    }
+    if (outFmt) {
+        const char* dump = AMediaFormat_toString(outFmt);
+        LOGI("nativeDecoderSetup output format: %s", dump ? dump : "(null)");
+        AMediaFormat_delete(outFmt);
+    }
+
+    LOGI("nativeDecoderSetup complete mime=%s size=%dx%d fps=%d hdr=%d hdrStatic=%zu", mime, width, height, fps, g_hdrEnabled, g_hdrStaticInfoLen);
     return 0;
 }
 
@@ -179,6 +222,21 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderCleanup(JNIEnv* env, jcl
 
     release_codec();
     release_window();
+}
+
+JNIEXPORT void JNICALL
+Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetHdrMode(JNIEnv* env, jclass clazz, jboolean enabled, jbyteArray hdrMetadata) {
+    (void)clazz;
+    g_hdrEnabled = enabled == JNI_TRUE;
+    g_hdrStaticInfoLen = 0;
+
+    if (g_hdrEnabled && hdrMetadata != NULL) {
+        jsize len = (*env)->GetArrayLength(env, hdrMetadata);
+        if (len > 0 && (size_t)len <= sizeof(g_hdrStaticInfo)) {
+            (*env)->GetByteArrayRegion(env, hdrMetadata, 0, len, (jbyte*)g_hdrStaticInfo);
+            g_hdrStaticInfoLen = (size_t)len;
+        }
+    }
 }
 
 JNIEXPORT jint JNICALL

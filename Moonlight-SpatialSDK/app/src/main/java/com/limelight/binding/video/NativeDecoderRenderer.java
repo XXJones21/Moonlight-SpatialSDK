@@ -56,7 +56,7 @@ public class NativeDecoderRenderer extends VideoDecoderRenderer {
 
     @Override
     public void setHdrMode(boolean enabled, byte[] hdrMetadata) {
-        // No-op for now
+        MoonBridge.nativeDecoderSetHdrMode(enabled, hdrMetadata);
     }
 }
 

@@ -332,7 +332,7 @@ class MoonlightConnectionManager(
     }
 
     override fun setHdrMode(enabled: Boolean, hdrMetadata: ByteArray?) {
-        // HDR mode changed
+        decoderRenderer.setHdrMode(enabled, hdrMetadata)
     }
 
     override fun setMotionEventState(controllerNumber: Short, motionType: Byte, reportRateHz: Short) {

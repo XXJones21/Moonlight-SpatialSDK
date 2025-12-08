@@ -208,7 +208,7 @@ class ImmersiveActivity : AppSystemActivity() {
                   shape = computePanelShape(),
                   display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
                   rendering = MediaPanelRenderOptions(
-                      isDRM = true,
+                      isDRM = false,
                       stereoMode = StereoMode.None
                   ),
               )
