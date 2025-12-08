@@ -1,0 +1,56 @@
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:3189:12-07 18:39:51.650 V/DGW     ( 7995): V[handleFrame:873] StreamGroupRetriableNetworkLayer[rpsignaling] handle frame
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:6714:12-07 18:39:53.665 W/StreamingManager(13645): 	at com.oculus.magic.StreamingManager.createNetworkClient(StreamingManager.java:210)
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:6746:12-07 18:39:53.665 W/StreamingManager(13645): 	at com.oculus.magic.StreamingManager.lambda$createNetworkClient$0$com-oculus-magic-StreamingManager(StreamingManager.java:205)
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:6783:12-07 18:39:53.666 E/MagicIslandLoader(13645): 	at com.oculus.magic.StreamingManager.createNetworkClient(StreamingManager.java:223)
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:7242:12-07 18:39:54.390 W/StreamingManager(13645): 	at com.oculus.magic.StreamingManager.createNetworkClient(StreamingManager.java:210)
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:7270:12-07 18:39:54.390 W/StreamingManager(13645): 	at com.oculus.magic.StreamingManager.lambda$createNetworkClient$0$com-oculus-magic-StreamingManager(StreamingManager.java:205)
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:7304:12-07 18:39:54.395 E/MagicIslandLoader(13645): 	at com.oculus.magic.StreamingManager.createNetworkClient(StreamingManager.java:223)
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:8388:12-07 18:39:54.841 I/MoonlightConnectionMgr(13645): startStream: audioConfig=com.limelight.nvstream.jni.MoonBridge$AudioConfiguration@302ca videoFormats=0x101
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:8393:12-07 18:39:54.846 I/System.out(13645): === MOONBRIDGE_SETUPBRIDGE_CALLED ===
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:8394:12-07 18:39:54.846 E/MoonBridge(13645): === MOONBRIDGE_SETUPBRIDGE_CALLED ===
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:8395:12-07 18:39:54.846 I/MoonBridge(13645): setupBridge called videoRenderer=MediaCodecDecoderRenderer audioRenderer=AndroidAudioRenderer connectionListener=MoonlightConnectionManager
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:8396:12-07 18:39:54.846 I/MoonBridge(13645): setupBridge completed - videoRenderer stored
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:8397:12-07 18:39:54.846 I/MoonlightConnectionMgr(13645): startStream: MoonBridge.setupBridge() called before connection start
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:8415:12-07 18:39:54.864 I/MoonlightConnectionMgr(13645): startStream: NvConnection created, calling start()
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:8417:12-07 18:39:54.871 I/MoonlightConnectionMgr(13645): NvConnection.start invoked host=10.1.95.5
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:8737:12-07 18:39:55.023 I/com.limelight.LimeLog(13645): NvConnection.startApp: appName=Moonlight appId=881448767 initialized=true
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:8742:12-07 18:39:55.023 I/com.limelight.LimeLog(13645): NvConnection.startApp: currentGame=0 requestedAppId=881448767
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:8743:12-07 18:39:55.023 I/com.limelight.LimeLog(13645): NvConnection.launchNotRunningApp: calling launchApp with appId=881448767 appName=Moonlight
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9170:12-07 18:39:56.310 I/com.limelight.LimeLog(13645): <root status_code="200"><sessionUrl0>rtspenc://10.1.95.5:48010</sessionUrl0><gamesession>1</gamesession></root>
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9172:12-07 18:39:56.310 I/com.limelight.LimeLog(13645): NvHTTP.launchApp: success, rtspSessionUrl=rtspenc://10.1.95.5:48010
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9175:12-07 18:39:56.311 I/com.limelight.LimeLog(13645): NvConnection: setupBridge should already be called (checking if videoRenderer is set)
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9176:12-07 18:39:56.311 I/com.limelight.LimeLog(13645): NvConnection: startConnection called with address=10.1.95.5 appVersion=7.1.431.-1 gfeVersion=3.23.0.74
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9177:12-07 18:39:56.311 I/com.limelight.LimeLog(13645): NvConnection: startConnection params: width=2560 height=1440 fps=60 bitrate=40000
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9178:12-07 18:39:56.311 I/com.limelight.LimeLog(13645): NvConnection: startConnection params: packetSize=1024 streamingRemotely=2 audioConfig=197322
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9179:12-07 18:39:56.311 I/com.limelight.LimeLog(13645): NvConnection: startConnection params: videoFormats=0x101 clientRefreshRateX100=0 videoCapabilities=0x1000007
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9180:12-07 18:39:56.311 I/com.limelight.LimeLog(13645): NvConnection: startConnection params: colorSpace=0 colorRange=0 rtspUrl=rtspenc://10.1.95.5:48010
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9181:12-07 18:39:56.311 I/com.limelight.LimeLog(13645): NvConnection: startConnection params: serverCodecModeSupport=0x1f0301
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9182:12-07 18:39:56.313 I/MoonBridge(13645): LiStartConnection called: address=10.1.95.5 appVersion=7.1.431.-1 gfeVersion=3.23.0.74 rtspUrl=rtspenc://10.1.95.5:48010
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9183:12-07 18:39:56.313 I/MoonBridge(13645): StreamConfig: width=2560 height=1440 fps=60 bitrate=40000 packetSize=1024 streamingRemotely=2
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9184:12-07 18:39:56.313 I/MoonBridge(13645): StreamConfig: audioConfig=197322 videoFormats=0x101 clientRefreshRateX100=0
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9185:12-07 18:39:56.313 I/MoonBridge(13645): StreamConfig: colorSpace=0 colorRange=0 encryptionFlags=0xffffffff videoCapabilities=0x1000007
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9186:12-07 18:39:56.313 I/MoonBridge(13645): ServerInfo: codecModeSupport=0x1f0301
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9188:12-07 18:39:56.313 I/moonlight-common-c(13645): RTSP port: 48010
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9209:12-07 18:39:56.314 I/moonlight-common-c(13645): Starting RTSP handshake...
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9210:12-07 18:39:56.314 I/moonlight-common-c(13645): Stage 4 starting: RTSP handshake
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9211:12-07 18:39:56.314 I/MoonlightConnectionMgr(13645): stageStarting RTSP handshake
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9245:12-07 18:39:56.540 I/MoonlightConnectionMgr(13645): stageComplete RTSP handshake
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9246:12-07 18:39:56.540 I/moonlight-common-c(13645): Stage 4 complete: RTSP handshake, NegotiatedVideoFormat=256
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9269:12-07 18:39:56.541 I/moonlight-common-c(13645): ControlStream: Starting ENet control stream on port 47999, ConnectData: 4185698054
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9270:12-07 18:39:56.541 I/moonlight-common-c(13645): ControlStream: Creating ENet host (family: 2, channels: 48)
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9271:12-07 18:39:56.541 I/moonlight-common-c(13645): ControlStream: ENet host created successfully
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9272:12-07 18:39:56.541 I/moonlight-common-c(13645): ControlStream: Initiating ENet connect to port 47999
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9273:12-07 18:39:56.541 I/moonlight-common-c(13645): ControlStream: ENet connect initiated, waiting for connection (timeout: 10000 ms)
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9274:12-07 18:39:56.546 I/moonlight-common-c(13645): ControlStream: serviceEnetHost returned: err=1, event.type=1
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9275:12-07 18:39:56.546 I/moonlight-common-c(13645): ControlStream: ENet connection established successfully
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9276:12-07 18:39:56.546 I/moonlight-common-c(13645): ControlStream: Flushed ENet connection ACK
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9302:12-07 18:39:56.547 I/MoonBridge(13645): BridgeDrSetup called format=256 width=2560 height=1440 fps=60 drFlags=0
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9303:12-07 18:39:56.548 I/System.out(13645): === MOONBRIDGE_BRIDGEDRSETUP_CALLED format=256 width=2560 height=1440 fps=60 ===
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9304:12-07 18:39:56.548 E/MoonBridge(13645): === MOONBRIDGE_BRIDGEDRSETUP_CALLED format=256 width=2560 height=1440 fps=60 ===
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9305:12-07 18:39:56.548 I/MoonBridge(13645): bridgeDrSetup called format=256 width=2560 height=1440 fps=60
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9311:12-07 18:39:56.549 I/System.out(13645): === MOONBRIDGE_BRIDGEDRSETUP_RESULT=0 ===
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9312:12-07 18:39:56.549 E/MoonBridge(13645): === MOONBRIDGE_BRIDGEDRSETUP_RESULT=0 ===
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9313:12-07 18:39:56.549 I/MoonBridge(13645): bridgeDrSetup completed result=0
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9314:12-07 18:39:56.549 I/MoonBridge(13645): BridgeDrSetup completed successfully
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9379:12-07 18:39:56.597 I/MoonBridge(13645): LiStartConnection returned ret=0
+D:\Tools\Moonlight-SpatialSDK\Moonlight-SpatialSDK\Documentation\crashing.log:9381:12-07 18:39:56.598 I/com.limelight.LimeLog(13645): NvConnection: startConnection returned ret=0

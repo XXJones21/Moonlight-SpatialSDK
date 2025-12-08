@@ -3,37 +3,21 @@ package com.example.moonlight_spatialsdk
 import android.app.Activity
 import android.view.Surface
 import com.limelight.binding.video.CrashListener
-import com.limelight.binding.video.MediaCodecDecoderRenderer
-import com.limelight.binding.video.PerfOverlayListener
+import com.limelight.binding.video.NativeDecoderRenderer
+import com.limelight.nvstream.av.video.VideoDecoderRenderer
 import com.limelight.nvstream.jni.MoonBridge
 import com.limelight.preferences.PreferenceConfiguration
 
 /**
- * Bridges the Spatial panel Surface to Moonlight's MediaCodecDecoderRenderer.
+ * Bridges the Spatial panel Surface to Moonlight's native decoder path.
  * Assumes the Moonlight dependencies (JNI + prefs) are available on the classpath.
  */
 class MoonlightPanelRenderer(
     private val activity: Activity,
     private val prefs: PreferenceConfiguration,
     private val crashListener: CrashListener,
-    private val perfOverlayListener: PerfOverlayListener = PerfOverlayListener { _ -> },
-    private val consecutiveCrashCount: Int = 0,
-    private val meteredData: Boolean = false,
-    private val requestedHdr: Boolean = false,
-    private val glRenderer: String = "spatial-panel",
 ) {
-  private val decoderRenderer: MediaCodecDecoderRenderer by lazy {
-    MediaCodecDecoderRenderer(
-        activity,
-        prefs,
-        crashListener,
-        consecutiveCrashCount,
-        meteredData,
-        requestedHdr,
-        glRenderer,
-        perfOverlayListener,
-    )
-  }
+  private val decoderRenderer: NativeDecoderRenderer by lazy { NativeDecoderRenderer() }
 
   fun attachSurface(surface: Surface) {
     System.out.println("=== MOONLIGHT_PANEL_RENDERER_ATTACH_SURFACE_CALLED ===")
@@ -62,6 +46,6 @@ class MoonlightPanelRenderer(
     android.util.Log.e("MoonlightPanelRenderer", "=== PRECONFIGURE_DECODER_RESULT=$result ===")
   }
 
-  fun getDecoder(): MediaCodecDecoderRenderer = decoderRenderer
+  fun getDecoder(): VideoDecoderRenderer = decoderRenderer
 }
 

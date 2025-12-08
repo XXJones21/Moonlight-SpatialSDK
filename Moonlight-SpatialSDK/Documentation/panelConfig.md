@@ -188,7 +188,7 @@ VideoSurfacePanelRegistration(
     }
 )
 
-###Panel positioning for immersive content
+### Panel positioning for immersive content
 
 Position 360° content behind other panels to create proper layering:
 

@@ -78,6 +78,8 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     private String glRenderer;
     private boolean foreground = true;
     private PerfOverlayListener perfListener;
+    private final AtomicInteger inputFrameCount = new AtomicInteger();
+    private final AtomicInteger outputFrameCount = new AtomicInteger();
 
     private static final int CR_MAX_TRIES = 10;
     private static final int CR_RECOVERY_TYPE_NONE = 0;
@@ -465,7 +467,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         return this.videoFormat;
     }
 
-    private MediaFormat createBaseMediaFormat(String mimeType) {
+    private MediaFormat createBaseMediaFormat(String mimeType, boolean isQtiDecoder) {
         MediaFormat videoFormat = MediaFormat.createVideoFormat(mimeType, initialWidth, initialHeight);
 
         // Avoid setting KEY_FRAME_RATE on Lollipop and earlier to reduce compatibility risk
@@ -479,8 +481,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             videoFormat.setInteger(MediaFormat.KEY_MAX_HEIGHT, initialHeight);
         }
 
-        // Android 7.0 adds color options to the MediaFormat
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        // Android 7.0 adds color options to the MediaFormat.
+        // QTI decoders have been logging unsupported/default.color params and BAD_INDEX;
+        // skip color keys for QTI (c2.qti/omx.qcom) and let the decoder choose defaults.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !isQtiDecoder) {
             videoFormat.setInteger(MediaFormat.KEY_COLOR_RANGE,
                     getPreferredColorRange() == MoonBridge.COLOR_RANGE_FULL ?
                     MediaFormat.COLOR_RANGE_FULL : MediaFormat.COLOR_RANGE_LIMITED);
@@ -547,6 +551,11 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         videoDecoder.configure(format, renderTarget.getSurface(), null, 0);
         android.util.Log.i("MediaCodecDecoderRenderer", "configureAndStartDecoder: videoDecoder.configure() completed");
 
+        // Reset frame counters for this session
+        inputFrameCount.set(0);
+        outputFrameCount.set(0);
+        android.util.Log.i("MediaCodecDecoderRenderer", "configureAndStartDecoder: counters reset");
+
         configuredFormat = format;
 
         // After reconfiguration, we must resubmit CSD buffers
@@ -603,7 +612,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     }
 
     public int initializeDecoder(boolean throwOnCodecError) {
-        android.util.Log.i("MediaCodecDecoderRenderer", String.format("initializeDecoder called videoFormat=%d width=%d height=%d fps=%d renderTarget=%s", 
+        android.util.Log.i("MediaCodecDecoderRenderer", String.format("initializeDecoder ENTER videoFormat=%d width=%d height=%d fps=%d renderTarget=%s", 
                         videoFormat, initialWidth, initialHeight, refreshRate, renderTarget != null ? "set" : "NULL"));
         String mimeType;
         MediaCodecInfo selectedDecoderInfo;
@@ -713,10 +722,17 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         adaptivePlayback = MediaCodecHelper.decoderSupportsAdaptivePlayback(selectedDecoderInfo, mimeType);
         fusedIdrFrame = MediaCodecHelper.decoderSupportsFusedIdrFrame(selectedDecoderInfo, mimeType);
 
+        // Determine if selected decoder is QTI to adjust color key usage
+        boolean isQtiDecoder = false;
+        if (selectedDecoderInfo != null && selectedDecoderInfo.getName() != null) {
+            String name = selectedDecoderInfo.getName().toLowerCase();
+            isQtiDecoder = name.startsWith("c2.qti") || name.startsWith("omx.qcom");
+        }
+
         for (int tryNumber = 0;; tryNumber++) {
             LimeLog.info("Decoder configuration try: "+tryNumber);
 
-            MediaFormat mediaFormat = createBaseMediaFormat(mimeType);
+            MediaFormat mediaFormat = createBaseMediaFormat(mimeType, isQtiDecoder);
 
             // This will try low latency options until we find one that works (or we give up).
             boolean newFormat = MediaCodecHelper.setDecoderLowLatencyOptions(mediaFormat, selectedDecoderInfo, tryNumber);
@@ -753,7 +769,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
     @Override
     public int setup(int format, int width, int height, int redrawRate) {
-        android.util.Log.i("MediaCodecDecoderRenderer", String.format("setup called format=%d width=%d height=%d fps=%d renderTarget=%s", 
+        android.util.Log.i("MediaCodecDecoderRenderer", String.format("setup ENTER format=%d width=%d height=%d fps=%d renderTarget=%s", 
                         format, width, height, redrawRate, renderTarget != null ? "set" : "NULL"));
         this.initialWidth = width;
         this.initialHeight = height;
@@ -1118,6 +1134,8 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                             int lastIndex = outIndex;
 
                             numFramesOut++;
+                            outputFrameCount.incrementAndGet();
+                            android.util.Log.d("MediaCodecDecoderRenderer", "dequeueOutputBuffer: rendered=" + outputFrameCount.get());
 
                             // Render the latest frame now if frame pacing isn't in balanced mode
                             if (prefs.framePacing != PreferenceConfiguration.FRAME_PACING_BALANCED) {
@@ -1221,6 +1239,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             return true;
         }
 
+        android.util.Log.d("MediaCodecDecoderRenderer", "fetchNextInputBuffer: begin (hasBuffer=false)");
         startTime = SystemClock.uptimeMillis();
 
         try {
@@ -1231,6 +1250,8 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
             // Get the backing ByteBuffer for the input buffer index
             if (nextInputBufferIndex >= 0) {
+                android.util.Log.d("MediaCodecDecoderRenderer", "fetchNextInputBuffer: dequeued index=" + nextInputBufferIndex);
+
                 // Using the new getInputBuffer() API on Lollipop allows
                 // the framework to do some performance optimizations for us
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -1239,6 +1260,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                         // According to the Android docs, getInputBuffer() can return null "if the
                         // index is not a dequeued input buffer". I don't think this ever should
                         // happen but if it does, let's try to get a new input buffer next time.
+                        android.util.Log.w("MediaCodecDecoderRenderer", "fetchNextInputBuffer: got null buffer for index=" + nextInputBufferIndex);
                         nextInputBufferIndex = -1;
                     }
                 }
@@ -1283,11 +1305,18 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             return false;
         }
 
+        // Count input buffers handed to the decoder
+        if (nextInputBufferIndex >= 0) {
+            inputFrameCount.incrementAndGet();
+            android.util.Log.d("MediaCodecDecoderRenderer", "queueInputBuffer: queued=" + inputFrameCount.get());
+        }
+
         return true;
     }
 
     @Override
     public void start() {
+        android.util.Log.d("MediaCodecDecoderRenderer", "start: starting renderer + choreographer threads");
         startRendererThread();
         startChoreographerThread();
     }
@@ -1456,6 +1485,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     public int submitDecodeUnit(byte[] decodeUnitData, int decodeUnitLength, int decodeUnitType,
                                 int frameNumber, int frameType, char frameHostProcessingLatency,
                                 long receiveTimeMs, long enqueueTimeMs) {
+        android.util.Log.d("MediaCodecDecoderRenderer", "submitDecodeUnit: type=" + decodeUnitType + " frame=" + frameNumber + " frameType=" + frameType);
         if (stopping) {
             // Don't bother if we're stopping
             return MoonBridge.DR_OK;
@@ -1733,6 +1763,12 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 }
             }
         }
+        else if (decodeUnitType == MoonBridge.BUFFER_TYPE_PICDATA) {
+            android.util.Log.d("MediaCodecDecoderRenderer", "submitDecodeUnit: PICDATA branch frame=" + frameNumber + " len=" + decodeUnitLength);
+        }
+        else {
+            android.util.Log.d("MediaCodecDecoderRenderer", "submitDecodeUnit: non-IDR non-PICDATA branch type=" + decodeUnitType + " frame=" + frameNumber);
+        }
 
         if (frameHostProcessingLatency != 0) {
             if (activeWindowVideoStats.minHostProcessingLatency != 0) {
@@ -1755,7 +1791,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             activeWindowVideoStats.totalTimeMs += enqueueTimeMs - receiveTimeMs;
         }
 
+        android.util.Log.d("MediaCodecDecoderRenderer", "submitDecodeUnit: calling fetchNextInputBuffer");
         if (!fetchNextInputBuffer()) {
+            android.util.Log.w("MediaCodecDecoderRenderer", "submitDecodeUnit: fetchNextInputBuffer returned false");
             return MoonBridge.DR_NEED_IDR;
         }
 
@@ -1802,9 +1840,11 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         nextInputBuffer.put(decodeUnitData, 0, decodeUnitLength);
 
         if (!queueNextInputBuffer(timestampUs, codecFlags)) {
+            android.util.Log.w("MediaCodecDecoderRenderer", "submitDecodeUnit: queueNextInputBuffer returned false");
             return MoonBridge.DR_NEED_IDR;
         }
 
+        android.util.Log.d("MediaCodecDecoderRenderer", "submitDecodeUnit: return DR_OK frame=" + frameNumber);
         return MoonBridge.DR_OK;
     }
 

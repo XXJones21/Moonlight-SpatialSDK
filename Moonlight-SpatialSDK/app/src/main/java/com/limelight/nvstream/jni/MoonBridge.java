@@ -3,6 +3,7 @@ package com.limelight.nvstream.jni;
 import com.limelight.nvstream.NvConnectionListener;
 import com.limelight.nvstream.av.audio.AudioRenderer;
 import com.limelight.nvstream.av.video.VideoDecoderRenderer;
+import android.view.Surface;
 
 public class MoonBridge {
     /* See documentation in Limelight.h for information about these functions and constants */
@@ -209,6 +210,7 @@ public class MoonBridge {
 
     public static void bridgeDrStart() {
         if (videoRenderer != null) {
+            android.util.Log.d("MoonBridge", "bridgeDrStart: starting videoRenderer");
             videoRenderer.start();
         }
     }
@@ -229,6 +231,7 @@ public class MoonBridge {
                                                int frameNumber, int frameType, char frameHostProcessingLatency,
                                                long receiveTimeMs, long enqueueTimeMs) {
         if (videoRenderer != null) {
+            android.util.Log.d("MoonBridge", "bridgeDrSubmitDecodeUnit: frame=" + frameNumber + " frameType=" + frameType + " len=" + decodeUnitLength + " type=" + decodeUnitType);
             return videoRenderer.submitDecodeUnit(decodeUnitData, decodeUnitLength,
                     decodeUnitType, frameNumber, frameType, frameHostProcessingLatency, receiveTimeMs, enqueueTimeMs);
         }
@@ -433,4 +436,14 @@ public class MoonBridge {
     public static native boolean guessControllerHasShareButton(int vendorId, int productId);
 
     public static native void init();
+
+    // Native decoder entry points
+    public static native void nativeDecoderSetSurface(Surface surface);
+    public static native int nativeDecoderSetup(int videoFormat, int width, int height, int redrawRate);
+    public static native void nativeDecoderStart();
+    public static native void nativeDecoderStop();
+    public static native void nativeDecoderCleanup();
+    public static native int nativeDecoderSubmit(byte[] decodeUnitData, int decodeUnitLength, int decodeUnitType,
+                                                int frameNumber, int frameType, char frameHostProcessingLatency,
+                                                long receiveTimeMs, long enqueueTimeMs);
 }

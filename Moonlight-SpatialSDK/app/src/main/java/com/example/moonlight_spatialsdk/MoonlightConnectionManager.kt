@@ -7,7 +7,7 @@ import android.os.Looper
 import android.util.Log
 import com.limelight.binding.audio.AndroidAudioRenderer
 import com.limelight.binding.crypto.AndroidCryptoProvider
-import com.limelight.binding.video.MediaCodecDecoderRenderer
+import com.limelight.nvstream.av.video.VideoDecoderRenderer
 import com.limelight.nvstream.NvConnection
 import com.limelight.nvstream.NvConnectionListener
 import com.limelight.nvstream.StreamConfiguration
@@ -29,7 +29,7 @@ import java.util.concurrent.Executors
 class MoonlightConnectionManager(
     private val context: Context,
     private val activity: Activity,
-    private val decoderRenderer: MediaCodecDecoderRenderer,
+    private val decoderRenderer: VideoDecoderRenderer,
     private val audioRenderer: AndroidAudioRenderer,
     private val onStatusUpdate: ((String, Boolean) -> Unit)? = null
 ) : NvConnectionListener {

@@ -162,7 +162,17 @@ fun ConnectionPanel2D(
   val defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context)
   var selectedRes by remember { mutableStateOf(defaultPrefs.getString("list_resolution", "1280x720") ?: "1280x720") }
   var selectedFps by remember { mutableStateOf(defaultPrefs.getString("list_fps", "60") ?: "60") }
-  var selectedFormat by remember { mutableStateOf(defaultPrefs.getString("video_format", "auto") ?: "auto") }
+  // Normalize stored format strings to UI-friendly values
+  var selectedFormat by remember {
+    mutableStateOf(
+        when (defaultPrefs.getString("video_format", "auto")) {
+          "neverh265" -> "h264"
+          "forceh265" -> "hevc"
+          "forceav1" -> "av1"
+          else -> "auto"
+        }
+    )
+  }
   var resOptions by remember {
     mutableStateOf(
         listOf(
@@ -542,10 +552,18 @@ fun ConnectionPanel2D(
               expanded = true,
               onClick = {
             val shared = PreferenceManager.getDefaultSharedPreferences(context)
+                // Map UI-friendly format to stored preference values expected by PreferenceConfiguration
+                val storedFormat =
+                    when (selectedFormat) {
+                      "h264" -> "neverh265"
+                      "hevc" -> "forceh265"
+                      "av1" -> "forceav1"
+                      else -> "auto"
+                    }
                 shared.edit()
                     .putString("list_resolution", selectedRes)
                     .putString("list_fps", selectedFps)
-                    .putString("video_format", selectedFormat)
+                    .putString("video_format", storedFormat)
                     .apply()
                 connectionStatus = "Applied stream prefs (resolution/fps/format)"
               },

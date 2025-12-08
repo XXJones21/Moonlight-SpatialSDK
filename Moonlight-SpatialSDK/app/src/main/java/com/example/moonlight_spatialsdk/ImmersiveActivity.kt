@@ -9,8 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.limelight.binding.audio.AndroidAudioRenderer
 import com.limelight.binding.video.CrashListener
-import com.limelight.binding.video.MediaCodecDecoderRenderer
-import com.limelight.binding.video.MediaCodecHelper
 import com.limelight.preferences.PreferenceConfiguration
 import com.meta.spatial.castinputforward.CastInputForwardFeature
 import com.meta.spatial.compose.ComposeFeature
@@ -81,10 +79,7 @@ class ImmersiveActivity : AppSystemActivity() {
     System.out.println("=== IMMERSIVE_ACTIVITY_ONCREATE_START ===")
     android.util.Log.e(TAG, "=== IMMERSIVE_ACTIVITY_ONCREATE_START ===")
     super.onCreate(savedInstanceState)
-    
-    // Initialize MediaCodecHelper before creating any decoder renderers
-    MediaCodecHelper.initialize(this, "spatial-panel")
-    
+
     // Create decoder renderer in onCreate() like moonlight-android does
     // This ensures decoder is initialized before any connection attempts
     moonlightPanelRenderer = MoonlightPanelRenderer(

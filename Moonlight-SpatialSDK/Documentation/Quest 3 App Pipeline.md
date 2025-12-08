@@ -37,61 +37,29 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 
 **File**: `PancakeActivity.kt`
 
-**Purpose**: 2D panel activity for connection setup and pairing
+**Purpose**: 2D panel activity for connection setup, pairing, stream preference selection, and launching immersive.
 
-**Key Features**:
+**Key Features (current)**:
 
-- Connection UI with host, port, and app ID input fields
-- PIN entry for server pairing
-- Pairing status checking before connection
-- Launches `ImmersiveActivity` with connection parameters
+- Host/port/appId inputs with persistence (`connection_prefs`).
+- Pairing flow (check → generate PIN → pair) using `MoonlightPairingHelper` and `PairingManager`.
+- Optional app list fetch once paired (populates appId dropdown).
+- Optional server capability fetch (res/fps/format filtering) and stream preference selector (resolution/fps/format stored in shared prefs for immersive).
+- Launches `ImmersiveActivity` with host/port/appId extras or launches immersive without params.
 
-**Lifecycle**:
+**UI Actions**:
 
-```kotlin
-override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setTheme(R.style.PanelAppThemeTransparent)
-    
-    // Initialize connection manager for pairing operations
-    val prefs = PreferenceConfiguration.readPreferences(this)
-    val panelRenderer = MoonlightPanelRenderer(...)
-    val connectionManager = MoonlightConnectionManager(...)
-    
-    setContent {
-        ConnectionPanel2D(
-            connectionManager = connectionManager,
-            onConnect = { host, port, appId ->
-                // Launch ImmersiveActivity with connection params
-            },
-            onLaunchImmersive = {
-                // Launch ImmersiveActivity without connection
-            }
-        )
-    }
-}
-```
+- “Connect & Launch Immersive”: checks pairing; if paired, saves prefs and starts immersive with extras; if not, triggers PIN pairing then allows connect.
+- “Configure Stream”: fetches server capabilities (if host provided) and updates selectable resolution/fps/format; writes to shared prefs.
+- “Reset Client Pairing”: clears cert/UID and resets UI to re-pair.
+- “Launch Immersive Mode (No Connection)”: opens immersive without starting stream.
 
-**UI Components**:
+**Pairing Flow (current)**:
 
-- Host/IP address input field
-- Port input field (default: 47989)
-- App ID input field (0 for desktop)
-- PIN input field (shown when pairing required)
-- Connect button (checks pairing, then launches immersive)
-- Launch Immersive button (no connection)
-
-**Pairing Flow**:
-
-1. User enters host/port and clicks "Connect"
-2. App checks pairing status (background thread)
-3. If not paired:
-   - Client generates 4-digit PIN
-   - Client displays PIN with instructions: "Enter this PIN on your server"
-   - Client automatically starts pairing with generated PIN
-   - User enters the same PIN on server (Sunshine/GFE)
-   - Pairing completes when server validates PIN
-4. If paired: Launches `ImmersiveActivity` with connection parameters
+1. User enters host/port → taps “Connect & Launch Immersive”.
+2. `checkPairing(host, port)` runs on background thread.
+3. If not paired: generate PIN, display it, call `pairWithServer`; on success, UI enables Connect.
+4. If paired: launch `ImmersiveActivity` with host/port/appId.
 
 ---
 
@@ -110,16 +78,15 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
 **Lifecycle Methods**:
 
-#### `onCreate()` - Lines 90-108
+#### `onCreate()`
 
-**Purpose**: Initialize app, check for connection parameters, load scene
+**Purpose**: Initialize streaming components and stash pending connection params.
 
 **Key Steps**:
 
-1. Initialize `NetworkedAssetLoader` for GLXF assets
-2. Read connection parameters from Intent (host, port, appId)
-3. If host provided: Check pairing, then start connection
-4. Load GLXF scene file
+1. Initialize `MediaCodecHelper` and create `MoonlightPanelRenderer` (single decoder), `AndroidAudioRenderer`, `MoonlightConnectionManager`.
+2. Read connection params from Intent extras (host/port/appId); store as pending (no connect yet).
+3. Init `NetworkedAssetLoader`.
 
 **Connection Parameters**:
 
@@ -153,34 +120,50 @@ scene.setLightingEnvironment(
 scene.setViewOrigin(0.0f, 0.0f, 2.0f, 180.0f)
 ```
 
-#### `registerPanels()` - Lines 129-146
+#### `registerPanels()` - current
 
-**Purpose**: Register video panel for Moonlight stream
+**Purpose**: Register the direct-to-surface media panel for Moonlight.
 
-**Panel Registration**:
+**Panel Registration (current code path)**:
 
 ```kotlin
 VideoSurfacePanelRegistration(
-    MOONLIGHT_PANEL_ID,
-    surfaceConsumer = { _, surface ->
-        moonlightPanelRenderer.attachSurface(surface)
+    R.id.ui_example,
+    surfaceConsumer = { panelEntity, surface ->
+        panelEntity.setComponent(Visible(true))
+        panelEntity.setComponent(
+            Transform(Pose(Vector3(0f, 1.1f, -1.5f), Quaternion(0f, 0f, 0f, 1f)))
+        )
+        panelEntity.setComponent(Grabbable(enabled = true))
+
+        SurfaceUtil.paintBlack(surface)
+        moonlightPanelRenderer.attachSurface(surface)   // single decoder render target
+        moonlightPanelRenderer.preConfigureDecoder()    // seeds decoder; no second decoder
+
+        isSurfaceReady = true
+        pendingConnectionParams?.let { (host, port, appId) ->
+            connectToHost(host, port, appId)
+        }
     },
     settingsCreator = {
         MediaPanelSettings(
-            shape = QuadShapeOptions(width = 1.6f, height = 0.9f),
-            display = PixelDisplayOptions(width = 1920, height = 1080),
-            rendering = MediaPanelRenderOptions(stereoMode = StereoMode.None)
+            shape = computePanelShape(), // derives physical aspect from prefs
+            display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
+            rendering = MediaPanelRenderOptions(
+                isDRM = true,
+                stereoMode = StereoMode.None,
+            ),
         )
-    }
+    },
 )
 ```
 
-**Panel Configuration**:
+**Panel Configuration (current behavior)**:
 
-- Size: 1.6m × 0.9m (16:9 aspect ratio)
-- Display: 1920×1080 pixels
-- Stereo: None (mono display)
-- Surface attached when panel is created
+- Shape: computed from `prefs.width/prefs.height` to keep physical aspect aligned with the stream.
+- Display: `PixelDisplayOptions(width = prefs.width, height = prefs.height)` (no hardcoded 1080p).
+- Rendering: DRM enabled, monoscopic.
+- Surface handling: paint black → attachSurface → preConfigureDecoder → mark surface ready → start pending connection if present.
 
 #### `registerFeatures()` - Lines 74-88
 
@@ -356,67 +339,41 @@ connectionManager.pairWithServer(host, port, pin) { success, error ->
 
 **File**: `MoonlightPanelRenderer.kt`
 
-**Purpose**: Bridges Spatial SDK panel Surface to Moonlight's MediaCodecDecoderRenderer
+**Purpose**: Bridge the Spatial panel Surface to a single Moonlight `MediaCodecDecoderRenderer`.
 
-**Key Features**:
+**Key Points (current)**:
 
-- Wraps `MediaCodecDecoderRenderer` with Spatial SDK integration
-- Provides Surface adapter for Moonlight decoder
-- Manages decoder lifecycle
+- Single decoder instance (`by lazy`); no duplicate decoders.
+- `attachSurface(surface)`: wraps the Surface in `LegacySurfaceHolderAdapter`, calls `decoderRenderer.setRenderTarget(holder)`.
+- `preConfigureDecoder()`: calls `decoderRenderer.setup(format, prefs.width, prefs.height, prefs.fps)` to seed configuration early. During stream start, Moonlight sees matching params and skips reconfiguration (“Decoder already configured with compatible parameters”).
+- Call order in `surfaceConsumer`: paint black → attachSurface → preConfigureDecoder → mark `isSurfaceReady` → start pending connection if present.
 
-**Initialization**:
+---
 
-```kotlin
-class MoonlightPanelRenderer(
-    private val activity: Activity,
-    private val prefs: PreferenceConfiguration,
-    private val crashListener: CrashListener,
-    private val perfOverlayListener: PerfOverlayListener = PerfOverlayListener { _ -> },
-    private val consecutiveCrashCount: Int = 0,
-    private val meteredData: Boolean = false,
-    private val requestedHdr: Boolean = false,
-    private val glRenderer: String = "spatial-panel"
-)
-```
+### Video Pipeline Trace (current instrumented path)
 
-**Decoder Creation** (Lazy):
+Step-by-step flow with expected logging and current gaps:
 
-```kotlin
-private val decoderRenderer: MediaCodecDecoderRenderer by lazy {
-    MediaCodecDecoderRenderer(
-        activity,
-        prefs,
-        crashListener,
-        consecutiveCrashCount,
-        meteredData,
-        requestedHdr,
-        glRenderer,
-        perfOverlayListener
-    )
-}
-```
+1) Panel surface ready (ImmersiveActivity `surfaceConsumer`)  
+   - Paint black → `attachSurface` (sets render target) → `preConfigureDecoder` (seed setup) → `isSurfaceReady=true` → `connectToHost` if pending params.
 
-#### `attachSurface()` - Lines 37-41
+2) Connection starts  
+   - `MoonlightConnectionManager.startStream` builds `NvConnection` with `MediaCodecDecoderRenderer` and `AndroidAudioRenderer`. Sunshine may renegotiate/rewrap formats within the same RTSP session (e.g., initial HDR/AV1 attempt, then SDR/HEVC fallback).
 
-**Purpose**: Attach Spatial panel Surface to Moonlight decoder
+3) Decoder setup (client)  
+   - `MediaCodecDecoderRenderer.setup/initializeDecoder` configures MediaCodec; skips reconfigure if params already match. Frame counters reset in `configureAndStartDecoder`.
 
-**Flow**:
+4) Decode-unit delivery  
+   - `submitDecodeUnit` logs are present for IDR and subsequent frames, confirming packets reach the renderer.
 
-1. Create `LegacySurfaceHolderAdapter` from Surface
-2. Set adapter as render target: `decoderRenderer.setRenderTarget(holder)`
-3. Decoder setup happens automatically via Moonlight connection flow
+5) Input buffer fetch & queue (expected)  
+   - Path: `submitDecodeUnit: calling fetchNextInputBuffer` → `fetchNextInputBuffer` (begin/dequeued index/null buffer logs) → `queueNextInputBuffer` (queued count).  
+   - Current state: these logs are absent in the latest run, implying MediaCodec IO is not being exercised on-device or the deployed build lacks the recent logging.
 
-**Surface Lifecycle**:
+6) Output/render (expected)  
+   - Renderer thread `dequeueOutputBuffer` should log `rendered=` counts; balanced frame pacing uses `Choreographer`. Not observed yet because input never flows.
 
-- Surface provided by `VideoSurfacePanelRegistration.surfaceConsumer`
-- Attached when panel is created by Spatial SDK
-- Decoder receives frames and renders to Surface
-
-#### `getDecoder()` - Line 43
-
-**Purpose**: Get decoder instance for connection manager
-
-**Returns**: `MediaCodecDecoderRenderer` instance
+Debug focus: verify the deployed build includes the new decoder logs and determine why `fetchNextInputBuffer` is not reached despite `submitDecodeUnit` firing.
 
 ---
 
@@ -493,49 +450,27 @@ private val decoderRenderer: MediaCodecDecoderRenderer by lazy {
 
 **2D Mode (PancakeActivity)**:
 
-1. User enters host/port/appId
-2. User clicks "Connect & Launch Immersive"
-3. App checks pairing status (background thread)
-4. If not paired:
-   a. Client generates 4-digit PIN
-   b. Client displays PIN: "Enter this PIN on your server: XXXX"
-   c. Client automatically starts pairing with generated PIN (background thread)
-   d. User enters same PIN on server (Sunshine/GFE pairing dialog)
-   e. Server validates PIN during pairing handshake
-   f. On success: Store paired server certificate and reuse the same persistent client ID; then launch ImmersiveActivity
-5. If paired:
-   a. Launch ImmersiveActivity with connection params
+1. User enters host/port/appId; may fetch server capabilities and set stream prefs (res/fps/format).
+2. “Connect & Launch Immersive”:
+   - `checkPairing(host, port)` → if not paired, generate PIN and `pairWithServer`.
+   - On paired: saves prefs, launches `ImmersiveActivity` with host/port/appId extras.
+3. App list fetch (optional) after pairing to populate appId.
 
 **Immersive Mode (ImmersiveActivity)**:
 
-1. Activity receives connection params via Intent
-2. onCreate(): Check pairing status (background thread; UI updates marshalled to main thread)
-3. If paired: Start stream connection (background thread) using persistent client ID and cached server certificate
-4. onSceneReady(): Configure scene (passthrough, lighting)
-5. registerPanels(): Video panel created
-6. surfaceConsumer: Surface attached to decoder
-7. Connection starts: Moonlight streams video to panel
-
-**Stream Lifecycle**:
-
-1. startStream() called (background thread)
-2. StreamConfiguration built from preferences
-3. NvConnection created
-4. connection.start() called
-5. Moonlight connection stages:
-   - Stage 1: Server discovery
-   - Stage 2: App launch (if appId != 0)
-   - Stage 3: Stream negotiation
-   - Stage 4: Video/audio stream start
-6. Decoder receives frames → Renders to panel Surface
-7. Audio renders via AndroidAudioRenderer
-8. User disconnects → stopStream() → Cleanup
+1. onCreate(): create decoder/audio/connection manager; stash pending host/port/appId; no pairing here.
+2. onSceneReady(): configure lighting/passthrough; create video panel entity; register panels.
+3. Panel `surfaceConsumer`: paint black → attachSurface → preConfigureDecoder → mark `isSurfaceReady` → if pending params, call `connectToHost`.
+4. `connectToHost` sets `isPaired=true`, stores params, calls `startStreamIfReady`.
+5. `startStreamIfReady`: if surface ready and paired, calls `connectionManager.startStream` with prefs (resolution/fps/bitrate/format) and pending host/port/appId.
+6. MoonBridge handles decoder callbacks; renderer already pre-configured so native setup skips reconfiguration.
+7. stopStream() on shutdown/disconnect cleans up connection/decoder.
 
 **Status Updates**:
 
-- All connection stages report via `NvConnectionListener` callbacks
-- Status updates flow to `onStatusUpdate` callback
-- UI updates via `StateFlow` in `ImmersiveActivity`
+- All connection stages report via `NvConnectionListener` callbacks.
+- Status updates flow to `onStatusUpdate` callback.
+- UI updates via `StateFlow` in `ImmersiveActivity`.
 
 ---
 

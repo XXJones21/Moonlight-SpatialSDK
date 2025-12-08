@@ -151,6 +151,8 @@ int BridgeDrSubmitDecodeUnit(PDECODE_UNIT decodeUnit) {
     JNIEnv* env = GetThreadEnv();
     int ret;
 
+    __android_log_print(ANDROID_LOG_INFO, "MoonBridge", "BridgeDrSubmitDecodeUnit: frame=%d frameType=%d fullLength=%d", decodeUnit->frameNumber, decodeUnit->frameType, decodeUnit->fullLength);
+
     // Increase the size of our frame data buffer if our frame won't fit
     if ((*env)->GetArrayLength(env, DecodedFrameBuffer) < decodeUnit->fullLength) {
         (*env)->DeleteGlobalRef(env, DecodedFrameBuffer);
