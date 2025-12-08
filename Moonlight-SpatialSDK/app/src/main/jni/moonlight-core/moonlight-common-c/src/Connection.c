@@ -1,5 +1,10 @@
 #include "Limelight-internal.h"
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#define ANDROID_LOG_TAG "moonlight-common-c"
+#endif
+
 static int stage = STAGE_NONE;
 static ConnListenerConnectionTerminated originalTerminationCallback;
 static bool alreadyTerminated;
@@ -260,6 +265,9 @@ int LiStartConnection(PSERVER_INFORMATION serverInfo, PSTREAM_CONFIGURATION stre
 
     memset(&LocalAddr, 0, sizeof(LocalAddr));
     NegotiatedVideoFormat = 0;
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "LiStartConnection: NegotiatedVideoFormat initialized to 0");
+#endif
     memcpy(&StreamConfig, streamConfig, sizeof(StreamConfig));
     RemoteAddrString = strdup(serverInfo->address);
 
@@ -330,19 +338,31 @@ int LiStartConnection(PSERVER_INFORMATION serverInfo, PSTREAM_CONFIGURATION stre
     }
     
     Limelog("Initializing platform...");
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d starting: platform initialization", STAGE_PLATFORM_INIT);
+#endif
     ListenerCallbacks.stageStarting(STAGE_PLATFORM_INIT);
     err = initializePlatform();
     if (err != 0) {
         Limelog("failed: %d\n", err);
+#ifdef __ANDROID__
+        __android_log_print(ANDROID_LOG_ERROR, ANDROID_LOG_TAG, "Stage %d failed: platform initialization error=%d", STAGE_PLATFORM_INIT, err);
+#endif
         ListenerCallbacks.stageFailed(STAGE_PLATFORM_INIT, err);
         goto Cleanup;
     }
     stage++;
     LC_ASSERT(stage == STAGE_PLATFORM_INIT);
     ListenerCallbacks.stageComplete(STAGE_PLATFORM_INIT);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d complete: platform initialization", STAGE_PLATFORM_INIT);
+#endif
     Limelog("done\n");
 
     Limelog("Resolving host name...");
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d starting: name resolution", STAGE_NAME_RESOLUTION);
+#endif
     ListenerCallbacks.stageStarting(STAGE_NAME_RESOLUTION);
     LC_ASSERT(RtspPortNumber != 0);
     if (RtspPortNumber != 48010) {
@@ -374,12 +394,18 @@ int LiStartConnection(PSERVER_INFORMATION serverInfo, PSTREAM_CONFIGURATION stre
     }
     if (err != 0) {
         Limelog("failed: %d\n", err);
+#ifdef __ANDROID__
+        __android_log_print(ANDROID_LOG_ERROR, ANDROID_LOG_TAG, "Stage %d failed: name resolution error=%d", STAGE_NAME_RESOLUTION, err);
+#endif
         ListenerCallbacks.stageFailed(STAGE_NAME_RESOLUTION, err);
         goto Cleanup;
     }
     stage++;
     LC_ASSERT(stage == STAGE_NAME_RESOLUTION);
     ListenerCallbacks.stageComplete(STAGE_NAME_RESOLUTION);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d complete: name resolution", STAGE_NAME_RESOLUTION);
+#endif
     Limelog("done\n");
 
     // If STREAM_CFG_AUTO was requested, determine the streamingRemotely value
@@ -402,110 +428,185 @@ int LiStartConnection(PSERVER_INFORMATION serverInfo, PSTREAM_CONFIGURATION stre
     }
 
     Limelog("Initializing audio stream...");
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d starting: audio stream initialization", STAGE_AUDIO_STREAM_INIT);
+#endif
     ListenerCallbacks.stageStarting(STAGE_AUDIO_STREAM_INIT);
     err = initializeAudioStream();
     if (err != 0) {
         Limelog("failed: %d\n", err);
+#ifdef __ANDROID__
+        __android_log_print(ANDROID_LOG_ERROR, ANDROID_LOG_TAG, "Stage %d failed: audio stream initialization error=%d", STAGE_AUDIO_STREAM_INIT, err);
+#endif
         ListenerCallbacks.stageFailed(STAGE_AUDIO_STREAM_INIT, err);
         goto Cleanup;
     }
     stage++;
     LC_ASSERT(stage == STAGE_AUDIO_STREAM_INIT);
     ListenerCallbacks.stageComplete(STAGE_AUDIO_STREAM_INIT);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d complete: audio stream initialization", STAGE_AUDIO_STREAM_INIT);
+#endif
     Limelog("done\n");
 
     Limelog("Starting RTSP handshake...");
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d starting: RTSP handshake", STAGE_RTSP_HANDSHAKE);
+#endif
     ListenerCallbacks.stageStarting(STAGE_RTSP_HANDSHAKE);
     err = performRtspHandshake(serverInfo);
     if (err != 0) {
         Limelog("failed: %d\n", err);
+#ifdef __ANDROID__
+        __android_log_print(ANDROID_LOG_ERROR, ANDROID_LOG_TAG, "Stage %d failed: RTSP handshake error=%d", STAGE_RTSP_HANDSHAKE, err);
+#endif
         ListenerCallbacks.stageFailed(STAGE_RTSP_HANDSHAKE, err);
         goto Cleanup;
     }
     stage++;
     LC_ASSERT(stage == STAGE_RTSP_HANDSHAKE);
     ListenerCallbacks.stageComplete(STAGE_RTSP_HANDSHAKE);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d complete: RTSP handshake, NegotiatedVideoFormat=%d", STAGE_RTSP_HANDSHAKE, NegotiatedVideoFormat);
+#endif
     Limelog("done\n");
 
     Limelog("Initializing control stream...");
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d starting: control stream initialization", STAGE_CONTROL_STREAM_INIT);
+#endif
     ListenerCallbacks.stageStarting(STAGE_CONTROL_STREAM_INIT);
     err = initializeControlStream();
     if (err != 0) {
         Limelog("failed: %d\n", err);
+#ifdef __ANDROID__
+        __android_log_print(ANDROID_LOG_ERROR, ANDROID_LOG_TAG, "Stage %d failed: control stream initialization error=%d", STAGE_CONTROL_STREAM_INIT, err);
+#endif
         ListenerCallbacks.stageFailed(STAGE_CONTROL_STREAM_INIT, err);
         goto Cleanup;
     }
     stage++;
     LC_ASSERT(stage == STAGE_CONTROL_STREAM_INIT);
     ListenerCallbacks.stageComplete(STAGE_CONTROL_STREAM_INIT);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d complete: control stream initialization", STAGE_CONTROL_STREAM_INIT);
+#endif
     Limelog("done\n");
 
     Limelog("Initializing video stream...");
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d starting: video stream initialization", STAGE_VIDEO_STREAM_INIT);
+#endif
     ListenerCallbacks.stageStarting(STAGE_VIDEO_STREAM_INIT);
     initializeVideoStream();
     stage++;
     LC_ASSERT(stage == STAGE_VIDEO_STREAM_INIT);
     ListenerCallbacks.stageComplete(STAGE_VIDEO_STREAM_INIT);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d complete: video stream initialization", STAGE_VIDEO_STREAM_INIT);
+#endif
     Limelog("done\n");
 
     Limelog("Initializing input stream...");
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d starting: input stream initialization", STAGE_INPUT_STREAM_INIT);
+#endif
     ListenerCallbacks.stageStarting(STAGE_INPUT_STREAM_INIT);
     initializeInputStream();
     stage++;
     LC_ASSERT(stage == STAGE_INPUT_STREAM_INIT);
     ListenerCallbacks.stageComplete(STAGE_INPUT_STREAM_INIT);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d complete: input stream initialization", STAGE_INPUT_STREAM_INIT);
+#endif
     Limelog("done\n");
 
     Limelog("Starting control stream...");
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d starting: control stream establishment", STAGE_CONTROL_STREAM_START);
+#endif
     ListenerCallbacks.stageStarting(STAGE_CONTROL_STREAM_START);
     err = startControlStream();
     if (err != 0) {
         Limelog("failed: %d\n", err);
+#ifdef __ANDROID__
+        __android_log_print(ANDROID_LOG_ERROR, ANDROID_LOG_TAG, "Stage %d failed: control stream establishment error=%d", STAGE_CONTROL_STREAM_START, err);
+#endif
         ListenerCallbacks.stageFailed(STAGE_CONTROL_STREAM_START, err);
         goto Cleanup;
     }
     stage++;
     LC_ASSERT(stage == STAGE_CONTROL_STREAM_START);
     ListenerCallbacks.stageComplete(STAGE_CONTROL_STREAM_START);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d complete: control stream establishment", STAGE_CONTROL_STREAM_START);
+#endif
     Limelog("done\n");
 
     Limelog("Starting video stream...");
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d starting: video stream establishment, NegotiatedVideoFormat=%d", STAGE_VIDEO_STREAM_START, NegotiatedVideoFormat);
+#endif
     ListenerCallbacks.stageStarting(STAGE_VIDEO_STREAM_START);
     err = startVideoStream(renderContext, drFlags);
     if (err != 0) {
         Limelog("Video stream start failed: %d\n", err);
+#ifdef __ANDROID__
+        __android_log_print(ANDROID_LOG_ERROR, ANDROID_LOG_TAG, "Stage %d failed: video stream establishment error=%d", STAGE_VIDEO_STREAM_START, err);
+#endif
         ListenerCallbacks.stageFailed(STAGE_VIDEO_STREAM_START, err);
         goto Cleanup;
     }
     stage++;
     LC_ASSERT(stage == STAGE_VIDEO_STREAM_START);
     ListenerCallbacks.stageComplete(STAGE_VIDEO_STREAM_START);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d complete: video stream establishment", STAGE_VIDEO_STREAM_START);
+#endif
     Limelog("done\n");
 
     Limelog("Starting audio stream...");
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d starting: audio stream establishment", STAGE_AUDIO_STREAM_START);
+#endif
     ListenerCallbacks.stageStarting(STAGE_AUDIO_STREAM_START);
     err = startAudioStream(audioContext, arFlags);
     if (err != 0) {
         Limelog("Audio stream start failed: %d\n", err);
+#ifdef __ANDROID__
+        __android_log_print(ANDROID_LOG_ERROR, ANDROID_LOG_TAG, "Stage %d failed: audio stream establishment error=%d", STAGE_AUDIO_STREAM_START, err);
+#endif
         ListenerCallbacks.stageFailed(STAGE_AUDIO_STREAM_START, err);
         goto Cleanup;
     }
     stage++;
     LC_ASSERT(stage == STAGE_AUDIO_STREAM_START);
     ListenerCallbacks.stageComplete(STAGE_AUDIO_STREAM_START);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d complete: audio stream establishment", STAGE_AUDIO_STREAM_START);
+#endif
     Limelog("done\n");
 
     Limelog("Starting input stream...");
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d starting: input stream establishment", STAGE_INPUT_STREAM_START);
+#endif
     ListenerCallbacks.stageStarting(STAGE_INPUT_STREAM_START);
     err = startInputStream();
     if (err != 0) {
         Limelog("Input stream start failed: %d\n", err);
+#ifdef __ANDROID__
+        __android_log_print(ANDROID_LOG_ERROR, ANDROID_LOG_TAG, "Stage %d failed: input stream establishment error=%d", STAGE_INPUT_STREAM_START, err);
+#endif
         ListenerCallbacks.stageFailed(STAGE_INPUT_STREAM_START, err);
         goto Cleanup;
     }
     stage++;
     LC_ASSERT(stage == STAGE_INPUT_STREAM_START);
     ListenerCallbacks.stageComplete(STAGE_INPUT_STREAM_START);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "Stage %d complete: input stream establishment", STAGE_INPUT_STREAM_START);
+#endif
     Limelog("done\n");
     
     // Wiggle the mouse a bit to wake the display up
@@ -514,6 +615,9 @@ int LiStartConnection(PSERVER_INFORMATION serverInfo, PSTREAM_CONFIGURATION stre
     LiSendMouseMoveEvent(-1, -1);
     PltSleepMs(10);
 
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "All stages complete, calling connectionStarted callback");
+#endif
     ListenerCallbacks.connectionStarted();
 
 Cleanup:

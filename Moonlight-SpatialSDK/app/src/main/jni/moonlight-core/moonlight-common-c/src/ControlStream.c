@@ -1642,6 +1642,8 @@ int startControlStream(void) {
 
         LC_ASSERT(ControlPortNumber != 0);
 
+        Limelog("ControlStream: Starting ENet control stream on port %u, ConnectData: %u\n", ControlPortNumber, ControlConnectData);
+
         enet_address_set_address(&localAddress, (struct sockaddr *)&LocalAddr, AddrLen);
 #ifdef __3DS__
         // binding to wildcard port is broken on the 3DS, so we need to define a port manually
@@ -1654,13 +1656,16 @@ int startControlStream(void) {
         enet_address_set_port(&remoteAddress, ControlPortNumber);
 
         // Create a client
+        Limelog("ControlStream: Creating ENet host (family: %d, channels: %d)\n", RemoteAddr.ss_family, CTRL_CHANNEL_COUNT);
         client = enet_host_create(RemoteAddr.ss_family,
                                   LocalAddr.ss_family != 0 ? &localAddress : NULL,
                                   1, CTRL_CHANNEL_COUNT, 0, 0);
         if (client == NULL) {
+            Limelog("ControlStream: Failed to create ENet host\n");
             stopping = true;
             return -1;
         }
+        Limelog("ControlStream: ENet host created successfully\n");
 
         client->intercept = ignoreDisconnectIntercept;
 
@@ -1671,16 +1676,20 @@ int startControlStream(void) {
         enet_socket_set_option (client->socket, ENET_SOCKOPT_QOS, 1);
 
         // Connect to the host
+        Limelog("ControlStream: Initiating ENet connect to port %u\n", ControlPortNumber);
         peer = enet_host_connect(client, &remoteAddress, CTRL_CHANNEL_COUNT, ControlConnectData);
         if (peer == NULL) {
+            Limelog("ControlStream: Failed to initiate ENet connect (peer is NULL)\n");
             stopping = true;
             enet_host_destroy(client);
             client = NULL;
             return -1;
         }
+        Limelog("ControlStream: ENet connect initiated, waiting for connection (timeout: %d ms)\n", CONTROL_STREAM_TIMEOUT_SEC * 1000);
 
         // Wait for the connect to complete
         err = serviceEnetHost(client, &event, CONTROL_STREAM_TIMEOUT_SEC * 1000);
+        Limelog("ControlStream: serviceEnetHost returned: err=%d, event.type=%d\n", err, err > 0 ? (int)event.type : -1);
         if (err <= 0 || event.type != ENET_EVENT_TYPE_CONNECT) {
             if (err < 0) {
                 Limelog("Failed to establish ENet connection on UDP port %u: error %d\n", ControlPortNumber, LastSocketFail());
@@ -1711,16 +1720,21 @@ int startControlStream(void) {
             }
         }
 
+        Limelog("ControlStream: ENet connection established successfully\n");
+
         // Ensure the connect verify ACK is sent immediately
         enet_host_flush(client);
+        Limelog("ControlStream: Flushed ENet connection ACK\n");
 
 #ifdef __3DS__
         // Set the peer timeout to 1 minute and limit backoff to 2x RTT
         // The 3DS can take a bit longer to set up when starting fresh
         enet_peer_timeout(peer, 2, 60000, 60000);
+        Limelog("ControlStream: Set peer timeout to 60 seconds (3DS)\n");
 #else
         // Set the peer timeout to 10 seconds and limit backoff to 2x RTT
         enet_peer_timeout(peer, 2, 10000, 10000);
+        Limelog("ControlStream: Set peer timeout to 10 seconds\n");
 #endif
     }
     else {
@@ -1736,8 +1750,10 @@ int startControlStream(void) {
         enableNoDelay(ctlSock);
     }
 
+    Limelog("ControlStream: Creating ControlRecv thread\n");
     err = PltCreateThread("ControlRecv", controlReceiveThreadFunc, NULL, &controlReceiveThread);
     if (err != 0) {
+        Limelog("ControlStream: Failed to create ControlRecv thread: %d\n", err);
         stopping = true;
         if (ctlSock != INVALID_SOCKET) {
             closeSocket(ctlSock);
@@ -1751,8 +1767,10 @@ int startControlStream(void) {
         }
         return err;
     }
+    Limelog("ControlStream: ControlRecv thread created successfully\n");
 
     // Send START A
+    Limelog("ControlStream: Sending START A packet\n");
     if (!sendMessageAndDiscardReply(packetTypes[IDX_START_A],
                                     payloadLengths[IDX_START_A],
                                     preconstructedPayloads[IDX_START_A],
@@ -1785,8 +1803,10 @@ int startControlStream(void) {
         }
         return err;
     }
+    Limelog("ControlStream: START A packet sent successfully\n");
 
     // Send START B
+    Limelog("ControlStream: Sending START B packet\n");
     if (!sendMessageAndDiscardReply(packetTypes[IDX_START_B],
                                     payloadLengths[IDX_START_B],
                                     preconstructedPayloads[IDX_START_B],
@@ -1819,6 +1839,7 @@ int startControlStream(void) {
         }
         return err;
     }
+    Limelog("ControlStream: START B packet sent successfully\n");
 
     err = PltCreateThread("LossStats", lossStatsThreadFunc, NULL, &lossStatsThread);
     if (err != 0) {

@@ -189,10 +189,20 @@ public class MoonBridge {
     }
 
     public static int bridgeDrSetup(int videoFormat, int width, int height, int redrawRate) {
+        System.out.println(String.format("=== MOONBRIDGE_BRIDGEDRSETUP_CALLED format=%d width=%d height=%d fps=%d ===", videoFormat, width, height, redrawRate));
+        android.util.Log.e("MoonBridge", String.format("=== MOONBRIDGE_BRIDGEDRSETUP_CALLED format=%d width=%d height=%d fps=%d ===", videoFormat, width, height, redrawRate));
+        android.util.Log.i("MoonBridge", String.format("bridgeDrSetup called format=%d width=%d height=%d fps=%d", videoFormat, width, height, redrawRate));
         if (videoRenderer != null) {
-            return videoRenderer.setup(videoFormat, width, height, redrawRate);
+            int result = videoRenderer.setup(videoFormat, width, height, redrawRate);
+            System.out.println(String.format("=== MOONBRIDGE_BRIDGEDRSETUP_RESULT=%d ===", result));
+            android.util.Log.e("MoonBridge", String.format("=== MOONBRIDGE_BRIDGEDRSETUP_RESULT=%d ===", result));
+            android.util.Log.i("MoonBridge", String.format("bridgeDrSetup completed result=%d", result));
+            return result;
         }
         else {
+            System.out.println("=== MOONBRIDGE_BRIDGEDRSETUP_VIDEORENDERER_NULL ===");
+            android.util.Log.e("MoonBridge", "=== MOONBRIDGE_BRIDGEDRSETUP_VIDEORENDERER_NULL ===");
+            android.util.Log.e("MoonBridge", "bridgeDrSetup called but videoRenderer is null!");
             return -1;
         }
     }
@@ -327,9 +337,15 @@ public class MoonBridge {
     }
 
     public static void setupBridge(VideoDecoderRenderer videoRenderer, AudioRenderer audioRenderer, NvConnectionListener connectionListener) {
+        System.out.println("=== MOONBRIDGE_SETUPBRIDGE_CALLED ===");
+        android.util.Log.e("MoonBridge", "=== MOONBRIDGE_SETUPBRIDGE_CALLED ===");
+        android.util.Log.i("MoonBridge", "setupBridge called videoRenderer=" + (videoRenderer != null ? videoRenderer.getClass().getSimpleName() : "null") + 
+                      " audioRenderer=" + (audioRenderer != null ? audioRenderer.getClass().getSimpleName() : "null") + 
+                      " connectionListener=" + (connectionListener != null ? connectionListener.getClass().getSimpleName() : "null"));
         MoonBridge.videoRenderer = videoRenderer;
         MoonBridge.audioRenderer = audioRenderer;
         MoonBridge.connectionListener = connectionListener;
+        android.util.Log.i("MoonBridge", "setupBridge completed - videoRenderer stored");
     }
 
     public static void cleanupBridge() {

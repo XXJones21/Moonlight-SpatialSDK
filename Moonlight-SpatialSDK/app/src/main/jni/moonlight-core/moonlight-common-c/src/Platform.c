@@ -251,8 +251,11 @@ static void thread_deallocator(OSThread *thread, void *stack) {
 int PltCreateThread(const char* name, ThreadEntry entry, void* context, PLT_THREAD* thread) {
     struct thread_context* ctx;
 
+    Limelog("PltCreateThread: Creating thread '%s'\n", name);
+
     ctx = (struct thread_context*)malloc(sizeof(*ctx));
     if (ctx == NULL) {
+        Limelog("PltCreateThread: Failed to allocate context for thread '%s'\n", name);
         return -1;
     }
 
@@ -266,6 +269,7 @@ int PltCreateThread(const char* name, ThreadEntry entry, void* context, PLT_THRE
     {
         thread->handle = CreateThread(NULL, 0, ThreadProc, ctx, 0, NULL);
         if (thread->handle == NULL) {
+            Limelog("PltCreateThread: CreateThread failed for thread '%s', error: %d\n", name, GetLastError());
             free(ctx);
             return -1;
         }
@@ -277,6 +281,7 @@ int PltCreateThread(const char* name, ThreadEntry entry, void* context, PLT_THRE
         ctx->thread = thread;
         thread->handle = sceKernelCreateThread(name, ThreadProc, 0, 0x40000, 0, 0, NULL);
         if (thread->handle < 0) {
+            Limelog("PltCreateThread: sceKernelCreateThread failed for thread '%s', error: %d\n", name, thread->handle);
             free(ctx);
             return -1;
         }
@@ -289,6 +294,7 @@ int PltCreateThread(const char* name, ThreadEntry entry, void* context, PLT_THRE
     const int stack_size = 4 * 1024 * 1024;
     uint8_t* stack = (uint8_t*)memalign(16, stack_size);
     if (stack == NULL) {
+        Limelog("PltCreateThread: Failed to allocate stack for thread '%s'\n", name);
         free(ctx);
         return -1;
     }
@@ -300,6 +306,7 @@ int PltCreateThread(const char* name, ThreadEntry entry, void* context, PLT_THRE
                         stack + stack_size, stack_size,
                         0x10, OS_THREAD_ATTRIB_AFFINITY_ANY))
     {
+        Limelog("PltCreateThread: OSCreateThread failed for thread '%s'\n", name);
         free(ctx);
         free(stack);
         return -1;
@@ -320,6 +327,7 @@ int PltCreateThread(const char* name, ThreadEntry entry, void* context, PLT_THRE
                                     -1,
                                     false);
         if (thread->thread == NULL) {
+            Limelog("PltCreateThread: threadCreate failed for thread '%s'\n", name);
             free(ctx);
             return -1;
         }
@@ -328,6 +336,7 @@ int PltCreateThread(const char* name, ThreadEntry entry, void* context, PLT_THRE
     {
         int err = pthread_create(&thread->thread, NULL, ThreadProc, ctx);
         if (err != 0) {
+            Limelog("PltCreateThread: pthread_create failed for thread '%s', error: %d\n", name, err);
             free(ctx);
             return err;
         }
@@ -335,6 +344,7 @@ int PltCreateThread(const char* name, ThreadEntry entry, void* context, PLT_THRE
 #endif
 
     activeThreads++;
+    Limelog("PltCreateThread: Thread '%s' created successfully (activeThreads: %d)\n", name, activeThreads);
 
     return 0;
 }

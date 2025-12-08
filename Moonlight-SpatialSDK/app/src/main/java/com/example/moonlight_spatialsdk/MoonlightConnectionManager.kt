@@ -186,12 +186,14 @@ class MoonlightConnectionManager(
                 }
 
                 Log.i(tag, "startStream host=$host port=$port appId=$appId res=${prefs.width}x${prefs.height} fps=${prefs.fps} bitrate=${prefs.bitrate}")
+                Log.i(tag, "startStream: audioConfig=${prefs.audioConfiguration} videoFormats=0x${Integer.toHexString(getSupportedVideoFormats(prefs))}")
                 val computerDetails = ComputerDetails.AddressTuple(host, port)
                 val uniqueId = IdentityStore.getOrCreateUniqueId(context)
                 val serverCert = IdentityStore.loadServerCert(context, host)
+                Log.i(tag, "startStream: uniqueId=$uniqueId serverCert=${if (serverCert != null) "present" else "null"}")
 
                 val streamConfig = StreamConfiguration.Builder()
-                    .setApp(NvApp("Moonlight", appId, false))
+                    .setApp(NvApp(if (appId == 0) "Desktop" else "Moonlight", appId, false))
                     .setResolution(prefs.width, prefs.height)
                     .setRefreshRate(prefs.fps)
                     .setBitrate(prefs.bitrate)
@@ -200,8 +202,16 @@ class MoonlightConnectionManager(
                     .setAudioConfiguration(prefs.audioConfiguration)
                     .setSupportedVideoFormats(getSupportedVideoFormats(prefs))
                     .setRemoteConfiguration(StreamConfiguration.STREAM_CFG_AUTO)
-                    .setClientRefreshRateX100(prefs.fps * 100)
+                    .setClientRefreshRateX100(0) // Set to 0 for compatibility with older servers
                     .build()
+                Log.i(tag, "startStream: streamConfig created width=${streamConfig.width} height=${streamConfig.height} fps=${streamConfig.refreshRate} bitrate=${streamConfig.bitrate}")
+            
+                // CRITICAL: Setup bridge BEFORE creating NvConnection
+                // This ensures videoRenderer is registered when native code calls bridgeDrSetup()
+                // If we don't do this, the server will connect but terminate immediately because
+                // bridgeDrSetup() can't be called (videoRenderer is null)
+                com.limelight.nvstream.jni.MoonBridge.setupBridge(decoderRenderer, audioRenderer, this)
+                Log.i(tag, "startStream: MoonBridge.setupBridge() called before connection start")
             
                 connection = NvConnection(
                     context,
@@ -212,7 +222,7 @@ class MoonlightConnectionManager(
                     cryptoProvider,
                     serverCert // serverCert (null means use default)
                 )
-                
+                Log.i(tag, "startStream: NvConnection created, calling start()")
                 connection?.start(audioRenderer, decoderRenderer, this)
                 Log.i(tag, "NvConnection.start invoked host=$host")
             } catch (e: Exception) {
@@ -240,8 +250,15 @@ class MoonlightConnectionManager(
      * Get supported video formats based on preferences.
      */
     private fun getSupportedVideoFormats(prefs: PreferenceConfiguration): Int {
-        // Force H.264 only to avoid decoder failures on device
-        return MoonBridge.VIDEO_FORMAT_H264
+        return when (prefs.videoFormat) {
+            PreferenceConfiguration.FormatOption.FORCE_H264 -> MoonBridge.VIDEO_FORMAT_H264
+            PreferenceConfiguration.FormatOption.FORCE_HEVC -> MoonBridge.VIDEO_FORMAT_H265
+            PreferenceConfiguration.FormatOption.FORCE_AV1 -> MoonBridge.VIDEO_FORMAT_AV1_MAIN8
+            PreferenceConfiguration.FormatOption.AUTO -> {
+                // Support both H.264 and HEVC, let server choose based on capabilities
+                MoonBridge.VIDEO_FORMAT_H264 or MoonBridge.VIDEO_FORMAT_H265
+            }
+        }
     }
 
     // NvConnectionListener implementation
@@ -314,7 +331,7 @@ class MoonlightConnectionManager(
         // Controller trigger rumble feedback
     }
 
-    override fun setHdrMode(enabled: Boolean, hdrMetadata: ByteArray) {
+    override fun setHdrMode(enabled: Boolean, hdrMetadata: ByteArray?) {
         // HDR mode changed
     }
 

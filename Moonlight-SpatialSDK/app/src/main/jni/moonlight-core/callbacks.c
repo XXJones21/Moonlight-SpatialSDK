@@ -108,18 +108,22 @@ int BridgeDrSetup(int videoFormat, int width, int height, int redrawRate, void* 
     JNIEnv* env = GetThreadEnv();
     int err;
 
+    __android_log_print(ANDROID_LOG_INFO, "MoonBridge", "BridgeDrSetup called format=%d width=%d height=%d fps=%d drFlags=%d", videoFormat, width, height, redrawRate, drFlags);
     err = (*env)->CallStaticIntMethod(env, GlobalBridgeClass, BridgeDrSetupMethod, videoFormat, width, height, redrawRate);
     if ((*env)->ExceptionCheck(env)) {
+        __android_log_print(ANDROID_LOG_ERROR, "MoonBridge", "BridgeDrSetup JNI exception occurred");
         // This is called on a Java thread, so it's safe to return
         return -1;
     }
     else if (err != 0) {
+        __android_log_print(ANDROID_LOG_ERROR, "MoonBridge", "BridgeDrSetup failed with error=%d", err);
         return err;
     }
 
     // Use a 32K frame buffer that will increase if needed
     DecodedFrameBuffer = (*env)->NewGlobalRef(env, (*env)->NewByteArray(env, 32768));
 
+    __android_log_print(ANDROID_LOG_INFO, "MoonBridge", "BridgeDrSetup completed successfully");
     return 0;
 }
 
@@ -499,6 +503,19 @@ Java_com_limelight_nvstream_jni_MoonBridge_startConnection(JNIEnv *env, jclass c
         streamConfig.encryptionFlags = ENCFLG_ALL;
     }
 
+    __android_log_print(ANDROID_LOG_INFO, "MoonBridge", "LiStartConnection called: address=%s appVersion=%s gfeVersion=%s rtspUrl=%s", 
+                        serverInfo.address, serverInfo.serverInfoAppVersion, 
+                        serverInfo.serverInfoGfeVersion ? serverInfo.serverInfoGfeVersion : "NULL",
+                        serverInfo.rtspSessionUrl ? serverInfo.rtspSessionUrl : "NULL");
+    __android_log_print(ANDROID_LOG_INFO, "MoonBridge", "StreamConfig: width=%d height=%d fps=%d bitrate=%d packetSize=%d streamingRemotely=%d", 
+                        streamConfig.width, streamConfig.height, streamConfig.fps, streamConfig.bitrate, 
+                        streamConfig.packetSize, streamConfig.streamingRemotely);
+    __android_log_print(ANDROID_LOG_INFO, "MoonBridge", "StreamConfig: audioConfig=%d videoFormats=0x%x clientRefreshRateX100=%d", 
+                        streamConfig.audioConfiguration, streamConfig.supportedVideoFormats, streamConfig.clientRefreshRateX100);
+    __android_log_print(ANDROID_LOG_INFO, "MoonBridge", "StreamConfig: colorSpace=%d colorRange=%d encryptionFlags=0x%x videoCapabilities=0x%x", 
+                        streamConfig.colorSpace, streamConfig.colorRange, streamConfig.encryptionFlags, videoCapabilities);
+    __android_log_print(ANDROID_LOG_INFO, "MoonBridge", "ServerInfo: codecModeSupport=0x%llx", (long long)serverInfo.serverCodecModeSupport);
+
     int ret = LiStartConnection(&serverInfo,
                                 &streamConfig,
                                 &BridgeConnListenerCallbacks,
@@ -506,6 +523,8 @@ Java_com_limelight_nvstream_jni_MoonBridge_startConnection(JNIEnv *env, jclass c
                                 &BridgeAudioRendererCallbacks,
                                 NULL, 0,
                                 NULL, 0);
+    
+    __android_log_print(ANDROID_LOG_INFO, "MoonBridge", "LiStartConnection returned ret=%d", ret);
 
     (*env)->ReleaseStringUTFChars(env, address, serverInfo.address);
     (*env)->ReleaseStringUTFChars(env, appVersion, serverInfo.serverInfoAppVersion);

@@ -296,6 +296,7 @@ public class NvConnection {
         //
         
         NvApp app = context.streamConfig.getApp();
+        LimeLog.info("NvConnection.startApp: appName=" + app.getAppName() + " appId=" + app.getAppId() + " initialized=" + app.isInitialized());
         
         // If the client did not provide an exact app ID, do a lookup with the applist
         if (!context.streamConfig.getApp().isInitialized()) {
@@ -307,8 +308,11 @@ public class NvConnection {
             }
         }
         
+        int currentGame = h.getCurrentGame(serverInfo);
+        LimeLog.info("NvConnection.startApp: currentGame=" + currentGame + " requestedAppId=" + app.getAppId());
+        
         // If there's a game running, resume it
-        if (h.getCurrentGame(serverInfo) != 0) {
+        if (currentGame != 0) {
             try {
                 if (h.getCurrentGame(serverInfo) == app.getAppId()) {
                     if (!h.launchApp(context, "resume", app.getAppId(), context.negotiatedHdr)) {
@@ -369,12 +373,16 @@ public class NvConnection {
     private boolean launchNotRunningApp(NvHTTP h, ConnectionContext context)
             throws IOException, XmlPullParserException {
         // Launch the app since it's not running
-        if (!h.launchApp(context, "launch", context.streamConfig.getApp().getAppId(), context.negotiatedHdr)) {
+        int appId = context.streamConfig.getApp().getAppId();
+        String appName = context.streamConfig.getApp().getAppName();
+        LimeLog.info("NvConnection.launchNotRunningApp: calling launchApp with appId=" + appId + " appName=" + appName);
+        if (!h.launchApp(context, "launch", appId, context.negotiatedHdr)) {
+            LimeLog.warning("NvConnection.launchNotRunningApp: launchApp returned false for appId=" + appId);
             context.connListener.displayMessage("Failed to launch application");
             return false;
         }
         
-        LimeLog.info("Launched new game session");
+        LimeLog.info("Launched new game session: appId=" + appId + " appName=" + appName);
         
         return true;
     }
@@ -424,7 +432,22 @@ public class NvConnection {
                 // Moonlight-core is not thread-safe with respect to connection start and stop, so
                 // we must not invoke that functionality in parallel.
                 synchronized (MoonBridge.class) {
-                    MoonBridge.setupBridge(videoDecoderRenderer, audioRenderer, connectionListener);
+                    // NOTE: setupBridge() should be called BEFORE NvConnection.start() is invoked
+                    // to ensure videoRenderer is registered when native code calls bridgeDrSetup().
+                    // If it's already been called, this is a no-op, but we log it for debugging.
+                    LimeLog.info("NvConnection: setupBridge should already be called (checking if videoRenderer is set)");
+                    // Don't call setupBridge() again - it should already be set by MoonlightConnectionManager
+                    LimeLog.info("NvConnection: startConnection called with address=" + context.serverAddress.address + 
+                                 " appVersion=" + context.serverAppVersion + " gfeVersion=" + context.serverGfeVersion);
+                    LimeLog.info("NvConnection: startConnection params: width=" + context.negotiatedWidth + " height=" + context.negotiatedHeight + 
+                                 " fps=" + context.streamConfig.getRefreshRate() + " bitrate=" + context.streamConfig.getBitrate());
+                    LimeLog.info("NvConnection: startConnection params: packetSize=" + context.negotiatedPacketSize + 
+                                 " streamingRemotely=" + context.negotiatedRemoteStreaming + " audioConfig=" + context.streamConfig.getAudioConfiguration().toInt());
+                    LimeLog.info("NvConnection: startConnection params: videoFormats=0x" + Integer.toHexString(context.streamConfig.getSupportedVideoFormats()) + 
+                                 " clientRefreshRateX100=" + context.streamConfig.getClientRefreshRateX100() + " videoCapabilities=0x" + Integer.toHexString(context.videoCapabilities));
+                    LimeLog.info("NvConnection: startConnection params: colorSpace=" + context.streamConfig.getColorSpace() + 
+                                 " colorRange=" + context.streamConfig.getColorRange() + " rtspUrl=" + context.rtspSessionUrl);
+                    LimeLog.info("NvConnection: startConnection params: serverCodecModeSupport=0x" + Long.toHexString(context.serverCodecModeSupport));
                     int ret = MoonBridge.startConnection(context.serverAddress.address,
                             context.serverAppVersion, context.serverGfeVersion, context.rtspSessionUrl,
                             context.serverCodecModeSupport,
@@ -438,6 +461,7 @@ public class NvConnection {
                             context.videoCapabilities,
                             context.streamConfig.getColorSpace(),
                             context.streamConfig.getColorRange());
+                    LimeLog.info("NvConnection: startConnection returned ret=" + ret);
                     if (ret != 0) {
                         // LiStartConnection() failed, so the caller is not expected
                         // to stop the connection themselves. We need to release their

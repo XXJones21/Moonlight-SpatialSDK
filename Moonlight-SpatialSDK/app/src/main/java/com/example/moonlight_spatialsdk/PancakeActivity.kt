@@ -43,12 +43,7 @@ import com.meta.spatial.uiset.theme.SpatialColorScheme
 import com.meta.spatial.uiset.theme.SpatialTheme
 import com.meta.spatial.uiset.theme.darkSpatialColorScheme
 import com.meta.spatial.uiset.theme.lightSpatialColorScheme
-import com.limelight.binding.audio.AndroidAudioRenderer
-import com.limelight.binding.video.CrashListener
-import com.limelight.binding.video.MediaCodecDecoderRenderer
-import com.limelight.binding.video.MediaCodecHelper
 import com.limelight.nvstream.http.PairingManager
-import com.limelight.nvstream.jni.MoonBridge
 import com.limelight.preferences.PreferenceConfiguration
 
 class PancakeActivity : ComponentActivity() {
@@ -57,30 +52,16 @@ class PancakeActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     setTheme(R.style.PanelAppThemeTransparent)
     
-    // Initialize MediaCodecHelper before creating any decoder renderers
-    MediaCodecHelper.initialize(this, "spatial-panel")
-    
     val prefs = PreferenceConfiguration.readPreferences(this)
-    val panelRenderer = MoonlightPanelRenderer(
-        activity = this,
-        prefs = prefs,
-        crashListener = CrashListener { _ -> }
-    )
-    val connectionManager = MoonlightConnectionManager(
-        context = this,
-        activity = this,
-        decoderRenderer = panelRenderer.getDecoder(),
-        audioRenderer = AndroidAudioRenderer(this, false),
-        onStatusUpdate = null
-    )
+    // Create lightweight pairing helper - no decoder/audio renderer needed for pairing operations
+    val pairingHelper = MoonlightPairingHelper(this)
     val shared = getSharedPreferences("connection_prefs", MODE_PRIVATE)
     val savedHost = shared.getString("saved_host", "") ?: ""
     val savedPort = shared.getString("saved_port", "47989") ?: "47989"
     val savedAppId = shared.getString("saved_appId", "0") ?: "0"
     setContent {
       ConnectionPanel2D(
-          connectionManager = connectionManager,
-          decoderRenderer = panelRenderer.getDecoder(),
+          pairingHelper = pairingHelper,
           savedHost = savedHost,
           savedPort = savedPort,
           savedAppId = savedAppId,
@@ -157,8 +138,7 @@ fun getPanelTheme(): SpatialColorScheme =
 
 @Composable
 fun ConnectionPanel2D(
-    connectionManager: MoonlightConnectionManager,
-    decoderRenderer: MediaCodecDecoderRenderer,
+    pairingHelper: MoonlightPairingHelper,
     savedHost: String,
     savedPort: String,
     savedAppId: String,
@@ -256,21 +236,89 @@ fun ConnectionPanel2D(
           modifier = Modifier.fillMaxWidth(),
       )
 
-      OutlinedTextField(
-          value = appId,
-          onValueChange = { appId = it },
-          label = { Text("App ID (0 for desktop)") },
-          enabled = !isConnected && !needsPairing,
-          singleLine = true,
-          keyboardOptions = KeyboardOptions(
-              keyboardType = KeyboardType.Number,
-              imeAction = ImeAction.Next
-          ),
-          keyboardActions = KeyboardActions(
-              onNext = { focusManager.clearFocus() }
-          ),
-          modifier = Modifier.fillMaxWidth(),
-      )
+      // App selection dropdown - only show if paired and app list is loaded
+      var appList by remember { mutableStateOf<List<com.limelight.nvstream.http.NvApp>>(emptyList()) }
+      var isLoadingApps by remember { mutableStateOf(false) }
+      var appListError by remember { mutableStateOf<String?>(null) }
+      
+      // Fetch app list when pairing is verified
+      LaunchedEffect(host, port, needsPairing) {
+        if (!needsPairing && host.isNotBlank() && appList.isEmpty() && !isLoadingApps) {
+          isLoadingApps = true
+          appListError = null
+          val portInt = port.toIntOrNull() ?: 47989
+          pairingHelper.fetchAppList(host, portInt) { apps, error ->
+            isLoadingApps = false
+            if (apps != null) {
+              appList = apps
+              // If current appId doesn't match any app, reset to first app (usually Desktop with ID 0)
+              val currentAppIdInt = appId.toIntOrNull() ?: 0
+              val matchingApp = apps.find { it.getAppId() == currentAppIdInt }
+              if (matchingApp == null && apps.isNotEmpty()) {
+                appId = apps.first().getAppId().toString()
+              }
+            } else {
+              appListError = error ?: "Failed to load app list"
+            }
+          }
+        }
+      }
+      
+      if (appList.isNotEmpty()) {
+        val appOptions = appList.map { "${it.getAppName()} (ID: ${it.getAppId()})" }
+        val currentAppIdInt = appId.toIntOrNull() ?: 0
+        val selectedAppName = appList.find { it.getAppId() == currentAppIdInt }?.let { 
+          "${it.getAppName()} (ID: ${it.getAppId()})" 
+        } ?: appOptions.firstOrNull() ?: appId
+        
+        LabeledDropdown(
+            label = "Application",
+            options = appOptions,
+            selected = selectedAppName,
+            onSelect = { selected ->
+              // Extract appId from selected string (format: "App Name (ID: 123)")
+              val appIdMatch = Regex("ID: (\\d+)").find(selected)
+              val newAppId = appIdMatch?.groupValues?.get(1) ?: "0"
+              appId = newAppId
+            },
+        )
+      } else if (isLoadingApps) {
+        Text(
+            text = "Loading applications...",
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.fillMaxWidth(),
+        )
+      } else if (appListError != null) {
+        Text(
+            text = "App list: $appListError",
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedTextField(
+            value = appId,
+            onValueChange = { appId = it },
+            label = { Text("App ID (fallback)") },
+            enabled = !isConnected && !needsPairing,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.clearFocus() }
+            ),
+            modifier = Modifier.fillMaxWidth(),
+        )
+      } else {
+        OutlinedTextField(
+            value = appId,
+            onValueChange = { appId = it },
+            label = { Text("App ID (enter host/port and check pairing first)") },
+            enabled = false,
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+      }
 
       if (needsPairing) {
         if (generatedPin == null) {
@@ -280,7 +328,7 @@ fun ConnectionPanel2D(
             isPairing = true
             connectionStatus = "Enter PIN $generatedPin on your server..."
             val portInt = port.toIntOrNull() ?: 47989
-            connectionManager.pairWithServer(host, portInt, generatedPin!!) { success, error ->
+            pairingHelper.pairWithServer(host, portInt, generatedPin!!) { success, error ->
               isPairing = false
               if (success) {
                 connectionStatus = "Paired! Click Connect to continue"
@@ -372,7 +420,7 @@ fun ConnectionPanel2D(
                     isCheckingPairing = true
                     connectionStatus = "Checking pairing..."
                     onSaveConnection(host, port, appId)
-                    connectionManager.checkPairing(host, portInt) { isPaired, error ->
+                    pairingHelper.checkPairing(host, portInt) { isPaired, error ->
                       isCheckingPairing = false
                       if (isPaired) {
                         connectionStatus = "Connecting..."
@@ -415,20 +463,13 @@ fun ConnectionPanel2D(
           onClick = {
             showConfig = !showConfig
             if (showConfig) {
-              val capsBits: Int = decoderRenderer.capabilities
-              val slices = (capsBits ushr 24) and 0xFF
-              val rfiAvc = (capsBits and MoonBridge.CAPABILITY_REFERENCE_FRAME_INVALIDATION_AVC) != 0
-              val rfiHevc = (capsBits and MoonBridge.CAPABILITY_REFERENCE_FRAME_INVALIDATION_HEVC) != 0
-              val rfiAv1 = (capsBits and MoonBridge.CAPABILITY_REFERENCE_FRAME_INVALIDATION_AV1) != 0
-              val direct = (capsBits and MoonBridge.CAPABILITY_DIRECT_SUBMIT) != 0
-              capabilitySummary =
-                  "SlicesPerFrame=$slices, RFI_AVC=$rfiAvc, RFI_HEVC=$rfiHevc, RFI_AV1=$rfiAv1, DirectSubmit=$direct"
+              capabilitySummary = "Decoder capabilities: Standard H.264/HEVC/AV1 support"
               capabilityStatus = "Loading server capabilities..."
               val portInt = port.toIntOrNull() ?: 47989
               if (host.isBlank()) {
                 capabilityStatus = "Enter host/port to load capabilities"
               } else {
-                connectionManager.fetchServerCapabilities(host, portInt) { caps, error ->
+                pairingHelper.fetchServerCapabilities(host, portInt) { caps, error ->
                   if (caps == null || error != null) {
                     capabilityStatus = error ?: "Failed to load server capabilities"
                     return@fetchServerCapabilities

@@ -291,7 +291,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     }
 
     public void setRenderTarget(SurfaceHolder renderTarget) {
+        android.util.Log.i("MediaCodecDecoderRenderer", "setRenderTarget called renderTarget=" + (renderTarget != null ? "set" : "NULL") + " - storing surface for later configure");
         this.renderTarget = renderTarget;
+        android.util.Log.i("MediaCodecDecoderRenderer", "setRenderTarget completed - renderTarget stored");
     }
 
     public MediaCodecDecoderRenderer(Activity activity, PreferenceConfiguration prefs,
@@ -536,8 +538,14 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         }
 
         LimeLog.info("Configuring with format: "+format);
-
+        android.util.Log.i("MediaCodecDecoderRenderer", "configureAndStartDecoder: renderTarget=" + (renderTarget != null ? "set" : "NULL"));
+        if (renderTarget == null) {
+            android.util.Log.e("MediaCodecDecoderRenderer", "configureAndStartDecoder: ERROR - renderTarget is NULL, cannot configure decoder!");
+            throw new IllegalStateException("renderTarget is null - cannot configure decoder");
+        }
+        android.util.Log.i("MediaCodecDecoderRenderer", "configureAndStartDecoder: calling videoDecoder.configure()");
         videoDecoder.configure(format, renderTarget.getSurface(), null, 0);
+        android.util.Log.i("MediaCodecDecoderRenderer", "configureAndStartDecoder: videoDecoder.configure() completed");
 
         configuredFormat = format;
 
@@ -595,6 +603,8 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     }
 
     public int initializeDecoder(boolean throwOnCodecError) {
+        android.util.Log.i("MediaCodecDecoderRenderer", String.format("initializeDecoder called videoFormat=%d width=%d height=%d fps=%d renderTarget=%s", 
+                        videoFormat, initialWidth, initialHeight, refreshRate, renderTarget != null ? "set" : "NULL"));
         String mimeType;
         MediaCodecInfo selectedDecoderInfo;
 
@@ -660,6 +670,46 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             return -3;
         }
 
+        if (videoDecoder != null && configuredFormat != null) {
+            String configuredMime = configuredFormat.getString(MediaFormat.KEY_MIME);
+            int configuredWidth = configuredFormat.getInteger(MediaFormat.KEY_WIDTH);
+            int configuredHeight = configuredFormat.getInteger(MediaFormat.KEY_HEIGHT);
+            
+            boolean formatMatches = mimeType.equals(configuredMime);
+            boolean resolutionMatches = (initialWidth == configuredWidth && initialHeight == configuredHeight);
+            boolean resolutionCompatible = false;
+            
+            if (formatMatches && !resolutionMatches && configuredFormat.containsKey(MediaFormat.KEY_MAX_WIDTH) && configuredFormat.containsKey(MediaFormat.KEY_MAX_HEIGHT)) {
+                int maxWidth = configuredFormat.getInteger(MediaFormat.KEY_MAX_WIDTH);
+                int maxHeight = configuredFormat.getInteger(MediaFormat.KEY_MAX_HEIGHT);
+                resolutionCompatible = (initialWidth <= maxWidth && initialHeight <= maxHeight);
+            }
+            
+            if (formatMatches && (resolutionMatches || resolutionCompatible)) {
+                android.util.Log.i("MediaCodecDecoderRenderer", String.format("Decoder already configured with compatible parameters (format=%s width=%d height=%d), skipping reconfiguration", 
+                                configuredMime, configuredWidth, configuredHeight));
+                LimeLog.info("Decoder already configured with compatible parameters, skipping reconfiguration");
+                return 0;
+            }
+            
+            android.util.Log.i("MediaCodecDecoderRenderer", String.format("Decoder configured with different parameters (old: %s %dx%d, new: %s %dx%d), releasing old decoder", 
+                            configuredMime, configuredWidth, configuredHeight, mimeType, initialWidth, initialHeight));
+            LimeLog.info("Decoder configured with different parameters, releasing old decoder");
+            
+            try {
+                videoDecoder.stop();
+            } catch (Exception e) {
+                android.util.Log.w("MediaCodecDecoderRenderer", "Error stopping decoder during reconfiguration: " + e.getMessage());
+            }
+            try {
+                videoDecoder.release();
+            } catch (Exception e) {
+                android.util.Log.w("MediaCodecDecoderRenderer", "Error releasing decoder during reconfiguration: " + e.getMessage());
+            }
+            videoDecoder = null;
+            configuredFormat = null;
+        }
+
         adaptivePlayback = MediaCodecHelper.decoderSupportsAdaptivePlayback(selectedDecoderInfo, mimeType);
         fusedIdrFrame = MediaCodecHelper.decoderSupportsFusedIdrFrame(selectedDecoderInfo, mimeType);
 
@@ -697,17 +747,26 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             }, null);
         }
 
+        android.util.Log.i("MediaCodecDecoderRenderer", "initializeDecoder completed successfully");
         return 0;
     }
 
     @Override
     public int setup(int format, int width, int height, int redrawRate) {
+        android.util.Log.i("MediaCodecDecoderRenderer", String.format("setup called format=%d width=%d height=%d fps=%d renderTarget=%s", 
+                        format, width, height, redrawRate, renderTarget != null ? "set" : "NULL"));
         this.initialWidth = width;
         this.initialHeight = height;
         this.videoFormat = format;
         this.refreshRate = redrawRate;
 
-        return initializeDecoder(false);
+        if (renderTarget == null) {
+            android.util.Log.e("MediaCodecDecoderRenderer", "setup called but renderTarget is NULL - decoder cannot be configured!");
+        }
+
+        int result = initializeDecoder(false);
+        android.util.Log.i("MediaCodecDecoderRenderer", String.format("setup completed result=%d", result));
+        return result;
     }
 
     // All threads that interact with the MediaCodec instance must call this function regularly!

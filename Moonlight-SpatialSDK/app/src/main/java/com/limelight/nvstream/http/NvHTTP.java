@@ -754,6 +754,7 @@ public class NvHTTP {
     }
     
     public boolean launchApp(ConnectionContext context, String verb, int appId, boolean enableHdr) throws IOException, XmlPullParserException {
+        LimeLog.info("NvHTTP.launchApp: verb=" + verb + " appId=" + appId + " enableHdr=" + enableHdr + " resolution=" + context.negotiatedWidth + "x" + context.negotiatedHeight);
         // Using an FPS value over 60 causes SOPS to default to 720p60,
         // so force it to 0 to ensure the correct resolution is set. We
         // used to use 60 here but that locked the frame rate to 60 FPS
@@ -776,8 +777,7 @@ public class NvHTTP {
             }
         }
 
-        String xmlStr = openHttpConnectionToString(httpClientLongConnectNoReadTimeout, getHttpsUrl(true), verb,
-            "appid=" + appId +
+        String queryParams = "appid=" + appId +
             "&mode=" + context.negotiatedWidth + "x" + context.negotiatedHeight + "x" + fps +
             "&additionalStates=1&sops=" + (enableSops ? 1 : 0) +
             "&rikey="+bytesToHex(context.riKey.getEncoded()) +
@@ -788,15 +788,34 @@ public class NvHTTP {
             "&remoteControllersBitmap=" + context.streamConfig.getAttachedGamepadMask() +
             "&gcmap=" + context.streamConfig.getAttachedGamepadMask() +
             "&gcpersist="+(context.streamConfig.getPersistGamepadsAfterDisconnect() ? 1 : 0) +
-            MoonBridge.getLaunchUrlQueryParameters());
-        if ((verb.equals("launch") && !getXmlString(xmlStr, "gamesession", true).equals("0") ||
-                (verb.equals("resume") && !getXmlString(xmlStr, "resume", true).equals("0")))) {
-            // sessionUrl0 will be missing for older GFE versions
-            context.rtspSessionUrl = getXmlString(xmlStr, "sessionUrl0", false);
-            return true;
-        }
-        else {
-            return false;
+            MoonBridge.getLaunchUrlQueryParameters();
+        LimeLog.info("NvHTTP.launchApp: sending HTTP " + verb + " request to " + getHttpsUrl(true) + " with appid=" + appId);
+        try {
+            String xmlStr = openHttpConnectionToString(httpClientLongConnectNoReadTimeout, getHttpsUrl(true), verb, queryParams);
+            LimeLog.info("NvHTTP.launchApp: received response, length=" + (xmlStr != null ? xmlStr.length() : 0));
+            if ((verb.equals("launch") && !getXmlString(xmlStr, "gamesession", true).equals("0")) ||
+                    (verb.equals("resume") && !getXmlString(xmlStr, "resume", true).equals("0"))) {
+                // sessionUrl0 will be missing for older GFE versions
+                context.rtspSessionUrl = getXmlString(xmlStr, "sessionUrl0", false);
+                LimeLog.info("NvHTTP.launchApp: success, rtspSessionUrl=" + context.rtspSessionUrl);
+                return true;
+            }
+            else {
+                LimeLog.warning("NvHTTP.launchApp: failed");
+                return false;
+            }
+        } catch (IOException e) {
+            LimeLog.warning("NvHTTP.launchApp: IOException during HTTP request: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        } catch (XmlPullParserException e) {
+            LimeLog.warning("NvHTTP.launchApp: XmlPullParserException parsing response: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        } catch (Exception e) {
+            LimeLog.warning("NvHTTP.launchApp: Unexpected exception: " + e.getClass().getName() + ": " + e.getMessage());
+            e.printStackTrace();
+            throw new IOException("Unexpected error in launchApp: " + e.getMessage(), e);
         }
     }
     

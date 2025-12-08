@@ -1,5 +1,10 @@
 #include "Limelight-internal.h"
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#define ANDROID_LOG_TAG "moonlight-common-c"
+#endif
+
 #define FIRST_FRAME_MAX 1500
 #define FIRST_FRAME_TIMEOUT_SEC 10
 
@@ -323,9 +328,22 @@ int startVideoStream(void* rendererContext, int drFlags) {
 
     // This must be called before the decoder thread starts submitting
     // decode units
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "startVideoStream: NegotiatedVideoFormat=%d width=%d height=%d fps=%d", 
+                        NegotiatedVideoFormat, StreamConfig.width, StreamConfig.height, StreamConfig.fps);
+    if (NegotiatedVideoFormat == 0) {
+        __android_log_print(ANDROID_LOG_ERROR, ANDROID_LOG_TAG, "startVideoStream: ERROR - NegotiatedVideoFormat is 0, setup will fail!");
+    }
+#endif
     LC_ASSERT(NegotiatedVideoFormat != 0);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "startVideoStream: Calling VideoCallbacks.setup()");
+#endif
     err = VideoCallbacks.setup(NegotiatedVideoFormat, StreamConfig.width,
         StreamConfig.height, StreamConfig.fps, rendererContext, drFlags);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "startVideoStream: VideoCallbacks.setup() returned err=%d", err);
+#endif
     if (err != 0) {
         return err;
     }

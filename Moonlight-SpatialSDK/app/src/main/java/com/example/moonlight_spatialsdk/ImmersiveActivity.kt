@@ -77,6 +77,9 @@ class ImmersiveActivity : AppSystemActivity() {
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    // CRITICAL TEST LOG - This MUST appear in logcat if onCreate is called
+    System.out.println("=== IMMERSIVE_ACTIVITY_ONCREATE_START ===")
+    android.util.Log.e(TAG, "=== IMMERSIVE_ACTIVITY_ONCREATE_START ===")
     super.onCreate(savedInstanceState)
     
     // Initialize MediaCodecHelper before creating any decoder renderers
@@ -110,18 +113,22 @@ class ImmersiveActivity : AppSystemActivity() {
     val host = intent.getStringExtra("host")
     val port = intent.getIntExtra("port", 47989)
     val appId = intent.getIntExtra("appId", 0)
+    System.out.println("=== IMMERSIVE_ACTIVITY_EXTRAS host=$host port=$port appId=$appId ===")
+    android.util.Log.e(TAG, "=== IMMERSIVE_ACTIVITY_EXTRAS host=$host port=$port appId=$appId ===")
     Log.i(TAG, "onCreate extras host=$host port=$port appId=$appId")
     
     if (!host.isNullOrBlank()) {
-      // Launch connection in background
-      Log.i(TAG, "Host provided, initiating connection flow")
-      connectToHost(host, port, appId)
+      // Store connection params but don't connect yet - wait for panel surface to be ready
+      Log.i(TAG, "Host provided, storing connection params for later connection")
+      pendingConnectionParams = Triple(host, port, appId)
     } else {
       Log.i(TAG, "No host provided; immersive launched without connection params")
     }
   }
 
   override fun onSceneReady() {
+    System.out.println("=== ONSCENE_READY_CALLED ===")
+    android.util.Log.e(TAG, "=== ONSCENE_READY_CALLED ===")
     super.onSceneReady()
 
     // Enable MR mode - scene and systemManager are now available
@@ -138,27 +145,77 @@ class ImmersiveActivity : AppSystemActivity() {
 
     scene.setViewOrigin(0.0f, 0.0f, 2.0f, 180.0f)
 
+    System.out.println("=== CALLING_CREATE_VIDEO_PANEL_ENTITY ===")
+    android.util.Log.e(TAG, "=== CALLING_CREATE_VIDEO_PANEL_ENTITY ===")
     createVideoPanelEntity()
   }
 
 
   @OptIn(SpatialSDKExperimentalAPI::class)
   override fun registerPanels(): List<PanelRegistration> {
+    System.out.println("=== REGISTER_PANELS_CALLED ===")
+    android.util.Log.e(TAG, "=== REGISTER_PANELS_CALLED ===")
     return listOf(
         VideoSurfacePanelRegistration(
             R.id.ui_example,
             surfaceConsumer = { panelEntity, surface ->
+              System.out.println("=== SURFACE_CONSUMER_CALLED panelEntity=$panelEntity ===")
+              android.util.Log.e(TAG, "=== SURFACE_CONSUMER_CALLED panelEntity=$panelEntity ===")
               Log.i(TAG, "Surface attached for panel entity=$panelEntity")
+              
+              // Store the panel entity reference
+              videoPanelEntity = panelEntity
+              
+              // Ensure panel is visible and positioned
+              panelEntity.setComponent(Visible(true))
+              panelEntity.setComponent(Transform(
+                  Pose(
+                      Vector3(0f, 1.1f, -1.5f),
+                      Quaternion(0f, 0f, 0f, 1f)
+                  )
+              ))
+              panelEntity.setComponent(Grabbable(enabled = true))
+              
               SurfaceUtil.paintBlack(surface)
+              
+              // Configure decoder with preferences when panel is created
+              System.out.println("=== ATTACHING_SURFACE_AND_CONFIGURING_DECODER ===")
+              android.util.Log.e(TAG, "=== ATTACHING_SURFACE_AND_CONFIGURING_DECODER ===")
               moonlightPanelRenderer.attachSurface(surface)
+              
+              // Pre-configure decoder with settings from PancakeActivity
+              System.out.println("=== PRECONFIGURING_DECODER ===")
+              android.util.Log.e(TAG, "=== PRECONFIGURING_DECODER ===")
+              moonlightPanelRenderer.preConfigureDecoder()
+              
               isSurfaceReady = true
-              startStreamIfReady()
+              System.out.println("=== SURFACE_READY_AND_DECODER_CONFIGURED ===")
+              android.util.Log.e(TAG, "=== SURFACE_READY_AND_DECODER_CONFIGURED ===")
+              
+              // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
+              val params = pendingConnectionParams
+              if (params != null) {
+                val (host, port, appId) = params
+                System.out.println("=== CONNECTING host=$host port=$port appId=$appId ===")
+                android.util.Log.e(TAG, "=== CONNECTING host=$host port=$port appId=$appId ===")
+                Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
+                connectToHost(host, port, appId)
+              } else {
+                System.out.println("=== NO_PENDING_CONNECTION_PARAMS ===")
+                android.util.Log.e(TAG, "=== NO_PENDING_CONNECTION_PARAMS ===")
+                Log.d(TAG, "Panel surface ready but no pending connection params")
+              }
             },
             settingsCreator = {
+              System.out.println("=== SETTINGS_CREATOR_CALLED ===")
+              android.util.Log.e(TAG, "=== SETTINGS_CREATOR_CALLED ===")
               MediaPanelSettings(
                   shape = QuadShapeOptions(width = 1.6f, height = 0.9f),
                   display = PixelDisplayOptions(width = 1920, height = 1080),
-                  rendering = MediaPanelRenderOptions(stereoMode = StereoMode.None),
+                  rendering = MediaPanelRenderOptions(
+                      isDRM = true,
+                      stereoMode = StereoMode.None
+                  ),
               )
             },
         ),
@@ -208,25 +265,16 @@ class ImmersiveActivity : AppSystemActivity() {
       return
     }
 
-    Log.i(TAG, "connectToHost starting checkPairing host=$host port=$port appId=$appId")
-    _connectionStatus.value = "Checking pairing..."
+    // PancakeActivity already verified pairing before launching ImmersiveActivity,
+    // so we can skip the redundant checkPairing() call and directly start the stream.
+    // This ensures only ImmersiveActivity initiates streaming connections.
+    Log.i(TAG, "connectToHost: Pairing already verified by PancakeActivity, starting stream host=$host port=$port appId=$appId")
+    _connectionStatus.value = "Connecting..."
     _isConnected.value = false
     pendingConnectionParams = Triple(host, port, appId)
-
-    connectionManager.checkPairing(host, port) { paired, error ->
-      Log.i(TAG, "checkPairing completed host=$host paired=$paired error=$error")
-      if (paired) {
-        isPaired = true
-        _connectionStatus.value = "Waiting for surface..."
-        startStreamIfReady()
-      } else {
-        isPaired = false
-        pendingConnectionParams = null
-        _connectionStatus.value = error ?: "Server requires pairing. Please pair in 2D mode first."
-        _isConnected.value = false
-        Log.w(TAG, "Pairing required or failed for host=$host error=$error")
-      }
-    }
+    isPaired = true // Assume paired since PancakeActivity verified it
+    
+    startStreamIfReady()
   }
   
   private fun startStreamIfReady() {
@@ -262,6 +310,8 @@ class ImmersiveActivity : AppSystemActivity() {
   }
 
   private fun createVideoPanelEntity() {
+    System.out.println("=== CREATE_VIDEO_PANEL_ENTITY_CALLED ===")
+    android.util.Log.e(TAG, "=== CREATE_VIDEO_PANEL_ENTITY_CALLED ===")
     Log.i(TAG, "Creating video panel entity with Panel(R.id.ui_example)")
     
     videoPanelEntity = Entity.create(
@@ -278,6 +328,8 @@ class ImmersiveActivity : AppSystemActivity() {
         )
     )
     
+    System.out.println("=== VIDEO_PANEL_ENTITY_CREATED ===")
+    android.util.Log.e(TAG, "=== VIDEO_PANEL_ENTITY_CREATED ===")
     Log.i(TAG, "Video panel entity created at (0, 1.1, -1.5) - visible and grabbable")
   }
 

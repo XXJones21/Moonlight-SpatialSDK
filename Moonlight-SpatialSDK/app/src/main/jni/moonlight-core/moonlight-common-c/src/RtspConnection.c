@@ -1,6 +1,11 @@
 #include "Limelight-internal.h"
 #include "Rtsp.h"
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#define ANDROID_LOG_TAG "moonlight-common-c"
+#endif
+
 #define RTSP_CONNECT_TIMEOUT_SEC 10
 #define RTSP_RECEIVE_TIMEOUT_SEC 15
 #define RTSP_RETRY_DELAY_MS 500
@@ -1063,9 +1068,15 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
         if ((StreamConfig.supportedVideoFormats & VIDEO_FORMAT_MASK_AV1) && strstr(response.payload, "AV1/90000")) {
             if ((serverInfo->serverCodecModeSupport & SCM_AV1_MAIN10) && (StreamConfig.supportedVideoFormats & VIDEO_FORMAT_AV1_MAIN10)) {
                 NegotiatedVideoFormat = VIDEO_FORMAT_AV1_MAIN10;
+#ifdef __ANDROID__
+                __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "NegotiatedVideoFormat set to VIDEO_FORMAT_AV1_MAIN10 (%d)", NegotiatedVideoFormat);
+#endif
             }
             else {
                 NegotiatedVideoFormat = VIDEO_FORMAT_AV1_MAIN8;
+#ifdef __ANDROID__
+                __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "NegotiatedVideoFormat set to VIDEO_FORMAT_AV1_MAIN8 (%d)", NegotiatedVideoFormat);
+#endif
             }
         }
         else if ((StreamConfig.supportedVideoFormats & VIDEO_FORMAT_MASK_H265) && strstr(response.payload, "sprop-parameter-sets=AAAAAU")) {
@@ -1077,13 +1088,22 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
             // look for the base 64 encoded VPS NALU prefix that is unique to the HEVC bitstream.
             if ((serverInfo->serverCodecModeSupport & SCM_HEVC_MAIN10) && (StreamConfig.supportedVideoFormats & VIDEO_FORMAT_H265_MAIN10)) {
                 NegotiatedVideoFormat = VIDEO_FORMAT_H265_MAIN10;
+#ifdef __ANDROID__
+                __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "NegotiatedVideoFormat set to VIDEO_FORMAT_H265_MAIN10 (%d)", NegotiatedVideoFormat);
+#endif
             }
             else {
                 NegotiatedVideoFormat = VIDEO_FORMAT_H265;
+#ifdef __ANDROID__
+                __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "NegotiatedVideoFormat set to VIDEO_FORMAT_H265 (%d)", NegotiatedVideoFormat);
+#endif
             }
         }
         else {
             NegotiatedVideoFormat = VIDEO_FORMAT_H264;
+#ifdef __ANDROID__
+            __android_log_print(ANDROID_LOG_INFO, ANDROID_LOG_TAG, "NegotiatedVideoFormat set to VIDEO_FORMAT_H264 (%d)", NegotiatedVideoFormat);
+#endif
 
             // Dimensions over 4096 are only supported with HEVC on NVENC
             if (StreamConfig.width > 4096 || StreamConfig.height > 4096) {
