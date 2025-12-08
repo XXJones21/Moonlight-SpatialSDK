@@ -211,7 +211,7 @@ class ImmersiveActivity : AppSystemActivity() {
               android.util.Log.e(TAG, "=== SETTINGS_CREATOR_CALLED ===")
               MediaPanelSettings(
                   shape = QuadShapeOptions(width = 1.6f, height = 0.9f),
-                  display = PixelDisplayOptions(width = 1920, height = 1080),
+                  display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
                   rendering = MediaPanelRenderOptions(
                       isDRM = true,
                       stereoMode = StereoMode.None

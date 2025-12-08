@@ -1,18 +1,18 @@
-[2025-12-07 15:19:56.082]: Info: Sunshine version: v2025.628.4510
-[2025-12-07 15:19:56.082]: Info: Package Publisher: LizardByte
-[2025-12-07 15:19:56.082]: Info: Publisher Website: https://app.lizardbyte.dev
-[2025-12-07 15:19:56.082]: Info: Get support: https://app.lizardbyte.dev/support
-[2025-12-07 15:19:56.082]: Info: config: 'min_log_level' = 1
-[2025-12-07 15:19:56.082]: Info: config: 'min_threads' = 4
-[2025-12-07 15:19:56.082]: Info: config: 'nvenc_spatial_aq' = enabled
-[2025-12-07 15:19:56.082]: Info: config: 'ping_timeout' = 1000000
-[2025-12-07 15:19:56.083]: Info: config: 'sw_preset' = ultrafast
-[2025-12-07 15:19:56.083]: Info: config: 'wan_encryption_mode' = 1
-[2025-12-07 15:19:56.083]: Info: Provided workaround settings for SettingsManager:
+[2025-12-07 18:27:34.933]: Info: Sunshine version: v2025.628.4510
+[2025-12-07 18:27:34.933]: Info: Package Publisher: LizardByte
+[2025-12-07 18:27:34.933]: Info: Publisher Website: https://app.lizardbyte.dev
+[2025-12-07 18:27:34.933]: Info: Get support: https://app.lizardbyte.dev/support
+[2025-12-07 18:27:34.933]: Info: config: 'min_log_level' = 1
+[2025-12-07 18:27:34.934]: Info: config: 'min_threads' = 4
+[2025-12-07 18:27:34.934]: Info: config: 'nvenc_spatial_aq' = enabled
+[2025-12-07 18:27:34.934]: Info: config: 'ping_timeout' = 1000000
+[2025-12-07 18:27:34.934]: Info: config: 'sw_preset' = ultrafast
+[2025-12-07 18:27:34.934]: Info: config: 'wan_encryption_mode' = 1
+[2025-12-07 18:27:34.934]: Info: Provided workaround settings for SettingsManager:
 {
   "hdr_blank_delay": null
 }
-[2025-12-07 15:19:56.086]: Info: Currently available display devices:
+[2025-12-07 18:27:34.936]: Info: Currently available display devices:
 [
   {
     "device_id": "{c84b309e-afe8-5383-aa89-fb66cd5c9a0d}",
@@ -51,15 +51,16 @@
     }
   }
 ]
-[2025-12-07 15:19:56.301]: Info: nvprefs: No need to modify application profile settings
-[2025-12-07 15:19:56.302]: Info: nvprefs: Changed OGL_CPL_PREFER_DXPRESENT to OGL_CPL_PREFER_DXPRESENT_PREFER_ENABLED for base profile
-[2025-12-07 15:19:56.360]: Info: Compiling shaders...
-[2025-12-07 15:19:56.382]: Info: System tray created
-[2025-12-07 15:19:56.382]: Debug: System tray loop
-[2025-12-07 15:19:56.477]: Info: Compiled shaders
-[2025-12-07 15:19:56.489]: Info: // Testing for available encoders, this may generate errors. You can safely ignore those errors. //
-[2025-12-07 15:19:56.489]: Info: Trying encoder [nvenc]
-[2025-12-07 15:19:56.932]: Info: 
+[2025-12-07 18:27:35.167]: Info: nvprefs: No need to modify application profile settings
+[2025-12-07 18:27:35.167]: Info: nvprefs: Changed OGL_CPL_PREFER_DXPRESENT to OGL_CPL_PREFER_DXPRESENT_PREFER_ENABLED for base profile
+[2025-12-07 18:27:35.257]: Info: Compiling shaders...
+[2025-12-07 18:27:35.287]: Info: System tray created
+[2025-12-07 18:27:35.288]: Debug: System tray loop
+[2025-12-07 18:27:35.652]: Info: Compiled shaders
+[2025-12-07 18:27:35.777]: Info: Successfully reset default audio device
+[2025-12-07 18:27:35.780]: Info: // Testing for available encoders, this may generate errors. You can safely ignore those errors. //
+[2025-12-07 18:27:35.780]: Info: Trying encoder [nvenc]
+[2025-12-07 18:27:36.225]: Info: 
 Device Description : NVIDIA GeForce RTX 4080
 Device Vendor ID   : 0x000010DE
 Device Device ID   : 0x00002704
@@ -70,51 +71,51 @@ Feature Level      : 0x0000B100
 Capture size       : 2560x1440
 Offset             : 0x0
 Virtual Desktop    : 2560x1440
-[2025-12-07 15:19:56.933]: Info: Active GPU has HAGS disabled
-[2025-12-07 15:19:56.933]: Info: Using realtime GPU priority
-[2025-12-07 15:19:56.933]: Info: 
+[2025-12-07 18:27:36.225]: Info: Active GPU has HAGS disabled
+[2025-12-07 18:27:36.225]: Info: Using realtime GPU priority
+[2025-12-07 18:27:36.225]: Info: 
 Colorspace         : DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020
 Bits Per Color     : 8
-Red Primary        : [0.657227,0.325195]
-Green Primary      : [0.267578,0.582031]
-Blue Primary       : [0.135742,0.109375]
-White Point        : [0.293945,0.349609]
-Min Luminance      : 0 nits
-Max Luminance      : 301.849 nits
-Max Full Luminance : 243.056 nits
-[2025-12-07 15:19:56.933]: Info: Desktop resolution [2560x1440]
-[2025-12-07 15:19:56.933]: Info: Desktop format [DXGI_FORMAT_R16G16B16A16_FLOAT]
-[2025-12-07 15:19:56.933]: Info: Display refresh rate [144Hz]
-[2025-12-07 15:19:56.933]: Info: Requested frame rate [60fps]
-[2025-12-07 15:19:56.934]: Info: Creating encoder [h264_nvenc]
-[2025-12-07 15:19:56.934]: Info: Color coding: SDR (Rec. 601)
-[2025-12-07 15:19:56.934]: Info: Color depth: 8-bit
-[2025-12-07 15:19:56.934]: Info: Color range: JPEG
-[2025-12-07 15:19:56.991]: Debug: NvEnc: requested encoded frame size 2.08 kB
-[2025-12-07 15:19:56.991]: Info: NvEnc: created encoder H.264 P1 async two-pass rfi spatial-aq
-[2025-12-07 15:19:56.996]: Debug: NvEnc: idr frame 1
-[2025-12-07 15:19:57.024]: Info: Creating encoder [hevc_nvenc]
-[2025-12-07 15:19:57.024]: Info: Color coding: SDR (Rec. 601)
-[2025-12-07 15:19:57.024]: Info: Color depth: 8-bit
-[2025-12-07 15:19:57.024]: Info: Color range: JPEG
-[2025-12-07 15:19:57.075]: Debug: NvEnc: requested encoded frame size 2.08 kB
-[2025-12-07 15:19:57.075]: Info: NvEnc: created encoder HEVC P1 async two-pass rfi spatial-aq
-[2025-12-07 15:19:57.080]: Debug: NvEnc: idr frame 1
-[2025-12-07 15:19:57.100]: Info: Creating encoder [av1_nvenc]
-[2025-12-07 15:19:57.100]: Info: Color coding: SDR (Rec. 601)
-[2025-12-07 15:19:57.100]: Info: Color depth: 8-bit
-[2025-12-07 15:19:57.100]: Info: Color range: JPEG
-[2025-12-07 15:19:57.155]: Debug: NvEnc: requested encoded frame size 2.08 kB
-[2025-12-07 15:19:57.155]: Info: NvEnc: created encoder AV1 P1 async two-pass rfi spatial-aq
-[2025-12-07 15:19:57.160]: Debug: NvEnc: idr frame 1
-[2025-12-07 15:19:57.180]: Info: Creating encoder [h264_nvenc]
-[2025-12-07 15:19:57.180]: Info: Color coding: SDR (Rec. 601)
-[2025-12-07 15:19:57.180]: Info: Color depth: 8-bit
-[2025-12-07 15:19:57.180]: Info: Color range: JPEG
-[2025-12-07 15:19:57.231]: Debug: NvEnc: requested encoded frame size 2.08 kB
-[2025-12-07 15:19:57.232]: Info: NvEnc: created encoder H.264 P1 async yuv444 two-pass rfi spatial-aq
-[2025-12-07 15:19:57.238]: Debug: NvEnc: idr frame 1
-[2025-12-07 15:19:57.468]: Info: 
+Red Primary        : [0.65722,0.325196]
+Green Primary      : [0.267575,0.582029]
+Blue Primary       : [0.135738,0.109375]
+White Point        : [0.293941,0.349611]
+Min Luminance      : 1 nits
+Max Luminance      : 10000 nits
+Max Full Luminance : 10000 nits
+[2025-12-07 18:27:36.225]: Info: Desktop resolution [2560x1440]
+[2025-12-07 18:27:36.225]: Info: Desktop format [DXGI_FORMAT_R16G16B16A16_FLOAT]
+[2025-12-07 18:27:36.225]: Info: Display refresh rate [144Hz]
+[2025-12-07 18:27:36.226]: Info: Requested frame rate [60fps]
+[2025-12-07 18:27:36.226]: Info: Creating encoder [h264_nvenc]
+[2025-12-07 18:27:36.226]: Info: Color coding: SDR (Rec. 601)
+[2025-12-07 18:27:36.226]: Info: Color depth: 8-bit
+[2025-12-07 18:27:36.226]: Info: Color range: JPEG
+[2025-12-07 18:27:36.288]: Debug: NvEnc: requested encoded frame size 2.08 kB
+[2025-12-07 18:27:36.289]: Info: NvEnc: created encoder H.264 P1 async two-pass rfi spatial-aq
+[2025-12-07 18:27:36.293]: Debug: NvEnc: idr frame 1
+[2025-12-07 18:27:36.310]: Info: Creating encoder [hevc_nvenc]
+[2025-12-07 18:27:36.310]: Info: Color coding: SDR (Rec. 601)
+[2025-12-07 18:27:36.310]: Info: Color depth: 8-bit
+[2025-12-07 18:27:36.310]: Info: Color range: JPEG
+[2025-12-07 18:27:36.358]: Debug: NvEnc: requested encoded frame size 2.08 kB
+[2025-12-07 18:27:36.358]: Info: NvEnc: created encoder HEVC P1 async two-pass rfi spatial-aq
+[2025-12-07 18:27:36.363]: Debug: NvEnc: idr frame 1
+[2025-12-07 18:27:36.383]: Info: Creating encoder [av1_nvenc]
+[2025-12-07 18:27:36.384]: Info: Color coding: SDR (Rec. 601)
+[2025-12-07 18:27:36.384]: Info: Color depth: 8-bit
+[2025-12-07 18:27:36.384]: Info: Color range: JPEG
+[2025-12-07 18:27:36.431]: Debug: NvEnc: requested encoded frame size 2.08 kB
+[2025-12-07 18:27:36.431]: Info: NvEnc: created encoder AV1 P1 async two-pass rfi spatial-aq
+[2025-12-07 18:27:36.436]: Debug: NvEnc: idr frame 1
+[2025-12-07 18:27:36.455]: Info: Creating encoder [h264_nvenc]
+[2025-12-07 18:27:36.455]: Info: Color coding: SDR (Rec. 601)
+[2025-12-07 18:27:36.455]: Info: Color depth: 8-bit
+[2025-12-07 18:27:36.455]: Info: Color range: JPEG
+[2025-12-07 18:27:36.507]: Debug: NvEnc: requested encoded frame size 2.08 kB
+[2025-12-07 18:27:36.507]: Info: NvEnc: created encoder H.264 P1 async yuv444 two-pass rfi spatial-aq
+[2025-12-07 18:27:36.514]: Debug: NvEnc: idr frame 1
+[2025-12-07 18:27:36.731]: Info: 
 Device Description : NVIDIA GeForce RTX 4080
 Device Vendor ID   : 0x000010DE
 Device Device ID   : 0x00002704
@@ -125,456 +126,519 @@ Feature Level      : 0x0000B100
 Capture size       : 2560x1440
 Offset             : 0x0
 Virtual Desktop    : 2560x1440
-[2025-12-07 15:19:57.468]: Info: Active GPU has HAGS disabled
-[2025-12-07 15:19:57.468]: Info: Using realtime GPU priority
-[2025-12-07 15:19:57.468]: Info: 
+[2025-12-07 18:27:36.731]: Info: Active GPU has HAGS disabled
+[2025-12-07 18:27:36.731]: Info: Using realtime GPU priority
+[2025-12-07 18:27:36.731]: Info: 
 Colorspace         : DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020
 Bits Per Color     : 8
-Red Primary        : [0.657227,0.325195]
-Green Primary      : [0.267578,0.582031]
-Blue Primary       : [0.135742,0.109375]
-White Point        : [0.293945,0.349609]
-Min Luminance      : 0 nits
-Max Luminance      : 301.849 nits
-Max Full Luminance : 243.056 nits
-[2025-12-07 15:19:57.469]: Info: Desktop resolution [2560x1440]
-[2025-12-07 15:19:57.469]: Info: Desktop format [DXGI_FORMAT_R16G16B16A16_FLOAT]
-[2025-12-07 15:19:57.469]: Info: Display refresh rate [144Hz]
-[2025-12-07 15:19:57.469]: Info: Requested frame rate [60fps]
-[2025-12-07 15:19:57.469]: Info: Creating encoder [hevc_nvenc]
-[2025-12-07 15:19:57.469]: Info: Color coding: HDR (Rec. 2020 + SMPTE 2084 PQ)
-[2025-12-07 15:19:57.469]: Info: Color depth: 10-bit
-[2025-12-07 15:19:57.469]: Info: Color range: JPEG
-[2025-12-07 15:19:57.705]: Debug: NvEnc: requested encoded frame size 2.08 kB
-[2025-12-07 15:19:57.705]: Info: NvEnc: created encoder HEVC P1 async yuv444 10-bit two-pass rfi spatial-aq
-[2025-12-07 15:19:57.711]: Debug: NvEnc: idr frame 1
-[2025-12-07 15:19:57.762]: Info: Creating encoder [av1_nvenc]
-[2025-12-07 15:19:57.762]: Info: Color coding: HDR (Rec. 2020 + SMPTE 2084 PQ)
-[2025-12-07 15:19:57.762]: Info: Color depth: 10-bit
-[2025-12-07 15:19:57.762]: Info: Color range: JPEG
-[2025-12-07 15:19:57.839]: Error: NvEnc: gpu doesn't support YUV444 encode
-[2025-12-07 15:19:57.839]: Error: NvEnc: NvEncUnregisterAsyncEvent() failed: NV_ENC_ERR_DEVICE_NOT_EXIST
-[2025-12-07 15:19:57.872]: Info: Creating encoder [av1_nvenc]
-[2025-12-07 15:19:57.872]: Info: Color coding: HDR (Rec. 2020 + SMPTE 2084 PQ)
-[2025-12-07 15:19:57.872]: Info: Color depth: 10-bit
-[2025-12-07 15:19:57.872]: Info: Color range: JPEG
-[2025-12-07 15:19:57.925]: Debug: NvEnc: requested encoded frame size 2.08 kB
-[2025-12-07 15:19:57.925]: Info: NvEnc: created encoder AV1 P1 async 10-bit two-pass rfi spatial-aq
-[2025-12-07 15:19:57.931]: Debug: NvEnc: idr frame 1
-[2025-12-07 15:19:57.964]: Info: 
-[2025-12-07 15:19:57.964]: Info: // Ignore any errors mentioned above, they are not relevant. //
-[2025-12-07 15:19:57.964]: Info: 
-[2025-12-07 15:19:57.964]: Debug: ------  h264 ------
-[2025-12-07 15:19:57.964]: Debug: PASSED: supported
-[2025-12-07 15:19:57.964]: Debug: REF_FRAMES_RESTRICT: supported
-[2025-12-07 15:19:57.964]: Debug: DYNAMIC_RANGE: unsupported
-[2025-12-07 15:19:57.964]: Debug: YUV444: supported
-[2025-12-07 15:19:57.964]: Debug: VUI_PARAMETERS: supported
-[2025-12-07 15:19:57.964]: Debug: -------------------
-[2025-12-07 15:19:57.964]: Info: Found H.264 encoder: h264_nvenc [nvenc]
-[2025-12-07 15:19:57.964]: Debug: ------  hevc ------
-[2025-12-07 15:19:57.964]: Debug: PASSED: supported
-[2025-12-07 15:19:57.964]: Debug: REF_FRAMES_RESTRICT: supported
-[2025-12-07 15:19:57.964]: Debug: DYNAMIC_RANGE: supported
-[2025-12-07 15:19:57.964]: Debug: YUV444: supported
-[2025-12-07 15:19:57.964]: Debug: VUI_PARAMETERS: supported
-[2025-12-07 15:19:57.964]: Debug: -------------------
-[2025-12-07 15:19:57.964]: Info: Found HEVC encoder: hevc_nvenc [nvenc]
-[2025-12-07 15:19:57.964]: Debug: ------  av1 ------
-[2025-12-07 15:19:57.964]: Debug: PASSED: supported
-[2025-12-07 15:19:57.964]: Debug: REF_FRAMES_RESTRICT: supported
-[2025-12-07 15:19:57.964]: Debug: DYNAMIC_RANGE: supported
-[2025-12-07 15:19:57.964]: Debug: YUV444: unsupported
-[2025-12-07 15:19:57.964]: Debug: VUI_PARAMETERS: unsupported
-[2025-12-07 15:19:57.964]: Debug: -------------------
-[2025-12-07 15:19:57.964]: Info: Found AV1 encoder: av1_nvenc [nvenc]
-[2025-12-07 15:19:57.969]: Info: Configuration UI available at [https://localhost:47990]
-[2025-12-07 15:19:58.533]: Debug: TUNNEL :: NONE
-[2025-12-07 15:19:58.533]: Debug: METHOD :: GET
-[2025-12-07 15:19:58.533]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:19:58.533]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:19:58.533]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:19:58.533]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:19:58.533]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:19:58.533]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:19:58.533]: Debug:  [--] 
-[2025-12-07 15:19:58.533]: Debug: uuid -- d8b25a45343b41e6bcd156489dfce3ee
-[2025-12-07 15:19:58.534]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:19:58.534]: Debug:  [--] 
-[2025-12-07 15:19:58.553]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:19:58.557]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:19:58.557]: Debug: METHOD :: GET
-[2025-12-07 15:19:58.558]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:19:58.558]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:19:58.558]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:19:58.558]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:19:58.558]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:19:58.558]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:19:58.558]: Debug:  [--] 
-[2025-12-07 15:19:58.558]: Debug: uuid -- d9c303e82d7b48dbae7d0f568a1419ec
-[2025-12-07 15:19:58.558]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:19:58.558]: Debug:  [--] 
-[2025-12-07 15:19:58.756]: Info: Registered Sunshine mDNS service
-[2025-12-07 15:20:01.814]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:01.814]: Debug: METHOD :: GET
-[2025-12-07 15:20:01.814]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:01.814]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:01.814]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:01.814]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:01.814]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:01.814]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:01.814]: Debug:  [--] 
-[2025-12-07 15:20:01.814]: Debug: uuid -- fea519a363af40c2acc6fa53e8989a8d
-[2025-12-07 15:20:01.814]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:01.814]: Debug:  [--] 
-[2025-12-07 15:20:01.836]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:01.839]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:01.839]: Debug: METHOD :: GET
-[2025-12-07 15:20:01.839]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:01.839]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:01.839]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:01.839]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:01.839]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:01.839]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:01.839]: Debug:  [--] 
-[2025-12-07 15:20:01.839]: Debug: uuid -- b2f734c9d2ca4d24958422f68aaff96b
-[2025-12-07 15:20:01.839]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:01.839]: Debug:  [--] 
-[2025-12-07 15:20:05.081]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:05.081]: Debug: METHOD :: GET
-[2025-12-07 15:20:05.081]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:05.081]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:05.081]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:05.081]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:05.081]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:05.081]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:05.081]: Debug:  [--] 
-[2025-12-07 15:20:05.081]: Debug: uuid -- e1853537ff074b7f83ee1b42c0d13f38
-[2025-12-07 15:20:05.081]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:05.081]: Debug:  [--] 
-[2025-12-07 15:20:05.106]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:05.110]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:05.110]: Debug: METHOD :: GET
-[2025-12-07 15:20:05.110]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:05.110]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:05.110]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:05.110]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:05.110]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:05.110]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:05.110]: Debug:  [--] 
-[2025-12-07 15:20:05.110]: Debug: uuid -- 0c1f28be24714aae9651a46e2086e878
-[2025-12-07 15:20:05.110]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:05.110]: Debug:  [--] 
-[2025-12-07 15:20:08.350]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:08.350]: Debug: METHOD :: GET
-[2025-12-07 15:20:08.350]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:08.350]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:08.350]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:08.350]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:08.350]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:08.350]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:08.350]: Debug:  [--] 
-[2025-12-07 15:20:08.351]: Debug: uuid -- 2f3cb4c5b6f5448bab230c6f33626aee
-[2025-12-07 15:20:08.351]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:08.351]: Debug:  [--] 
-[2025-12-07 15:20:08.370]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:08.373]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:08.373]: Debug: METHOD :: GET
-[2025-12-07 15:20:08.373]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:08.373]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:08.373]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:08.373]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:08.373]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:08.373]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:08.373]: Debug:  [--] 
-[2025-12-07 15:20:08.373]: Debug: uuid -- 610f2c2ecb024ec29d91e59a7ea248bb
-[2025-12-07 15:20:08.373]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:08.373]: Debug:  [--] 
-[2025-12-07 15:20:11.627]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:11.627]: Debug: METHOD :: GET
-[2025-12-07 15:20:11.627]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:11.627]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:11.627]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:11.627]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:11.628]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:11.628]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:11.628]: Debug:  [--] 
-[2025-12-07 15:20:11.628]: Debug: uuid -- a1e98a83f34c4d25bc4797f5cde8ba87
-[2025-12-07 15:20:11.628]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:11.628]: Debug:  [--] 
-[2025-12-07 15:20:11.652]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:11.655]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:11.655]: Debug: METHOD :: GET
-[2025-12-07 15:20:11.655]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:11.655]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:11.655]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:11.655]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:11.655]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:11.655]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:11.655]: Debug:  [--] 
-[2025-12-07 15:20:11.655]: Debug: uuid -- 6db8dffa442042f48c9edfab3c58954e
-[2025-12-07 15:20:11.655]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:11.655]: Debug:  [--] 
-[2025-12-07 15:20:14.905]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:14.905]: Debug: METHOD :: GET
-[2025-12-07 15:20:14.905]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:14.905]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:14.905]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:14.905]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:14.905]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:14.905]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:14.905]: Debug:  [--] 
-[2025-12-07 15:20:14.905]: Debug: uuid -- 13563285a84c4061a6bb4a92edeb28f8
-[2025-12-07 15:20:14.905]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:14.905]: Debug:  [--] 
-[2025-12-07 15:20:14.925]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:14.929]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:14.929]: Debug: METHOD :: GET
-[2025-12-07 15:20:14.929]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:14.929]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:14.929]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:14.929]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:14.929]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:14.929]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:14.929]: Debug:  [--] 
-[2025-12-07 15:20:14.929]: Debug: uuid -- ae2591cced5c4f3b92c29c94de607c6f
-[2025-12-07 15:20:14.929]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:14.929]: Debug:  [--] 
-[2025-12-07 15:20:18.183]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:18.183]: Debug: METHOD :: GET
-[2025-12-07 15:20:18.183]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:18.183]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:18.183]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:18.184]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:18.184]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:18.184]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:18.184]: Debug:  [--] 
-[2025-12-07 15:20:18.184]: Debug: uuid -- c9ea599a69a44a5ca14654aeb3ada6d1
-[2025-12-07 15:20:18.184]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:18.184]: Debug:  [--] 
-[2025-12-07 15:20:18.208]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:18.211]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:18.211]: Debug: METHOD :: GET
-[2025-12-07 15:20:18.211]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:18.212]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:18.212]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:18.212]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:18.212]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:18.212]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:18.212]: Debug:  [--] 
-[2025-12-07 15:20:18.212]: Debug: uuid -- 9207c1a7ce8a49949772ed1f138df9c7
-[2025-12-07 15:20:18.212]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:18.212]: Debug:  [--] 
-[2025-12-07 15:20:21.459]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:21.459]: Debug: METHOD :: GET
-[2025-12-07 15:20:21.459]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:21.459]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:21.459]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:21.459]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:21.459]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:21.459]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:21.459]: Debug:  [--] 
-[2025-12-07 15:20:21.459]: Debug: uuid -- a5b375552b984b759c6ae59611abe2de
-[2025-12-07 15:20:21.459]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:21.459]: Debug:  [--] 
-[2025-12-07 15:20:21.481]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:21.484]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:21.484]: Debug: METHOD :: GET
-[2025-12-07 15:20:21.484]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:21.485]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:21.485]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:21.485]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:21.485]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:21.485]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:21.485]: Debug:  [--] 
-[2025-12-07 15:20:21.485]: Debug: uuid -- 19581c29dda844399d52da5b2c58be52
-[2025-12-07 15:20:21.485]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:21.485]: Debug:  [--] 
-[2025-12-07 15:20:24.762]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:24.763]: Debug: METHOD :: GET
-[2025-12-07 15:20:24.763]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:24.763]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:24.763]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:24.763]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:24.763]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:24.763]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:24.763]: Debug:  [--] 
-[2025-12-07 15:20:24.763]: Debug: uuid -- 9a8593cacaf84dae9cacfa4667005e05
-[2025-12-07 15:20:24.763]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:24.763]: Debug:  [--] 
-[2025-12-07 15:20:24.784]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:24.788]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:24.788]: Debug: METHOD :: GET
-[2025-12-07 15:20:24.788]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:24.788]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:24.788]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:24.788]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:24.788]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:24.788]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:24.788]: Debug:  [--] 
-[2025-12-07 15:20:24.788]: Debug: uuid -- 323476e914664de79928fd610fe32c0d
-[2025-12-07 15:20:24.788]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:24.788]: Debug:  [--] 
-[2025-12-07 15:20:24.814]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:24.818]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:24.818]: Debug: METHOD :: GET
-[2025-12-07 15:20:24.818]: Debug: DESTINATION :: /applist
-[2025-12-07 15:20:24.818]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:24.818]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:24.818]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:24.818]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:24.818]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:24.818]: Debug:  [--] 
-[2025-12-07 15:20:24.818]: Debug: uuid -- 6e10b35d051647848f5be050eb9a40d0
-[2025-12-07 15:20:24.818]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:24.818]: Debug:  [--] 
-[2025-12-07 15:20:26.160]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:26.160]: Debug: METHOD :: GET
-[2025-12-07 15:20:26.160]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:26.160]: Debug: User-Agent -- okhttp/4.12.0
-[2025-12-07 15:20:26.160]: Debug: Accept-Encoding -- gzip
-[2025-12-07 15:20:26.160]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:26.160]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:26.160]: Debug:  [--] 
-[2025-12-07 15:20:26.160]: Debug: uuid -- eb4e3a1e-e3dc-48d6-a937-11ff88ae44bf
-[2025-12-07 15:20:26.160]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:26.160]: Debug:  [--] 
-[2025-12-07 15:20:26.215]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:26.219]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:26.219]: Debug: METHOD :: GET
-[2025-12-07 15:20:26.219]: Debug: DESTINATION :: /applist
-[2025-12-07 15:20:26.219]: Debug: User-Agent -- okhttp/4.12.0
-[2025-12-07 15:20:26.219]: Debug: Accept-Encoding -- gzip
-[2025-12-07 15:20:26.220]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:26.220]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:26.220]: Debug:  [--] 
-[2025-12-07 15:20:26.220]: Debug: uuid -- 748df9aa-3159-463a-92ef-d9eb19815b27
-[2025-12-07 15:20:26.220]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:26.220]: Debug:  [--] 
-[2025-12-07 15:20:28.041]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:28.041]: Debug: METHOD :: GET
-[2025-12-07 15:20:28.041]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:28.041]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:28.041]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:28.041]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:28.042]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:28.042]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:28.042]: Debug:  [--] 
-[2025-12-07 15:20:28.042]: Debug: uuid -- a5b3fbcd1ead464e848e3cdf5b4692e2
-[2025-12-07 15:20:28.042]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:28.042]: Debug:  [--] 
-[2025-12-07 15:20:28.064]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:28.066]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:28.066]: Debug: METHOD :: GET
-[2025-12-07 15:20:28.067]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:28.067]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:28.067]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:28.067]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:28.067]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:28.067]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:28.067]: Debug:  [--] 
-[2025-12-07 15:20:28.067]: Debug: uuid -- 8724798304274422a7f644bc3e3595f7
-[2025-12-07 15:20:28.067]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:28.067]: Debug:  [--] 
-[2025-12-07 15:20:31.286]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:31.286]: Debug: METHOD :: GET
-[2025-12-07 15:20:31.286]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:31.286]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:31.286]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:31.286]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:31.286]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:31.287]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:31.287]: Debug:  [--] 
-[2025-12-07 15:20:31.287]: Debug: uuid -- 65ed19c1fb6b4c12acdd1cf4c4662f38
-[2025-12-07 15:20:31.287]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:31.287]: Debug:  [--] 
-[2025-12-07 15:20:31.311]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:31.313]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:31.314]: Debug: METHOD :: GET
-[2025-12-07 15:20:31.314]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:31.314]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:31.314]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:31.314]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:31.314]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:31.314]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:31.314]: Debug:  [--] 
-[2025-12-07 15:20:31.314]: Debug: uuid -- 2c7b2f4a67a6409a8489a9e5d4324cd3
-[2025-12-07 15:20:31.314]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:31.314]: Debug:  [--] 
-[2025-12-07 15:20:31.666]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:31.666]: Debug: METHOD :: GET
-[2025-12-07 15:20:31.666]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:31.666]: Debug: User-Agent -- okhttp/4.12.0
-[2025-12-07 15:20:31.666]: Debug: Accept-Encoding -- gzip
-[2025-12-07 15:20:31.666]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:31.666]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:31.666]: Debug:  [--] 
-[2025-12-07 15:20:31.666]: Debug: uuid -- b267eb62-c6f4-4220-b681-728f10287262
-[2025-12-07 15:20:31.666]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:31.666]: Debug:  [--] 
-[2025-12-07 15:20:31.700]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:31.703]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:31.703]: Debug: METHOD :: GET
-[2025-12-07 15:20:31.703]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:31.703]: Debug: User-Agent -- okhttp/4.12.0
-[2025-12-07 15:20:31.703]: Debug: Accept-Encoding -- gzip
-[2025-12-07 15:20:31.703]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:31.703]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:31.703]: Debug:  [--] 
-[2025-12-07 15:20:31.703]: Debug: uuid -- 54619667-ac66-4410-8664-5b5a185cf0d7
-[2025-12-07 15:20:31.703]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:31.703]: Debug:  [--] 
-[2025-12-07 15:20:33.738]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:33.739]: Debug: METHOD :: GET
-[2025-12-07 15:20:33.739]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:33.739]: Debug: User-Agent -- okhttp/4.12.0
-[2025-12-07 15:20:33.739]: Debug: Accept-Encoding -- gzip
-[2025-12-07 15:20:33.739]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:33.739]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:33.739]: Debug:  [--] 
-[2025-12-07 15:20:33.739]: Debug: uuid -- a114d1bf-9ca0-4bea-bc8b-841438a1a83c
-[2025-12-07 15:20:33.739]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:33.739]: Debug:  [--] 
-[2025-12-07 15:20:33.790]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:33.793]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:33.793]: Debug: METHOD :: GET
-[2025-12-07 15:20:33.793]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:33.793]: Debug: User-Agent -- okhttp/4.12.0
-[2025-12-07 15:20:33.793]: Debug: Accept-Encoding -- gzip
-[2025-12-07 15:20:33.793]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:33.793]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:33.793]: Debug:  [--] 
-[2025-12-07 15:20:33.793]: Debug: uuid -- f69a6568-b7a5-4037-bf25-1269762fd9a4
-[2025-12-07 15:20:33.793]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:33.794]: Debug:  [--] 
-[2025-12-07 15:20:33.894]: Debug: /CN=NVIDIA GameStream Client -- verified
-[2025-12-07 15:20:33.897]: Debug: TUNNEL :: HTTPS
-[2025-12-07 15:20:33.897]: Debug: METHOD :: GET
-[2025-12-07 15:20:33.897]: Debug: DESTINATION :: /launch
-[2025-12-07 15:20:33.897]: Debug: User-Agent -- okhttp/4.12.0
-[2025-12-07 15:20:33.897]: Debug: Accept-Encoding -- gzip
-[2025-12-07 15:20:33.897]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:33.898]: Debug: Host -- 10.1.95.5:47984
-[2025-12-07 15:20:33.898]: Debug:  [--] 
-[2025-12-07 15:20:33.898]: Debug: uuid -- 917ca676-ca1e-4e62-985d-c64215c8f8bc
-[2025-12-07 15:20:33.898]: Debug: appid -- 881448767
-[2025-12-07 15:20:33.898]: Debug: mode -- 3840x2160x60
-[2025-12-07 15:20:33.898]: Debug: additionalStates -- 1
-[2025-12-07 15:20:33.898]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:33.898]: Debug: sops -- 0
-[2025-12-07 15:20:33.898]: Debug: rikey -- 8ACC62A549F03D414B47BA9DEA7DB9A1
-[2025-12-07 15:20:33.898]: Debug: surroundAudioInfo -- 196610
-[2025-12-07 15:20:33.898]: Debug: rikeyid -- 510297380
-[2025-12-07 15:20:33.898]: Debug: remoteControllersBitmap -- 0
-[2025-12-07 15:20:33.898]: Debug: corever -- 1
-[2025-12-07 15:20:33.898]: Debug: gcmap -- 0
-[2025-12-07 15:20:33.898]: Debug: localAudioPlayMode -- 0
-[2025-12-07 15:20:33.898]: Debug: gcpersist -- 0
-[2025-12-07 15:20:33.898]: Debug:  [--] 
-[2025-12-07 15:20:33.916]: Info: Encoder reenumeration is required
-[2025-12-07 15:20:33.916]: Info: // Testing for available encoders, this may generate errors. You can safely ignore those errors. //
-[2025-12-07 15:20:33.916]: Info: Trying encoder [nvenc]
-[2025-12-07 15:20:34.200]: Info: 
+Red Primary        : [0.65722,0.325196]
+Green Primary      : [0.267575,0.582029]
+Blue Primary       : [0.135738,0.109375]
+White Point        : [0.293941,0.349611]
+Min Luminance      : 1 nits
+Max Luminance      : 10000 nits
+Max Full Luminance : 10000 nits
+[2025-12-07 18:27:36.732]: Info: Desktop resolution [2560x1440]
+[2025-12-07 18:27:36.732]: Info: Desktop format [DXGI_FORMAT_R16G16B16A16_FLOAT]
+[2025-12-07 18:27:36.732]: Info: Display refresh rate [144Hz]
+[2025-12-07 18:27:36.732]: Info: Requested frame rate [60fps]
+[2025-12-07 18:27:36.732]: Info: Creating encoder [hevc_nvenc]
+[2025-12-07 18:27:36.732]: Info: Color coding: HDR (Rec. 2020 + SMPTE 2084 PQ)
+[2025-12-07 18:27:36.732]: Info: Color depth: 10-bit
+[2025-12-07 18:27:36.732]: Info: Color range: JPEG
+[2025-12-07 18:27:36.944]: Debug: NvEnc: requested encoded frame size 2.08 kB
+[2025-12-07 18:27:36.944]: Info: NvEnc: created encoder HEVC P1 async yuv444 10-bit two-pass rfi spatial-aq
+[2025-12-07 18:27:36.951]: Debug: NvEnc: idr frame 1
+[2025-12-07 18:27:36.998]: Info: Creating encoder [av1_nvenc]
+[2025-12-07 18:27:36.998]: Info: Color coding: HDR (Rec. 2020 + SMPTE 2084 PQ)
+[2025-12-07 18:27:36.998]: Info: Color depth: 10-bit
+[2025-12-07 18:27:36.998]: Info: Color range: JPEG
+[2025-12-07 18:27:37.075]: Error: NvEnc: gpu doesn't support YUV444 encode
+[2025-12-07 18:27:37.076]: Error: NvEnc: NvEncUnregisterAsyncEvent() failed: NV_ENC_ERR_DEVICE_NOT_EXIST
+[2025-12-07 18:27:37.096]: Info: Creating encoder [av1_nvenc]
+[2025-12-07 18:27:37.096]: Info: Color coding: HDR (Rec. 2020 + SMPTE 2084 PQ)
+[2025-12-07 18:27:37.096]: Info: Color depth: 10-bit
+[2025-12-07 18:27:37.096]: Info: Color range: JPEG
+[2025-12-07 18:27:37.147]: Debug: NvEnc: requested encoded frame size 2.08 kB
+[2025-12-07 18:27:37.147]: Info: NvEnc: created encoder AV1 P1 async 10-bit two-pass rfi spatial-aq
+[2025-12-07 18:27:37.152]: Debug: NvEnc: idr frame 1
+[2025-12-07 18:27:37.187]: Info: 
+[2025-12-07 18:27:37.187]: Info: // Ignore any errors mentioned above, they are not relevant. //
+[2025-12-07 18:27:37.187]: Info: 
+[2025-12-07 18:27:37.187]: Debug: ------  h264 ------
+[2025-12-07 18:27:37.187]: Debug: PASSED: supported
+[2025-12-07 18:27:37.188]: Debug: REF_FRAMES_RESTRICT: supported
+[2025-12-07 18:27:37.188]: Debug: DYNAMIC_RANGE: unsupported
+[2025-12-07 18:27:37.188]: Debug: YUV444: supported
+[2025-12-07 18:27:37.188]: Debug: VUI_PARAMETERS: supported
+[2025-12-07 18:27:37.188]: Debug: -------------------
+[2025-12-07 18:27:37.188]: Info: Found H.264 encoder: h264_nvenc [nvenc]
+[2025-12-07 18:27:37.188]: Debug: ------  hevc ------
+[2025-12-07 18:27:37.188]: Debug: PASSED: supported
+[2025-12-07 18:27:37.188]: Debug: REF_FRAMES_RESTRICT: supported
+[2025-12-07 18:27:37.188]: Debug: DYNAMIC_RANGE: supported
+[2025-12-07 18:27:37.188]: Debug: YUV444: supported
+[2025-12-07 18:27:37.188]: Debug: VUI_PARAMETERS: supported
+[2025-12-07 18:27:37.188]: Debug: -------------------
+[2025-12-07 18:27:37.188]: Info: Found HEVC encoder: hevc_nvenc [nvenc]
+[2025-12-07 18:27:37.188]: Debug: ------  av1 ------
+[2025-12-07 18:27:37.188]: Debug: PASSED: supported
+[2025-12-07 18:27:37.188]: Debug: REF_FRAMES_RESTRICT: supported
+[2025-12-07 18:27:37.188]: Debug: DYNAMIC_RANGE: supported
+[2025-12-07 18:27:37.188]: Debug: YUV444: unsupported
+[2025-12-07 18:27:37.188]: Debug: VUI_PARAMETERS: unsupported
+[2025-12-07 18:27:37.188]: Debug: -------------------
+[2025-12-07 18:27:37.188]: Info: Found AV1 encoder: av1_nvenc [nvenc]
+[2025-12-07 18:27:37.212]: Info: Configuration UI available at [https://localhost:47990]
+[2025-12-07 18:27:37.326]: Debug: METHOD :: GET
+[2025-12-07 18:27:37.326]: Debug: DESTINATION :: /api/logs
+[2025-12-07 18:27:37.326]: Debug: Sec-Fetch-Site -- same-origin
+[2025-12-07 18:27:37.326]: Debug: Sec-Fetch-Mode -- cors
+[2025-12-07 18:27:37.326]: Debug: Sec-Fetch-Dest -- empty
+[2025-12-07 18:27:37.326]: Debug: Authorization -- CREDENTIALS REDACTED
+[2025-12-07 18:27:37.326]: Debug: Connection -- keep-alive
+[2025-12-07 18:27:37.326]: Debug: Accept-Encoding -- gzip, deflate, br, zstd
+[2025-12-07 18:27:37.326]: Debug: Referer -- https://localhost:47990/troubleshooting
+[2025-12-07 18:27:37.326]: Debug: Accept-Language -- en-US,en;q=0.5
+[2025-12-07 18:27:37.326]: Debug: User-Agent -- Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+[2025-12-07 18:27:37.326]: Debug: Priority -- u=4
+[2025-12-07 18:27:37.326]: Debug: Accept -- */*
+[2025-12-07 18:27:37.326]: Debug: Host -- localhost:47990
+[2025-12-07 18:27:37.326]: Debug:  [--] 
+[2025-12-07 18:27:37.326]: Debug:  [--] 
+[2025-12-07 18:27:37.332]: Debug: METHOD :: POST
+[2025-12-07 18:27:37.332]: Debug: DESTINATION :: /api/apps/close
+[2025-12-07 18:27:37.332]: Debug: Priority -- u=0
+[2025-12-07 18:27:37.333]: Debug: Host -- localhost:47990
+[2025-12-07 18:27:37.333]: Debug: Accept -- */*
+[2025-12-07 18:27:37.333]: Debug: User-Agent -- Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+[2025-12-07 18:27:37.333]: Debug: Accept-Language -- en-US,en;q=0.5
+[2025-12-07 18:27:37.333]: Debug: Referer -- https://localhost:47990/troubleshooting
+[2025-12-07 18:27:37.333]: Debug: Content-Length -- 0
+[2025-12-07 18:27:37.333]: Debug: Origin -- https://localhost:47990
+[2025-12-07 18:27:37.333]: Debug: Accept-Encoding -- gzip, deflate, br, zstd
+[2025-12-07 18:27:37.333]: Debug: Connection -- keep-alive
+[2025-12-07 18:27:37.333]: Debug: Content-Type -- application/json
+[2025-12-07 18:27:37.333]: Debug: Sec-Fetch-Dest -- empty
+[2025-12-07 18:27:37.333]: Debug: Authorization -- CREDENTIALS REDACTED
+[2025-12-07 18:27:37.333]: Debug: Sec-Fetch-Mode -- cors
+[2025-12-07 18:27:37.333]: Debug: Sec-Fetch-Site -- same-origin
+[2025-12-07 18:27:37.333]: Debug:  [--] 
+[2025-12-07 18:27:37.333]: Debug:  [--] 
+[2025-12-07 18:27:37.991]: Info: Registered Sunshine mDNS service
+[2025-12-07 18:27:41.530]: Debug: METHOD :: GET
+[2025-12-07 18:27:41.530]: Debug: DESTINATION :: /api/logs
+[2025-12-07 18:27:41.530]: Debug: Sec-Fetch-Site -- same-origin
+[2025-12-07 18:27:41.530]: Debug: Sec-Fetch-Mode -- cors
+[2025-12-07 18:27:41.530]: Debug: Sec-Fetch-Dest -- empty
+[2025-12-07 18:27:41.530]: Debug: Authorization -- CREDENTIALS REDACTED
+[2025-12-07 18:27:41.530]: Debug: Connection -- keep-alive
+[2025-12-07 18:27:41.530]: Debug: Accept-Encoding -- gzip, deflate, br, zstd
+[2025-12-07 18:27:41.530]: Debug: Referer -- https://localhost:47990/troubleshooting
+[2025-12-07 18:27:41.530]: Debug: Accept-Language -- en-US,en;q=0.5
+[2025-12-07 18:27:41.530]: Debug: User-Agent -- Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+[2025-12-07 18:27:41.530]: Debug: Priority -- u=4
+[2025-12-07 18:27:41.530]: Debug: Accept -- */*
+[2025-12-07 18:27:41.530]: Debug: Host -- localhost:47990
+[2025-12-07 18:27:41.530]: Debug:  [--] 
+[2025-12-07 18:27:41.530]: Debug:  [--] 
+[2025-12-07 18:27:42.335]: Debug: TUNNEL :: NONE
+[2025-12-07 18:27:42.335]: Debug: METHOD :: GET
+[2025-12-07 18:27:42.335]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:27:42.335]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:27:42.335]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:27:42.335]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:27:42.335]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:42.335]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:27:42.335]: Debug:  [--] 
+[2025-12-07 18:27:42.335]: Debug: uuid -- ff67d1fcad634b3d8c25b3ffcbe2a516
+[2025-12-07 18:27:42.335]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:42.335]: Debug:  [--] 
+[2025-12-07 18:27:42.355]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:27:42.358]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:27:42.358]: Debug: METHOD :: GET
+[2025-12-07 18:27:42.358]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:27:42.358]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:27:42.358]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:27:42.358]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:27:42.358]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:42.359]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:27:42.359]: Debug:  [--] 
+[2025-12-07 18:27:42.359]: Debug: uuid -- 468e10aa09d042c98b00c6e4d5fc0db7
+[2025-12-07 18:27:42.359]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:42.359]: Debug:  [--] 
+[2025-12-07 18:27:42.389]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:27:42.392]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:27:42.392]: Debug: METHOD :: GET
+[2025-12-07 18:27:42.392]: Debug: DESTINATION :: /applist
+[2025-12-07 18:27:42.392]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:27:42.392]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:27:42.392]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:27:42.392]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:42.393]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:27:42.393]: Debug:  [--] 
+[2025-12-07 18:27:42.393]: Debug: uuid -- 533cc8ddd3de4785b611951450bb1928
+[2025-12-07 18:27:42.393]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:42.393]: Debug:  [--] 
+[2025-12-07 18:27:45.429]: Debug: TUNNEL :: NONE
+[2025-12-07 18:27:45.429]: Debug: METHOD :: GET
+[2025-12-07 18:27:45.429]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:27:45.429]: Debug: User-Agent -- okhttp/4.12.0
+[2025-12-07 18:27:45.429]: Debug: Accept-Encoding -- gzip
+[2025-12-07 18:27:45.429]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:45.429]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:27:45.429]: Debug:  [--] 
+[2025-12-07 18:27:45.429]: Debug: uuid -- f4cb6604-95ea-44bd-90c3-a59ecbbaddab
+[2025-12-07 18:27:45.429]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:45.429]: Debug:  [--] 
+[2025-12-07 18:27:45.492]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:27:45.495]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:27:45.496]: Debug: METHOD :: GET
+[2025-12-07 18:27:45.496]: Debug: DESTINATION :: /applist
+[2025-12-07 18:27:45.496]: Debug: User-Agent -- okhttp/4.12.0
+[2025-12-07 18:27:45.496]: Debug: Accept-Encoding -- gzip
+[2025-12-07 18:27:45.496]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:45.496]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:27:45.496]: Debug:  [--] 
+[2025-12-07 18:27:45.496]: Debug: uuid -- 072e145d-3218-40a1-b4bd-1bbba82c8860
+[2025-12-07 18:27:45.496]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:45.496]: Debug:  [--] 
+[2025-12-07 18:27:45.508]: Debug: TUNNEL :: NONE
+[2025-12-07 18:27:45.508]: Debug: METHOD :: GET
+[2025-12-07 18:27:45.508]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:27:45.508]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:27:45.508]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:27:45.508]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:27:45.508]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:45.508]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:27:45.508]: Debug:  [--] 
+[2025-12-07 18:27:45.508]: Debug: uuid -- bec780767a2e486096861c474da98fcd
+[2025-12-07 18:27:45.508]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:45.508]: Debug:  [--] 
+[2025-12-07 18:27:45.524]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:27:45.527]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:27:45.527]: Debug: METHOD :: GET
+[2025-12-07 18:27:45.527]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:27:45.527]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:27:45.527]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:27:45.527]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:27:45.527]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:45.527]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:27:45.527]: Debug:  [--] 
+[2025-12-07 18:27:45.527]: Debug: uuid -- 598128c330c94dcbabd14b392f5ae0bf
+[2025-12-07 18:27:45.527]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:45.527]: Debug:  [--] 
+[2025-12-07 18:27:46.776]: Debug: METHOD :: GET
+[2025-12-07 18:27:46.776]: Debug: DESTINATION :: /api/logs
+[2025-12-07 18:27:46.776]: Debug: Sec-Fetch-Site -- same-origin
+[2025-12-07 18:27:46.776]: Debug: Sec-Fetch-Mode -- cors
+[2025-12-07 18:27:46.776]: Debug: Sec-Fetch-Dest -- empty
+[2025-12-07 18:27:46.776]: Debug: Authorization -- CREDENTIALS REDACTED
+[2025-12-07 18:27:46.776]: Debug: Connection -- keep-alive
+[2025-12-07 18:27:46.776]: Debug: Accept-Encoding -- gzip, deflate, br, zstd
+[2025-12-07 18:27:46.776]: Debug: Referer -- https://localhost:47990/troubleshooting
+[2025-12-07 18:27:46.776]: Debug: Accept-Language -- en-US,en;q=0.5
+[2025-12-07 18:27:46.776]: Debug: User-Agent -- Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+[2025-12-07 18:27:46.776]: Debug: Priority -- u=4
+[2025-12-07 18:27:46.776]: Debug: Accept -- */*
+[2025-12-07 18:27:46.776]: Debug: Host -- localhost:47990
+[2025-12-07 18:27:46.776]: Debug:  [--] 
+[2025-12-07 18:27:46.776]: Debug:  [--] 
+[2025-12-07 18:27:48.656]: Debug: TUNNEL :: NONE
+[2025-12-07 18:27:48.657]: Debug: METHOD :: GET
+[2025-12-07 18:27:48.657]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:27:48.657]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:27:48.657]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:27:48.657]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:27:48.657]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:48.657]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:27:48.657]: Debug:  [--] 
+[2025-12-07 18:27:48.657]: Debug: uuid -- e49e15c230394cbda1bbaac68a18863b
+[2025-12-07 18:27:48.657]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:48.657]: Debug:  [--] 
+[2025-12-07 18:27:48.680]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:27:48.684]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:27:48.684]: Debug: METHOD :: GET
+[2025-12-07 18:27:48.684]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:27:48.684]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:27:48.684]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:27:48.684]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:27:48.684]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:48.684]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:27:48.684]: Debug:  [--] 
+[2025-12-07 18:27:48.684]: Debug: uuid -- 1eba845d8daf46b49d5497739bf47bd4
+[2025-12-07 18:27:48.684]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:48.684]: Debug:  [--] 
+[2025-12-07 18:27:51.785]: Debug: METHOD :: GET
+[2025-12-07 18:27:51.785]: Debug: DESTINATION :: /api/logs
+[2025-12-07 18:27:51.785]: Debug: Sec-Fetch-Site -- same-origin
+[2025-12-07 18:27:51.785]: Debug: Sec-Fetch-Mode -- cors
+[2025-12-07 18:27:51.785]: Debug: Sec-Fetch-Dest -- empty
+[2025-12-07 18:27:51.786]: Debug: Authorization -- CREDENTIALS REDACTED
+[2025-12-07 18:27:51.786]: Debug: Connection -- keep-alive
+[2025-12-07 18:27:51.786]: Debug: Accept-Encoding -- gzip, deflate, br, zstd
+[2025-12-07 18:27:51.786]: Debug: Referer -- https://localhost:47990/troubleshooting
+[2025-12-07 18:27:51.786]: Debug: Accept-Language -- en-US,en;q=0.5
+[2025-12-07 18:27:51.786]: Debug: User-Agent -- Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+[2025-12-07 18:27:51.786]: Debug: Priority -- u=4
+[2025-12-07 18:27:51.786]: Debug: Accept -- */*
+[2025-12-07 18:27:51.786]: Debug: Host -- localhost:47990
+[2025-12-07 18:27:51.786]: Debug:  [--] 
+[2025-12-07 18:27:51.786]: Debug:  [--] 
+[2025-12-07 18:27:51.840]: Debug: TUNNEL :: NONE
+[2025-12-07 18:27:51.840]: Debug: METHOD :: GET
+[2025-12-07 18:27:51.840]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:27:51.840]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:27:51.841]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:27:51.841]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:27:51.841]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:51.841]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:27:51.841]: Debug:  [--] 
+[2025-12-07 18:27:51.841]: Debug: uuid -- cfe14a6d7e8b4fbdad501778d51e5e8d
+[2025-12-07 18:27:51.841]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:51.841]: Debug:  [--] 
+[2025-12-07 18:27:51.861]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:27:51.865]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:27:51.865]: Debug: METHOD :: GET
+[2025-12-07 18:27:51.865]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:27:51.865]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:27:51.865]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:27:51.865]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:27:51.865]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:51.865]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:27:51.865]: Debug:  [--] 
+[2025-12-07 18:27:51.865]: Debug: uuid -- b3c081e13a9148deb8ea6f74175ee8a3
+[2025-12-07 18:27:51.865]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:51.866]: Debug:  [--] 
+[2025-12-07 18:27:55.013]: Debug: TUNNEL :: NONE
+[2025-12-07 18:27:55.013]: Debug: METHOD :: GET
+[2025-12-07 18:27:55.013]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:27:55.013]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:27:55.013]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:27:55.013]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:27:55.013]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:55.013]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:27:55.014]: Debug:  [--] 
+[2025-12-07 18:27:55.014]: Debug: uuid -- fc12bf41207f4e18a3404141259fec2b
+[2025-12-07 18:27:55.014]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:55.014]: Debug:  [--] 
+[2025-12-07 18:27:55.034]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:27:55.038]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:27:55.038]: Debug: METHOD :: GET
+[2025-12-07 18:27:55.038]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:27:55.038]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:27:55.038]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:27:55.038]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:27:55.038]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:55.038]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:27:55.038]: Debug:  [--] 
+[2025-12-07 18:27:55.038]: Debug: uuid -- 65a5c32847154b38be9e3da04fc92ece
+[2025-12-07 18:27:55.038]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:55.038]: Debug:  [--] 
+[2025-12-07 18:27:56.783]: Debug: METHOD :: GET
+[2025-12-07 18:27:56.783]: Debug: DESTINATION :: /api/logs
+[2025-12-07 18:27:56.783]: Debug: Sec-Fetch-Site -- same-origin
+[2025-12-07 18:27:56.783]: Debug: Sec-Fetch-Mode -- cors
+[2025-12-07 18:27:56.783]: Debug: Sec-Fetch-Dest -- empty
+[2025-12-07 18:27:56.784]: Debug: Authorization -- CREDENTIALS REDACTED
+[2025-12-07 18:27:56.784]: Debug: Connection -- keep-alive
+[2025-12-07 18:27:56.784]: Debug: Accept-Encoding -- gzip, deflate, br, zstd
+[2025-12-07 18:27:56.784]: Debug: Referer -- https://localhost:47990/troubleshooting
+[2025-12-07 18:27:56.784]: Debug: Accept-Language -- en-US,en;q=0.5
+[2025-12-07 18:27:56.784]: Debug: User-Agent -- Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+[2025-12-07 18:27:56.784]: Debug: Priority -- u=4
+[2025-12-07 18:27:56.784]: Debug: Accept -- */*
+[2025-12-07 18:27:56.784]: Debug: Host -- localhost:47990
+[2025-12-07 18:27:56.784]: Debug:  [--] 
+[2025-12-07 18:27:56.784]: Debug:  [--] 
+[2025-12-07 18:27:58.196]: Debug: TUNNEL :: NONE
+[2025-12-07 18:27:58.196]: Debug: METHOD :: GET
+[2025-12-07 18:27:58.196]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:27:58.196]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:27:58.196]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:27:58.196]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:27:58.196]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:58.196]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:27:58.196]: Debug:  [--] 
+[2025-12-07 18:27:58.196]: Debug: uuid -- a4173f42763a483a9f7973e97c19b958
+[2025-12-07 18:27:58.196]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:58.196]: Debug:  [--] 
+[2025-12-07 18:27:58.220]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:27:58.225]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:27:58.225]: Debug: METHOD :: GET
+[2025-12-07 18:27:58.225]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:27:58.225]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:27:58.225]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:27:58.225]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:27:58.225]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:27:58.225]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:27:58.225]: Debug:  [--] 
+[2025-12-07 18:27:58.225]: Debug: uuid -- 1c6efe021a1c4cf09dd03782e9a3ccc4
+[2025-12-07 18:27:58.225]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:27:58.225]: Debug:  [--] 
+[2025-12-07 18:28:00.449]: Debug: TUNNEL :: NONE
+[2025-12-07 18:28:00.449]: Debug: METHOD :: GET
+[2025-12-07 18:28:00.449]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:00.449]: Debug: User-Agent -- okhttp/4.12.0
+[2025-12-07 18:28:00.449]: Debug: Accept-Encoding -- gzip
+[2025-12-07 18:28:00.449]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:00.449]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:28:00.449]: Debug:  [--] 
+[2025-12-07 18:28:00.449]: Debug: uuid -- 3bb6faa4-f34f-487d-a399-eb105f949cd0
+[2025-12-07 18:28:00.449]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:00.450]: Debug:  [--] 
+[2025-12-07 18:28:00.485]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:28:00.489]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:28:00.489]: Debug: METHOD :: GET
+[2025-12-07 18:28:00.489]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:00.489]: Debug: User-Agent -- okhttp/4.12.0
+[2025-12-07 18:28:00.489]: Debug: Accept-Encoding -- gzip
+[2025-12-07 18:28:00.489]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:00.489]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:28:00.489]: Debug:  [--] 
+[2025-12-07 18:28:00.489]: Debug: uuid -- 232df415-30ad-4d8b-985e-4e13f68556b7
+[2025-12-07 18:28:00.489]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:00.489]: Debug:  [--] 
+[2025-12-07 18:28:01.374]: Debug: TUNNEL :: NONE
+[2025-12-07 18:28:01.376]: Debug: METHOD :: GET
+[2025-12-07 18:28:01.377]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:01.377]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:28:01.377]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:28:01.377]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:28:01.377]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:01.377]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:28:01.377]: Debug:  [--] 
+[2025-12-07 18:28:01.377]: Debug: uuid -- 98ba36af497d4232af025ca233754cca
+[2025-12-07 18:28:01.377]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:01.377]: Debug:  [--] 
+[2025-12-07 18:28:01.400]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:28:01.403]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:28:01.403]: Debug: METHOD :: GET
+[2025-12-07 18:28:01.403]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:01.403]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:28:01.403]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:28:01.403]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:28:01.403]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:01.403]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:28:01.404]: Debug:  [--] 
+[2025-12-07 18:28:01.404]: Debug: uuid -- a6e768e33f864486831adca1f2e56a28
+[2025-12-07 18:28:01.404]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:01.404]: Debug:  [--] 
+[2025-12-07 18:28:01.783]: Debug: METHOD :: GET
+[2025-12-07 18:28:01.784]: Debug: DESTINATION :: /api/logs
+[2025-12-07 18:28:01.784]: Debug: Sec-Fetch-Site -- same-origin
+[2025-12-07 18:28:01.784]: Debug: Sec-Fetch-Mode -- cors
+[2025-12-07 18:28:01.784]: Debug: Sec-Fetch-Dest -- empty
+[2025-12-07 18:28:01.784]: Debug: Authorization -- CREDENTIALS REDACTED
+[2025-12-07 18:28:01.784]: Debug: Connection -- keep-alive
+[2025-12-07 18:28:01.784]: Debug: Accept-Encoding -- gzip, deflate, br, zstd
+[2025-12-07 18:28:01.784]: Debug: Referer -- https://localhost:47990/troubleshooting
+[2025-12-07 18:28:01.784]: Debug: Accept-Language -- en-US,en;q=0.5
+[2025-12-07 18:28:01.784]: Debug: User-Agent -- Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+[2025-12-07 18:28:01.784]: Debug: Priority -- u=4
+[2025-12-07 18:28:01.784]: Debug: Accept -- */*
+[2025-12-07 18:28:01.784]: Debug: Host -- localhost:47990
+[2025-12-07 18:28:01.784]: Debug:  [--] 
+[2025-12-07 18:28:01.784]: Debug:  [--] 
+[2025-12-07 18:28:04.569]: Debug: TUNNEL :: NONE
+[2025-12-07 18:28:04.570]: Debug: METHOD :: GET
+[2025-12-07 18:28:04.570]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:04.570]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:28:04.570]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:28:04.570]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:28:04.570]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:04.570]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:28:04.570]: Debug:  [--] 
+[2025-12-07 18:28:04.571]: Debug: uuid -- e7f0826f6cc14a1e8008726c2e88f204
+[2025-12-07 18:28:04.571]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:04.571]: Debug:  [--] 
+[2025-12-07 18:28:04.590]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:28:04.596]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:28:04.596]: Debug: METHOD :: GET
+[2025-12-07 18:28:04.596]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:04.596]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:28:04.596]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:28:04.596]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:28:04.596]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:04.596]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:28:04.597]: Debug:  [--] 
+[2025-12-07 18:28:04.597]: Debug: uuid -- eaadc35e21da407493ffd23fc19e9977
+[2025-12-07 18:28:04.597]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:04.597]: Debug:  [--] 
+[2025-12-07 18:28:04.609]: Debug: TUNNEL :: NONE
+[2025-12-07 18:28:04.610]: Debug: METHOD :: GET
+[2025-12-07 18:28:04.610]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:04.610]: Debug: User-Agent -- okhttp/4.12.0
+[2025-12-07 18:28:04.610]: Debug: Accept-Encoding -- gzip
+[2025-12-07 18:28:04.610]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:04.610]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:28:04.610]: Debug:  [--] 
+[2025-12-07 18:28:04.610]: Debug: uuid -- 53df1b59-cede-48f3-8bd7-26487ca43f75
+[2025-12-07 18:28:04.610]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:04.610]: Debug:  [--] 
+[2025-12-07 18:28:04.654]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:28:04.659]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:28:04.659]: Debug: METHOD :: GET
+[2025-12-07 18:28:04.659]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:04.659]: Debug: User-Agent -- okhttp/4.12.0
+[2025-12-07 18:28:04.659]: Debug: Accept-Encoding -- gzip
+[2025-12-07 18:28:04.659]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:04.659]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:28:04.659]: Debug:  [--] 
+[2025-12-07 18:28:04.659]: Debug: uuid -- c1cd3560-681f-41fb-a977-9bee46d9f03b
+[2025-12-07 18:28:04.659]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:04.660]: Debug:  [--] 
+[2025-12-07 18:28:06.339]: Debug: TUNNEL :: NONE
+[2025-12-07 18:28:06.340]: Debug: METHOD :: GET
+[2025-12-07 18:28:06.340]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:06.340]: Debug: User-Agent -- okhttp/4.12.0
+[2025-12-07 18:28:06.340]: Debug: Accept-Encoding -- gzip
+[2025-12-07 18:28:06.340]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:06.340]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:28:06.340]: Debug:  [--] 
+[2025-12-07 18:28:06.340]: Debug: uuid -- f4f44ada-f1d8-4d1e-8f73-c1ad456ab9f5
+[2025-12-07 18:28:06.340]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:06.340]: Debug:  [--] 
+[2025-12-07 18:28:06.388]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:28:06.390]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:28:06.390]: Debug: METHOD :: GET
+[2025-12-07 18:28:06.390]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:06.390]: Debug: User-Agent -- okhttp/4.12.0
+[2025-12-07 18:28:06.390]: Debug: Accept-Encoding -- gzip
+[2025-12-07 18:28:06.391]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:06.391]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:28:06.391]: Debug:  [--] 
+[2025-12-07 18:28:06.391]: Debug: uuid -- 5c307636-ee60-4c31-a9a7-da2090a2a87a
+[2025-12-07 18:28:06.391]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:06.391]: Debug:  [--] 
+[2025-12-07 18:28:06.458]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:28:06.462]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:28:06.462]: Debug: METHOD :: GET
+[2025-12-07 18:28:06.462]: Debug: DESTINATION :: /launch
+[2025-12-07 18:28:06.462]: Debug: User-Agent -- okhttp/4.12.0
+[2025-12-07 18:28:06.462]: Debug: Accept-Encoding -- gzip
+[2025-12-07 18:28:06.462]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:06.462]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:28:06.462]: Debug:  [--] 
+[2025-12-07 18:28:06.462]: Debug: uuid -- 2c3953a9-857e-4d04-8026-6f63b0971d21
+[2025-12-07 18:28:06.462]: Debug: appid -- 881448767
+[2025-12-07 18:28:06.462]: Debug: mode -- 2560x1440x60
+[2025-12-07 18:28:06.462]: Debug: additionalStates -- 1
+[2025-12-07 18:28:06.462]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:06.462]: Debug: sops -- 0
+[2025-12-07 18:28:06.462]: Debug: rikey -- 99926DE39C7DEA266261304229BE3F32
+[2025-12-07 18:28:06.462]: Debug: surroundAudioInfo -- 196610
+[2025-12-07 18:28:06.462]: Debug: rikeyid -- -1230928549
+[2025-12-07 18:28:06.462]: Debug: remoteControllersBitmap -- 0
+[2025-12-07 18:28:06.462]: Debug: corever -- 1
+[2025-12-07 18:28:06.462]: Debug: gcmap -- 0
+[2025-12-07 18:28:06.462]: Debug: localAudioPlayMode -- 0
+[2025-12-07 18:28:06.462]: Debug: gcpersist -- 0
+[2025-12-07 18:28:06.462]: Debug:  [--] 
+[2025-12-07 18:28:06.476]: Info: Encoder reenumeration is required
+[2025-12-07 18:28:06.476]: Info: // Testing for available encoders, this may generate errors. You can safely ignore those errors. //
+[2025-12-07 18:28:06.476]: Info: Trying encoder [nvenc]
+[2025-12-07 18:28:06.779]: Info: 
 Device Description : NVIDIA GeForce RTX 4080
 Device Vendor ID   : 0x000010DE
 Device Device ID   : 0x00002704
@@ -585,63 +649,67 @@ Feature Level      : 0x0000B100
 Capture size       : 2560x1440
 Offset             : 0x0
 Virtual Desktop    : 2560x1440
-[2025-12-07 15:20:34.200]: Info: Active GPU has HAGS disabled
-[2025-12-07 15:20:34.200]: Info: Using realtime GPU priority
-[2025-12-07 15:20:34.200]: Info: 
+[2025-12-07 18:28:06.780]: Info: Active GPU has HAGS disabled
+[2025-12-07 18:28:06.780]: Info: Using realtime GPU priority
+[2025-12-07 18:28:06.780]: Info: 
 Colorspace         : DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020
 Bits Per Color     : 8
-Red Primary        : [0.657227,0.325195]
-Green Primary      : [0.267578,0.582031]
-Blue Primary       : [0.135742,0.109375]
-White Point        : [0.293945,0.349609]
-Min Luminance      : 0 nits
-Max Luminance      : 301.849 nits
-Max Full Luminance : 243.056 nits
-[2025-12-07 15:20:34.200]: Info: Desktop resolution [2560x1440]
-[2025-12-07 15:20:34.200]: Info: Desktop format [DXGI_FORMAT_R16G16B16A16_FLOAT]
-[2025-12-07 15:20:34.201]: Info: Display refresh rate [144Hz]
-[2025-12-07 15:20:34.201]: Info: Requested frame rate [60fps]
-[2025-12-07 15:20:34.201]: Info: Creating encoder [h264_nvenc]
-[2025-12-07 15:20:34.201]: Info: Color coding: SDR (Rec. 601)
-[2025-12-07 15:20:34.201]: Info: Color depth: 8-bit
-[2025-12-07 15:20:34.201]: Info: Color range: JPEG
-[2025-12-07 15:20:34.251]: Debug: NvEnc: requested encoded frame size 2.08 kB
-[2025-12-07 15:20:34.251]: Info: NvEnc: created encoder H.264 P1 async two-pass rfi spatial-aq
-[2025-12-07 15:20:34.256]: Debug: NvEnc: idr frame 1
-[2025-12-07 15:20:34.275]: Info: Creating encoder [hevc_nvenc]
-[2025-12-07 15:20:34.275]: Info: Color coding: SDR (Rec. 601)
-[2025-12-07 15:20:34.275]: Info: Color depth: 8-bit
-[2025-12-07 15:20:34.275]: Info: Color range: JPEG
-[2025-12-07 15:20:34.326]: Debug: NvEnc: requested encoded frame size 2.08 kB
-[2025-12-07 15:20:34.326]: Info: NvEnc: created encoder HEVC P1 async two-pass rfi spatial-aq
-[2025-12-07 15:20:34.331]: Debug: NvEnc: idr frame 1
-[2025-12-07 15:20:34.349]: Info: Creating encoder [av1_nvenc]
-[2025-12-07 15:20:34.349]: Info: Color coding: SDR (Rec. 601)
-[2025-12-07 15:20:34.349]: Info: Color depth: 8-bit
-[2025-12-07 15:20:34.349]: Info: Color range: JPEG
-[2025-12-07 15:20:34.397]: Debug: NvEnc: requested encoded frame size 2.08 kB
-[2025-12-07 15:20:34.398]: Info: NvEnc: created encoder AV1 P1 async two-pass rfi spatial-aq
-[2025-12-07 15:20:34.403]: Debug: NvEnc: idr frame 1
-[2025-12-07 15:20:34.475]: Info: Creating encoder [h264_nvenc]
-[2025-12-07 15:20:34.475]: Info: Color coding: SDR (Rec. 601)
-[2025-12-07 15:20:34.475]: Info: Color depth: 8-bit
-[2025-12-07 15:20:34.475]: Info: Color range: JPEG
-[2025-12-07 15:20:34.525]: Debug: NvEnc: requested encoded frame size 2.08 kB
-[2025-12-07 15:20:34.525]: Info: NvEnc: created encoder H.264 P1 async yuv444 two-pass rfi spatial-aq
-[2025-12-07 15:20:34.532]: Debug: NvEnc: idr frame 1
-[2025-12-07 15:20:34.543]: Debug: TUNNEL :: NONE
-[2025-12-07 15:20:34.543]: Debug: METHOD :: GET
-[2025-12-07 15:20:34.543]: Debug: DESTINATION :: /serverinfo
-[2025-12-07 15:20:34.543]: Debug: User-Agent -- Mozilla/5.0
-[2025-12-07 15:20:34.543]: Debug: Accept-Language -- en-US,*
-[2025-12-07 15:20:34.543]: Debug: Accept-Encoding -- gzip, deflate
-[2025-12-07 15:20:34.543]: Debug: Connection -- Keep-Alive
-[2025-12-07 15:20:34.543]: Debug: Host -- 10.1.95.5:47989
-[2025-12-07 15:20:34.543]: Debug:  [--] 
-[2025-12-07 15:20:34.543]: Debug: uuid -- 83a090a1d3164c0da7a228f74247f70e
-[2025-12-07 15:20:34.543]: Debug: uniqueid -- 0123456789ABCDEF
-[2025-12-07 15:20:34.543]: Debug:  [--] 
-[2025-12-07 15:20:34.760]: Info: 
+Red Primary        : [0.65722,0.325196]
+Green Primary      : [0.267575,0.582029]
+Blue Primary       : [0.135738,0.109375]
+White Point        : [0.293941,0.349611]
+Min Luminance      : 1 nits
+Max Luminance      : 10000 nits
+Max Full Luminance : 10000 nits
+[2025-12-07 18:28:06.780]: Info: Desktop resolution [2560x1440]
+[2025-12-07 18:28:06.780]: Info: Desktop format [DXGI_FORMAT_R16G16B16A16_FLOAT]
+[2025-12-07 18:28:06.780]: Info: Display refresh rate [144Hz]
+[2025-12-07 18:28:06.780]: Info: Requested frame rate [60fps]
+[2025-12-07 18:28:06.780]: Info: Creating encoder [h264_nvenc]
+[2025-12-07 18:28:06.780]: Info: Color coding: SDR (Rec. 601)
+[2025-12-07 18:28:06.780]: Info: Color depth: 8-bit
+[2025-12-07 18:28:06.780]: Info: Color range: JPEG
+[2025-12-07 18:28:06.783]: Debug: METHOD :: GET
+[2025-12-07 18:28:06.783]: Debug: DESTINATION :: /api/logs
+[2025-12-07 18:28:06.783]: Debug: Sec-Fetch-Site -- same-origin
+[2025-12-07 18:28:06.783]: Debug: Sec-Fetch-Mode -- cors
+[2025-12-07 18:28:06.783]: Debug: Sec-Fetch-Dest -- empty
+[2025-12-07 18:28:06.783]: Debug: Authorization -- CREDENTIALS REDACTED
+[2025-12-07 18:28:06.783]: Debug: Connection -- keep-alive
+[2025-12-07 18:28:06.783]: Debug: Accept-Encoding -- gzip, deflate, br, zstd
+[2025-12-07 18:28:06.783]: Debug: Referer -- https://localhost:47990/troubleshooting
+[2025-12-07 18:28:06.783]: Debug: Accept-Language -- en-US,en;q=0.5
+[2025-12-07 18:28:06.783]: Debug: User-Agent -- Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+[2025-12-07 18:28:06.783]: Debug: Priority -- u=4
+[2025-12-07 18:28:06.783]: Debug: Accept -- */*
+[2025-12-07 18:28:06.783]: Debug: Host -- localhost:47990
+[2025-12-07 18:28:06.784]: Debug:  [--] 
+[2025-12-07 18:28:06.784]: Debug:  [--] 
+[2025-12-07 18:28:06.836]: Debug: NvEnc: requested encoded frame size 2.08 kB
+[2025-12-07 18:28:06.837]: Info: NvEnc: created encoder H.264 P1 async two-pass rfi spatial-aq
+[2025-12-07 18:28:06.843]: Debug: NvEnc: idr frame 1
+[2025-12-07 18:28:06.862]: Info: Creating encoder [hevc_nvenc]
+[2025-12-07 18:28:06.862]: Info: Color coding: SDR (Rec. 601)
+[2025-12-07 18:28:06.862]: Info: Color depth: 8-bit
+[2025-12-07 18:28:06.862]: Info: Color range: JPEG
+[2025-12-07 18:28:06.912]: Debug: NvEnc: requested encoded frame size 2.08 kB
+[2025-12-07 18:28:06.912]: Info: NvEnc: created encoder HEVC P1 async two-pass rfi spatial-aq
+[2025-12-07 18:28:06.917]: Debug: NvEnc: idr frame 1
+[2025-12-07 18:28:06.936]: Info: Creating encoder [av1_nvenc]
+[2025-12-07 18:28:06.936]: Info: Color coding: SDR (Rec. 601)
+[2025-12-07 18:28:06.936]: Info: Color depth: 8-bit
+[2025-12-07 18:28:06.936]: Info: Color range: JPEG
+[2025-12-07 18:28:06.999]: Debug: NvEnc: requested encoded frame size 2.08 kB
+[2025-12-07 18:28:06.999]: Info: NvEnc: created encoder AV1 P1 async two-pass rfi spatial-aq
+[2025-12-07 18:28:07.004]: Debug: NvEnc: idr frame 1
+[2025-12-07 18:28:07.033]: Info: Creating encoder [h264_nvenc]
+[2025-12-07 18:28:07.033]: Info: Color coding: SDR (Rec. 601)
+[2025-12-07 18:28:07.033]: Info: Color depth: 8-bit
+[2025-12-07 18:28:07.033]: Info: Color range: JPEG
+[2025-12-07 18:28:07.094]: Debug: NvEnc: requested encoded frame size 2.08 kB
+[2025-12-07 18:28:07.094]: Info: NvEnc: created encoder H.264 P1 async yuv444 two-pass rfi spatial-aq
+[2025-12-07 18:28:07.101]: Debug: NvEnc: idr frame 1
+[2025-12-07 18:28:07.318]: Info: 
 Device Description : NVIDIA GeForce RTX 4080
 Device Vendor ID   : 0x000010DE
 Device Device ID   : 0x00002704
@@ -652,67 +720,515 @@ Feature Level      : 0x0000B100
 Capture size       : 2560x1440
 Offset             : 0x0
 Virtual Desktop    : 2560x1440
-[2025-12-07 15:20:34.760]: Info: Active GPU has HAGS disabled
-[2025-12-07 15:20:34.760]: Info: Using realtime GPU priority
-[2025-12-07 15:20:34.760]: Info: 
+[2025-12-07 18:28:07.318]: Info: Active GPU has HAGS disabled
+[2025-12-07 18:28:07.318]: Info: Using realtime GPU priority
+[2025-12-07 18:28:07.319]: Info: 
 Colorspace         : DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020
 Bits Per Color     : 8
-Red Primary        : [0.657227,0.325195]
-Green Primary      : [0.267578,0.582031]
-Blue Primary       : [0.135742,0.109375]
-White Point        : [0.293945,0.349609]
-Min Luminance      : 0 nits
-Max Luminance      : 301.849 nits
-Max Full Luminance : 243.056 nits
-[2025-12-07 15:20:34.761]: Info: Desktop resolution [2560x1440]
-[2025-12-07 15:20:34.761]: Info: Desktop format [DXGI_FORMAT_R16G16B16A16_FLOAT]
-[2025-12-07 15:20:34.761]: Info: Display refresh rate [144Hz]
-[2025-12-07 15:20:34.761]: Info: Requested frame rate [60fps]
-[2025-12-07 15:20:34.761]: Info: Creating encoder [hevc_nvenc]
-[2025-12-07 15:20:34.761]: Info: Color coding: HDR (Rec. 2020 + SMPTE 2084 PQ)
-[2025-12-07 15:20:34.761]: Info: Color depth: 10-bit
-[2025-12-07 15:20:34.761]: Info: Color range: JPEG
-[2025-12-07 15:20:34.946]: Debug: NvEnc: requested encoded frame size 2.08 kB
-[2025-12-07 15:20:34.947]: Info: NvEnc: created encoder HEVC P1 async yuv444 10-bit two-pass rfi spatial-aq
-[2025-12-07 15:20:34.952]: Debug: NvEnc: idr frame 1
-[2025-12-07 15:20:35.029]: Info: Creating encoder [av1_nvenc]
-[2025-12-07 15:20:35.029]: Info: Color coding: HDR (Rec. 2020 + SMPTE 2084 PQ)
-[2025-12-07 15:20:35.029]: Info: Color depth: 10-bit
-[2025-12-07 15:20:35.029]: Info: Color range: JPEG
-[2025-12-07 15:20:35.107]: Error: NvEnc: gpu doesn't support YUV444 encode
-[2025-12-07 15:20:35.107]: Error: NvEnc: NvEncUnregisterAsyncEvent() failed: NV_ENC_ERR_DEVICE_NOT_EXIST
-[2025-12-07 15:20:35.129]: Info: Creating encoder [av1_nvenc]
-[2025-12-07 15:20:35.130]: Info: Color coding: HDR (Rec. 2020 + SMPTE 2084 PQ)
-[2025-12-07 15:20:35.130]: Info: Color depth: 10-bit
-[2025-12-07 15:20:35.130]: Info: Color range: JPEG
-[2025-12-07 15:20:35.179]: Debug: NvEnc: requested encoded frame size 2.08 kB
-[2025-12-07 15:20:35.180]: Info: NvEnc: created encoder AV1 P1 async 10-bit two-pass rfi spatial-aq
-[2025-12-07 15:20:35.185]: Debug: NvEnc: idr frame 1
-[2025-12-07 15:20:35.216]: Info: 
-[2025-12-07 15:20:35.216]: Info: // Ignore any errors mentioned above, they are not relevant. //
-[2025-12-07 15:20:35.216]: Info: 
-[2025-12-07 15:20:35.216]: Debug: ------  h264 ------
-[2025-12-07 15:20:35.216]: Debug: PASSED: supported
-[2025-12-07 15:20:35.216]: Debug: REF_FRAMES_RESTRICT: supported
-[2025-12-07 15:20:35.216]: Debug: DYNAMIC_RANGE: unsupported
-[2025-12-07 15:20:35.216]: Debug: YUV444: supported
-[2025-12-07 15:20:35.216]: Debug: VUI_PARAMETERS: supported
-[2025-12-07 15:20:35.216]: Debug: -------------------
-[2025-12-07 15:20:35.216]: Info: Found H.264 encoder: h264_nvenc [nvenc]
-[2025-12-07 15:20:35.216]: Debug: ------  hevc ------
-[2025-12-07 15:20:35.216]: Debug: PASSED: supported
-[2025-12-07 15:20:35.216]: Debug: REF_FRAMES_RESTRICT: supported
-[2025-12-07 15:20:35.216]: Debug: DYNAMIC_RANGE: supported
-[2025-12-07 15:20:35.216]: Debug: YUV444: supported
-[2025-12-07 15:20:35.217]: Debug: VUI_PARAMETERS: supported
-[2025-12-07 15:20:35.217]: Debug: -------------------
-[2025-12-07 15:20:35.217]: Info: Found HEVC encoder: hevc_nvenc [nvenc]
-[2025-12-07 15:20:35.217]: Debug: ------  av1 ------
-[2025-12-07 15:20:35.217]: Debug: PASSED: supported
-[2025-12-07 15:20:35.217]: Debug: REF_FRAMES_RESTRICT: supported
-[2025-12-07 15:20:35.217]: Debug: DYNAMIC_RANGE: supported
-[2025-12-07 15:20:35.217]: Debug: YUV444: unsupported
-[2025-12-07 15:20:35.217]: Debug: VUI_PARAMETERS: unsupported
-[2025-12-07 15:20:35.217]: Debug: -------------------
-[2025-12-07 15:20:35.217]: Info: Found AV1 encoder: av1_nvenc [nvenc]
-[2025-12-07 15:20:35.217]: Info: Executing [Desktop]
+Red Primary        : [0.65722,0.325196]
+Green Primary      : [0.267575,0.582029]
+Blue Primary       : [0.135738,0.109375]
+White Point        : [0.293941,0.349611]
+Min Luminance      : 1 nits
+Max Luminance      : 10000 nits
+Max Full Luminance : 10000 nits
+[2025-12-07 18:28:07.319]: Info: Desktop resolution [2560x1440]
+[2025-12-07 18:28:07.319]: Info: Desktop format [DXGI_FORMAT_R16G16B16A16_FLOAT]
+[2025-12-07 18:28:07.319]: Info: Display refresh rate [144Hz]
+[2025-12-07 18:28:07.319]: Info: Requested frame rate [60fps]
+[2025-12-07 18:28:07.320]: Info: Creating encoder [hevc_nvenc]
+[2025-12-07 18:28:07.320]: Info: Color coding: HDR (Rec. 2020 + SMPTE 2084 PQ)
+[2025-12-07 18:28:07.320]: Info: Color depth: 10-bit
+[2025-12-07 18:28:07.320]: Info: Color range: JPEG
+[2025-12-07 18:28:07.461]: Debug: NvEnc: requested encoded frame size 2.08 kB
+[2025-12-07 18:28:07.461]: Info: NvEnc: created encoder HEVC P1 async yuv444 10-bit two-pass rfi spatial-aq
+[2025-12-07 18:28:07.466]: Debug: NvEnc: idr frame 1
+[2025-12-07 18:28:07.503]: Info: Creating encoder [av1_nvenc]
+[2025-12-07 18:28:07.503]: Info: Color coding: HDR (Rec. 2020 + SMPTE 2084 PQ)
+[2025-12-07 18:28:07.503]: Info: Color depth: 10-bit
+[2025-12-07 18:28:07.503]: Info: Color range: JPEG
+[2025-12-07 18:28:07.581]: Error: NvEnc: gpu doesn't support YUV444 encode
+[2025-12-07 18:28:07.582]: Error: NvEnc: NvEncUnregisterAsyncEvent() failed: NV_ENC_ERR_DEVICE_NOT_EXIST
+[2025-12-07 18:28:07.603]: Info: Creating encoder [av1_nvenc]
+[2025-12-07 18:28:07.603]: Info: Color coding: HDR (Rec. 2020 + SMPTE 2084 PQ)
+[2025-12-07 18:28:07.603]: Info: Color depth: 10-bit
+[2025-12-07 18:28:07.603]: Info: Color range: JPEG
+[2025-12-07 18:28:07.654]: Debug: NvEnc: requested encoded frame size 2.08 kB
+[2025-12-07 18:28:07.654]: Info: NvEnc: created encoder AV1 P1 async 10-bit two-pass rfi spatial-aq
+[2025-12-07 18:28:07.660]: Debug: NvEnc: idr frame 1
+[2025-12-07 18:28:07.688]: Info: 
+[2025-12-07 18:28:07.689]: Info: // Ignore any errors mentioned above, they are not relevant. //
+[2025-12-07 18:28:07.689]: Info: 
+[2025-12-07 18:28:07.689]: Debug: ------  h264 ------
+[2025-12-07 18:28:07.689]: Debug: PASSED: supported
+[2025-12-07 18:28:07.689]: Debug: REF_FRAMES_RESTRICT: supported
+[2025-12-07 18:28:07.689]: Debug: DYNAMIC_RANGE: unsupported
+[2025-12-07 18:28:07.689]: Debug: YUV444: supported
+[2025-12-07 18:28:07.689]: Debug: VUI_PARAMETERS: supported
+[2025-12-07 18:28:07.689]: Debug: -------------------
+[2025-12-07 18:28:07.689]: Info: Found H.264 encoder: h264_nvenc [nvenc]
+[2025-12-07 18:28:07.689]: Debug: ------  hevc ------
+[2025-12-07 18:28:07.689]: Debug: PASSED: supported
+[2025-12-07 18:28:07.689]: Debug: REF_FRAMES_RESTRICT: supported
+[2025-12-07 18:28:07.689]: Debug: DYNAMIC_RANGE: supported
+[2025-12-07 18:28:07.689]: Debug: YUV444: supported
+[2025-12-07 18:28:07.689]: Debug: VUI_PARAMETERS: supported
+[2025-12-07 18:28:07.689]: Debug: -------------------
+[2025-12-07 18:28:07.689]: Info: Found HEVC encoder: hevc_nvenc [nvenc]
+[2025-12-07 18:28:07.689]: Debug: ------  av1 ------
+[2025-12-07 18:28:07.689]: Debug: PASSED: supported
+[2025-12-07 18:28:07.689]: Debug: REF_FRAMES_RESTRICT: supported
+[2025-12-07 18:28:07.689]: Debug: DYNAMIC_RANGE: supported
+[2025-12-07 18:28:07.689]: Debug: YUV444: unsupported
+[2025-12-07 18:28:07.689]: Debug: VUI_PARAMETERS: unsupported
+[2025-12-07 18:28:07.689]: Debug: -------------------
+[2025-12-07 18:28:07.689]: Info: Found AV1 encoder: av1_nvenc [nvenc]
+[2025-12-07 18:28:07.689]: Info: Executing [Desktop]
+[2025-12-07 18:28:07.763]: Debug: TUNNEL :: NONE
+[2025-12-07 18:28:07.764]: Debug: METHOD :: GET
+[2025-12-07 18:28:07.764]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:07.764]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:28:07.764]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:28:07.765]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:28:07.765]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:07.765]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:28:07.765]: Debug:  [--] 
+[2025-12-07 18:28:07.765]: Debug: uuid -- a8e0e0ff4a3f4db5a51017730ad0f783
+[2025-12-07 18:28:07.765]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:07.765]: Debug:  [--] 
+[2025-12-07 18:28:07.786]: Debug: handle_read_encrypted_header(): Handle read of size: 24 bytes
+[2025-12-07 18:28:07.786]: Debug: handle_read_encrypted(): Handle read of size: 96 bytes
+[2025-12-07 18:28:07.786]: Debug: type [REQUEST]
+[2025-12-07 18:28:07.786]: Debug: sequence number [1]
+[2025-12-07 18:28:07.786]: Debug: protocol :: RTSP/1.0
+[2025-12-07 18:28:07.786]: Debug: payload :: 
+[2025-12-07 18:28:07.787]: Debug: command :: OPTIONS
+[2025-12-07 18:28:07.787]: Debug: target :: rtspenc://10.1.95.5:48010
+[2025-12-07 18:28:07.787]: Debug: CSeq :: 1
+[2025-12-07 18:28:07.787]: Debug: X-GS-ClientVersion :: 14
+[2025-12-07 18:28:07.787]: Debug: Host :: 10.1.95.5
+[2025-12-07 18:28:07.787]: Debug: ---Begin MessageBuffer---
+OPTIONS
+---End MessageBuffer---
+[2025-12-07 18:28:07.788]: Debug: ---Begin Response---
+RTSP/1.0 200 OK
+CSeq: 1
+
+
+
+---End Response---
+[2025-12-07 18:28:07.791]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:28:07.791]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:28:07.791]: Debug: METHOD :: GET
+[2025-12-07 18:28:07.791]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:07.791]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:28:07.791]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:28:07.791]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:28:07.791]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:07.791]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:28:07.791]: Debug:  [--] 
+[2025-12-07 18:28:07.791]: Debug: uuid -- 515edd12ebae48789ba01f1b4b4d451d
+[2025-12-07 18:28:07.792]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:07.792]: Debug:  [--] 
+[2025-12-07 18:28:07.796]: Debug: handle_read_encrypted_header(): Handle read of size: 24 bytes
+[2025-12-07 18:28:07.796]: Debug: handle_read_encrypted(): Handle read of size: 172 bytes
+[2025-12-07 18:28:07.797]: Debug: type [REQUEST]
+[2025-12-07 18:28:07.797]: Debug: sequence number [2]
+[2025-12-07 18:28:07.797]: Debug: protocol :: RTSP/1.0
+[2025-12-07 18:28:07.797]: Debug: payload :: 
+[2025-12-07 18:28:07.797]: Debug: command :: DESCRIBE
+[2025-12-07 18:28:07.797]: Debug: target :: rtspenc://10.1.95.5:48010
+[2025-12-07 18:28:07.797]: Debug: CSeq :: 2
+[2025-12-07 18:28:07.797]: Debug: X-GS-ClientVersion :: 14
+[2025-12-07 18:28:07.797]: Debug: Host :: 10.1.95.5
+[2025-12-07 18:28:07.797]: Debug: Accept :: application/sdp
+[2025-12-07 18:28:07.797]: Debug: If-Modified-Since :: Thu, 01 Jan 1970 00:00:00 GMT
+[2025-12-07 18:28:07.797]: Debug: ---Begin MessageBuffer---
+DESCRIBE
+---End MessageBuffer---
+[2025-12-07 18:28:07.797]: Debug: ---Begin Response---
+RTSP/1.0 200 OK
+CSeq: 2
+
+
+a=x-ss-general.featureFlags:3
+a=x-ss-general.encryptionSupported:5
+a=x-ss-general.encryptionRequested:1
+a=x-nv-video[0].refPicInvalidation:1
+sprop-parameter-sets=AAAAAU
+a=rtpmap:98 AV1/90000
+a=fmtp:97 surround-params=21101
+a=fmtp:97 surround-params=21101
+a=fmtp:97 surround-params=642012453
+a=fmtp:97 surround-params=660012345
+a=fmtp:97 surround-params=85301245367
+a=fmtp:97 surround-params=88001234567
+
+---End Response---
+[2025-12-07 18:28:07.802]: Debug: handle_read_encrypted_header(): Handle read of size: 24 bytes
+[2025-12-07 18:28:07.802]: Debug: handle_read_encrypted(): Handle read of size: 185 bytes
+[2025-12-07 18:28:07.802]: Debug: type [REQUEST]
+[2025-12-07 18:28:07.802]: Debug: sequence number [3]
+[2025-12-07 18:28:07.802]: Debug: protocol :: RTSP/1.0
+[2025-12-07 18:28:07.802]: Debug: payload :: 
+[2025-12-07 18:28:07.802]: Debug: command :: SETUP
+[2025-12-07 18:28:07.802]: Debug: target :: streamid=audio/0/0
+[2025-12-07 18:28:07.802]: Debug: CSeq :: 3
+[2025-12-07 18:28:07.802]: Debug: X-GS-ClientVersion :: 14
+[2025-12-07 18:28:07.802]: Debug: Host :: 10.1.95.5
+[2025-12-07 18:28:07.802]: Debug: Transport :: unicast;X-GS-ClientPort=50000-50001
+[2025-12-07 18:28:07.802]: Debug: If-Modified-Since :: Thu, 01 Jan 1970 00:00:00 GMT
+[2025-12-07 18:28:07.802]: Debug: ---Begin MessageBuffer---
+SETUP
+---End MessageBuffer---
+[2025-12-07 18:28:07.802]: Debug: ---Begin Response---
+RTSP/1.0 200 OK
+CSeq: 3
+Session: DEADBEEFCAFE;timeout = 90
+Transport: server_port=48000
+X-SS-Ping-Payload: EA2B729614DF20BE
+
+
+
+---End Response---
+[2025-12-07 18:28:07.809]: Debug: handle_read_encrypted_header(): Handle read of size: 24 bytes
+[2025-12-07 18:28:07.809]: Debug: handle_read_encrypted(): Handle read of size: 208 bytes
+[2025-12-07 18:28:07.809]: Debug: type [REQUEST]
+[2025-12-07 18:28:07.809]: Debug: sequence number [4]
+[2025-12-07 18:28:07.809]: Debug: protocol :: RTSP/1.0
+[2025-12-07 18:28:07.809]: Debug: payload :: 
+[2025-12-07 18:28:07.809]: Debug: command :: SETUP
+[2025-12-07 18:28:07.809]: Debug: target :: streamid=video/0/0
+[2025-12-07 18:28:07.809]: Debug: CSeq :: 4
+[2025-12-07 18:28:07.809]: Debug: X-GS-ClientVersion :: 14
+[2025-12-07 18:28:07.810]: Debug: Host :: 10.1.95.5
+[2025-12-07 18:28:07.810]: Debug: Session :: DEADBEEFCAFE
+[2025-12-07 18:28:07.810]: Debug: Transport :: unicast;X-GS-ClientPort=50000-50001
+[2025-12-07 18:28:07.810]: Debug: If-Modified-Since :: Thu, 01 Jan 1970 00:00:00 GMT
+[2025-12-07 18:28:07.810]: Debug: ---Begin MessageBuffer---
+SETUP
+---End MessageBuffer---
+[2025-12-07 18:28:07.810]: Debug: ---Begin Response---
+RTSP/1.0 200 OK
+CSeq: 4
+Session: DEADBEEFCAFE;timeout = 90
+Transport: server_port=47998
+X-SS-Ping-Payload: EA2B729614DF20BE
+
+
+
+---End Response---
+[2025-12-07 18:28:07.817]: Debug: handle_read_encrypted_header(): Handle read of size: 24 bytes
+[2025-12-07 18:28:07.817]: Debug: handle_read_encrypted(): Handle read of size: 211 bytes
+[2025-12-07 18:28:07.817]: Debug: type [REQUEST]
+[2025-12-07 18:28:07.817]: Debug: sequence number [5]
+[2025-12-07 18:28:07.817]: Debug: protocol :: RTSP/1.0
+[2025-12-07 18:28:07.817]: Debug: payload :: 
+[2025-12-07 18:28:07.817]: Debug: command :: SETUP
+[2025-12-07 18:28:07.817]: Debug: target :: streamid=control/13/0
+[2025-12-07 18:28:07.817]: Debug: CSeq :: 5
+[2025-12-07 18:28:07.817]: Debug: X-GS-ClientVersion :: 14
+[2025-12-07 18:28:07.817]: Debug: Host :: 10.1.95.5
+[2025-12-07 18:28:07.817]: Debug: Session :: DEADBEEFCAFE
+[2025-12-07 18:28:07.818]: Debug: Transport :: unicast;X-GS-ClientPort=50000-50001
+[2025-12-07 18:28:07.818]: Debug: If-Modified-Since :: Thu, 01 Jan 1970 00:00:00 GMT
+[2025-12-07 18:28:07.818]: Debug: ---Begin MessageBuffer---
+SETUP
+---End MessageBuffer---
+[2025-12-07 18:28:07.818]: Debug: ---Begin Response---
+RTSP/1.0 200 OK
+CSeq: 5
+Session: DEADBEEFCAFE;timeout = 90
+Transport: server_port=47999
+X-SS-Connect-Data: 1546443673
+
+
+
+---End Response---
+[2025-12-07 18:28:07.837]: Debug: handle_read_encrypted_header(): Handle read of size: 24 bytes
+[2025-12-07 18:28:07.837]: Debug: handle_read_encrypted(): Handle read of size: 1624 bytes
+[2025-12-07 18:28:07.837]: Debug: type [REQUEST]
+[2025-12-07 18:28:07.838]: Debug: sequence number [6]
+[2025-12-07 18:28:07.838]: Debug: protocol :: RTSP/1.0
+[2025-12-07 18:28:07.838]: Debug: payload :: v=0
+o=android 0 14 IN IPv4 10.1.95.5
+s=NVIDIA Streaming Client
+a=x-ml-general.featureFlags:3 
+a=x-ss-general.encryptionEnabled:5 
+a=x-nv-video[0].clientViewportWd:2560 
+a=x-nv-video[0].clientViewportHt:1440 
+a=x-nv-video[0].maxFPS:60 
+a=x-nv-video[0].packetSize:1024 
+a=x-nv-video[0].rateControlMode:4 
+a=x-nv-video[0].timeoutLengthMs:7000 
+a=x-nv-video[0].framesWithInvalidRefThreshold:0 
+a=x-nv-video[0].initialBitrateKbps:32000 
+a=x-nv-video[0].initialPeakBitrateKbps:32000 
+a=x-nv-vqos[0].bw.minimumBitrateKbps:32000 
+a=x-nv-vqos[0].bw.maximumBitrateKbps:32000 
+a=x-ml-video.configuredBitrateKbps:40000 
+a=x-nv-vqos[0].fec.enable:1 
+a=x-nv-vqos[0].videoQualityScoreUpdateTime:5000 
+a=x-nv-vqos[0].qosTrafficType:5 
+a=x-nv-aqos.qosTrafficType:4 
+a=x-nv-general.featureFlags:167 
+a=x-nv-general.useReliableUdp:13 
+a=x-nv-vqos[0].fec.minRequiredFecPackets:2 
+a=x-nv-vqos[0].bllFec.enable:0 
+a=x-nv-vqos[0].drc.enable:0 
+a=x-nv-general.enableRecoveryMode:0 
+a=x-nv-video[0].videoEncoderSlicesPerFrame:1 
+a=x-nv-clientSupportHevc:1 
+a=x-nv-vqos[0].bitStreamFormat:1 
+a=x-nv-video[0].dynamicRangeMode:0 
+a=x-nv-video[0].maxNumReferenceFrames:0 
+a=x-nv-video[0].clientRefreshRateX100:0 
+a=x-nv-audio.surround.numChannels:2 
+a=x-nv-audio.surround.channelMask:3 
+a=x-nv-audio.surround.enable:0 
+a=x-nv-audio.surround.AudioQuality:0 
+a=x-nv-aqos.packetDuration:5 
+a=x-nv-video[0].encoderCscMode:0 
+t=0 0
+m=video 47998  
+[2025-12-07 18:28:07.838]: Debug: command :: ANNOUNCE
+[2025-12-07 18:28:07.838]: Debug: target :: streamid=control/13/0
+[2025-12-07 18:28:07.838]: Debug: CSeq :: 6
+[2025-12-07 18:28:07.838]: Debug: X-GS-ClientVersion :: 14
+[2025-12-07 18:28:07.838]: Debug: Host :: 10.1.95.5
+[2025-12-07 18:28:07.838]: Debug: Session :: DEADBEEFCAFE
+[2025-12-07 18:28:07.838]: Debug: Content-type :: application/sdp
+[2025-12-07 18:28:07.838]: Debug: Content-length :: 1455
+[2025-12-07 18:28:07.838]: Debug: ---Begin MessageBuffer---
+ANNOUNCE
+---End MessageBuffer---
+[2025-12-07 18:28:07.838]: Debug: Found Host: 10.1.95.5
+[2025-12-07 18:28:07.838]: Debug: Client configured bitrate is 40000 Kbps
+[2025-12-07 18:28:07.838]: Debug: Final adjusted video encoding bitrate is 30988 Kbps
+[2025-12-07 18:28:07.838]: Info: New streaming session started [active sessions: 1]
+[2025-12-07 18:28:07.844]: Debug: Expecting incoming session connections from 10.1.95.13
+[2025-12-07 18:28:07.984]: Info: nvprefs: No need to modify application profile settings
+[2025-12-07 18:28:07.984]: Info: nvprefs: No need to modify global profile settings
+[2025-12-07 18:28:08.005]: Debug: ---Begin Response---
+RTSP/1.0 200 OK
+CSeq: 6
+
+
+
+---End Response---
+[2025-12-07 18:28:08.020]: Debug: handle_read_encrypted_header(): Handle read of size: 24 bytes
+[2025-12-07 18:28:08.020]: Debug: handle_read_encrypted(): Handle read of size: 92 bytes
+[2025-12-07 18:28:08.020]: Debug: type [REQUEST]
+[2025-12-07 18:28:08.020]: Debug: sequence number [7]
+[2025-12-07 18:28:08.020]: Debug: protocol :: RTSP/1.0
+[2025-12-07 18:28:08.020]: Debug: payload :: 
+[2025-12-07 18:28:08.020]: Debug: command :: PLAY
+[2025-12-07 18:28:08.020]: Debug: target :: /
+[2025-12-07 18:28:08.020]: Debug: CSeq :: 7
+[2025-12-07 18:28:08.020]: Debug: X-GS-ClientVersion :: 14
+[2025-12-07 18:28:08.020]: Debug: Host :: 10.1.95.5
+[2025-12-07 18:28:08.020]: Debug: Session :: DEADBEEFCAFE
+[2025-12-07 18:28:08.020]: Debug: ---Begin MessageBuffer---
+PLAY
+---End MessageBuffer---
+[2025-12-07 18:28:08.020]: Debug: ---Begin Response---
+RTSP/1.0 200 OK
+CSeq: 7
+
+
+
+---End Response---
+[2025-12-07 18:28:08.030]: Debug: Initialized new control stream session by connect data match [v2]
+[2025-12-07 18:28:08.030]: Debug: Control local address [10.1.95.5]
+[2025-12-07 18:28:08.030]: Debug: Control peer address [10.1.95.13:6107]
+[2025-12-07 18:28:08.030]: Info: CLIENT CONNECTED
+[2025-12-07 18:28:08.030]: Debug: type [IDX_REQUEST_IDR_FRAME]
+[2025-12-07 18:28:08.030]: Debug: type [IDX_START_B]
+[2025-12-07 18:28:08.038]: Debug: RAISE: 10.1.95.13:39595 :: VIDEO
+[2025-12-07 18:28:08.038]: Debug: Received ping [v2] from 10.1.95.13:39595 [0100000045423032464434313639323742324145]
+[2025-12-07 18:28:08.038]: Debug: Start capturing Video
+[2025-12-07 18:28:08.038]: Debug: Detecting monitors...
+[2025-12-07 18:28:08.039]: Debug: 
+====== ADAPTER =====
+Device Name      : NVIDIA GeForce RTX 4080
+Device Vendor ID : 0x000010DE
+Device Device ID : 0x00002704
+Device Video Mem : 16050 MiB
+Device Sys Mem   : 0 MiB
+Share Sys Mem    : 16243 MiB
+
+    ====== OUTPUT ======
+[2025-12-07 18:28:08.039]: Debug:     Output Name       : \\.\DISPLAY1
+    AttachedToDesktop : yes
+    Resolution        : 2560x1440
+
+[2025-12-07 18:28:08.051]: Debug: --begin relative mouse move packet--
+deltaX [1]
+deltaY [1]
+--end relative mouse move packet--
+[2025-12-07 18:28:08.061]: Debug: --begin relative mouse move packet--
+deltaX [-1]
+deltaY [-1]
+--end relative mouse move packet--
+[2025-12-07 18:28:08.135]: Debug: 
+====== ADAPTER =====
+Device Name      : NVIDIA GeForce RTX 4080
+Device Vendor ID : 0x000010DE
+Device Device ID : 0x00002704
+Device Video Mem : 16050 MiB
+Device Sys Mem   : 0 MiB
+Share Sys Mem    : 16243 MiB
+
+    ====== OUTPUT ======
+[2025-12-07 18:28:08.135]: Debug: 
+====== ADAPTER =====
+Device Name      : Microsoft Basic Render Driver
+Device Vendor ID : 0x00001414
+Device Device ID : 0x0000008C
+Device Video Mem : 0 MiB
+Device Sys Mem   : 0 MiB
+Share Sys Mem    : 16243 MiB
+
+    ====== OUTPUT ======
+[2025-12-07 18:28:08.317]: Debug: RAISE: 10.1.95.13:34965 :: AUDIO
+[2025-12-07 18:28:08.317]: Debug: Received ping [v2] from 10.1.95.13:34965 [0200000045423032464434313639323742324145]
+[2025-12-07 18:28:08.317]: Debug: Start capturing Audio
+[2025-12-07 18:28:08.320]: Info: 
+Device Description : NVIDIA GeForce RTX 4080
+Device Vendor ID   : 0x000010DE
+Device Device ID   : 0x00002704
+Device Video Mem   : 16050 MiB
+Device Sys Mem     : 0 MiB
+Share Sys Mem      : 16243 MiB
+Feature Level      : 0x0000B100
+Capture size       : 2560x1440
+Offset             : 0x0
+Virtual Desktop    : 2560x1440
+[2025-12-07 18:28:08.320]: Info: Active GPU has HAGS disabled
+[2025-12-07 18:28:08.320]: Info: Using realtime GPU priority
+[2025-12-07 18:28:08.320]: Info: 
+Colorspace         : DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020
+Bits Per Color     : 8
+Red Primary        : [0.65722,0.325196]
+Green Primary      : [0.267575,0.582029]
+Blue Primary       : [0.135738,0.109375]
+White Point        : [0.293941,0.349611]
+Min Luminance      : 1 nits
+Max Luminance      : 10000 nits
+Max Full Luminance : 10000 nits
+[2025-12-07 18:28:08.320]: Info: Desktop resolution [2560x1440]
+[2025-12-07 18:28:08.320]: Info: Desktop format [DXGI_FORMAT_R16G16B16A16_FLOAT]
+[2025-12-07 18:28:08.320]: Info: Display refresh rate [144Hz]
+[2025-12-07 18:28:08.321]: Info: Requested frame rate [60fps]
+[2025-12-07 18:28:08.321]: Info: Creating encoder [hevc_nvenc]
+[2025-12-07 18:28:08.321]: Info: Color coding: SDR (Rec. 601)
+[2025-12-07 18:28:08.321]: Info: Color depth: 8-bit
+[2025-12-07 18:28:08.321]: Info: Color range: MPEG
+[2025-12-07 18:28:08.322]: Info: Virtual audio device will use 24-bit to match default device
+[2025-12-07 18:28:08.331]: Info: Changed virtual audio sink format to [S24 48000 2.0]
+[2025-12-07 18:28:08.339]: Info: Capture format [DXGI_FORMAT_R16G16B16A16_FLOAT]
+[2025-12-07 18:28:08.363]: Debug: Trying audio format [Stereo]
+[2025-12-07 18:28:08.365]: Info: Audio mixer format is 32-bit, 48000 Hz, no resampling needed
+[2025-12-07 18:28:08.370]: Info: Audio capture format is [F32 48000 2.0]
+[2025-12-07 18:28:08.370]: Debug: Found audio format [Stereo]
+[2025-12-07 18:28:08.371]: Info: Opus initialized: 48 kHz, 2 channels, 512 kbps (total), LOWDELAY
+[2025-12-07 18:28:08.375]: Debug: NvEnc: requested encoded frame size 64.56 kB
+[2025-12-07 18:28:08.375]: Info: NvEnc: created encoder HEVC P1 async two-pass rfi spatial-aq
+[2025-12-07 18:28:08.376]: Info: Minimum frame time set to 16.6667ms, based on client-requested target framerate 60.
+[2025-12-07 18:28:08.382]: Debug: NvEnc: idr frame 1
+[2025-12-07 18:28:08.433]: Debug: Sent HDR mode: false
+[2025-12-07 18:28:10.940]: Debug: TUNNEL :: NONE
+[2025-12-07 18:28:10.940]: Debug: METHOD :: GET
+[2025-12-07 18:28:10.941]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:10.941]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:28:10.941]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:28:10.941]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:28:10.941]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:10.941]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:28:10.941]: Debug:  [--] 
+[2025-12-07 18:28:10.941]: Debug: uuid -- 541dbcc9549e478399f90b5101b2295a
+[2025-12-07 18:28:10.941]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:10.941]: Debug:  [--] 
+[2025-12-07 18:28:10.966]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:28:10.969]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:28:10.969]: Debug: METHOD :: GET
+[2025-12-07 18:28:10.969]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:10.969]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:28:10.969]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:28:10.969]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:28:10.969]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:10.969]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:28:10.969]: Debug:  [--] 
+[2025-12-07 18:28:10.969]: Debug: uuid -- 2c427c1523dd416c887ae9cc47cb69c3
+[2025-12-07 18:28:10.969]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:10.969]: Debug:  [--] 
+[2025-12-07 18:28:11.799]: Debug: METHOD :: GET
+[2025-12-07 18:28:11.799]: Debug: DESTINATION :: /api/logs
+[2025-12-07 18:28:11.799]: Debug: Sec-Fetch-Site -- same-origin
+[2025-12-07 18:28:11.799]: Debug: Sec-Fetch-Mode -- cors
+[2025-12-07 18:28:11.799]: Debug: Sec-Fetch-Dest -- empty
+[2025-12-07 18:28:11.799]: Debug: Authorization -- CREDENTIALS REDACTED
+[2025-12-07 18:28:11.799]: Debug: Connection -- keep-alive
+[2025-12-07 18:28:11.799]: Debug: Accept-Encoding -- gzip, deflate, br, zstd
+[2025-12-07 18:28:11.799]: Debug: Referer -- https://localhost:47990/troubleshooting
+[2025-12-07 18:28:11.799]: Debug: Accept-Language -- en-US,en;q=0.5
+[2025-12-07 18:28:11.799]: Debug: User-Agent -- Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+[2025-12-07 18:28:11.799]: Debug: Priority -- u=4
+[2025-12-07 18:28:11.799]: Debug: Accept -- */*
+[2025-12-07 18:28:11.799]: Debug: Host -- localhost:47990
+[2025-12-07 18:28:11.799]: Debug:  [--] 
+[2025-12-07 18:28:11.799]: Debug:  [--] 
+[2025-12-07 18:28:14.127]: Debug: TUNNEL :: NONE
+[2025-12-07 18:28:14.127]: Debug: METHOD :: GET
+[2025-12-07 18:28:14.127]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:14.127]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:28:14.127]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:28:14.127]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:28:14.127]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:14.127]: Debug: Host -- 10.1.95.5:47989
+[2025-12-07 18:28:14.127]: Debug:  [--] 
+[2025-12-07 18:28:14.127]: Debug: uuid -- 4fbb7ed59bda4387b699d069bda164c1
+[2025-12-07 18:28:14.127]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:14.127]: Debug:  [--] 
+[2025-12-07 18:28:14.148]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:28:14.150]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:28:14.150]: Debug: METHOD :: GET
+[2025-12-07 18:28:14.151]: Debug: DESTINATION :: /serverinfo
+[2025-12-07 18:28:14.151]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:28:14.151]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:28:14.151]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:28:14.151]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:14.151]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:28:14.151]: Debug:  [--] 
+[2025-12-07 18:28:14.151]: Debug: uuid -- 7d19d218304244eaa2debaed432fcae7
+[2025-12-07 18:28:14.151]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:14.151]: Debug:  [--] 
+[2025-12-07 18:28:14.181]: Debug: /CN=NVIDIA GameStream Client -- verified
+[2025-12-07 18:28:14.185]: Debug: TUNNEL :: HTTPS
+[2025-12-07 18:28:14.185]: Debug: METHOD :: GET
+[2025-12-07 18:28:14.185]: Debug: DESTINATION :: /applist
+[2025-12-07 18:28:14.185]: Debug: User-Agent -- Mozilla/5.0
+[2025-12-07 18:28:14.185]: Debug: Accept-Language -- en-US,*
+[2025-12-07 18:28:14.185]: Debug: Accept-Encoding -- gzip, deflate
+[2025-12-07 18:28:14.185]: Debug: Connection -- Keep-Alive
+[2025-12-07 18:28:14.185]: Debug: Host -- 10.1.95.5:47984
+[2025-12-07 18:28:14.185]: Debug:  [--] 
+[2025-12-07 18:28:14.185]: Debug: uuid -- 36f49247d3a14cb785bc07a5b64e188d
+[2025-12-07 18:28:14.185]: Debug: uniqueid -- 0123456789ABCDEF
+[2025-12-07 18:28:14.185]: Debug:  [--] 
+[2025-12-07 18:28:16.799]: Debug: METHOD :: GET
+[2025-12-07 18:28:16.799]: Debug: DESTINATION :: /api/logs
+[2025-12-07 18:28:16.799]: Debug: Sec-Fetch-Site -- same-origin
+[2025-12-07 18:28:16.799]: Debug: Sec-Fetch-Mode -- cors
+[2025-12-07 18:28:16.799]: Debug: Sec-Fetch-Dest -- empty
+[2025-12-07 18:28:16.799]: Debug: Authorization -- CREDENTIALS REDACTED
+[2025-12-07 18:28:16.799]: Debug: Connection -- keep-alive
+[2025-12-07 18:28:16.799]: Debug: Accept-Encoding -- gzip, deflate, br, zstd
+[2025-12-07 18:28:16.799]: Debug: Referer -- https://localhost:47990/troubleshooting
+[2025-12-07 18:28:16.799]: Debug: Accept-Language -- en-US,en;q=0.5
+[2025-12-07 18:28:16.799]: Debug: User-Agent -- Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+[2025-12-07 18:28:16.799]: Debug: Priority -- u=4
+[2025-12-07 18:28:16.799]: Debug: Accept -- */*
+[2025-12-07 18:28:16.799]: Debug: Host -- localhost:47990
+[2025-12-07 18:28:16.799]: Debug:  [--] 
+[2025-12-07 18:28:16.799]: Debug:  [--] 
