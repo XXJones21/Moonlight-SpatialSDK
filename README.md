@@ -22,11 +22,11 @@ The application uses Meta Spatial SDK with a hybrid app pattern, supporting both
 
 ### Main Components
 
-- **PancakeActivity** (`PancakeActivity.kt`) - 2D panel activity for connection setup, pairing, and stream configuration
-- **ImmersiveActivity** (`ImmersiveActivity.kt`) - VR activity for video streaming with passthrough
-- **MoonlightConnectionManager** (`MoonlightConnectionManager.kt`) - Connection lifecycle, pairing, and stream management
-- **MoonlightPanelRenderer** (`MoonlightPanelRenderer.kt`) - Bridges Spatial panel Surface to Moonlight native decoder
-- **LegacySurfaceHolderAdapter** (`LegacySurfaceHolderAdapter.kt`) - Adapter for Moonlight's SurfaceHolder interface
+- **PancakeActivity** (`Moonlight-SpatialSDK/app/src/main/java/.../PancakeActivity.kt`) - 2D panel activity for connection setup, pairing, and stream configuration
+- **ImmersiveActivity** (`Moonlight-SpatialSDK/app/src/main/java/.../ImmersiveActivity.kt`) - VR activity for video streaming with passthrough
+- **MoonlightConnectionManager** (`Moonlight-SpatialSDK/app/src/main/java/.../MoonlightConnectionManager.kt`) - Connection lifecycle, pairing, and stream management
+- **MoonlightPanelRenderer** (`Moonlight-SpatialSDK/app/src/main/java/.../MoonlightPanelRenderer.kt`) - Bridges Spatial panel Surface to Moonlight native decoder
+- **LegacySurfaceHolderAdapter** (`Moonlight-SpatialSDK/app/src/main/java/.../LegacySurfaceHolderAdapter.kt`) - Adapter for Moonlight's SurfaceHolder interface
 
 ### Connection Flow
 
@@ -68,7 +68,7 @@ The application uses Meta Spatial SDK with a hybrid app pattern, supporting both
 
 1. **Install Meta Spatial Editor**:
    - Download from [Meta Developer Portal](https://developers.meta.com/horizon/documentation/spatial-sdk/spatial-editor-overview)
-   - Required for editing scenes (`app/scenes/Main.metaspatial`)
+   - Required for editing scenes (`Moonlight-SpatialSDK/app/scenes/Main.metaspatial`)
 
 2. **Configure Android Studio**:
    - Install Android SDK and build tools
@@ -108,8 +108,8 @@ The application uses Meta Spatial SDK with a hybrid app pattern, supporting both
 
 The app includes network security configuration to allow cleartext HTTP traffic for initial pairing (required by Moonlight protocol). This is configured in:
 
-- `app/src/main/res/xml/network_security_config.xml`
-- Referenced in `AndroidManifest.xml`
+- `Moonlight-SpatialSDK/app/src/main/res/xml/network_security_config.xml`
+- Referenced in `Moonlight-SpatialSDK/app/src/main/AndroidManifest.xml`
 
 **Note**: After pairing, all connections use HTTPS with certificate pinning for security.
 
@@ -146,19 +146,21 @@ The app includes network security configuration to allow cleartext HTTP traffic 
 
 ```text
 Moonlight-SpatialSDK/
-├── app/
-│   ├── src/main/
-│   │   ├── java/              # Kotlin/Java source code
-│   │   │   ├── PancakeActivity.kt
-│   │   │   ├── ImmersiveActivity.kt
-│   │   │   ├── MoonlightConnectionManager.kt
-│   │   │   └── ...
-│   │   ├── jni/               # Native Moonlight code
-│   │   ├── res/               # Resources
-│   │   └── AndroidManifest.xml
-│   ├── scenes/                # Meta Spatial Editor scenes
-│   └── build.gradle.kts
-├── Documentation/             # Project documentation
+├── Moonlight-SpatialSDK/
+│   ├── app/
+│   │   ├── src/main/
+│   │   │   ├── java/              # Kotlin/Java source code
+│   │   │   │   ├── PancakeActivity.kt
+│   │   │   │   ├── ImmersiveActivity.kt
+│   │   │   │   ├── MoonlightConnectionManager.kt
+│   │   │   │   └── ...
+│   │   │   ├── jni/               # Native Moonlight code
+│   │   │   ├── res/               # Resources
+│   │   │   └── AndroidManifest.xml
+│   │   ├── scenes/                # Meta Spatial Editor scenes
+│   │   └── build.gradle.kts
+│   └── README.md
+├── Documentation/                 # Project documentation
 └── README.md
 ```
 
@@ -204,9 +206,9 @@ Moonlight-SpatialSDK/
 
 The project uses Gradle for build management. Key build files:
 
-- `build.gradle.kts` - Root build configuration
-- `app/build.gradle.kts` - App module configuration
-- `gradle/libs.versions.toml` - Dependency versions
+- `Moonlight-SpatialSDK/build.gradle.kts` - Root build configuration
+- `Moonlight-SpatialSDK/app/build.gradle.kts` - App module configuration
+- `Moonlight-SpatialSDK/gradle/libs.versions.toml` - Dependency versions
 
 ### Debugging
 
@@ -269,3 +271,4 @@ For issues, questions, or contributions:
 ---
 
 **Note**: This project is in active development. Some features may be incomplete or subject to change.
+
