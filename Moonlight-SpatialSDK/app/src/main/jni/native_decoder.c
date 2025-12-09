@@ -53,6 +53,10 @@ static int64_t g_lastPtsUs = 0;
 static bool g_hdrEnabled = false;
 static uint8_t g_hdrStaticInfo[64];
 static size_t g_hdrStaticInfoLen = 0;
+static int g_colorRange = -1;
+static int g_colorStandard = -1;
+static int g_colorTransfer = -1;
+static int g_dataspace = -1;
 
 static const char* mime_from_format(int videoFormat) {
     if ((videoFormat & 0x0F00) != 0) {
@@ -120,10 +124,27 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetSurface(JNIEnv* env, 
     if (surface != NULL) {
         g_window = ANativeWindow_fromSurface(env, surface);
         if (g_window != NULL) {
-            // Hint the target dataspace to full-range BT.601 to match Sunshine's SDR Rec.601 JPEG signaling
-            ANativeWindow_setBuffersDataSpace(g_window, HAL_DATASPACE_V0_JFIF);
+            if (g_dataspace >= 0) {
+                ANativeWindow_setBuffersDataSpace(g_window, g_dataspace);
+                LOGE("nativeDecoderSetSurface: applied dataspace=0x%x", g_dataspace);
+            } else {
+                // Hint the target dataspace to full-range BT.601 to match Sunshine's SDR Rec.601 JPEG signaling
+                ANativeWindow_setBuffersDataSpace(g_window, HAL_DATASPACE_V0_JFIF);
+                LOGE("nativeDecoderSetSurface: no dataspace provided, using fallback HAL_DATASPACE_V0_JFIF");
+            }
         }
     }
+}
+
+JNIEXPORT void JNICALL
+Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetColorConfig(JNIEnv* env, jclass clazz, jint colorRange, jint colorStandard, jint colorTransfer, jint dataspace) {
+    (void)env;
+    (void)clazz;
+    g_colorRange = colorRange;
+    g_colorStandard = colorStandard;
+    g_colorTransfer = colorTransfer;
+    g_dataspace = dataspace;
+    LOGE("nativeDecoderSetColorConfig: range=%d standard=%d transfer=%d dataspace=0x%x", g_colorRange, g_colorStandard, g_colorTransfer, g_dataspace);
 }
 
 JNIEXPORT jint JNICALL
@@ -142,6 +163,16 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetup(JNIEnv* env, jclas
     if (g_window == NULL) {
         LOGE("nativeDecoderSetup failed: surface is null");
         return -1;
+    }
+
+    if (g_colorRange < 0 || g_colorStandard < 0 || g_colorTransfer < 0) {
+        LOGE("nativeDecoderSetup: color config missing (range=%d standard=%d transfer=%d) - aborting to avoid silent fallback",
+             g_colorRange, g_colorStandard, g_colorTransfer);
+        return -2;
+    }
+    if (g_dataspace < 0) {
+        LOGE("nativeDecoderSetup: dataspace not provided - aborting to avoid silent fallback");
+        return -3;
     }
 
     const char* mime = mime_from_format(videoFormat);
@@ -163,6 +194,10 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetup(JNIEnv* env, jclas
         AMediaFormat_setInt32(g_format, AMEDIAFORMAT_KEY_COLOR_STANDARD, AMEDIAFORMAT_COLOR_STANDARD_BT2020);
         AMediaFormat_setInt32(g_format, AMEDIAFORMAT_KEY_COLOR_TRANSFER, AMEDIAFORMAT_COLOR_TRANSFER_ST2084);
         AMediaFormat_setBuffer(g_format, AMEDIAFORMAT_KEY_HDR_STATIC_INFO, g_hdrStaticInfo, g_hdrStaticInfoLen);
+    } else {
+        AMediaFormat_setInt32(g_format, AMEDIAFORMAT_KEY_COLOR_RANGE, g_colorRange);
+        AMediaFormat_setInt32(g_format, AMEDIAFORMAT_KEY_COLOR_STANDARD, g_colorStandard);
+        AMediaFormat_setInt32(g_format, AMEDIAFORMAT_KEY_COLOR_TRANSFER, g_colorTransfer);
     }
 
     media_status_t status = AMediaCodec_configure(g_codec, g_format, g_window, NULL, 0);

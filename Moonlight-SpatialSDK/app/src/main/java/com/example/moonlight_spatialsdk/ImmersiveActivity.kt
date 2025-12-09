@@ -7,6 +7,7 @@ import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.example.moonlight_spatialsdk.BuildConfig
 import com.limelight.binding.audio.AndroidAudioRenderer
 import com.limelight.binding.video.CrashListener
 import com.limelight.preferences.PreferenceConfiguration
@@ -17,9 +18,13 @@ import com.meta.spatial.core.Pose
 import com.meta.spatial.core.Quaternion
 import com.meta.spatial.core.SpatialFeature
 import com.meta.spatial.core.SpatialSDKExperimentalAPI
+import com.meta.spatial.core.Vector2
 import com.meta.spatial.core.Vector3
 import com.meta.spatial.toolkit.Grabbable
+import com.meta.spatial.toolkit.GrabbableType
 import com.meta.spatial.toolkit.Panel
+import com.meta.spatial.toolkit.PanelDimensions
+import com.meta.spatial.toolkit.PlayerBodyAttachmentSystem
 import com.meta.spatial.toolkit.Transform
 import com.meta.spatial.toolkit.Visible
 import com.meta.spatial.datamodelinspector.DataModelInspectorFeature
@@ -33,6 +38,7 @@ import com.meta.spatial.toolkit.AppSystemActivity
 import com.meta.spatial.toolkit.MediaPanelRenderOptions
 import com.meta.spatial.toolkit.MediaPanelSettings
 import com.meta.spatial.toolkit.PanelRegistration
+import com.meta.spatial.toolkit.PanelStyleOptions
 import com.meta.spatial.toolkit.PixelDisplayOptions
 import com.meta.spatial.toolkit.QuadShapeOptions
 import com.meta.spatial.toolkit.VideoSurfacePanelRegistration
@@ -44,6 +50,7 @@ import java.io.File
 class ImmersiveActivity : AppSystemActivity() {
   private val TAG = "ImmersiveActivity"
   private val prefs by lazy { PreferenceConfiguration.readPreferences(this) }
+  private val basePanelHeightMeters = 0.7f
   private lateinit var moonlightPanelRenderer: MoonlightPanelRenderer
   private lateinit var audioRenderer: AndroidAudioRenderer
   private lateinit var connectionManager: MoonlightConnectionManager
@@ -57,6 +64,7 @@ class ImmersiveActivity : AppSystemActivity() {
   private var isPaired: Boolean = false
   private var isSurfaceReady: Boolean = false
   private var videoPanelEntity: Entity? = null
+  private var panelPositioningSystem: PanelPositioningSystem? = null
 
   override fun registerFeatures(): List<SpatialFeature> {
     val features =
@@ -140,6 +148,10 @@ class ImmersiveActivity : AppSystemActivity() {
 
     scene.setViewOrigin(0.0f, 0.0f, 2.0f, 180.0f)
 
+    panelPositioningSystem = PanelPositioningSystem()
+    systemManager.registerSystem(panelPositioningSystem!!)
+    Log.i(TAG, "PanelPositioningSystem registered")
+
     System.out.println("=== CALLING_CREATE_VIDEO_PANEL_ENTITY ===")
     android.util.Log.e(TAG, "=== CALLING_CREATE_VIDEO_PANEL_ENTITY ===")
     createVideoPanelEntity()
@@ -161,15 +173,12 @@ class ImmersiveActivity : AppSystemActivity() {
               // Store the panel entity reference
               videoPanelEntity = panelEntity
               
-              // Ensure panel is visible and positioned
+              // Set panel entity on positioning system for async positioning
+              panelPositioningSystem?.setPanelEntity(panelEntity)
+              
+              // Panel starts visible - positioning handled by PanelPositioningSystem
               panelEntity.setComponent(Visible(true))
-              panelEntity.setComponent(Transform(
-                  Pose(
-                      Vector3(0f, 1.1f, -1.5f),
-                      Quaternion(0f, 0f, 0f, 1f)
-                  )
-              ))
-              panelEntity.setComponent(Grabbable(enabled = true))
+              panelEntity.setComponent(Grabbable(enabled = true, type = GrabbableType.PIVOT_Y))
               
               SurfaceUtil.paintBlack(surface)
               
@@ -211,6 +220,7 @@ class ImmersiveActivity : AppSystemActivity() {
                       isDRM = false,
                       stereoMode = StereoMode.None
                   ),
+                  style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
               )
             },
         ),
@@ -223,14 +233,14 @@ class ImmersiveActivity : AppSystemActivity() {
    * direct-to-surface output pixel-perfect.
    */
   private fun computePanelShape(): QuadShapeOptions {
-    val panelWidthMeters = 1.6f
     val aspect =
         if (prefs.height != 0) {
           prefs.width.toFloat() / prefs.height.toFloat()
         } else {
           16f / 9f
         }
-    val panelHeightMeters = panelWidthMeters / aspect
+    val panelHeightMeters = basePanelHeightMeters
+    val panelWidthMeters = aspect * basePanelHeightMeters
     return QuadShapeOptions(width = panelWidthMeters, height = panelHeightMeters)
   }
 
@@ -326,23 +336,27 @@ class ImmersiveActivity : AppSystemActivity() {
     android.util.Log.e(TAG, "=== CREATE_VIDEO_PANEL_ENTITY_CALLED ===")
     Log.i(TAG, "Creating video panel entity with Panel(R.id.ui_example)")
     
+    val aspect =
+        if (prefs.height != 0) {
+          prefs.width.toFloat() / prefs.height.toFloat()
+        } else {
+          16f / 9f
+        }
+    val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+    
     videoPanelEntity = Entity.create(
         listOf(
             Panel(R.id.ui_example),
-            Transform(
-                Pose(
-                    Vector3(0f, 1.1f, -1.5f),
-                    Quaternion(0f, 0f, 0f, 1f)
-                )
-            ),
-            Grabbable(enabled = true),
+            Transform(),
+            PanelDimensions(panelSize),
+            Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
             Visible(true)
         )
     )
     
     System.out.println("=== VIDEO_PANEL_ENTITY_CREATED ===")
     android.util.Log.e(TAG, "=== VIDEO_PANEL_ENTITY_CREATED ===")
-    Log.i(TAG, "Video panel entity created at (0, 1.1, -1.5) - visible and grabbable")
+    Log.i(TAG, "Video panel entity created with PanelDimensions - positioning handled by Spatial SDK")
   }
 
 }

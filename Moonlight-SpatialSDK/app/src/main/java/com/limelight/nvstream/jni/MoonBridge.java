@@ -443,6 +443,7 @@ public class MoonBridge {
     public static native void nativeDecoderStart();
     public static native void nativeDecoderStop();
     public static native void nativeDecoderCleanup();
+    public static native void nativeDecoderSetColorConfig(int colorRange, int colorStandard, int colorTransfer, int dataspace);
     public static native void nativeDecoderSetHdrMode(boolean enabled, byte[] hdrMetadata);
     public static native int nativeDecoderSubmit(byte[] decodeUnitData, int decodeUnitLength, int decodeUnitType,
                                                 int frameNumber, int frameType, char frameHostProcessingLatency,
