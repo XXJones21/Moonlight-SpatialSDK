@@ -1,6 +1,9 @@
 # Cursor IDE - local only
 .cursor
 
+#documentation
+PremiumMediaSample/
+
 # OS files
 .DS_Store
 Thumbs.db
@@ -17,8 +20,9 @@ build/
 *.war
 *.ear
 
-# Logs
+# Log files - contain runtime data and should not be committed
 *.log
+logs/
 
 # Temporary files
 *.tmp
