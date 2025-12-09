@@ -22,11 +22,11 @@ The application uses Meta Spatial SDK with a hybrid app pattern, supporting both
 
 ### Main Components
 
-- **PancakeActivity** (`Moonlight-SpatialSDK/app/src/main/java/.../PancakeActivity.kt`) - 2D panel activity for connection setup, pairing, and stream configuration
-- **ImmersiveActivity** (`Moonlight-SpatialSDK/app/src/main/java/.../ImmersiveActivity.kt`) - VR activity for video streaming with passthrough
-- **MoonlightConnectionManager** (`Moonlight-SpatialSDK/app/src/main/java/.../MoonlightConnectionManager.kt`) - Connection lifecycle, pairing, and stream management
-- **MoonlightPanelRenderer** (`Moonlight-SpatialSDK/app/src/main/java/.../MoonlightPanelRenderer.kt`) - Bridges Spatial panel Surface to Moonlight native decoder
-- **LegacySurfaceHolderAdapter** (`Moonlight-SpatialSDK/app/src/main/java/.../LegacySurfaceHolderAdapter.kt`) - Adapter for Moonlight's SurfaceHolder interface
+- **PancakeActivity** (`Moonlight-SpatialSDK/app/src/main/java/.../PancakeActivity.kt`): 2D panel activity for connection setup, pairing, and stream configuration
+- **ImmersiveActivity** (`Moonlight-SpatialSDK/app/src/main/java/.../ImmersiveActivity.kt`): VR activity for video streaming with passthrough
+- **MoonlightConnectionManager** (`Moonlight-SpatialSDK/app/src/main/java/.../MoonlightConnectionManager.kt`): Connection lifecycle, pairing, and stream management
+- **MoonlightPanelRenderer** (`Moonlight-SpatialSDK/app/src/main/java/.../MoonlightPanelRenderer.kt`): Bridges Spatial panel Surface to Moonlight native decoder
+- **LegacySurfaceHolderAdapter** (`Moonlight-SpatialSDK/app/src/main/java/.../LegacySurfaceHolderAdapter.kt`): Adapter for Moonlight's SurfaceHolder interface
 
 ### Connection Flow
 
@@ -196,19 +196,19 @@ Moonlight-SpatialSDK/
 
 ### Key Technologies
 
-- **Kotlin** - Primary development language
-- **Meta Spatial SDK** - VR framework
-- **Moonlight Core** - Game streaming protocol (native C code)
-- **Android MediaCodec** - Hardware video decoding
-- **Jetpack Compose** - UI framework (for 2D mode)
+- **Kotlin**: Primary development language
+- **Meta Spatial SDK**: VR framework
+- **Moonlight Core**: Game streaming protocol (native C code)
+- **Android MediaCodec**: Hardware video decoding
+- **Jetpack Compose**: UI framework (for 2D mode)
 
 ### Building from Source
 
 The project uses Gradle for build management. Key build files:
 
-- `Moonlight-SpatialSDK/build.gradle.kts` - Root build configuration
-- `Moonlight-SpatialSDK/app/build.gradle.kts` - App module configuration
-- `Moonlight-SpatialSDK/gradle/libs.versions.toml` - Dependency versions
+- `Moonlight-SpatialSDK/build.gradle.kts`: Root build configuration
+- `Moonlight-SpatialSDK/app/build.gradle.kts`: App module configuration
+- `Moonlight-SpatialSDK/gradle/libs.versions.toml`: Dependency versions
 
 ### Debugging
 
@@ -249,15 +249,15 @@ Contributions are welcome! Please:
 
 This project is based on:
 
-- **Moonlight** - [Moonlight Game Streaming](https://github.com/moonlight-stream/moonlight-android) (GPLv3)
-- **Meta Spatial SDK** - Meta Platform Technologies SDK license
+- **Moonlight**: [Moonlight Game Streaming](https://github.com/moonlight-stream/moonlight-android) (GPLv3)
+- **Meta Spatial SDK**: Meta Platform Technologies SDK license
 
 See individual component licenses for details.
 
 ## Acknowledgments
 
-- [Moonlight Project](https://moonlight-stream.org/) - Game streaming protocol
-- [Sunshine](https://github.com/LizardByte/Sunshine) - Open-source game streaming server
+- [Moonlight Project](https://moonlight-stream.org/): Game streaming protocol
+- [Sunshine](https://github.com/LizardByte/Sunshine): Open-source game streaming server
 - Meta Spatial SDK team - VR framework and tools
 
 ## Support
@@ -271,4 +271,3 @@ For issues, questions, or contributions:
 ---
 
 **Note**: This project is in active development. Some features may be incomplete or subject to change.
-

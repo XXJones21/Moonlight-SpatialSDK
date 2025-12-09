@@ -22,11 +22,11 @@ The application uses Meta Spatial SDK with a hybrid app pattern, supporting both
 
 ### Main Components
 
-- **PancakeActivity** (`PancakeActivity.kt`) - 2D panel activity for connection setup, pairing, and stream configuration
-- **ImmersiveActivity** (`ImmersiveActivity.kt`) - VR activity for video streaming with passthrough
-- **MoonlightConnectionManager** (`MoonlightConnectionManager.kt`) - Connection lifecycle, pairing, and stream management
-- **MoonlightPanelRenderer** (`MoonlightPanelRenderer.kt`) - Bridges Spatial panel Surface to Moonlight native decoder
-- **LegacySurfaceHolderAdapter** (`LegacySurfaceHolderAdapter.kt`) - Adapter for Moonlight's SurfaceHolder interface
+- **PancakeActivity** (`PancakeActivity.kt`): 2D panel activity for connection setup, pairing, and stream configuration
+- **ImmersiveActivity** (`ImmersiveActivity.kt`): VR activity for video streaming with passthrough
+- **MoonlightConnectionManager** (`MoonlightConnectionManager.kt`): Connection lifecycle, pairing, and stream management
+- **MoonlightPanelRenderer** (`MoonlightPanelRenderer.kt`): Bridges Spatial panel Surface to Moonlight native decoder
+- **LegacySurfaceHolderAdapter** (`LegacySurfaceHolderAdapter.kt`): Adapter for Moonlight's SurfaceHolder interface
 
 ### Connection Flow
 
@@ -194,19 +194,19 @@ Moonlight-SpatialSDK/
 
 ### Key Technologies
 
-- **Kotlin** - Primary development language
-- **Meta Spatial SDK** - VR framework
-- **Moonlight Core** - Game streaming protocol (native C code)
-- **Android MediaCodec** - Hardware video decoding
-- **Jetpack Compose** - UI framework (for 2D mode)
+- **Kotlin**: Primary development language
+- **Meta Spatial SDK**: VR framework
+- **Moonlight Core**: Game streaming protocol (native C code)
+- **Android MediaCodec**: Hardware video decoding
+- **Jetpack Compose**: UI framework (for 2D mode)
 
 ### Building from Source
 
 The project uses Gradle for build management. Key build files:
 
-- `build.gradle.kts` - Root build configuration
-- `app/build.gradle.kts` - App module configuration
-- `gradle/libs.versions.toml` - Dependency versions
+- `build.gradle.kts`: Root build configuration
+- `app/build.gradle.kts`: App module configuration
+- `gradle/libs.versions.toml`: Dependency versions
 
 ### Debugging
 
@@ -229,10 +229,10 @@ The project uses Gradle for build management. Key build files:
 
 ## Documentation
 
-- [Quest 3 App Pipeline](Documentation/Quest%203%20App%20Pipeline.md) - Comprehensive architecture documentation
-- [POST_MORTEM](Documentation/POST_MORTEM.md) - Issue investigation and resolution report
-- [Native Video Path Plan](Documentation/Native_Video_Path_Plan.md) - Video rendering architecture
-- [Native Rendering Overview](Documentation/Native_Rendering_Overview.md) - Rendering system details
+- [Quest 3 App Pipeline](Documentation/Quest%203%20App%20Pipeline.md): Comprehensive architecture documentation
+- [POST_MORTEM](Documentation/POST_MORTEM.md): Issue investigation and resolution report
+- [Native Video Path Plan](Documentation/Native_Video_Path_Plan.md): Video rendering architecture
+- [Native Rendering Overview](Documentation/Native_Rendering_Overview.md): Rendering system details
 
 ## Contributing
 
@@ -247,15 +247,15 @@ Contributions are welcome! Please:
 
 This project is based on:
 
-- **Moonlight** - [Moonlight Game Streaming](https://github.com/moonlight-stream/moonlight-android) (GPLv3)
-- **Meta Spatial SDK** - Meta Platform Technologies SDK license
+- **Moonlight**: [Moonlight Game Streaming](https://github.com/moonlight-stream/moonlight-android) (GPLv3)
+- **Meta Spatial SDK**: Meta Platform Technologies SDK license
 
 See individual component licenses for details.
 
 ## Acknowledgments
 
-- [Moonlight Project](https://moonlight-stream.org/) - Game streaming protocol
-- [Sunshine](https://github.com/LizardByte/Sunshine) - Open-source game streaming server
+- [Moonlight Project](https://moonlight-stream.org/): Game streaming protocol
+- [Sunshine](https://github.com/LizardByte/Sunshine): Open-source game streaming server
 - Meta Spatial SDK team - VR framework and tools
 
 ## Support
