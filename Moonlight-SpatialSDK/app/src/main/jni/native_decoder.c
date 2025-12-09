@@ -34,6 +34,10 @@
 #ifndef AMEDIAFORMAT_COLOR_TRANSFER_ST2084
 #define AMEDIAFORMAT_COLOR_TRANSFER_ST2084 6
 #endif
+#ifndef HAL_DATASPACE_V0_JFIF
+// JPEG full range BT.601 dataspace (deprecated constants but still honored by ANativeWindow)
+#define HAL_DATASPACE_V0_JFIF 0x101
+#endif
 
 static ANativeWindow* g_window = NULL;
 static AMediaCodec* g_codec = NULL;
@@ -115,6 +119,10 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetSurface(JNIEnv* env, 
     release_window();
     if (surface != NULL) {
         g_window = ANativeWindow_fromSurface(env, surface);
+        if (g_window != NULL) {
+            // Hint the target dataspace to full-range BT.601 to match Sunshine's SDR Rec.601 JPEG signaling
+            ANativeWindow_setBuffersDataSpace(g_window, HAL_DATASPACE_V0_JFIF);
+        }
     }
 }
 
@@ -169,16 +177,16 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetup(JNIEnv* env, jclas
     AMediaFormat* outFmt = AMediaCodec_getOutputFormat(g_codec);
     if (inFmt) {
         const char* dump = AMediaFormat_toString(inFmt);
-        LOGI("nativeDecoderSetup input format: %s", dump ? dump : "(null)");
+        LOGE("nativeDecoderSetup input format: %s", dump ? dump : "(null)");
         AMediaFormat_delete(inFmt);
     }
     if (outFmt) {
         const char* dump = AMediaFormat_toString(outFmt);
-        LOGI("nativeDecoderSetup output format: %s", dump ? dump : "(null)");
+        LOGE("nativeDecoderSetup output format: %s", dump ? dump : "(null)");
         AMediaFormat_delete(outFmt);
     }
 
-    LOGI("nativeDecoderSetup complete mime=%s size=%dx%d fps=%d hdr=%d hdrStatic=%zu", mime, width, height, fps, g_hdrEnabled, g_hdrStaticInfoLen);
+    LOGE("nativeDecoderSetup complete mime=%s size=%dx%d fps=%d hdr=%d hdrStatic=%zu", mime, width, height, fps, g_hdrEnabled, g_hdrStaticInfoLen);
     return 0;
 }
 

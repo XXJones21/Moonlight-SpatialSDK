@@ -18,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.Checkbox
 import com.meta.spatial.uiset.dropdown.SpatialDropdown
 import com.meta.spatial.uiset.dropdown.foundation.SpatialDropdownItem
 import androidx.compose.runtime.Composable
@@ -189,6 +190,8 @@ fun ConnectionPanel2D(
   var formatOptions by remember { mutableStateOf(listOf("auto", "h264", "hevc", "av1")) }
   var capabilitySummary by remember { mutableStateOf("") }
   var capabilityStatus by remember { mutableStateOf<String?>(null) }
+  var enableHdr by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_enable_hdr", false)) }
+  var enableFullRange by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_full_range", false)) }
 
   val focusManager = LocalFocusManager.current
   val scrollState = rememberScrollState()
@@ -547,6 +550,24 @@ fun ConnectionPanel2D(
               onSelect = { selectedFormat = it },
           )
 
+          Row(
+              modifier = Modifier.fillMaxWidth(),
+              verticalAlignment = Alignment.CenterVertically
+          ) {
+            Checkbox(checked = enableHdr, onCheckedChange = { enableHdr = it })
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Enable HDR (request from server)")
+          }
+
+          Row(
+              modifier = Modifier.fillMaxWidth(),
+              verticalAlignment = Alignment.CenterVertically
+          ) {
+            Checkbox(checked = enableFullRange, onCheckedChange = { enableFullRange = it })
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Prefer full range (client output)")
+          }
+
           PrimaryButton(
               label = "Apply Stream Settings",
               expanded = true,
@@ -564,8 +585,10 @@ fun ConnectionPanel2D(
                     .putString("list_resolution", selectedRes)
                     .putString("list_fps", selectedFps)
                     .putString("video_format", storedFormat)
+                    .putBoolean("checkbox_enable_hdr", enableHdr)
+                    .putBoolean("checkbox_full_range", enableFullRange)
                     .apply()
-                connectionStatus = "Applied stream prefs (resolution/fps/format)"
+                connectionStatus = "Applied stream prefs (res/fps/format/HDR/range)"
               },
           )
         }

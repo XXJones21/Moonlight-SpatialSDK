@@ -11,14 +11,17 @@ public class NativeDecoderRenderer extends VideoDecoderRenderer {
     public void setRenderTarget(SurfaceHolder holder) {
         renderTarget = holder;
         if (holder != null) {
+            android.util.Log.i("NativeDecoderRenderer", "setRenderTarget: surface set");
             MoonBridge.nativeDecoderSetSurface(holder.getSurface());
         } else {
+            android.util.Log.i("NativeDecoderRenderer", "setRenderTarget: surface cleared");
             MoonBridge.nativeDecoderSetSurface(null);
         }
     }
 
     @Override
     public int setup(int format, int width, int height, int redrawRate) {
+        android.util.Log.i("NativeDecoderRenderer", "setup: fmt=" + format + " " + width + "x" + height + " fps=" + redrawRate + " surface=" + (renderTarget != null));
         if (renderTarget == null) {
             return -1;
         }
@@ -28,16 +31,19 @@ public class NativeDecoderRenderer extends VideoDecoderRenderer {
 
     @Override
     public void start() {
+        android.util.Log.i("NativeDecoderRenderer", "start");
         MoonBridge.nativeDecoderStart();
     }
 
     @Override
     public void stop() {
+        android.util.Log.i("NativeDecoderRenderer", "stop");
         MoonBridge.nativeDecoderStop();
     }
 
     @Override
     public void cleanup() {
+        android.util.Log.i("NativeDecoderRenderer", "cleanup");
         MoonBridge.nativeDecoderCleanup();
     }
 
