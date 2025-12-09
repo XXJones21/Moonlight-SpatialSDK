@@ -12,7 +12,7 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 - **Immersive Activity**: `ImmersiveActivity.kt` - VR activity for video streaming
 - **Core Components**:
   - `MoonlightConnectionManager.kt` - Connection lifecycle, pairing, and stream management
-  - `MoonlightPanelRenderer.kt` - Bridges Spatial panel Surface to Moonlight decoder
+  - `MoonlightPanelRenderer.kt` - Bridges Spatial panel Surface to Moonlight native decoder
   - `LegacySurfaceHolderAdapter.kt` - Adapter for Moonlight's SurfaceHolder interface
   - `OptionsPanelLayout.kt` - Compose UI components (legacy, currently unused)
 
@@ -45,6 +45,7 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 - Pairing flow (check → generate PIN → pair) using `MoonlightPairingHelper` and `PairingManager`.
 - Optional app list fetch once paired (populates appId dropdown).
 - Optional server capability fetch (res/fps/format filtering) and stream preference selector (resolution/fps/format stored in shared prefs for immersive).
+- Stream flags surfaced in UI: HDR enable, and “prefer full range” (stored in prefs).
 - Launches `ImmersiveActivity` with host/port/appId extras or launches immersive without params.
 
 **UI Actions**:
@@ -84,7 +85,7 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 
 **Key Steps**:
 
-1. Initialize `MediaCodecHelper` and create `MoonlightPanelRenderer` (single decoder), `AndroidAudioRenderer`, `MoonlightConnectionManager`.
+1. Initialize `MediaCodecHelper` and create `MoonlightPanelRenderer` (native decoder), `AndroidAudioRenderer`, `MoonlightConnectionManager`.
 2. Read connection params from Intent extras (host/port/appId); store as pending (no connect yet).
 3. Init `NetworkedAssetLoader`.
 
@@ -150,7 +151,7 @@ VideoSurfacePanelRegistration(
             shape = computePanelShape(), // derives physical aspect from prefs
             display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
             rendering = MediaPanelRenderOptions(
-                isDRM = true,
+                isDRM = false,
                 stereoMode = StereoMode.None,
             ),
         )
@@ -162,7 +163,7 @@ VideoSurfacePanelRegistration(
 
 - Shape: computed from `prefs.width/prefs.height` to keep physical aspect aligned with the stream.
 - Display: `PixelDisplayOptions(width = prefs.width, height = prefs.height)` (no hardcoded 1080p).
-- Rendering: DRM enabled, monoscopic.
+- Rendering: monoscopic; DRM currently off.
 - Surface handling: paint black → attachSurface → preConfigureDecoder → mark surface ready → start pending connection if present.
 
 #### `registerFeatures()` - Lines 74-88
@@ -215,7 +216,7 @@ private val _isConnected: MutableStateFlow<Boolean>
 class MoonlightConnectionManager(
     private val context: Context,
     private val activity: Activity,
-    private val decoderRenderer: MediaCodecDecoderRenderer,
+    private val decoderRenderer: VideoDecoderRenderer,
     private val audioRenderer: AndroidAudioRenderer,
     private val onStatusUpdate: ((String, Boolean) -> Unit)? = null
 ) : NvConnectionListener
@@ -339,7 +340,7 @@ connectionManager.pairWithServer(host, port, pin) { success, error ->
 
 **File**: `MoonlightPanelRenderer.kt`
 
-**Purpose**: Bridge the Spatial panel Surface to a single Moonlight `MediaCodecDecoderRenderer`.
+**Purpose**: Bridge the Spatial panel Surface to a single Moonlight `NativeDecoderRenderer` (native AMediaCodec path).
 
 **Key Points (current)**:
 
@@ -354,26 +355,23 @@ connectionManager.pairWithServer(host, port, pin) { success, error ->
 
 Step-by-step flow with expected logging and current gaps:
 
-1) Panel surface ready (ImmersiveActivity `surfaceConsumer`)  
+1. Panel surface ready (ImmersiveActivity `surfaceConsumer`)  
    - Paint black → `attachSurface` (sets render target) → `preConfigureDecoder` (seed setup) → `isSurfaceReady=true` → `connectToHost` if pending params.
 
-2) Connection starts  
-   - `MoonlightConnectionManager.startStream` builds `NvConnection` with `MediaCodecDecoderRenderer` and `AndroidAudioRenderer`. Sunshine may renegotiate/rewrap formats within the same RTSP session (e.g., initial HDR/AV1 attempt, then SDR/HEVC fallback).
+2. Connection starts  
+   - `MoonlightConnectionManager.startStream` builds `NvConnection` with `NativeDecoderRenderer` (via `VideoDecoderRenderer`) and `AndroidAudioRenderer`. Sunshine may renegotiate/rewrap formats within the same RTSP session (e.g., initial HDR/AV1 attempt, then SDR/HEVC fallback).
 
-3) Decoder setup (client)  
-   - `MediaCodecDecoderRenderer.setup/initializeDecoder` configures MediaCodec; skips reconfigure if params already match. Frame counters reset in `configureAndStartDecoder`.
+3. Decoder setup (client)  
+   - `NativeDecoderRenderer.setup` configures the native AMediaCodec; skips reconfigure if params already match. Frame counters reset at start.
 
-4) Decode-unit delivery  
+4. Decode-unit delivery  
    - `submitDecodeUnit` logs are present for IDR and subsequent frames, confirming packets reach the renderer.
 
-5) Input buffer fetch & queue (expected)  
-   - Path: `submitDecodeUnit: calling fetchNextInputBuffer` → `fetchNextInputBuffer` (begin/dequeued index/null buffer logs) → `queueNextInputBuffer` (queued count).  
-   - Current state: these logs are absent in the latest run, implying MediaCodec IO is not being exercised on-device or the deployed build lacks the recent logging.
+5. Negotiated formats (observed)  
+   - Native decoder logs show output format with dataspace=260, `color-range=2` (limited), `color-standard=130817`, `color-transfer=65791`, hdr=0. Colors improved after full-range/HDR flags, but the codec still advertises limited range.
 
-6) Output/render (expected)  
-   - Renderer thread `dequeueOutputBuffer` should log `rendered=` counts; balanced frame pacing uses `Choreographer`. Not observed yet because input never flows.
-
-Debug focus: verify the deployed build includes the new decoder logs and determine why `fetchNextInputBuffer` is not reached despite `submitDecodeUnit` firing.
+6. Panel overlay  
+   - A translucent/white overlay can appear; taking the headset off/on can clear it. Likely compositor/panel-layer behavior rather than decoder.
 
 ---
 
@@ -496,6 +494,8 @@ Debug focus: verify the deployed build includes the new decoder logs and determi
 - No MRUK features (anchoring, wall detection)
 - No scaling/interaction systems
 - Static panel registration (not dynamic)
+- Codec negotiates limited range/dataspace despite full-range/HDR flags; colors are now correct but rely on codec behavior.
+- Occasional translucent/white overlay on the panel; likely compositor/panel-layer related (can clear after headset off/on).
 
 ### Future Enhancements
 
@@ -544,7 +544,7 @@ Debug focus: verify the deployed build includes the new decoder logs and determi
 - `com.limelight.nvstream.NvConnection` - Moonlight connection class
 - `com.limelight.nvstream.http.NvHTTP` - HTTP communication
 - `com.limelight.nvstream.http.PairingManager` - PIN pairing
-- `com.limelight.binding.video.MediaCodecDecoderRenderer` - Video decoder
+- `com.limelight.binding.video.NativeDecoderRenderer` - Native video decoder (AMediaCodec)
 - `com.limelight.binding.audio.AndroidAudioRenderer` - Audio renderer
 
 ---

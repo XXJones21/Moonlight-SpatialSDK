@@ -20,16 +20,19 @@ This document introduces the native video decode/render path now used by default
 
 - `app/src/main/jni/native_decoder.c` / `.h`
   - NDK `AMediaCodec` wrapper (setup/start/submit/stop/cleanup).
-  - Uses `ANativeWindow_fromSurface` for output.
+  - Uses `ANativeWindow_fromSurface` for output; applies a dataspace hint (HAL_DATASPACE_V0_JFIF) on the surface to match Sunshine’s SDR JPEG/full-range signaling.
   - Input thread runs inline via `nativeDecoderSubmit`; output thread renders continuously.
+  - Logs negotiated input/output formats (color-standard/range/transfer) for debugging.
 - `app/src/main/java/com/limelight/nvstream/jni/MoonBridge.java`
   - JNI exports for native decoder control (`nativeDecoderSetSurface`, `nativeDecoderSetup/Start/Stop/Cleanup/Submit`).
 - `app/src/main/java/com/limelight/binding/video/NativeDecoderRenderer.java`
-  - Implements `VideoDecoderRenderer`; forwards all calls to the native decoder.
+  - Implements `VideoDecoderRenderer`; forwards all calls to the native decoder and exposes HDR mode passthrough.
 - `app/src/main/java/com/example/moonlight_spatialsdk/MoonlightPanelRenderer.kt`
   - Owns a single `NativeDecoderRenderer`; attaches the Spatial panel surface and preconfigures decoder.
 - `app/src/main/java/com/example/moonlight_spatialsdk/MoonlightConnectionManager.kt`
-  - Supplies the native renderer to `NvConnection.start`; no Java renderer fallback.
+  - Supplies the native renderer to `NvConnection.start`; no Java renderer fallback. HDR callbacks are forwarded to the native decoder.
+- `app/src/main/java/com/example/moonlight_spatialsdk/PancakeActivity.kt`
+  - Stream config UI now includes HDR enable and “prefer full range” toggles; values are stored in shared prefs and flow into stream config.
 - `app/src/main/jni/moonlight-core/Android.mk`
   - Builds `native_decoder.c`, links `mediandk` and `android`.
 
@@ -51,13 +54,17 @@ This document introduces the native video decode/render path now used by default
 
 ## Current Limitations
 
-- HDR and AV1: not yet validated; mime selection is present but no HDR metadata handling.
+- Codec negotiation: output format currently reports dataspace 260, `color-range=2` (limited), `color-standard=130817` (platform default), `color-transfer=65791`, so colors still depend on codec defaults despite surface hint.
+- Panel overlay: a translucent/white layer sometimes appears; removing headset can clear it. Likely compositor/panel config rather than decoder.
+- HDR: signaling path exists (UI toggle, native hook), but HDR metadata and end-to-end validation are still pending.
+- AV1: not yet validated.
 - Error handling: minimal; decoder recovery/recreation is not yet implemented.
 - Performance knobs (low-latency params, adaptive playback) are not set; this is a minimal bring-up.
+- MediaPanelRenderOptions does not expose mips/forceSceneTexture; direct-to-compositor flags would require PanelConfigOptions if needed.
 
 ## Build Notes
 
-- `Android.mk` links `-lmediandk -landroid` and compiles `../native_decoder.c`.
+- `Android.mk` links `-lmediandk -landroid -lnativewindow` and compiles `../native_decoder.c`.
 - No Gradle changes required beyond existing JNI build.
 
 ## How to Exercise
@@ -73,3 +80,4 @@ This document introduces the native video decode/render path now used by default
 - Wire HDR static info and guard AV1 paths.
 - Add perf counters (queued/rendered) and optional tracing.
 - Feature flags for HDR/AV1/recovery once baseline is stable.
+- If overlay persists, consider a PanelConfigOptions path to set `mips=1`, `forceSceneTexture=false`, `enableTransparent=false` explicitly (MediaPanelRenderOptions doesn’t expose these).
