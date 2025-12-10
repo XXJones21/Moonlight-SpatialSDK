@@ -39,7 +39,8 @@ import com.meta.spatial.runtime.NetworkedAssetLoader
 import com.meta.spatial.toolkit.AppSystemActivity
 import com.meta.spatial.toolkit.MediaPanelRenderOptions
 import com.meta.spatial.toolkit.MediaPanelSettings
-import com.meta.spatial.toolkit.LayerConfig
+import com.meta.spatial.compose.composePanel
+import com.meta.spatial.runtime.LayerConfig
 import com.meta.spatial.toolkit.PanelRegistration
 import com.meta.spatial.toolkit.PanelStyleOptions
 import com.meta.spatial.toolkit.PixelDisplayOptions
@@ -246,17 +247,16 @@ class ImmersiveActivity : AppSystemActivity() {
         PanelRegistration(R.id.connection_panel) {
           config {
             fractionOfScreen = 0.8f
-            height = 1200
-            width = 800
+            height = basePanelHeightMeters
+            width = basePanelHeightMeters * 0.8f
             layoutDpi = 160
             layerConfig = LayerConfig()
             enableTransparent = true
             includeGlass = false
             themeResourceId = R.style.PanelAppThemeTransparent
           }
-          composePanel {
-            setContent {
-              ConnectionPanelImmersive(
+          composePanel { setContent {
+            ConnectionPanelImmersive(
                   pairingHelper = pairingHelper,
                   savedHost = savedHost,
                   savedPort = savedPort,
