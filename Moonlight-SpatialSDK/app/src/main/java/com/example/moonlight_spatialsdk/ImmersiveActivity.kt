@@ -1,6 +1,7 @@
 package com.example.moonlight_spatialsdk
 
 import android.app.PendingIntent
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -26,6 +27,7 @@ import com.meta.spatial.toolkit.Panel
 import com.meta.spatial.toolkit.PanelDimensions
 import com.meta.spatial.toolkit.PlayerBodyAttachmentSystem
 import com.meta.spatial.toolkit.Transform
+import com.meta.spatial.toolkit.TransformParent
 import com.meta.spatial.toolkit.Visible
 import com.meta.spatial.datamodelinspector.DataModelInspectorFeature
 import com.meta.spatial.debugtools.HotReloadFeature
@@ -37,6 +39,7 @@ import com.meta.spatial.runtime.NetworkedAssetLoader
 import com.meta.spatial.toolkit.AppSystemActivity
 import com.meta.spatial.toolkit.MediaPanelRenderOptions
 import com.meta.spatial.toolkit.MediaPanelSettings
+import com.meta.spatial.toolkit.LayerConfig
 import com.meta.spatial.toolkit.PanelRegistration
 import com.meta.spatial.toolkit.PanelStyleOptions
 import com.meta.spatial.toolkit.PixelDisplayOptions
@@ -64,7 +67,9 @@ class ImmersiveActivity : AppSystemActivity() {
   private var isPaired: Boolean = false
   private var isSurfaceReady: Boolean = false
   private var videoPanelEntity: Entity? = null
+  private var connectionPanelEntity: Entity? = null
   private var panelPositioningSystem: PanelPositioningSystem? = null
+  private lateinit var pairingHelper: MoonlightPairingHelper
 
   override fun registerFeatures(): List<SpatialFeature> {
     val features =
@@ -96,6 +101,7 @@ class ImmersiveActivity : AppSystemActivity() {
         crashListener = CrashListener { _ -> },
     )
     audioRenderer = AndroidAudioRenderer(this, prefs.enableAudioFx)
+    pairingHelper = MoonlightPairingHelper(this)
     connectionManager = MoonlightConnectionManager(
         context = this,
         activity = this,
@@ -155,6 +161,10 @@ class ImmersiveActivity : AppSystemActivity() {
     System.out.println("=== CALLING_CREATE_VIDEO_PANEL_ENTITY ===")
     android.util.Log.e(TAG, "=== CALLING_CREATE_VIDEO_PANEL_ENTITY ===")
     createVideoPanelEntity()
+    
+    System.out.println("=== CALLING_CREATE_CONNECTION_PANEL_ENTITY ===")
+    android.util.Log.e(TAG, "=== CALLING_CREATE_CONNECTION_PANEL_ENTITY ===")
+    createConnectionPanelEntity()
   }
 
 
@@ -162,6 +172,12 @@ class ImmersiveActivity : AppSystemActivity() {
   override fun registerPanels(): List<PanelRegistration> {
     System.out.println("=== REGISTER_PANELS_CALLED ===")
     android.util.Log.e(TAG, "=== REGISTER_PANELS_CALLED ===")
+    
+    val shared = getSharedPreferences("connection_prefs", MODE_PRIVATE)
+    val savedHost = shared.getString("saved_host", "") ?: ""
+    val savedPort = shared.getString("saved_port", "47989") ?: "47989"
+    val savedAppId = shared.getString("saved_appId", "0") ?: "0"
+    
     return listOf(
         VideoSurfacePanelRegistration(
             R.id.ui_example,
@@ -196,6 +212,9 @@ class ImmersiveActivity : AppSystemActivity() {
               System.out.println("=== SURFACE_READY_AND_DECODER_CONFIGURED ===")
               android.util.Log.e(TAG, "=== SURFACE_READY_AND_DECODER_CONFIGURED ===")
               
+              // Update connection panel parent after video panel is ready
+              updateConnectionPanelParent()
+              
               // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
               val params = pendingConnectionParams
               if (params != null) {
@@ -224,6 +243,43 @@ class ImmersiveActivity : AppSystemActivity() {
               )
             },
         ),
+        PanelRegistration(R.id.connection_panel) {
+          config {
+            fractionOfScreen = 0.8f
+            height = 1200
+            width = 800
+            layoutDpi = 160
+            layerConfig = LayerConfig()
+            enableTransparent = true
+            includeGlass = false
+            themeResourceId = R.style.PanelAppThemeTransparent
+          }
+          composePanel {
+            setContent {
+              ConnectionPanelImmersive(
+                  pairingHelper = pairingHelper,
+                  savedHost = savedHost,
+                  savedPort = savedPort,
+                  savedAppId = savedAppId,
+                  onSaveConnection = { h: String, p: String, a: String ->
+                    getSharedPreferences("connection_prefs", MODE_PRIVATE).edit()
+                        .putString("saved_host", h)
+                        .putString("saved_port", p)
+                        .putString("saved_appId", a)
+                        .apply()
+                  },
+                  onClearPairing = {
+                    IdentityStore.clearAll(this@ImmersiveActivity)
+                    Log.i(TAG, "Cleared client pairing state and pinned certificates")
+                  },
+                  onConnect = { host, port, appId ->
+                    Log.i(TAG, "Connection panel connect clicked host=$host port=$port appId=$appId")
+                    connectToHost(host, port, appId)
+                  }
+              )
+            }
+          }
+        },
     )
   }
 
@@ -357,6 +413,62 @@ class ImmersiveActivity : AppSystemActivity() {
     System.out.println("=== VIDEO_PANEL_ENTITY_CREATED ===")
     android.util.Log.e(TAG, "=== VIDEO_PANEL_ENTITY_CREATED ===")
     Log.i(TAG, "Video panel entity created with PanelDimensions - positioning handled by Spatial SDK")
+  }
+
+  private fun createConnectionPanelEntity() {
+    System.out.println("=== CREATE_CONNECTION_PANEL_ENTITY_CALLED ===")
+    android.util.Log.e(TAG, "=== CREATE_CONNECTION_PANEL_ENTITY_CALLED ===")
+    Log.i(TAG, "Creating connection panel entity with Panel(R.id.connection_panel)")
+    
+    val aspect =
+        if (prefs.height != 0) {
+          prefs.width.toFloat() / prefs.height.toFloat()
+        } else {
+          16f / 9f
+        }
+    val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+    
+    connectionPanelEntity = Entity.create(
+        listOf(
+            Panel(R.id.connection_panel),
+            Transform(),
+            PanelDimensions(panelSize),
+            Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
+            Visible(true),
+            TransformParent(Entity.nullEntity()) // Will be updated when videoPanelEntity is ready
+        )
+    )
+    
+    System.out.println("=== CONNECTION_PANEL_ENTITY_CREATED ===")
+    android.util.Log.e(TAG, "=== CONNECTION_PANEL_ENTITY_CREATED ===")
+    Log.i(TAG, "Connection panel entity created - will be parented to video panel when ready")
+    
+    // If video panel already exists, parent immediately
+    updateConnectionPanelParent()
+  }
+
+  private fun updateConnectionPanelParent() {
+    val videoEntity = videoPanelEntity
+    val connectionEntity = connectionPanelEntity
+    
+    if (videoEntity != null && connectionEntity != null) {
+      val videoDimensions = videoEntity.tryGetComponent<PanelDimensions>()
+      val connectionDimensions = connectionEntity.tryGetComponent<PanelDimensions>()
+      val spacing = 0.1f // 10cm spacing between panels
+      val offsetX = if (videoDimensions != null && connectionDimensions != null) {
+        videoDimensions.dimensions.x / 2f + spacing + connectionDimensions.dimensions.x / 2f
+      } else {
+        1.0f + spacing // Default offset if dimensions not available
+      }
+      
+      val offset = Vector3(offsetX, 0f, 0f)
+      connectionEntity.setComponent(TransformParent(videoEntity))
+      connectionEntity.setComponent(Transform(Pose(offset)))
+      
+      System.out.println("=== CONNECTION_PANEL_PARENTED ===")
+      android.util.Log.e(TAG, "=== CONNECTION_PANEL_PARENTED ===")
+      Log.i(TAG, "Connection panel parented to video panel with offset x=$offsetX")
+    }
   }
 
 }
