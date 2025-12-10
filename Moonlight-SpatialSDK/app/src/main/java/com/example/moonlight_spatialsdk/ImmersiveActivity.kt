@@ -29,6 +29,7 @@ import com.meta.spatial.toolkit.PlayerBodyAttachmentSystem
 import com.meta.spatial.toolkit.Transform
 import com.meta.spatial.toolkit.TransformParent
 import com.meta.spatial.toolkit.Visible
+import com.meta.spatial.toolkit.Scale
 import com.meta.spatial.datamodelinspector.DataModelInspectorFeature
 import com.meta.spatial.debugtools.HotReloadFeature
 import com.meta.spatial.isdk.IsdkFeature
@@ -38,6 +39,7 @@ import com.meta.spatial.ovrmetrics.OVRMetricsFeature
 import com.meta.spatial.runtime.NetworkedAssetLoader
 import com.meta.spatial.toolkit.AppSystemActivity
 import com.meta.spatial.toolkit.MediaPanelRenderOptions
+import com.meta.spatial.toolkit.SpatialActivityManager
 import com.meta.spatial.toolkit.MediaPanelSettings
 import com.meta.spatial.compose.composePanel
 import com.meta.spatial.runtime.LayerConfig
@@ -166,100 +168,26 @@ class ImmersiveActivity : AppSystemActivity() {
     Log.i(TAG, "PanelPositioningSystem registered")
 
     // Create PanelManager first - this will be the root for all panels
-    System.out.println("=== CALLING_CREATE_PANEL_MANAGER ===")
-    android.util.Log.e(TAG, "=== CALLING_CREATE_PANEL_MANAGER ===")
     panelManager = PanelManager()
     val panelManagerEntity = panelManager!!.create()
     panelPositioningSystem?.setPanelEntity(panelManagerEntity)
     Log.i(TAG, "PanelManager created and set on positioning system")
 
-    System.out.println("=== CALLING_CREATE_VIDEO_PANEL_ENTITY ===")
-    android.util.Log.e(TAG, "=== CALLING_CREATE_VIDEO_PANEL_ENTITY ===")
     createVideoPanelEntity()
-    
-    System.out.println("=== CALLING_CREATE_CONNECTION_PANEL_ENTITY ===")
-    android.util.Log.e(TAG, "=== CALLING_CREATE_CONNECTION_PANEL_ENTITY ===")
     createConnectionPanelEntity()
   }
 
 
   @OptIn(SpatialSDKExperimentalAPI::class)
   override fun registerPanels(): List<PanelRegistration> {
-    System.out.println("=== REGISTER_PANELS_CALLED ===")
-    android.util.Log.e(TAG, "=== REGISTER_PANELS_CALLED ===")
-    
     val shared = getSharedPreferences("connection_prefs", MODE_PRIVATE)
     val savedHost = shared.getString("saved_host", "") ?: ""
     val savedPort = shared.getString("saved_port", "47989") ?: "47989"
     val savedAppId = shared.getString("saved_appId", "0") ?: "0"
     
+    // Video panel is registered dynamically in createVideoPanelEntity() using executeOnVrActivity
+    // to ensure panelManager is initialized before registration (lifecycle alignment)
     return listOf(
-        VideoSurfacePanelRegistration(
-            R.id.ui_example,
-            surfaceConsumer = { panelEntity, surface ->
-              System.out.println("=== SURFACE_CONSUMER_CALLED panelEntity=$panelEntity ===")
-              android.util.Log.e(TAG, "=== SURFACE_CONSUMER_CALLED panelEntity=$panelEntity ===")
-              Log.i(TAG, "Surface attached for panel entity=$panelEntity")
-              
-              // Store the panel entity reference
-              videoPanelEntity = panelEntity
-              
-              // Parent video panel to PanelManager
-              val managerEntity = panelManager?.panelManagerEntity
-              if (managerEntity != null) {
-                panelEntity.setComponent(TransformParent(managerEntity))
-                panelEntity.setComponent(Transform(Pose(Vector3(0f, 0f, 0f))))
-                Log.i(TAG, "Video panel parented to PanelManager")
-              }
-              
-              // Panel starts hidden - will be shown when stream is ready
-              panelEntity.setComponent(Visible(false))
-              panelEntity.setComponent(Grabbable(enabled = true, type = GrabbableType.PIVOT_Y))
-              
-              SurfaceUtil.paintBlack(surface)
-              
-              // Configure decoder with preferences when panel is created
-              System.out.println("=== ATTACHING_SURFACE_AND_CONFIGURING_DECODER ===")
-              android.util.Log.e(TAG, "=== ATTACHING_SURFACE_AND_CONFIGURING_DECODER ===")
-              moonlightPanelRenderer.attachSurface(surface)
-              
-              // Pre-configure decoder with settings from PancakeActivity
-              System.out.println("=== PRECONFIGURING_DECODER ===")
-              android.util.Log.e(TAG, "=== PRECONFIGURING_DECODER ===")
-              moonlightPanelRenderer.preConfigureDecoder()
-              
-              isSurfaceReady = true
-              System.out.println("=== SURFACE_READY_AND_DECODER_CONFIGURED ===")
-              android.util.Log.e(TAG, "=== SURFACE_READY_AND_DECODER_CONFIGURED ===")
-              
-              // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
-              val params = pendingConnectionParams
-              if (params != null) {
-                val (host, port, appId) = params
-                System.out.println("=== CONNECTING host=$host port=$port appId=$appId ===")
-                android.util.Log.e(TAG, "=== CONNECTING host=$host port=$port appId=$appId ===")
-                Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
-                connectToHost(host, port, appId)
-              } else {
-                System.out.println("=== NO_PENDING_CONNECTION_PARAMS ===")
-                android.util.Log.e(TAG, "=== NO_PENDING_CONNECTION_PARAMS ===")
-                Log.d(TAG, "Panel surface ready but no pending connection params")
-              }
-            },
-            settingsCreator = {
-              System.out.println("=== SETTINGS_CREATOR_CALLED ===")
-              android.util.Log.e(TAG, "=== SETTINGS_CREATOR_CALLED ===")
-              MediaPanelSettings(
-                  shape = computePanelShape(),
-                  display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
-                  rendering = MediaPanelRenderOptions(
-                      isDRM = false,
-                      stereoMode = StereoMode.None
-                  ),
-                  style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
-              )
-            },
-        ),
         PanelRegistration(R.id.connection_panel) {
           config {
             fractionOfScreen = 0.8f
@@ -408,8 +336,6 @@ class ImmersiveActivity : AppSystemActivity() {
   }
 
   private fun createVideoPanelEntity() {
-    System.out.println("=== CREATE_VIDEO_PANEL_ENTITY_CALLED ===")
-    android.util.Log.e(TAG, "=== CREATE_VIDEO_PANEL_ENTITY_CALLED ===")
     Log.i(TAG, "Creating video panel entity with Panel(R.id.ui_example)")
     
     val aspect =
@@ -420,11 +346,70 @@ class ImmersiveActivity : AppSystemActivity() {
         }
     val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
     
+    // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
+    // This matches PremiumMediaSample pattern and ensures panelManager is initialized
+    SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
+      immersiveActivity.registerPanel(
+          VideoSurfacePanelRegistration(
+              R.id.ui_example,
+              surfaceConsumer = { panelEntity, surface ->
+                Log.i(TAG, "Surface attached for panel entity=$panelEntity")
+                
+                // Store the panel entity reference
+                videoPanelEntity = panelEntity
+                
+                // Parent video panel to PanelManager (now guaranteed to be initialized)
+                val managerEntity = panelManager?.panelManagerEntity
+                if (managerEntity != null) {
+                  panelEntity.setComponent(TransformParent(managerEntity))
+                  panelEntity.setComponent(Transform(Pose(Vector3(0f, 0f, 0f))))
+                  Log.i(TAG, "Video panel parented to PanelManager")
+                }
+                
+                // Panel starts hidden - will be shown when stream is ready
+                panelEntity.setComponent(Visible(false))
+                panelEntity.setComponent(Grabbable(enabled = true, type = GrabbableType.PIVOT_Y))
+                
+                SurfaceUtil.paintBlack(surface)
+                
+                // Configure decoder with preferences when panel is created
+                moonlightPanelRenderer.attachSurface(surface)
+                moonlightPanelRenderer.preConfigureDecoder()
+                
+                isSurfaceReady = true
+                
+                // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
+                val params = pendingConnectionParams
+                if (params != null) {
+                  val (host, port, appId) = params
+                  Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
+                  connectToHost(host, port, appId)
+                } else {
+                  Log.d(TAG, "Panel surface ready but no pending connection params")
+                }
+              },
+              settingsCreator = {
+                MediaPanelSettings(
+                    shape = computePanelShape(),
+                    display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
+                    rendering = MediaPanelRenderOptions(
+                        isDRM = false,
+                        stereoMode = StereoMode.None,
+                        zIndex = 0 // Rectilinear panels use zIndex 0 (Equirect180 uses -1)
+                    ),
+                    style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
+                )
+              },
+          )
+      )
+    }
+    
+    // Create entity after panel registration (panel must be registered before entity creation)
     val managerEntity = panelManager?.panelManagerEntity
     val parentComponent = if (managerEntity != null) {
       TransformParent(managerEntity)
     } else {
-      TransformParent(Entity.nullEntity()) // Will be updated when PanelManager is ready
+      TransformParent(Entity.nullEntity())
     }
     
     videoPanelEntity = Entity.create(
@@ -432,14 +417,13 @@ class ImmersiveActivity : AppSystemActivity() {
             Panel(R.id.ui_example),
             Transform(Pose(Vector3(0f, 0f, 0f))),
             PanelDimensions(panelSize),
+            Scale(Vector3(1f)), // Initial scale of 1.0 - can be adjusted after connection
             Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
             Visible(false), // Hidden initially, shown when stream is ready
             parentComponent
         )
     )
     
-    System.out.println("=== VIDEO_PANEL_ENTITY_CREATED ===")
-    android.util.Log.e(TAG, "=== VIDEO_PANEL_ENTITY_CREATED ===")
     Log.i(TAG, "Video panel entity created - parented to PanelManager, hidden initially")
   }
 
@@ -478,5 +462,38 @@ class ImmersiveActivity : AppSystemActivity() {
     android.util.Log.e(TAG, "=== CONNECTION_PANEL_ENTITY_CREATED ===")
     Log.i(TAG, "Connection panel entity created - parented to PanelManager, visible initially")
   }
+
+  /**
+   * Updates the scale of the video panel after connection is established.
+   * Scale is applied uniformly to all dimensions (x, y, z).
+   * 
+   * @param scaleFactor Scale multiplier (1.0 = original size, 2.0 = double size, 0.5 = half size)
+   */
+  fun updateVideoPanelScale(scaleFactor: Float) {
+    val entity = videoPanelEntity ?: return
+    val currentScale = entity.tryGetComponent<Scale>()
+    if (currentScale != null) {
+      entity.setComponent(Scale(Vector3(scaleFactor)))
+      Log.i(TAG, "Video panel scale updated to $scaleFactor")
+    } else {
+      entity.setComponent(Scale(Vector3(scaleFactor)))
+      Log.i(TAG, "Video panel scale component added with value $scaleFactor")
+    }
+  }
+
+  /**
+   * PanelLayerAlpha is a custom component used in PremiumMediaSample for fade in/out effects.
+   * It controls panel opacity separately from the Visible component:
+   * - Visible: Controls whether entity is rendered at all (on/off)
+   * - PanelLayerAlpha: Controls opacity for smooth fade transitions (0.0 = transparent, 1.0 = opaque)
+   * 
+   * Implementation requires:
+   * 1. Component definition XML (components/PanelLayerAlpha.xml)
+   * 2. Component registration in registerFeatures()
+   * 3. PanelLayerAlphaSystem to apply alpha to panel layer colorScaleBias
+   * 4. Optional: TweenEngineSystem integration for animated fades
+   * 
+   * For now, we use Visible component for instant show/hide. Fade effects can be added later if needed.
+   */
 
 }
