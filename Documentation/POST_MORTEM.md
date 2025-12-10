@@ -330,6 +330,42 @@ Understanding the Moonlight protocol is essential:
 
 ---
 
+## Known Issues
+
+### Video Surface Color Space Initialization Issue
+
+**Problem**: Video panels display incorrect colors on initial surface creation. Colors appear washed out, oversaturated, or with incorrect color space mapping. The issue resolves after device sleep/wake cycle (onPause/onResume).
+
+**Affected Implementations**:
+- Moonlight SpatialSDK (this project)
+- PremiumMediaSample (Meta's reference implementation)
+
+**Symptoms**:
+- Incorrect colors on first video frame after surface creation
+- Colors appear correct after device sleep/wake cycle
+- Issue affects both ExoPlayer (PremiumMediaSample) and native decoder (Moonlight) paths
+
+**Root Cause Analysis**:
+- Likely related to Spatial SDK panel surface color space initialization
+- Surface color space/dataspace may not be properly applied on first frame
+- Sleep/wake cycle triggers surface re-initialization that applies correct color space
+
+**Workaround**:
+- Device sleep/wake cycle (taking headset off/on) fixes colors
+- This is a known limitation in the current Spatial SDK version
+
+**Status**: ⚠️ Known SDK Issue - Affects reference implementation
+- Not a bug in our implementation
+- Requires SDK fix from Meta
+- Workaround: Sleep/wake cycle if colors are incorrect
+
+**References**:
+- Observed in PremiumMediaSample test videos
+- Same behavior in Moonlight SpatialSDK
+- Issue persists across different video codecs (H.264, HEVC, AV1)
+
+---
+
 ## Remaining Considerations
 
 ### Potential Future Issues
@@ -338,6 +374,7 @@ Understanding the Moonlight protocol is essential:
 2. **Network Conditions**: Handle UDP packet loss and network interruptions
 3. **Decoder Capabilities**: Verify device supports negotiated format/resolution
 4. **Thread Safety**: Ensure all bridge operations are thread-safe
+5. **Color Space Initialization**: Monitor for SDK updates addressing video surface color space issue
 
 ### Monitoring Points
 
