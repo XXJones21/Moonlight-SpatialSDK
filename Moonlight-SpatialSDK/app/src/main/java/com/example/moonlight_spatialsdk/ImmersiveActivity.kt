@@ -5,6 +5,9 @@ import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.InputDevice
+import android.view.KeyEvent
+import android.view.MotionEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -74,6 +77,11 @@ class ImmersiveActivity : AppSystemActivity() {
   private var panelManager: PanelManager? = null
   private var panelPositioningSystem: PanelPositioningSystem? = null
   private lateinit var pairingHelper: MoonlightPairingHelper
+  
+  // Diagnostic flag: when true, bypass ControllerHandler forwarding to allow UI navigation testing
+  // Set to true to test if controller input reaches the app (UI navigation)
+  // Set to false to forward input to ControllerHandler for Sunshine passthrough
+  private val allowControllerUIInput = false
 
   override fun registerFeatures(): List<SpatialFeature> {
     val features =
@@ -118,6 +126,14 @@ class ImmersiveActivity : AppSystemActivity() {
           if (connected) {
             videoPanelEntity?.setComponent(Visible(true))
             Log.i(TAG, "Video stream ready (connected=$connected, status=$status), showing video panel")
+            
+            // Initialize ControllerHandler now that video panel is visible and stream is ready
+            val handlerInitialized = connectionManager.initializeControllerHandler()
+            if (handlerInitialized) {
+              Log.i(TAG, "ControllerHandler initialized successfully for input passthrough")
+            } else {
+              Log.w(TAG, "ControllerHandler initialization failed - input passthrough may not work")
+            }
           }
         }
     )
@@ -287,9 +303,11 @@ class ImmersiveActivity : AppSystemActivity() {
       return
     }
 
-    // Hide connection panel when connect is pressed
-    connectionPanelEntity?.setComponent(Visible(false))
-    Log.i(TAG, "Connection panel hidden - starting connection")
+    // Destroy connection panel entity when connect is pressed to prevent it from receiving input
+    // Following PremiumMediaSample pattern: destroy entity, not just hide it
+    connectionPanelEntity?.destroy()
+    connectionPanelEntity = null
+    Log.i(TAG, "Connection panel entity destroyed - starting connection")
 
     // PancakeActivity already verified pairing before launching ImmersiveActivity,
     // so we can skip the redundant checkPairing() call and directly start the stream.
@@ -495,5 +513,112 @@ class ImmersiveActivity : AppSystemActivity() {
    * 
    * For now, we use Visible component for instant show/hide. Fade effects can be added later if needed.
    */
+
+  /**
+   * Forward key events to ControllerHandler for input passthrough.
+   * This allows Bluetooth controllers (Xbox/DualShock 4) to send input to the server.
+   * Only forwards events when connected, and consumes them to prevent UI handling.
+   */
+  override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+    // Diagnostic: allow controller input to reach UI for testing
+    if (allowControllerUIInput) {
+      // Log to verify all events are reaching this method
+      Log.d(TAG, "dispatchKeyEvent: action=${event.action}, keyCode=${event.keyCode}, device=${event.device?.name}")
+      return super.dispatchKeyEvent(event)
+    }
+    
+    // Log all key events for debugging
+    Log.d(TAG, "dispatchKeyEvent: action=${event.action}, keyCode=${event.keyCode}, device=${event.device?.name}, connected=${connectionManager.isConnected()}")
+    
+    // Only forward input when connected (check directly from connection manager for accuracy)
+    if (!connectionManager.isConnected()) {
+      Log.d(TAG, "dispatchKeyEvent: Not connected, passing to super")
+      return super.dispatchKeyEvent(event)
+    }
+    
+    val controllerHandler = connectionManager.getControllerHandler()
+    if (controllerHandler == null) {
+      Log.w(TAG, "dispatchKeyEvent: Connected but ControllerHandler is null")
+      return super.dispatchKeyEvent(event)
+    }
+    
+    // Skip keyboard events (alphabetic keyboards) to avoid consuming UI input
+    val device = event.device
+    if (device != null && device.keyboardType == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
+      Log.d(TAG, "dispatchKeyEvent: Alphabetic keyboard, passing to super")
+      return super.dispatchKeyEvent(event)
+    }
+    
+    // Let ControllerHandler determine if this is a gamepad event
+    // It has sophisticated logic to detect gamepads and will return true if handled
+    val handled = when (event.action) {
+      KeyEvent.ACTION_DOWN -> {
+        val result = controllerHandler.handleButtonDown(event)
+        Log.d(TAG, "dispatchKeyEvent: handleButtonDown returned $result")
+        result
+      }
+      KeyEvent.ACTION_UP -> {
+        val result = controllerHandler.handleButtonUp(event)
+        Log.d(TAG, "dispatchKeyEvent: handleButtonUp returned $result")
+        result
+      }
+      else -> false
+    }
+    if (handled) {
+      // Consume the event to prevent UI from handling it
+      Log.d(TAG, "dispatchKeyEvent: ControllerHandler handled event, consuming")
+      return true
+    }
+    
+    Log.d(TAG, "dispatchKeyEvent: ControllerHandler did not handle, passing to super")
+    return super.dispatchKeyEvent(event)
+  }
+
+  /**
+   * Forward motion events (joystick/analog stick movements) to ControllerHandler for input passthrough.
+   * This allows Bluetooth controllers to send analog stick and trigger input to the server.
+   * Only forwards gamepad events when connected, and consumes them to prevent UI handling.
+   */
+  override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
+    // Diagnostic: allow controller input to reach UI for testing
+    if (allowControllerUIInput) {
+      // Log to verify all events are reaching this method
+      Log.d(TAG, "dispatchGenericMotionEvent: action=${event.action}, source=${event.source}, device=${event.device?.name}")
+      return super.dispatchGenericMotionEvent(event)
+    }
+    
+    // Log motion events for debugging
+    Log.d(TAG, "dispatchGenericMotionEvent: action=${event.action}, source=${event.source}, device=${event.device?.name}, connected=${connectionManager.isConnected()}")
+    
+    // Only forward input when connected (check directly from connection manager for accuracy)
+    if (!connectionManager.isConnected()) {
+      Log.d(TAG, "dispatchGenericMotionEvent: Not connected, passing to super")
+      return super.dispatchGenericMotionEvent(event)
+    }
+    
+    val controllerHandler = connectionManager.getControllerHandler()
+    if (controllerHandler == null) {
+      Log.w(TAG, "dispatchGenericMotionEvent: Connected but ControllerHandler is null")
+      return super.dispatchGenericMotionEvent(event)
+    }
+    
+    // Check if this is a gamepad/joystick event
+    val isGamepad = (event.source and InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK ||
+        (event.source and InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD
+    if (isGamepad) {
+      val handled = controllerHandler.handleMotionEvent(event)
+      Log.d(TAG, "dispatchGenericMotionEvent: handleMotionEvent returned $handled")
+      if (handled) {
+        // Consume the event to prevent UI from handling it
+        Log.d(TAG, "dispatchGenericMotionEvent: ControllerHandler handled event, consuming")
+        return true
+      }
+    } else {
+      Log.d(TAG, "dispatchGenericMotionEvent: Not a gamepad event (source=${event.source}), passing to super")
+    }
+    
+    Log.d(TAG, "dispatchGenericMotionEvent: ControllerHandler did not handle, passing to super")
+    return super.dispatchGenericMotionEvent(event)
+  }
 
 }

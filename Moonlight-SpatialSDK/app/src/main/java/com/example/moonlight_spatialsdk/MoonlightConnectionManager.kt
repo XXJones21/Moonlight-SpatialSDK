@@ -7,6 +7,7 @@ import android.os.Looper
 import android.util.Log
 import com.limelight.binding.audio.AndroidAudioRenderer
 import com.limelight.binding.crypto.AndroidCryptoProvider
+import com.limelight.binding.input.ControllerHandler
 import com.limelight.nvstream.av.video.VideoDecoderRenderer
 import com.limelight.nvstream.NvConnection
 import com.limelight.nvstream.NvConnectionListener
@@ -42,6 +43,8 @@ class MoonlightConnectionManager(
     private val tag = "MoonlightConnectionMgr"
     private var connection: NvConnection? = null
     private var isConnected: Boolean = false
+    private var controllerHandler: ControllerHandler? = null
+    private var currentPrefs: PreferenceConfiguration? = null
     private val cryptoProvider: LimelightCryptoProvider = AndroidCryptoProvider(context)
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -223,6 +226,7 @@ class MoonlightConnectionManager(
                     serverCert // serverCert (null means use default)
                 )
                 Log.i(tag, "startStream: NvConnection created, calling start()")
+                currentPrefs = prefs
                 connection?.start(audioRenderer, decoderRenderer, this)
                 Log.i(tag, "NvConnection.start invoked host=$host")
             } catch (e: Exception) {
@@ -240,6 +244,12 @@ class MoonlightConnectionManager(
     fun stopStream() {
         executor.execute {
             Log.i(tag, "stopStream invoked")
+            
+            // Destroy ControllerHandler
+            controllerHandler?.destroy()
+            controllerHandler = null
+            currentPrefs = null
+            
             connection?.stop()
             connection = null
             isConnected = false
@@ -287,6 +297,11 @@ class MoonlightConnectionManager(
     override fun connectionStarted() {
         isConnected = true
         Log.i(tag, "connectionStarted")
+        
+        // Try to create ControllerHandler automatically if connection and prefs are available
+        // If not available now, user can call initializeControllerHandler() manually later
+        initializeControllerHandler()
+        
         onStatusUpdate?.let { postToMain { it("Connected", true) } }
     }
 
@@ -294,6 +309,12 @@ class MoonlightConnectionManager(
         isConnected = false
         val message = if (errorCode == 0) "Disconnected" else "Connection terminated (error: $errorCode)"
         Log.w(tag, "connectionTerminated error=$errorCode")
+        
+        // Destroy ControllerHandler
+        controllerHandler?.destroy()
+        controllerHandler = null
+        currentPrefs = null
+        
         onStatusUpdate?.let { postToMain { it(message, false) } }
         try {
             decoderRenderer.stop()
@@ -341,6 +362,55 @@ class MoonlightConnectionManager(
 
     override fun setControllerLED(controllerNumber: Short, r: Byte, g: Byte, b: Byte) {
         // Controller LED color changed
+    }
+
+    /**
+     * Manually initialize ControllerHandler for input passthrough.
+     * Can be called after connection is established, e.g., when a controller is paired.
+     * Safe to call multiple times - will only create if not already initialized.
+     * 
+     * @return true if ControllerHandler was created or already exists, false if creation failed
+     */
+    fun initializeControllerHandler(): Boolean {
+        // If already initialized, return success
+        if (controllerHandler != null) {
+            Log.d(tag, "initializeControllerHandler: Already initialized")
+            return true
+        }
+        
+        // Check if connection and prefs are available
+        val conn = connection
+        val prefs = currentPrefs
+        if (conn == null || prefs == null) {
+            Log.w(tag, "initializeControllerHandler: Cannot create - connection=${conn != null} prefs=${prefs != null}")
+            return false
+        }
+        
+        // Create ControllerHandler
+        try {
+            controllerHandler = ControllerHandler(activity, conn, null, prefs)
+            Log.i(tag, "initializeControllerHandler: ControllerHandler created successfully")
+            return true
+        } catch (e: Exception) {
+            Log.e(tag, "initializeControllerHandler: Failed to create ControllerHandler", e)
+            return false
+        }
+    }
+
+    /**
+     * Get the ControllerHandler instance for input event forwarding.
+     * Returns null if ControllerHandler is not created yet.
+     */
+    fun getControllerHandler(): ControllerHandler? {
+        return controllerHandler
+    }
+
+    /**
+     * Check if currently connected to the server.
+     * Used for input event filtering.
+     */
+    fun isConnected(): Boolean {
+        return isConnected
     }
 
     private fun postToMain(block: () -> Unit) {
