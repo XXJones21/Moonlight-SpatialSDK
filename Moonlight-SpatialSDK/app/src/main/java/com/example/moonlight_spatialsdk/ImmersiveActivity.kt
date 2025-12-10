@@ -69,6 +69,7 @@ class ImmersiveActivity : AppSystemActivity() {
   private var isSurfaceReady: Boolean = false
   private var videoPanelEntity: Entity? = null
   private var connectionPanelEntity: Entity? = null
+  private var panelManager: PanelManager? = null
   private var panelPositioningSystem: PanelPositioningSystem? = null
   private lateinit var pairingHelper: MoonlightPairingHelper
 
@@ -111,6 +112,11 @@ class ImmersiveActivity : AppSystemActivity() {
         onStatusUpdate = { status, connected ->
           _connectionStatus.value = status
           _isConnected.value = connected
+          // When connection is established (stream ready), show video panel
+          if (connected) {
+            videoPanelEntity?.setComponent(Visible(true))
+            Log.i(TAG, "Video stream ready (connected=$connected, status=$status), showing video panel")
+          }
         }
     )
     
@@ -159,6 +165,14 @@ class ImmersiveActivity : AppSystemActivity() {
     systemManager.registerSystem(panelPositioningSystem!!)
     Log.i(TAG, "PanelPositioningSystem registered")
 
+    // Create PanelManager first - this will be the root for all panels
+    System.out.println("=== CALLING_CREATE_PANEL_MANAGER ===")
+    android.util.Log.e(TAG, "=== CALLING_CREATE_PANEL_MANAGER ===")
+    panelManager = PanelManager()
+    val panelManagerEntity = panelManager!!.create()
+    panelPositioningSystem?.setPanelEntity(panelManagerEntity)
+    Log.i(TAG, "PanelManager created and set on positioning system")
+
     System.out.println("=== CALLING_CREATE_VIDEO_PANEL_ENTITY ===")
     android.util.Log.e(TAG, "=== CALLING_CREATE_VIDEO_PANEL_ENTITY ===")
     createVideoPanelEntity()
@@ -190,11 +204,16 @@ class ImmersiveActivity : AppSystemActivity() {
               // Store the panel entity reference
               videoPanelEntity = panelEntity
               
-              // Set panel entity on positioning system for async positioning
-              panelPositioningSystem?.setPanelEntity(panelEntity)
+              // Parent video panel to PanelManager
+              val managerEntity = panelManager?.panelManagerEntity
+              if (managerEntity != null) {
+                panelEntity.setComponent(TransformParent(managerEntity))
+                panelEntity.setComponent(Transform(Pose(Vector3(0f, 0f, 0f))))
+                Log.i(TAG, "Video panel parented to PanelManager")
+              }
               
-              // Panel starts visible - positioning handled by PanelPositioningSystem
-              panelEntity.setComponent(Visible(true))
+              // Panel starts hidden - will be shown when stream is ready
+              panelEntity.setComponent(Visible(false))
               panelEntity.setComponent(Grabbable(enabled = true, type = GrabbableType.PIVOT_Y))
               
               SurfaceUtil.paintBlack(surface)
@@ -212,9 +231,6 @@ class ImmersiveActivity : AppSystemActivity() {
               isSurfaceReady = true
               System.out.println("=== SURFACE_READY_AND_DECODER_CONFIGURED ===")
               android.util.Log.e(TAG, "=== SURFACE_READY_AND_DECODER_CONFIGURED ===")
-              
-              // Update connection panel parent after video panel is ready
-              updateConnectionPanelParent()
               
               // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
               val params = pendingConnectionParams
@@ -343,6 +359,10 @@ class ImmersiveActivity : AppSystemActivity() {
       return
     }
 
+    // Hide connection panel when connect is pressed
+    connectionPanelEntity?.setComponent(Visible(false))
+    Log.i(TAG, "Connection panel hidden - starting connection")
+
     // PancakeActivity already verified pairing before launching ImmersiveActivity,
     // so we can skip the redundant checkPairing() call and directly start the stream.
     // This ensures only ImmersiveActivity initiates streaming connections.
@@ -400,19 +420,27 @@ class ImmersiveActivity : AppSystemActivity() {
         }
     val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
     
+    val managerEntity = panelManager?.panelManagerEntity
+    val parentComponent = if (managerEntity != null) {
+      TransformParent(managerEntity)
+    } else {
+      TransformParent(Entity.nullEntity()) // Will be updated when PanelManager is ready
+    }
+    
     videoPanelEntity = Entity.create(
         listOf(
             Panel(R.id.ui_example),
-            Transform(),
+            Transform(Pose(Vector3(0f, 0f, 0f))),
             PanelDimensions(panelSize),
             Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
-            Visible(true)
+            Visible(false), // Hidden initially, shown when stream is ready
+            parentComponent
         )
     )
     
     System.out.println("=== VIDEO_PANEL_ENTITY_CREATED ===")
     android.util.Log.e(TAG, "=== VIDEO_PANEL_ENTITY_CREATED ===")
-    Log.i(TAG, "Video panel entity created with PanelDimensions - positioning handled by Spatial SDK")
+    Log.i(TAG, "Video panel entity created - parented to PanelManager, hidden initially")
   }
 
   private fun createConnectionPanelEntity() {
@@ -428,47 +456,27 @@ class ImmersiveActivity : AppSystemActivity() {
         }
     val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
     
+    val managerEntity = panelManager?.panelManagerEntity
+    val parentComponent = if (managerEntity != null) {
+      TransformParent(managerEntity)
+    } else {
+      TransformParent(Entity.nullEntity()) // Will be updated when PanelManager is ready
+    }
+    
     connectionPanelEntity = Entity.create(
         listOf(
             Panel(R.id.connection_panel),
-            Transform(),
+            Transform(Pose(Vector3(0f, 0f, 0f))),
             PanelDimensions(panelSize),
             Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
-            Visible(true),
-            TransformParent(Entity.nullEntity()) // Will be updated when videoPanelEntity is ready
+            Visible(true), // Visible initially, hidden when connect is pressed
+            parentComponent
         )
     )
     
     System.out.println("=== CONNECTION_PANEL_ENTITY_CREATED ===")
     android.util.Log.e(TAG, "=== CONNECTION_PANEL_ENTITY_CREATED ===")
-    Log.i(TAG, "Connection panel entity created - will be parented to video panel when ready")
-    
-    // If video panel already exists, parent immediately
-    updateConnectionPanelParent()
-  }
-
-  private fun updateConnectionPanelParent() {
-    val videoEntity = videoPanelEntity
-    val connectionEntity = connectionPanelEntity
-    
-    if (videoEntity != null && connectionEntity != null) {
-      val videoDimensions = videoEntity.tryGetComponent<PanelDimensions>()
-      val connectionDimensions = connectionEntity.tryGetComponent<PanelDimensions>()
-      val spacing = 0.1f // 10cm spacing between panels
-      val offsetX = if (videoDimensions != null && connectionDimensions != null) {
-        videoDimensions.dimensions.x / 2f + spacing + connectionDimensions.dimensions.x / 2f
-      } else {
-        1.0f + spacing // Default offset if dimensions not available
-      }
-      
-      val offset = Vector3(offsetX, 0f, 0f)
-      connectionEntity.setComponent(TransformParent(videoEntity))
-      connectionEntity.setComponent(Transform(Pose(offset)))
-      
-      System.out.println("=== CONNECTION_PANEL_PARENTED ===")
-      android.util.Log.e(TAG, "=== CONNECTION_PANEL_PARENTED ===")
-      Log.i(TAG, "Connection panel parented to video panel with offset x=$offsetX")
-    }
+    Log.i(TAG, "Connection panel entity created - parented to PanelManager, visible initially")
   }
 
 }
