@@ -1,66 +1,87 @@
 # Quest 3 App Pipeline
 
-This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Quest 3 application architecture, focusing on the hybrid 2D/immersive mode structure, connection management, and video streaming integration.
+This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Quest 3 application architecture, focusing on the immersive-only VR mode structure, connection management, and video streaming integration.
 
-**Architecture**: The Quest 3 app uses Meta Spatial SDK with a hybrid app pattern, supporting both 2D panel mode and immersive VR mode for Moonlight game streaming.
+**Architecture**: The Quest 3 app uses Meta Spatial SDK with an immersive-only pattern, launching directly into VR mode for Moonlight game streaming. The app features a connection panel for setup and a video panel for streaming, both managed through a PanelManager entity.
 
 ## Client Architecture
 
 ### File Structure
 
-- **2D Activity**: `PancakeActivity.kt` - 2D panel activity for connection UI and pairing
-- **Immersive Activity**: `ImmersiveActivity.kt` - VR activity for video streaming
+- **Immersive Activity**: `ImmersiveActivity.kt` - VR activity (default launcher) for connection UI and video streaming
+- **2D Activity**: `PancakeActivity.kt` - 2D panel activity (legacy, not default launcher) for connection UI and pairing
 - **Core Components**:
+  - `PanelManager.kt` - Manages root entity for all panel entities
+  - `PanelPositioningSystem.kt` - Positions PanelManager entity in front of user
   - `MoonlightConnectionManager.kt` - Connection lifecycle, pairing, and stream management
   - `MoonlightPanelRenderer.kt` - Bridges Spatial panel Surface to Moonlight native decoder
   - `LegacySurfaceHolderAdapter.kt` - Adapter for Moonlight's SurfaceHolder interface
-  - `OptionsPanelLayout.kt` - Compose UI components (legacy, currently unused)
+  - `ConnectionPanelImmersive.kt` - Compose UI for connection management in VR
 
-**Purpose**: Hybrid Moonlight game streaming application supporting both 2D window mode and immersive VR mode with passthrough.
+**Purpose**: Immersive-only Moonlight game streaming application launching directly into VR mode with passthrough. Features connection panel for setup and video panel for streaming, both managed through PanelManager.
 
 ---
 
 ## TABLE OF CONTENTS
 
 1. [Main Activities](#main-activities)
-2. [Connection Management](#connection-management)
-3. [Video Panel Rendering](#video-panel-rendering)
-4. [Pairing System](#pairing-system)
-5. [Communication Flow](#communication-flow)
-6. [Current State & Future Enhancements](#current-state--future-enhancements)
+2. [Panel Management](#panel-management)
+3. [Connection Management](#connection-management)
+4. [Video Panel Rendering](#video-panel-rendering)
+5. [Pairing System](#pairing-system)
+6. [Communication Flow](#communication-flow)
+7. [Current State & Future Enhancements](#current-state--future-enhancements)
 
 ---
 
 ## MAIN ACTIVITIES
 
-### PancakeActivity (2D Mode)
+### ImmersiveActivity (VR Mode - Default Launcher)
+
+**File**: `ImmersiveActivity.kt`
+
+**Purpose**: Immersive VR activity that serves as the default launcher. Provides connection UI and video streaming in a single immersive experience.
+
+**Launch Configuration**:
+
+- **Default Launcher**: `ImmersiveActivity` is set as the default launcher in `AndroidManifest.xml`
+- **Intent Categories**: `android.intent.category.LAUNCHER` and `com.oculus.intent.category.VR`
+- **Launch Mode**: `singleTask` to prevent multiple instances
+
+**Key Features**:
+
+- **Connection Panel**: Compose UI panel for connection setup, pairing, and stream preferences
+- **Video Panel**: Direct-to-surface media panel for Moonlight video streaming
+- **PanelManager**: Root entity that manages positioning of all panels
+- **Dynamic Panel Registration**: Video panel registered using `executeOnVrActivity` for lifecycle alignment
+- **Panel Visibility Management**: Connection panel visible initially, video panel hidden until stream ready
+- Passthrough mode enabled
+- Scene setup with lighting and environment
+
+**Panel Architecture**:
+
+- **PanelManager Entity**: Root entity positioned by `PanelPositioningSystem` in front of user
+- **Connection Panel Entity**: Child of PanelManager, visible on launch
+- **Video Panel Entity**: Child of PanelManager, hidden until stream is ready
+- Both panels positioned at same location (Vector3(0f, 0f, 0f)) relative to PanelManager
+
+---
+
+### PancakeActivity (2D Mode - Legacy)
 
 **File**: `PancakeActivity.kt`
 
-**Purpose**: 2D panel activity for connection setup, pairing, stream preference selection, and launching immersive.
+**Purpose**: 2D panel activity for connection setup and pairing (legacy, not default launcher).
 
-**Key Features (current)**:
+**Status**: Available but not used as default launcher. ImmersiveActivity now provides connection UI in VR mode.
 
-- Host/port/appId inputs with persistence (`connection_prefs`).
-- Pairing flow (check → generate PIN → pair) using `MoonlightPairingHelper` and `PairingManager`.
-- Optional app list fetch once paired (populates appId dropdown).
-- Optional server capability fetch (res/fps/format filtering) and stream preference selector (resolution/fps/format stored in shared prefs for immersive).
-- Stream flags surfaced in UI: HDR enable, and “prefer full range” (stored in prefs).
-- Launches `ImmersiveActivity` with host/port/appId extras or launches immersive without params.
+**Key Features**:
 
-**UI Actions**:
-
-- “Connect & Launch Immersive”: checks pairing; if paired, saves prefs and starts immersive with extras; if not, triggers PIN pairing then allows connect.
-- “Configure Stream”: fetches server capabilities (if host provided) and updates selectable resolution/fps/format; writes to shared prefs.
-- “Reset Client Pairing”: clears cert/UID and resets UI to re-pair.
-- “Launch Immersive Mode (No Connection)”: opens immersive without starting stream.
-
-**Pairing Flow (current)**:
-
-1. User enters host/port → taps “Connect & Launch Immersive”.
-2. `checkPairing(host, port)` runs on background thread.
-3. If not paired: generate PIN, display it, call `pairWithServer`; on success, UI enables Connect.
-4. If paired: launch `ImmersiveActivity` with host/port/appId.
+- Host/port/appId inputs with persistence (`connection_prefs`)
+- Pairing flow using `MoonlightPairingHelper` and `PairingManager`
+- Optional app list and server capability fetch
+- Stream preference configuration
+- Can launch `ImmersiveActivity` with connection params
 
 ---
 
@@ -85,9 +106,27 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 
 **Key Steps**:
 
-1. Initialize `MediaCodecHelper` and create `MoonlightPanelRenderer` (native decoder), `AndroidAudioRenderer`, `MoonlightConnectionManager`.
-2. Read connection params from Intent extras (host/port/appId); store as pending (no connect yet).
-3. Init `NetworkedAssetLoader`.
+1. **Initialize MediaCodecHelper**: Call `MediaCodecHelper.initialize(this, getQuestGlRenderer())` with Quest 3's Adreno 740 GPU identifier. This enables explicit decoder selection, decoder preference logic, and capability checking. Must be called BEFORE creating decoder renderer.
+2. Create `MoonlightPanelRenderer` (native decoder), `AndroidAudioRenderer`, `MoonlightConnectionManager`.
+3. Read connection params from Intent extras (host/port/appId); store as pending (no connect yet).
+4. Init `NetworkedAssetLoader`.
+
+**MediaCodecHelper Initialization**:
+
+```kotlin
+// Initialize MediaCodecHelper BEFORE creating decoder renderer
+// Quest 3/3S uses Adreno 740 GPU - we use a known value since we're targeting specific hardware
+val glRenderer = getQuestGlRenderer() // Returns "Adreno (TM) 740"
+Log.i(TAG, "Initializing MediaCodecHelper with GL renderer: $glRenderer")
+MediaCodecHelper.initialize(this, glRenderer)
+Log.i(TAG, "MediaCodecHelper initialized successfully")
+```
+
+**Benefits**:
+- Enables explicit decoder selection via `MediaCodecHelper.findBestDecoderForMime()`
+- Leverages MediaCodecHelper's decoder preference and blacklisting logic
+- Enables capability checking (low latency, adaptive playback support)
+- GPU capability detection (low-end Snapdragon, Adreno model detection)
 
 **Connection Parameters**:
 
@@ -96,9 +135,9 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 - `port`: Server port (default: 47989)
 - `appId`: Application ID to launch (0 for desktop)
 
-#### `onSceneReady()` - Lines 110-126
+#### `onSceneReady()`
 
-**Purpose**: Configure scene after Spatial SDK initialization
+**Purpose**: Configure scene after Spatial SDK initialization and create panel entities
 
 **Key Steps**:
 
@@ -107,6 +146,10 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 3. Set lighting environment (ambient, sun, intensity)
 4. Update IBL environment from assets
 5. Set view origin (position and rotation)
+6. Register `PanelPositioningSystem` for panel placement
+7. Create `PanelManager` entity (root for all panels)
+8. Create video panel entity (hidden initially)
+9. Create connection panel entity (visible initially)
 
 **Scene Configuration**:
 
@@ -119,52 +162,140 @@ scene.setLightingEnvironment(
     environmentIntensity = 0.3f
 )
 scene.setViewOrigin(0.0f, 0.0f, 2.0f, 180.0f)
+
+// Panel management
+panelPositioningSystem = PanelPositioningSystem()
+systemManager.registerSystem(panelPositioningSystem!!)
+
+panelManager = PanelManager()
+val panelManagerEntity = panelManager!!.create()
+panelPositioningSystem?.setPanelEntity(panelManagerEntity)
+
+createVideoPanelEntity()
+createConnectionPanelEntity()
 ```
 
-#### `registerPanels()` - current
+#### `registerPanels()`
 
-**Purpose**: Register the direct-to-surface media panel for Moonlight.
+**Purpose**: Register the connection panel (Compose UI). Video panel is registered dynamically in `createVideoPanelEntity()`.
 
-**Panel Registration (current code path)**:
+**Panel Registration**:
 
 ```kotlin
-VideoSurfacePanelRegistration(
-    R.id.ui_example,
-    surfaceConsumer = { panelEntity, surface ->
-        panelEntity.setComponent(Visible(true))
-        panelEntity.setComponent(
-            Transform(Pose(Vector3(0f, 1.1f, -1.5f), Quaternion(0f, 0f, 0f, 1f)))
-        )
-        panelEntity.setComponent(Grabbable(enabled = true))
+override fun registerPanels(): List<PanelRegistration> {
+    // Video panel is registered dynamically in createVideoPanelEntity() using executeOnVrActivity
+    // to ensure panelManager is initialized before registration (lifecycle alignment)
+    return listOf(
+        PanelRegistration(R.id.connection_panel) {
+            config {
+                fractionOfScreen = 0.8f
+                height = basePanelHeightMeters
+                width = basePanelHeightMeters * 0.8f
+                layoutDpi = 160
+                layerConfig = LayerConfig()
+                enableTransparent = true
+                includeGlass = false
+                themeResourceId = R.style.PanelAppThemeTransparent
+            }
+            composePanel { setContent {
+                ConnectionPanelImmersive(...)
+            }}
+        },
+    )
+}
+```
 
-        SurfaceUtil.paintBlack(surface)
-        moonlightPanelRenderer.attachSurface(surface)   // single decoder render target
-        moonlightPanelRenderer.preConfigureDecoder()    // seeds decoder; no second decoder
+**Connection Panel Features**:
 
-        isSurfaceReady = true
-        pendingConnectionParams?.let { (host, port, appId) ->
-            connectToHost(host, port, appId)
-        }
-    },
-    settingsCreator = {
-        MediaPanelSettings(
-            shape = computePanelShape(), // derives physical aspect from prefs
-            display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
-            rendering = MediaPanelRenderOptions(
-                isDRM = false,
-                stereoMode = StereoMode.None,
-            ),
+- Compose UI for connection management
+- Host/port/appId inputs with persistence
+- Pairing flow (check → generate PIN → pair)
+- Stream preference configuration
+- Connect button that hides connection panel and starts stream
+- Clear pairing button
+
+#### `createVideoPanelEntity()`
+
+**Purpose**: Create video panel entity and register panel dynamically using `executeOnVrActivity`.
+
+**Key Steps**:
+
+1. Register video panel using `SpatialActivityManager.executeOnVrActivity` (ensures activity is ready)
+2. Configure `VideoSurfacePanelRegistration` with surface consumer and settings
+3. Create entity with `Panel(R.id.ui_example)` component
+4. Parent entity to PanelManager
+5. Set initial visibility to `false` (shown when stream ready)
+
+**Video Panel Registration**:
+
+```kotlin
+SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
+    immersiveActivity.registerPanel(
+        VideoSurfacePanelRegistration(
+            R.id.ui_example,
+            surfaceConsumer = { panelEntity, surface ->
+                // Store panel entity reference
+                videoPanelEntity = panelEntity
+                
+                // Parent to PanelManager (guaranteed to be initialized)
+                val managerEntity = panelManager?.panelManagerEntity
+                if (managerEntity != null) {
+                    panelEntity.setComponent(TransformParent(managerEntity))
+                    panelEntity.setComponent(Transform(Pose(Vector3(0f, 0f, 0f))))
+                }
+                
+                // Panel starts hidden - shown when stream is ready
+                panelEntity.setComponent(Visible(false))
+                panelEntity.setComponent(Grabbable(enabled = true, type = GrabbableType.PIVOT_Y))
+                
+                SurfaceUtil.paintBlack(surface)
+                moonlightPanelRenderer.attachSurface(surface)
+                moonlightPanelRenderer.preConfigureDecoder()
+                
+                isSurfaceReady = true
+                
+                // Start connection if pending params exist
+                pendingConnectionParams?.let { (host, port, appId) ->
+                    connectToHost(host, port, appId)
+                }
+            },
+            settingsCreator = {
+                MediaPanelSettings(
+                    shape = computePanelShape(),
+                    display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
+                    rendering = MediaPanelRenderOptions(
+                        isDRM = false,
+                        stereoMode = StereoMode.None,
+                        zIndex = 0 // Rectilinear panels use zIndex 0
+                    ),
+                    style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
+                )
+            },
         )
-    },
+    )
+}
+
+// Create entity after panel registration
+videoPanelEntity = Entity.create(
+    listOf(
+        Panel(R.id.ui_example),
+        Transform(Pose(Vector3(0f, 0f, 0f))),
+        PanelDimensions(panelSize),
+        Scale(Vector3(1f)), // Initial scale of 1.0
+        Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
+        Visible(false), // Hidden initially
+        TransformParent(panelManagerEntity)
+    )
 )
 ```
 
-**Panel Configuration (current behavior)**:
+**Panel Configuration**:
 
-- Shape: computed from `prefs.width/prefs.height` to keep physical aspect aligned with the stream.
-- Display: `PixelDisplayOptions(width = prefs.width, height = prefs.height)` (no hardcoded 1080p).
-- Rendering: monoscopic; DRM currently off.
-- Surface handling: paint black → attachSurface → preConfigureDecoder → mark surface ready → start pending connection if present.
+- **Shape**: Computed from `prefs.width/prefs.height` to match stream aspect ratio
+- **Display**: `PixelDisplayOptions(width = prefs.width, height = prefs.height)` - supports 4K, 1440p, 1080p
+- **Rendering**: Monoscopic (`StereoMode.None`), `zIndex = 0` for rectilinear panels
+- **Scale**: Initial scale of 1.0, adjustable via `updateVideoPanelScale()` after connection
+- **Surface handling**: Paint black → attachSurface → preConfigureDecoder → mark surface ready → start pending connection if present
 
 #### `registerFeatures()` - Lines 74-88
 
@@ -190,6 +321,93 @@ private val audioRenderer: AndroidAudioRenderer
 private val connectionManager: MoonlightConnectionManager
 private val _connectionStatus: MutableStateFlow<String>
 private val _isConnected: MutableStateFlow<Boolean>
+```
+
+---
+
+## PANEL MANAGEMENT
+
+### PanelManager
+
+**File**: `PanelManager.kt`
+
+**Purpose**: Manages the root entity that serves as the parent for all panel entities, allowing all panels to be positioned together as a group.
+
+**Key Features**:
+
+- Creates root entity with `Transform`, `Visible(true)`, and `Grabbable` components
+- Serves as parent for both connection panel and video panel entities
+- Positioned by `PanelPositioningSystem` in front of user
+- All child panels positioned relative to PanelManager (Vector3(0f, 0f, 0f) offset)
+
+**Implementation**:
+
+```kotlin
+class PanelManager {
+    var panelManagerEntity: Entity? = null
+    
+    fun create(): Entity {
+        panelManagerEntity = Entity.create(
+            listOf(
+                Transform(),
+                Visible(true),
+                Grabbable(enabled = true, type = GrabbableType.PIVOT_Y)
+            )
+        )
+        return panelManagerEntity!!
+    }
+}
+```
+
+**Usage**:
+
+- Created in `onSceneReady()` after `PanelPositioningSystem` is registered
+- Set as target for `PanelPositioningSystem.setPanelEntity()`
+- All panel entities parented to `panelManagerEntity` using `TransformParent` component
+
+### PanelPositioningSystem
+
+**File**: `PanelPositioningSystem.kt`
+
+**Purpose**: Positions the PanelManager entity in front of the user's head at a comfortable viewing distance.
+
+**Key Features**:
+
+- Positions PanelManager entity (not individual panels)
+- Calculates position based on head tracking
+- Places panel at configurable distance (default: 1.0m)
+- Applies eye-level offset for comfortable viewing
+
+**Lifecycle**:
+
+- Registered in `onSceneReady()`
+- PanelManager entity set via `setPanelEntity()`
+- Executes each frame until panel is positioned
+- Retries up to 60 times if head tracking not ready
+
+### Panel Visibility Management
+
+**Initial State**:
+
+- **Connection Panel**: `Visible(true)` - Shown on launch
+- **Video Panel**: `Visible(false)` - Hidden until stream ready
+
+**State Transitions**:
+
+1. **App Launch**: Connection panel visible, video panel hidden
+2. **User Clicks Connect**: Connection panel set to `Visible(false)`, connection starts
+3. **Stream Ready**: Video panel set to `Visible(true)` when `connectionManager.onStatusUpdate` reports `connected = true`
+
+**Implementation**:
+
+```kotlin
+// In connectToHost()
+connectionPanelEntity?.setComponent(Visible(false))
+
+// In connectionManager.onStatusUpdate callback
+if (connected) {
+    videoPanelEntity?.setComponent(Visible(true))
+}
 ```
 
 ---
@@ -456,13 +674,46 @@ Step-by-step flow with expected logging and current gaps:
 
 **Immersive Mode (ImmersiveActivity)**:
 
-1. onCreate(): create decoder/audio/connection manager; stash pending host/port/appId; no pairing here.
-2. onSceneReady(): configure lighting/passthrough; create video panel entity; register panels.
-3. Panel `surfaceConsumer`: paint black → attachSurface → preConfigureDecoder → mark `isSurfaceReady` → if pending params, call `connectToHost`.
-4. `connectToHost` sets `isPaired=true`, stores params, calls `startStreamIfReady`.
-5. `startStreamIfReady`: if surface ready and paired, calls `connectionManager.startStream` with prefs (resolution/fps/bitrate/format) and pending host/port/appId.
-6. MoonBridge handles decoder callbacks; renderer already pre-configured so native setup skips reconfiguration.
-7. stopStream() on shutdown/disconnect cleans up connection/decoder.
+1. **onCreate()**: 
+   - Create decoder/audio/connection manager
+   - Initialize `pairingHelper`
+   - Read connection params from Intent extras or shared preferences
+   - Store as pending (no connect yet)
+
+2. **onSceneReady()**: 
+   - Configure lighting/passthrough
+   - Register `PanelPositioningSystem`
+   - Create `PanelManager` entity and set on positioning system
+   - Create video panel entity (registers panel dynamically using `executeOnVrActivity`)
+   - Create connection panel entity
+
+3. **registerPanels()**: 
+   - Register connection panel (Compose UI)
+   - Video panel registered dynamically in `createVideoPanelEntity()`
+
+4. **Panel `surfaceConsumer`** (video panel): 
+   - Paint black → attachSurface → preConfigureDecoder → mark `isSurfaceReady`
+   - Parent panel to PanelManager
+   - If pending params exist, call `connectToHost`
+
+5. **User clicks Connect** (connection panel): 
+   - Hide connection panel (`Visible(false)`)
+   - Call `connectToHost(host, port, appId)`
+
+6. **connectToHost()**: 
+   - Sets `isPaired=true`, stores params
+   - Calls `startStreamIfReady()`
+
+7. **startStreamIfReady()**: 
+   - If surface ready and paired, calls `connectionManager.startStream` with prefs
+   - Stream starts with negotiated resolution/fps/bitrate/format
+
+8. **Stream Ready**: 
+   - `connectionManager.onStatusUpdate` reports `connected = true`
+   - Video panel set to `Visible(true)`
+
+9. **stopStream()**: 
+   - On shutdown/disconnect, cleans up connection/decoder
 
 **Status Updates**:
 
@@ -478,46 +729,59 @@ Step-by-step flow with expected logging and current gaps:
 
 **✅ Completed**:
 
-- Hybrid 2D/immersive architecture
-- 2D connection UI with keyboard support
+- Immersive-only architecture (default launcher)
+- Connection panel in VR mode (Compose UI)
+- Video panel in immersive mode
+- PanelManager for unified panel positioning
+- Dynamic panel registration using `executeOnVrActivity` (lifecycle alignment)
+- Panel visibility management (connection panel → video panel transition)
 - PIN pairing system (client-generated PIN)
 - Network security configuration (cleartext traffic for pairing)
 - Background thread execution (prevents ANR)
-- Video panel in immersive mode
 - Passthrough mode enabled
 - Connection lifecycle management
+- Panel scaling support (`Scale` component, `updateVideoPanelScale()` method)
+- zIndex configuration for rectilinear panels
 
 **⚠️ Limitations**:
 
-- Video panel only works in immersive mode
-- No 2D video display (connection UI only in 2D)
+- Immersive-only (no 2D video display)
 - No MRUK features (anchoring, wall detection)
-- No scaling/interaction systems
-- Static panel registration (not dynamic)
-- Codec negotiates limited range/dataspace despite full-range/HDR flags; colors are now correct but rely on codec behavior.
-- Occasional translucent/white overlay on the panel; likely compositor/panel-layer related (can clear after headset off/on).
+- No advanced scaling/interaction systems (AnalogScalableSystem, TouchScalableSystem)
+- Known SDK issue: Video surface color space initialization (affects PremiumMediaSample too)
+  - Colors may be incorrect on first frame
+  - Resolves after device sleep/wake cycle
+  - See `POST_MORTEM.md` for details
 
 ### Future Enhancements
 
-**Phase 1: Hybrid Video Display** (From SAMPLE_ARCHITECTURE_ANALYSIS.md):
-
-- Add video panel to `PancakeActivity` for 2D streaming
-- Ensure video connection persists when switching modes
-- Support video in both 2D window and immersive mode
-
-**Phase 2: MRUK Integration**:
+**Phase 1: MRUK Integration**:
 
 - Add `MRUKFeature` to `ImmersiveActivity`
 - Request `USE_SCENE` permission
 - Load MRUK scene on activity start
 - Add anchoring components to video panel entity
+- Support wall/ceiling/floor detection and anchoring
 
-**Phase 3: Advanced Features**:
+**Phase 2: Advanced Scaling Systems**:
 
-- Add scaling systems (`AnalogScalableSystem`, `TouchScalableSystem`)
+- Add `AnalogScalableSystem` for controller-based scaling
+- Add `TouchScalableSystem` for touch-based scaling
 - Register video panel entity with scalable system
-- Add panel layer alpha for transitions
-- (Optional) Add lighting systems
+- Add `Scalable`, `ScaledParent`, `ScaledChild` components
+
+**Phase 3: Panel Transitions**:
+
+- Add `PanelLayerAlpha` component and system for fade effects
+- Implement fade in/out for panel visibility transitions
+- Add `FadingPanel` base class pattern (from PremiumMediaSample)
+
+**Phase 4: Advanced Features**:
+
+- Add hero lighting system for video panel
+- Add wall lighting system (MRUK integration)
+- Add cinema state handler (TV/Cinema modes)
+- Add control panel for playback controls
 
 ---
 
@@ -525,14 +789,17 @@ Step-by-step flow with expected logging and current gaps:
 
 ### Main Activities
 
-- `PancakeActivity.kt` - 2D panel activity with connection UI
-- `ImmersiveActivity.kt` - VR activity with video streaming
+- `ImmersiveActivity.kt` - VR activity (default launcher) with connection UI and video streaming
+- `PancakeActivity.kt` - 2D panel activity (legacy, not default launcher)
 
 ### Core Components
 
+- `PanelManager.kt` - Root entity manager for all panels
+- `PanelPositioningSystem.kt` - Positions PanelManager in front of user
 - `MoonlightConnectionManager.kt` - Connection and pairing management
 - `MoonlightPanelRenderer.kt` - Video decoder integration
 - `LegacySurfaceHolderAdapter.kt` - Surface adapter for Moonlight
+- `ConnectionPanelImmersive.kt` - Compose UI for connection management in VR
 
 ### Configuration Files
 
@@ -559,28 +826,33 @@ Step-by-step flow with expected logging and current gaps:
 
 ## SUMMARY
 
-The Moonlight-SpatialSDK Quest 3 app is a hybrid application that:
+The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 
 **Strengths**:
 
-- ✅ Hybrid 2D/immersive architecture following Meta's best practices
+- ✅ Immersive-only architecture launching directly into VR mode
+- ✅ PanelManager for unified panel positioning and management
+- ✅ Dynamic panel registration using `executeOnVrActivity` (lifecycle alignment)
+- ✅ Connection panel in VR mode (Compose UI) for seamless setup
+- ✅ Panel visibility management (connection → video panel transition)
 - ✅ PIN pairing system for secure first-time connections (client-generated PIN)
 - ✅ Network security configuration for pairing compatibility
 - ✅ Background thread execution prevents ANR
-- ✅ Clean separation between connection UI and video streaming
 - ✅ Passthrough mode for mixed reality experience
-
-**Areas for Enhancement**:
-
-- ⚠️ Video display currently only in immersive mode
-- ⚠️ No MRUK features (anchoring, wall detection)
-- ⚠️ No scaling/interaction systems
-- ⚠️ Static panel registration (not dynamic like PremiumMediaSample)
+- ✅ Panel scaling support with `Scale` component
 
 **Architecture Alignment**:
 
-- ✅ Follows Meta Spatial SDK hybrid app pattern
-- ✅ Matches HybridSample structure for mode switching
-- 🔄 Ready for PremiumMediaSample-style enhancements (MRUK, scaling)
+- ✅ Follows Meta Spatial SDK immersive app pattern
+- ✅ Uses `executeOnVrActivity` for dynamic panel registration (PremiumMediaSample pattern)
+- ✅ PanelManager pattern for unified panel management
+- 🔄 Ready for PremiumMediaSample-style enhancements (MRUK, advanced scaling, lighting)
 
-The core streaming functionality is working, with pairing support and proper lifecycle management. The next phase is to add video display in 2D mode and enhance immersive mode with MRUK features.
+**Known Issues**:
+
+- ⚠️ Video surface color space initialization issue (affects PremiumMediaSample too)
+  - Colors may be incorrect on first frame
+  - Resolves after device sleep/wake cycle
+  - See `POST_MORTEM.md` for details
+
+The core streaming functionality is working, with pairing support and proper lifecycle management. The app launches directly into immersive mode with connection UI, transitioning to video streaming once connected. The next phase is to add MRUK features and advanced scaling systems.

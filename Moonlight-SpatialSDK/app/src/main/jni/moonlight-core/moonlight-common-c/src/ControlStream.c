@@ -947,7 +947,9 @@ static void asyncCallbackThreadFunc(void* context) {
                 queuedCb = nextCb;
             }
 
+            Limelog("ControlStream: Invoking setHdrMode callback, hdrEnabled=%d\n", hdrEnabled);
             ListenerCallbacks.setHdrMode(hdrEnabled);
+            Limelog("ControlStream: setHdrMode callback completed\n");
             break;
 
         case IDX_SET_MOTION_EVENT:
@@ -1211,6 +1213,7 @@ static void controlReceiveThreadFunc(void* context) {
                 }
 
                 hdrEnabled = (enableByte != 0);
+                Limelog("ControlStream: HDR_INFO packet received, enableByte=%d, hdrEnabled=%d, IS_SUNSHINE=%d\n", enableByte, hdrEnabled, IS_SUNSHINE());
             }
 
             // Process client callbacks in a separate thread

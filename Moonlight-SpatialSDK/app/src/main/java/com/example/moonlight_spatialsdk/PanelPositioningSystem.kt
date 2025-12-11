@@ -16,7 +16,7 @@ class PanelPositioningSystem : SystemBase() {
   private var panelIsPositioned = false
   private var retryCount = 0
   private val maxRetries = 60
-  private var panelEntity: Entity? = null
+  private var panelManagerEntity: Entity? = null
   private var distanceInMeters: Float = 1.0f
   private var eyeLevelOffsetMeters: Float = 0.1f
 
@@ -32,8 +32,8 @@ class PanelPositioningSystem : SystemBase() {
   }
 
   fun setPanelEntity(entity: Entity) {
-    panelEntity = entity
-    Log.d(TAG, "Panel entity reference set for positioning system")
+    panelManagerEntity = entity
+    Log.d(TAG, "PanelManager entity reference set for positioning system")
   }
 
   fun setDistance(distance: Float) {
@@ -67,8 +67,8 @@ class PanelPositioningSystem : SystemBase() {
       return false
     }
 
-    val panelEntity = this.panelEntity
-    if (panelEntity == null) {
+    val panelManagerEntity = this.panelManagerEntity
+    if (panelManagerEntity == null) {
       return false
     }
 
@@ -89,18 +89,18 @@ class PanelPositioningSystem : SystemBase() {
     val panelRotation = Quaternion.fromSequentialPYR(0f, targetYaw, 0f)
 
     val panelPose = Pose(panelPositionWithY, panelRotation)
-    panelEntity.setComponent(Transform(panelPose))
-    Log.i(TAG, "Panel positioned ${distanceInMeters}m in front of user. Head (world): ${headPosition}, Panel: ${panelPositionWithY}, Forward: ${forward}")
+    panelManagerEntity.setComponent(Transform(panelPose))
+    Log.i(TAG, "PanelManager positioned ${distanceInMeters}m in front of user. Head (world): ${headPosition}, Panel: ${panelPositionWithY}, Forward: ${forward}")
 
-    val verified = verifyPanelPosition(headPose, panelEntity)
+    val verified = verifyPanelPosition(headPose, panelManagerEntity)
     if (verified) {
-      Log.i(TAG, "Panel position verified via raycast, disabling system")
+      Log.i(TAG, "PanelManager position verified via raycast, disabling system")
     }
 
     return verified
   }
 
-  private fun verifyPanelPosition(headPose: Pose, panelEntity: Entity): Boolean {
+  private fun verifyPanelPosition(headPose: Pose, panelManagerEntity: Entity): Boolean {
     val forward = headPose.q * Vector3(0f, 0f, 1f)
     val forwardHorizontal = Vector3(forward.x, 0f, forward.z)
     val forwardNormalized = forwardHorizontal.normalize()
@@ -113,7 +113,7 @@ class PanelPositioningSystem : SystemBase() {
     val intersection = getScene().lineSegmentIntersect(worldOrigin, worldTarget)
     val hitEntity = intersection?.entity
 
-    return hitEntity == panelEntity
+    return hitEntity == panelManagerEntity
   }
 
   private fun getHmd(): Entity? {

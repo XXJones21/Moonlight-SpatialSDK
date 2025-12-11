@@ -23,17 +23,54 @@ class MoonlightPanelRenderer(
   private val decoderRenderer: NativeDecoderRenderer by lazy { NativeDecoderRenderer() }
 
   private fun applyDecoderColorConfig() {
-    // Use server-announced stream defaults: SDR Rec.709 full range (Sunshine announce).
-    val colorRange = MediaFormat.COLOR_RANGE_FULL
-    val colorStandard = MediaFormat.COLOR_STANDARD_BT709
-    val colorTransfer = MediaFormat.COLOR_TRANSFER_SDR_VIDEO
-    val dataSpace =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-          // Request full-range sRGB/BT709; V0_SRGB is not in older SDKs, so use DATASPACE_SRGB.
-          DataSpace.DATASPACE_SRGB
-        } else {
-          -1
-        }
+    // #region agent log
+    try {
+      val logData = java.io.FileWriter("d:\\Tools\\Moonlight-SpatialSDK\\.cursor\\debug.log", true).use { writer ->
+        writer.append("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\",\"location\":\"MoonlightPanelRenderer.kt:25\",\"message\":\"applyDecoderColorConfig entry\",\"data\":{\"prefs.enableHdr\":${prefs.enableHdr},\"prefs.fullRange\":${prefs.fullRange}},\"timestamp\":${System.currentTimeMillis()}}\n")
+      }
+    } catch (e: Exception) {}
+    // #endregion
+    // Use preferences to determine color settings - this matches what we request in StreamConfiguration
+    // Request FULL range BT709 for SDR, BT2020 for HDR
+    val colorRange = if (prefs.fullRange) {
+      MediaFormat.COLOR_RANGE_FULL
+    } else {
+      MediaFormat.COLOR_RANGE_LIMITED
+    }
+    
+    val colorStandard = if (prefs.enableHdr) {
+      MediaFormat.COLOR_STANDARD_BT2020
+    } else {
+      MediaFormat.COLOR_STANDARD_BT709
+    }
+    
+    val colorTransfer = if (prefs.enableHdr) {
+      MediaFormat.COLOR_TRANSFER_ST2084
+    } else {
+      MediaFormat.COLOR_TRANSFER_SDR_VIDEO
+    }
+    
+    val dataSpace = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      if (prefs.enableHdr) {
+        // HDR uses BT2020 PQ dataspace
+        DataSpace.DATASPACE_BT2020_PQ
+      } else {
+        // SDR uses sRGB/BT709 dataspace
+        DataSpace.DATASPACE_SRGB
+      }
+    } else {
+      -1
+    }
+    
+    // #region agent log
+    try {
+      val logData = java.io.FileWriter("d:\\Tools\\Moonlight-SpatialSDK\\.cursor\\debug.log", true).use { writer ->
+        writer.append("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\",\"location\":\"MoonlightPanelRenderer.kt:59\",\"message\":\"applyDecoderColorConfig before nativeDecoderSetColorConfig\",\"data\":{\"colorRange\":$colorRange,\"colorStandard\":$colorStandard,\"colorTransfer\":$colorTransfer,\"dataSpace\":$dataSpace,\"dataSpaceHex\":\"0x${Integer.toHexString(dataSpace)}\"},\"timestamp\":${System.currentTimeMillis()}}\n")
+      }
+    } catch (e: Exception) {}
+    // #endregion
+    
+    android.util.Log.i("MoonlightPanelRenderer", "applyDecoderColorConfig: range=${if (prefs.fullRange) "FULL" else "LIMITED"} standard=${if (prefs.enableHdr) "BT2020" else "BT709"} transfer=${if (prefs.enableHdr) "ST2084" else "SDR_VIDEO"} dataspace=0x${Integer.toHexString(dataSpace)}")
     MoonBridge.nativeDecoderSetColorConfig(colorRange, colorStandard, colorTransfer, dataSpace)
   }
 

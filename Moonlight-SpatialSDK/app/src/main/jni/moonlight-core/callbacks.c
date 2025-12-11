@@ -345,19 +345,28 @@ void BridgeClConnectionStatusUpdate(int connectionStatus) {
 void BridgeClSetHdrMode(bool enabled) {
     JNIEnv* env = GetThreadEnv();
 
+    __android_log_print(ANDROID_LOG_INFO, "moonlight-common-c", "BridgeClSetHdrMode: called with enabled=%d", enabled);
+    
     jbyteArray hdrMetadataByteArray = NULL;
     SS_HDR_METADATA hdrMetadata;
 
     // Check if HDR metadata was provided
     if (enabled && LiGetHdrMetadata(&hdrMetadata)) {
+        __android_log_print(ANDROID_LOG_INFO, "moonlight-common-c", "BridgeClSetHdrMode: HDR metadata available, creating byte array");
         hdrMetadataByteArray = (*env)->NewByteArray(env, sizeof(SS_HDR_METADATA));
         (*env)->SetByteArrayRegion(env, hdrMetadataByteArray, 0, sizeof(SS_HDR_METADATA), (jbyte*)&hdrMetadata);
+    } else {
+        __android_log_print(ANDROID_LOG_INFO, "moonlight-common-c", "BridgeClSetHdrMode: HDR metadata not available (enabled=%d, LiGetHdrMetadata=%d)", enabled, enabled && LiGetHdrMetadata(&hdrMetadata));
     }
 
+    __android_log_print(ANDROID_LOG_INFO, "moonlight-common-c", "BridgeClSetHdrMode: Calling Java setHdrMode method");
     (*env)->CallStaticVoidMethod(env, GlobalBridgeClass, BridgeClSetHdrModeMethod, enabled, hdrMetadataByteArray);
     if ((*env)->ExceptionCheck(env)) {
+        __android_log_print(ANDROID_LOG_ERROR, "moonlight-common-c", "BridgeClSetHdrMode: Exception occurred calling Java method");
         // We will crash here
         (*JVM)->DetachCurrentThread(JVM);
+    } else {
+        __android_log_print(ANDROID_LOG_INFO, "moonlight-common-c", "BridgeClSetHdrMode: Java method call completed successfully");
     }
 }
 

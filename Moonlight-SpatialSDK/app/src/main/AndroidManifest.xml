@@ -41,6 +41,10 @@
     android:name="oculus.software.overlay_keyboard"
     android:required="false"
   />
+  <uses-feature
+    android:name="android.hardware.gamepad"
+    android:required="false"
+  />
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
   <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -77,7 +81,6 @@
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="com.oculus.intent.category.2D" />
-        <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
     <activity
@@ -92,6 +95,7 @@
         <action android:name="android.intent.action.MAIN" />
         <category android:name="com.oculus.intent.category.VR" />
         <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
   </application>
