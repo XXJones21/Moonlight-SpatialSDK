@@ -106,9 +106,27 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 
 **Key Steps**:
 
-1. Initialize `MediaCodecHelper` and create `MoonlightPanelRenderer` (native decoder), `AndroidAudioRenderer`, `MoonlightConnectionManager`.
-2. Read connection params from Intent extras (host/port/appId); store as pending (no connect yet).
-3. Init `NetworkedAssetLoader`.
+1. **Initialize MediaCodecHelper**: Call `MediaCodecHelper.initialize(this, getQuestGlRenderer())` with Quest 3's Adreno 740 GPU identifier. This enables explicit decoder selection, decoder preference logic, and capability checking. Must be called BEFORE creating decoder renderer.
+2. Create `MoonlightPanelRenderer` (native decoder), `AndroidAudioRenderer`, `MoonlightConnectionManager`.
+3. Read connection params from Intent extras (host/port/appId); store as pending (no connect yet).
+4. Init `NetworkedAssetLoader`.
+
+**MediaCodecHelper Initialization**:
+
+```kotlin
+// Initialize MediaCodecHelper BEFORE creating decoder renderer
+// Quest 3/3S uses Adreno 740 GPU - we use a known value since we're targeting specific hardware
+val glRenderer = getQuestGlRenderer() // Returns "Adreno (TM) 740"
+Log.i(TAG, "Initializing MediaCodecHelper with GL renderer: $glRenderer")
+MediaCodecHelper.initialize(this, glRenderer)
+Log.i(TAG, "MediaCodecHelper initialized successfully")
+```
+
+**Benefits**:
+- Enables explicit decoder selection via `MediaCodecHelper.findBestDecoderForMime()`
+- Leverages MediaCodecHelper's decoder preference and blacklisting logic
+- Enables capability checking (low latency, adaptive playback support)
+- GPU capability detection (low-end Snapdragon, Adreno model detection)
 
 **Connection Parameters**:
 

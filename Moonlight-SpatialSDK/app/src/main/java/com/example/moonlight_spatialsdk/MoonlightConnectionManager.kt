@@ -195,6 +195,56 @@ class MoonlightConnectionManager(
                 val serverCert = IdentityStore.loadServerCert(context, host)
                 Log.i(tag, "startStream: uniqueId=$uniqueId serverCert=${if (serverCert != null) "present" else "null"}")
 
+                // Check server HDR capability before requesting HDR
+                val http = NvHTTP(computerDetails, 0, uniqueId, serverCert, cryptoProvider)
+                val serverInfo = http.getServerInfo(true)
+                val serverCodecModeSupport = http.getServerCodecModeSupport(serverInfo)
+                Log.i(tag, "startStream: serverCodecModeSupport=0x${java.lang.Long.toHexString(serverCodecModeSupport)}")
+                
+                // Server HDR support mask: 0x20200 (HEVC Main10 HDR10 + AV1 Main10 HDR10)
+                val serverSupportsHdr = (serverCodecModeSupport and 0x20200L) != 0L
+                var effectiveHdrEnabled = prefs.enableHdr
+                
+                if (prefs.enableHdr && !serverSupportsHdr) {
+                    Log.w(tag, "startStream: HDR requested but server does not support HDR (serverCodecModeSupport=0x${java.lang.Long.toHexString(serverCodecModeSupport)}). Disabling HDR for this connection.")
+                    postToMain { 
+                        onStatusUpdate?.invoke("Your PC GPU does not support streaming HDR. The stream will be SDR.", false) 
+                    }
+                    effectiveHdrEnabled = false
+                }
+
+                // Determine color space and range based on effective HDR state
+                // Request FULL range BT709 for SDR, BT2020 for HDR
+                val colorSpace = if (effectiveHdrEnabled) {
+                    MoonBridge.COLORSPACE_REC_2020
+                } else {
+                    MoonBridge.COLORSPACE_REC_709
+                }
+                val colorRange = if (prefs.fullRange) {
+                    MoonBridge.COLOR_RANGE_FULL
+                } else {
+                    MoonBridge.COLOR_RANGE_LIMITED
+                }
+                
+                Log.i(tag, "startStream: colorSpace=${colorSpace} (${if (effectiveHdrEnabled) "BT2020" else "BT709"}) colorRange=${colorRange} (${if (prefs.fullRange) "FULL" else "LIMITED"}) enableHdr=${prefs.enableHdr} effectiveHdrEnabled=$effectiveHdrEnabled")
+                
+                // Get supported formats - remove 10-bit mask if HDR was disabled due to server capability
+                val supportedFormats = if (effectiveHdrEnabled) {
+                    getSupportedVideoFormats(prefs)
+                } else {
+                    // Remove 10-bit formats if HDR is not enabled
+                    val baseFormats = when (prefs.videoFormat) {
+                        PreferenceConfiguration.FormatOption.FORCE_H264 -> MoonBridge.VIDEO_FORMAT_H264
+                        PreferenceConfiguration.FormatOption.FORCE_HEVC -> MoonBridge.VIDEO_FORMAT_H265
+                        PreferenceConfiguration.FormatOption.FORCE_AV1 -> MoonBridge.VIDEO_FORMAT_AV1_MAIN8
+                        PreferenceConfiguration.FormatOption.AUTO -> {
+                            MoonBridge.VIDEO_FORMAT_H264 or MoonBridge.VIDEO_FORMAT_H265
+                        }
+                    }
+                    baseFormats
+                }
+                Log.i(tag, "startStream: supportedVideoFormats=0x${Integer.toHexString(supportedFormats)} has10Bit=${(supportedFormats and MoonBridge.VIDEO_FORMAT_MASK_10BIT) != 0} enableHdr=${prefs.enableHdr}")
+                
                 val streamConfig = StreamConfiguration.Builder()
                     .setApp(NvApp(if (appId == 0) "Desktop" else "Moonlight", appId, false))
                     .setResolution(prefs.width, prefs.height)
@@ -203,11 +253,13 @@ class MoonlightConnectionManager(
                     // Disable SOPS to simplify stream setup on device
                     .setEnableSops(false)
                     .setAudioConfiguration(prefs.audioConfiguration)
-                    .setSupportedVideoFormats(getSupportedVideoFormats(prefs))
+                    .setSupportedVideoFormats(supportedFormats)
                     .setRemoteConfiguration(StreamConfiguration.STREAM_CFG_AUTO)
                     .setClientRefreshRateX100(0) // Set to 0 for compatibility with older servers
+                    .setColorSpace(colorSpace)
+                    .setColorRange(colorRange)
                     .build()
-                Log.i(tag, "startStream: streamConfig created width=${streamConfig.width} height=${streamConfig.height} fps=${streamConfig.refreshRate} bitrate=${streamConfig.bitrate}")
+                Log.i(tag, "startStream: streamConfig created width=${streamConfig.width} height=${streamConfig.height} fps=${streamConfig.refreshRate} bitrate=${streamConfig.bitrate} supportedFormats=0x${Integer.toHexString(streamConfig.getSupportedVideoFormats())}")
             
                 // CRITICAL: Setup bridge BEFORE creating NvConnection
                 // This ensures videoRenderer is registered when native code calls bridgeDrSetup()
@@ -258,9 +310,10 @@ class MoonlightConnectionManager(
 
     /**
      * Get supported video formats based on preferences.
+     * Includes 10-bit formats when HDR is enabled.
      */
     private fun getSupportedVideoFormats(prefs: PreferenceConfiguration): Int {
-        return when (prefs.videoFormat) {
+        val baseFormats = when (prefs.videoFormat) {
             PreferenceConfiguration.FormatOption.FORCE_H264 -> MoonBridge.VIDEO_FORMAT_H264
             PreferenceConfiguration.FormatOption.FORCE_HEVC -> MoonBridge.VIDEO_FORMAT_H265
             PreferenceConfiguration.FormatOption.FORCE_AV1 -> MoonBridge.VIDEO_FORMAT_AV1_MAIN8
@@ -268,6 +321,13 @@ class MoonlightConnectionManager(
                 // Support both H.264 and HEVC, let server choose based on capabilities
                 MoonBridge.VIDEO_FORMAT_H264 or MoonBridge.VIDEO_FORMAT_H265
             }
+        }
+        
+        // Add 10-bit formats if HDR is enabled
+        return if (prefs.enableHdr) {
+            baseFormats or MoonBridge.VIDEO_FORMAT_MASK_10BIT
+        } else {
+            baseFormats
         }
     }
 
@@ -353,6 +413,13 @@ class MoonlightConnectionManager(
     }
 
     override fun setHdrMode(enabled: Boolean, hdrMetadata: ByteArray?) {
+        // #region agent log
+        try {
+            java.io.FileWriter("d:\\Tools\\Moonlight-SpatialSDK\\.cursor\\debug.log", true).use { writer ->
+                writer.append("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\",\"location\":\"MoonlightConnectionManager.kt:380\",\"message\":\"setHdrMode called in connection manager\",\"data\":{\"enabled\":$enabled,\"hdrMetadata\":\"${if (hdrMetadata != null) "present(${hdrMetadata.size} bytes)" else "null"}\"},\"timestamp\":${System.currentTimeMillis()}}\n")
+            }
+        } catch (e: Exception) {}
+        // #endregion
         decoderRenderer.setHdrMode(enabled, hdrMetadata)
     }
 

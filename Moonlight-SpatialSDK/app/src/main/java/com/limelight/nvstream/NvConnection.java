@@ -244,11 +244,22 @@ public class NvConnection {
 
         context.serverCodecModeSupport = (int)h.getServerCodecModeSupport(serverInfo);
 
-        context.negotiatedHdr = (context.streamConfig.getSupportedVideoFormats() & MoonBridge.VIDEO_FORMAT_MASK_10BIT) != 0;
+        int supportedFormats = context.streamConfig.getSupportedVideoFormats();
+        boolean has10BitMask = (supportedFormats & MoonBridge.VIDEO_FORMAT_MASK_10BIT) != 0;
+        LimeLog.info("NvConnection.startApp: supportedVideoFormats=0x" + Integer.toHexString(supportedFormats) + 
+                     " has10BitMask=" + has10BitMask + " VIDEO_FORMAT_MASK_10BIT=0x" + Integer.toHexString(MoonBridge.VIDEO_FORMAT_MASK_10BIT));
+        
+        context.negotiatedHdr = has10BitMask;
+        LimeLog.info("NvConnection.startApp: initial negotiatedHdr=" + context.negotiatedHdr + 
+                     " serverCodecModeSupport=0x" + Long.toHexString(context.serverCodecModeSupport));
+        
         if ((context.serverCodecModeSupport & 0x20200) == 0 && context.negotiatedHdr) {
+            LimeLog.info("NvConnection.startApp: Server does not support HDR, disabling negotiatedHdr");
             context.connListener.displayTransientMessage("Your PC GPU does not support streaming HDR. The stream will be SDR.");
             context.negotiatedHdr = false;
         }
+        
+        LimeLog.info("NvConnection.startApp: final negotiatedHdr=" + context.negotiatedHdr);
         
         //
         // Decide on negotiated stream parameters now

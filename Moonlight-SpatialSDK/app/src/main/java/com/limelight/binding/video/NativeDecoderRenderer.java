@@ -62,6 +62,13 @@ public class NativeDecoderRenderer extends VideoDecoderRenderer {
 
     @Override
     public void setHdrMode(boolean enabled, byte[] hdrMetadata) {
+        // #region agent log
+        try {
+            java.io.FileWriter writer = new java.io.FileWriter("d:\\Tools\\Moonlight-SpatialSDK\\.cursor\\debug.log", true);
+            writer.append("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\",\"location\":\"NativeDecoderRenderer.java:64\",\"message\":\"setHdrMode called\",\"data\":{\"enabled\":" + enabled + ",\"hdrMetadata\":\"" + (hdrMetadata != null ? "present(" + hdrMetadata.length + " bytes)" : "null") + "\"},\"timestamp\":" + System.currentTimeMillis() + "}\n");
+            writer.close();
+        } catch (Exception e) {}
+        // #endregion
         MoonBridge.nativeDecoderSetHdrMode(enabled, hdrMetadata);
     }
 }

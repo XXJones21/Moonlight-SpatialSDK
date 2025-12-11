@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.example.moonlight_spatialsdk.BuildConfig
 import com.limelight.binding.audio.AndroidAudioRenderer
 import com.limelight.binding.video.CrashListener
+import com.limelight.binding.video.MediaCodecHelper
 import com.limelight.preferences.PreferenceConfiguration
 import com.meta.spatial.castinputforward.CastInputForwardFeature
 import com.meta.spatial.compose.ComposeFeature
@@ -83,6 +84,20 @@ class ImmersiveActivity : AppSystemActivity() {
   // Set to false to forward input to ControllerHandler for Sunshine passthrough
   private val allowControllerUIInput = false
 
+  /**
+   * Get OpenGL renderer string for Quest 3/3S hardware.
+   * Quest 3 uses Adreno 740 GPU. Since we're targeting specific hardware,
+   * we can use a known value. This enables MediaCodecHelper to properly
+   * detect GPU capabilities and configure decoder optimizations.
+   */
+  private fun getQuestGlRenderer(): String {
+    // Quest 3/3S uses Snapdragon XR2 Gen 2 with Adreno 740 GPU
+    // MediaCodecHelper uses this to detect GPU capabilities (e.g., isLowEndSnapdragon, isAdreno620)
+    // For Quest 3, we know it's Adreno 740, so we can use a known value
+    // Format: "Adreno (TM) 740" - MediaCodecHelper parses the number to detect capabilities
+    return "Adreno (TM) 740"
+  }
+
   override fun registerFeatures(): List<SpatialFeature> {
     val features =
         mutableListOf<SpatialFeature>(
@@ -104,6 +119,14 @@ class ImmersiveActivity : AppSystemActivity() {
     System.out.println("=== IMMERSIVE_ACTIVITY_ONCREATE_START ===")
     android.util.Log.e(TAG, "=== IMMERSIVE_ACTIVITY_ONCREATE_START ===")
     super.onCreate(savedInstanceState)
+
+    // Initialize MediaCodecHelper BEFORE creating decoder renderer
+    // This is required for explicit decoder selection and capability checking
+    // Quest 3/3S uses Adreno 740 GPU - we can use a known value since we're targeting specific hardware
+    val glRenderer = getQuestGlRenderer()
+    Log.i(TAG, "Initializing MediaCodecHelper with GL renderer: $glRenderer")
+    MediaCodecHelper.initialize(this, glRenderer)
+    Log.i(TAG, "MediaCodecHelper initialized successfully")
 
     // Create decoder renderer in onCreate() like moonlight-android does
     // This ensures decoder is initialized before any connection attempts
