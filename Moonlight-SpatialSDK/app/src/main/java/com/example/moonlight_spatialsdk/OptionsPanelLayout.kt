@@ -5,8 +5,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -28,7 +28,9 @@ import androidx.compose.ui.unit.dp
 import com.meta.spatial.toolkit.PanelConstants
 import com.meta.spatial.uiset.button.PrimaryButton
 import com.meta.spatial.uiset.button.SecondaryButton
+import com.meta.spatial.uiset.input.SpatialTextField
 import com.meta.spatial.uiset.theme.LocalColorScheme
+import com.meta.spatial.uiset.theme.LocalTypography
 import com.meta.spatial.uiset.theme.SpatialColorScheme
 import com.meta.spatial.uiset.theme.SpatialTheme
 import com.meta.spatial.uiset.theme.darkSpatialColorScheme
@@ -82,7 +84,6 @@ private fun OptionsPanel(
   val hostFocusRequester = remember { FocusRequester() }
   val portFocusRequester = remember { FocusRequester() }
   val appIdFocusRequester = remember { FocusRequester() }
-  val focusManager = LocalFocusManager.current
 
   SpatialTheme(colorScheme = getPanelTheme()) {
     Column(
@@ -90,96 +91,98 @@ private fun OptionsPanel(
             Modifier.fillMaxSize()
                 .clip(SpatialTheme.shapes.large)
                 .background(brush = LocalColorScheme.current.panel)
-                .padding(36.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+                .padding(48.dp),
     ) {
+      // Title with PanelScaffold pattern
       Text(
           text = "Moonlight Connection",
-          style = MaterialTheme.typography.headlineMedium,
+          style = SpatialTheme.typography.headline1Strong.copy(
+              color = SpatialTheme.colorScheme.primaryAlphaBackground
+          ),
       )
+      Spacer(Modifier.height(40.dp))
+      HorizontalDivider(color = SpatialTheme.colorScheme.primaryAlphaBackground)
+      Spacer(Modifier.height(48.dp))
       
-      Text(
-          text = connectionStatus,
-          style = MaterialTheme.typography.bodyMedium,
-      )
+      // Content with improved spacing
+      Column(
+          verticalArrangement = Arrangement.spacedBy(20.dp),
+          horizontalAlignment = Alignment.CenterHorizontally,
+      ) {
+        // Status section
+        Text(
+            text = connectionStatus,
+            style = LocalTypography.current.body1Strong.copy(
+                color = SpatialTheme.colorScheme.primaryAlphaBackground
+            ),
+        )
+        
+        Spacer(Modifier.height(10.dp))
 
-      key("host_field") {
-        OutlinedTextField(
-            value = host,
-            onValueChange = { host = it },
-            label = { Text("Host / IP Address") },
-            enabled = !isConnected,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { portFocusRequester.requestFocus() }
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(hostFocusRequester),
-        )
-      }
+        // Connection fields section
+        key("host_field") {
+          SpatialTextField(
+              label = "Host / IP Address",
+              placeholder = "192.168.1.100",
+              value = host,
+              onValueChange = { host = it },
+              enabled = !isConnected,
+              autoValidate = false,
+              modifier = Modifier
+                  .fillMaxWidth()
+                  .focusRequester(hostFocusRequester),
+          )
+        }
 
-      key("port_field") {
-        OutlinedTextField(
-            value = port,
-            onValueChange = { port = it },
-            label = { Text("Port") },
-            enabled = !isConnected,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { appIdFocusRequester.requestFocus() }
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(portFocusRequester),
-        )
-      }
+        key("port_field") {
+          SpatialTextField(
+              label = "Port",
+              placeholder = "47989",
+              value = port,
+              onValueChange = { port = it },
+              enabled = !isConnected,
+              autoValidate = false,
+              modifier = Modifier
+                  .fillMaxWidth()
+                  .focusRequester(portFocusRequester),
+          )
+        }
 
-      key("appid_field") {
-        OutlinedTextField(
-            value = appId,
-            onValueChange = { appId = it },
-            label = { Text("App ID (0 for desktop)") },
-            enabled = !isConnected,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = { focusManager.clearFocus() }
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(appIdFocusRequester),
-        )
-      }
+        key("appid_field") {
+          SpatialTextField(
+              label = "App ID",
+              placeholder = "0 for desktop",
+              value = appId,
+              onValueChange = { appId = it },
+              enabled = !isConnected,
+              autoValidate = false,
+              helperText = "Enter 0 for desktop or specific app ID",
+              modifier = Modifier
+                  .fillMaxWidth()
+                  .focusRequester(appIdFocusRequester),
+          )
+        }
 
-      if (isConnected) {
-        SecondaryButton(
-            label = "Disconnect",
-            expanded = true,
-            onClick = onDisconnect,
-        )
-      } else {
-        PrimaryButton(
-            label = "Connect",
-            expanded = true,
-            onClick = {
-              val portInt = port.toIntOrNull() ?: 47989
-              val appIdInt = appId.toIntOrNull() ?: 0
-              onConnect(host, portInt, appIdInt)
-            },
-        )
+        Spacer(Modifier.height(10.dp))
+
+        // Action buttons
+        if (isConnected) {
+          SecondaryButton(
+              label = "Disconnect",
+              expanded = true,
+              onClick = onDisconnect,
+          )
+        } else {
+          PrimaryButton(
+              label = "Connect",
+              expanded = true,
+              onClick = {
+                val portInt = port.toIntOrNull() ?: 47989
+                val appIdInt = appId.toIntOrNull() ?: 0
+                onConnect(host, portInt, appIdInt)
+              },
+          )
+        }
       }
     }
   }

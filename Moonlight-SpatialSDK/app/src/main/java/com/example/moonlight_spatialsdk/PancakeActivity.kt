@@ -15,12 +15,15 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.Checkbox
+import com.meta.spatial.uiset.control.SpatialCheckbox
 import com.meta.spatial.uiset.dropdown.SpatialDropdown
 import com.meta.spatial.uiset.dropdown.foundation.SpatialDropdownItem
+import com.meta.spatial.uiset.theme.icons.SpatialIcons
+import com.meta.spatial.uiset.theme.icons.regular.CategoryAll
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,7 +42,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import com.meta.spatial.uiset.button.PrimaryButton
 import com.meta.spatial.uiset.button.SecondaryButton
+import com.meta.spatial.uiset.input.SpatialTextField
 import com.meta.spatial.uiset.theme.LocalColorScheme
+import com.meta.spatial.uiset.theme.LocalTypography
 import com.meta.spatial.uiset.theme.SpatialColorScheme
 import com.meta.spatial.uiset.theme.SpatialTheme
 import com.meta.spatial.uiset.theme.darkSpatialColorScheme
@@ -193,7 +198,34 @@ fun ConnectionPanel2D(
   var enableHdr by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_enable_hdr", false)) }
   var enableFullRange by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_full_range", false)) }
 
-  val focusManager = LocalFocusManager.current
+  // App selection dropdown - only show if paired and app list is loaded
+  var appList by remember { mutableStateOf<List<com.limelight.nvstream.http.NvApp>>(emptyList()) }
+  var isLoadingApps by remember { mutableStateOf(false) }
+  var appListError by remember { mutableStateOf<String?>(null) }
+  
+  // Fetch app list when pairing is verified
+  LaunchedEffect(host, port, needsPairing) {
+    if (!needsPairing && host.isNotBlank() && appList.isEmpty() && !isLoadingApps) {
+      isLoadingApps = true
+      appListError = null
+      val portInt = port.toIntOrNull() ?: 47989
+      pairingHelper.fetchAppList(host, portInt) { apps, error ->
+        isLoadingApps = false
+        if (apps != null) {
+          appList = apps
+          // If current appId doesn't match any app, reset to first app (usually Desktop with ID 0)
+          val currentAppIdInt = appId.toIntOrNull() ?: 0
+          val matchingApp = apps.find { it.getAppId() == currentAppIdInt }
+          if (matchingApp == null && apps.isNotEmpty()) {
+            appId = apps.first().getAppId().toString()
+          }
+        } else {
+          appListError = error ?: "Failed to load app list"
+        }
+      }
+    }
+  }
+
   val scrollState = rememberScrollState()
 
   SpatialTheme(colorScheme = getPanelTheme()) {
@@ -217,35 +249,25 @@ fun ConnectionPanel2D(
           style = MaterialTheme.typography.bodyMedium,
       )
 
-      OutlinedTextField(
+      SpatialTextField(
+          label = "Host / IP Address",
+          placeholder = "192.168.1.100",
           value = host,
           onValueChange = { host = it },
-          label = { Text("Host / IP Address") },
           enabled = !isConnected,
-          singleLine = true,
-          keyboardOptions = KeyboardOptions(
-              keyboardType = KeyboardType.Text,
-              imeAction = ImeAction.Next
-          ),
-          keyboardActions = KeyboardActions(
-              onNext = { focusManager.moveFocus(FocusDirection.Next) }
-          ),
+          autoValidate = false,
+          helperText = "Enter the IP address or hostname of your Moonlight server",
           modifier = Modifier.fillMaxWidth(),
       )
 
-      OutlinedTextField(
+      SpatialTextField(
+          label = "Port",
+          placeholder = "47989",
           value = port,
           onValueChange = { port = it },
-          label = { Text("Port") },
           enabled = !isConnected,
-          singleLine = true,
-          keyboardOptions = KeyboardOptions(
-              keyboardType = KeyboardType.Number,
-              imeAction = ImeAction.Next
-          ),
-          keyboardActions = KeyboardActions(
-              onNext = { focusManager.moveFocus(FocusDirection.Next) }
-          ),
+          autoValidate = false,
+          helperText = "Default Moonlight port is 47989",
           modifier = Modifier.fillMaxWidth(),
       )
 
@@ -295,100 +317,178 @@ fun ConnectionPanel2D(
               appId = newAppId
             },
         )
-      } else if (isLoadingApps) {
-        Text(
-            text = "Loading applications...",
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.fillMaxWidth(),
-        )
-      } else if (appListError != null) {
-        Text(
-            text = "App list: $appListError",
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-            value = appId,
-            onValueChange = { appId = it },
-            label = { Text("App ID (fallback)") },
-            enabled = !isConnected && !needsPairing,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { focusManager.clearFocus() }
-            ),
-            modifier = Modifier.fillMaxWidth(),
-        )
-      } else {
-        OutlinedTextField(
-            value = appId,
-            onValueChange = { appId = it },
-            label = { Text("App ID (enter host/port and check pairing first)") },
-            enabled = false,
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-      }
+        Spacer(Modifier.height(20.dp))
+        HorizontalDivider(color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.3f))
+        Spacer(Modifier.height(20.dp))
 
-      if (needsPairing) {
-        if (generatedPin == null) {
-          // Generate PIN when pairing is needed - use pairingAttemptKey to prevent infinite loop
-          LaunchedEffect(pairingAttemptKey) {
-            generatedPin = PairingManager.generatePinString()
-            isPairing = true
-            connectionStatus = "Enter PIN $generatedPin on your server..."
+        // Application Selection section
+        Text(
+            text = "Application Selection",
+            style = LocalTypography.current.headline2Strong.copy(
+                color = SpatialTheme.colorScheme.primaryAlphaBackground
+            ),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(10.dp))
+          if (!needsPairing && host.isNotBlank() && appList.isEmpty() && !isLoadingApps) {
+            isLoadingApps = true
+            appListError = null
             val portInt = port.toIntOrNull() ?: 47989
-            pairingHelper.pairWithServer(host, portInt, generatedPin!!) { success, error ->
-              isPairing = false
-              if (success) {
-                connectionStatus = "Paired! Click Connect to continue"
-                needsPairing = false
-                generatedPin = null
-              } else {
-                when (error) {
-                  "Incorrect PIN" -> {
-                    connectionStatus = "PIN incorrect. Click 'Retry Pairing' to try again."
-                  }
-                  "Pairing already in progress" -> {
-                    connectionStatus = "Another device is pairing. Please wait, then tap Retry."
-                  }
-                  else -> {
-                    connectionStatus = error ?: "Pairing failed. Click 'Retry Pairing' to try again."
-                  }
+            pairingHelper.fetchAppList(host, portInt) { apps, error ->
+              isLoadingApps = false
+              if (apps != null) {
+                appList = apps
+                // If current appId doesn't match any app, reset to first app (usually Desktop with ID 0)
+                val currentAppIdInt = appId.toIntOrNull() ?: 0
+                val matchingApp = apps.find { it.getAppId() == currentAppIdInt }
+                if (matchingApp == null && apps.isNotEmpty()) {
+                  appId = apps.first().getAppId().toString()
                 }
+              } else {
+                appListError = error ?: "Failed to load app list"
               }
             }
           }
         }
         
-        if (generatedPin != null) {
-          Column(
+        if (appList.isNotEmpty()) {
+          val appOptions = appList.map { "${it.getAppName()} (ID: ${it.getAppId()})" }
+          val currentAppIdInt = appId.toIntOrNull() ?: 0
+          val selectedAppName = appList.find { it.getAppId() == currentAppIdInt }?.let { 
+            "${it.getAppName()} (ID: ${it.getAppId()})" 
+          } ?: appOptions.firstOrNull() ?: appId
+          
+          LabeledDropdown(
+              label = "Application",
+              options = appOptions,
+              selected = selectedAppName,
+              onSelect = { selected ->
+                // Extract appId from selected string (format: "App Name (ID: 123)")
+                val appIdMatch = Regex("ID: (\\d+)").find(selected)
+                val newAppId = appIdMatch?.groupValues?.get(1) ?: "0"
+                appId = newAppId
+              },
+          )
+        } else if (isLoadingApps) {
+          Text(
+              text = "Loading applications...",
+              style = LocalTypography.current.body1.copy(
+                  color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.6f)
+              ),
               modifier = Modifier.fillMaxWidth(),
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.spacedBy(16.dp)
-          ) {
-            Text(
-                text = "Enter this PIN on your server:",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Text(
-                text = generatedPin!!,
-                style = MaterialTheme.typography.headlineLarge,
-            )
-            if (isPairing) {
-              Text(
-                  text = "Waiting for PIN entry on server...",
-                  style = MaterialTheme.typography.bodySmall,
-              )
+          )
+        } else if (appListError != null) {
+          Text(
+              text = "App list: $appListError",
+              style = LocalTypography.current.body1.copy(
+                  color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.6f)
+              ),
+              modifier = Modifier.fillMaxWidth(),
+          )
+          Spacer(Modifier.height(10.dp))
+          SpatialTextField(
+              label = "App ID (fallback)",
+              placeholder = "0",
+              value = appId,
+              onValueChange = { appId = it },
+              enabled = !isConnected && !needsPairing,
+              autoValidate = false,
+              helperText = "Enter app ID manually if app list failed to load",
+              modifier = Modifier.fillMaxWidth(),
+          )
+        } else {
+          SpatialTextField(
+              label = "App ID",
+              placeholder = "0 for desktop",
+              value = appId,
+              onValueChange = { appId = it },
+              enabled = false,
+              autoValidate = false,
+              helperText = "Enter host/port and check pairing first to load app list",
+              modifier = Modifier.fillMaxWidth(),
+          )
+        }
+
+        Spacer(Modifier.height(20.dp))
+        HorizontalDivider(color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.3f))
+        Spacer(Modifier.height(20.dp))
+
+        // Pairing section
+        if (needsPairing) {
+          if (generatedPin == null) {
+            // Generate PIN when pairing is needed - use pairingAttemptKey to prevent infinite loop
+            LaunchedEffect(pairingAttemptKey) {
+              generatedPin = PairingManager.generatePinString()
+              isPairing = true
+              connectionStatus = "Enter PIN $generatedPin on your server..."
+              val portInt = port.toIntOrNull() ?: 47989
+              pairingHelper.pairWithServer(host, portInt, generatedPin!!) { success, error ->
+                isPairing = false
+                if (success) {
+                  connectionStatus = "Paired! Click Connect to continue"
+                  needsPairing = false
+                  generatedPin = null
+                } else {
+                  when (error) {
+                    "Incorrect PIN" -> {
+                      connectionStatus = "PIN incorrect. Click 'Retry Pairing' to try again."
+                    }
+                    "Pairing already in progress" -> {
+                      connectionStatus = "Another device is pairing. Please wait, then tap Retry."
+                    }
+                    else -> {
+                      connectionStatus = error ?: "Pairing failed. Click 'Retry Pairing' to try again."
+                    }
+                  }
+                }
+              }
             }
           }
+          
+          if (generatedPin != null) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+              Text(
+                  text = "Pairing Required",
+                  style = LocalTypography.current.headline2Strong.copy(
+                      color = SpatialTheme.colorScheme.primaryAlphaBackground
+                  ),
+              )
+              Spacer(Modifier.height(10.dp))
+              Text(
+                  text = "Enter this PIN on your server:",
+                  style = LocalTypography.current.body1.copy(
+                      color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                  ),
+              )
+              Text(
+                  text = generatedPin!!,
+                  style = SpatialTheme.typography.headline1Strong.copy(
+                      color = SpatialTheme.colorScheme.primaryAlphaBackground
+                  ),
+              )
+              if (isPairing) {
+                Text(
+                    text = "Waiting for PIN entry on server...",
+                    style = LocalTypography.current.body1.copy(
+                        color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.6f)
+                    ),
+                )
+              }
+            }
+            Spacer(Modifier.height(20.dp))
+          }
         }
-      }
 
-      if (isConnected) {
+        Spacer(Modifier.height(20.dp))
+        HorizontalDivider(color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.3f))
+        Spacer(Modifier.height(20.dp))
+
+        // Action buttons section
+        if (isConnected) {
         SecondaryButton(
             label = "Disconnect",
             expanded = true,
@@ -552,20 +652,52 @@ fun ConnectionPanel2D(
 
           Row(
               modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically
           ) {
-            Checkbox(checked = enableHdr, onCheckedChange = { enableHdr = it })
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Enable HDR (request from server)")
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                  text = "Enable HDR",
+                  style = LocalTypography.current.body1.copy(
+                      color = SpatialTheme.colorScheme.primaryAlphaBackground
+                  )
+              )
+              Text(
+                  text = "Request HDR from server",
+                  style = LocalTypography.current.body2.copy(
+                      color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                  )
+              )
+            }
+            SpatialCheckbox(
+                checked = enableHdr,
+                onCheckedChange = { enableHdr = it }
+            )
           }
 
           Row(
               modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically
           ) {
-            Checkbox(checked = enableFullRange, onCheckedChange = { enableFullRange = it })
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Prefer full range (client output)")
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                  text = "Prefer Full Range",
+                  style = LocalTypography.current.body1.copy(
+                      color = SpatialTheme.colorScheme.primaryAlphaBackground
+                  )
+              )
+              Text(
+                  text = "Client output color range",
+                  style = LocalTypography.current.body2.copy(
+                      color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                  )
+              )
+            }
+            SpatialCheckbox(
+                checked = enableFullRange,
+                onCheckedChange = { enableFullRange = it }
+            )
           }
 
           PrimaryButton(
@@ -603,462 +735,5 @@ fun ConnectionPanel2D(
   }
 }
 
-@Composable
-fun ConnectionPanelImmersive(
-    pairingHelper: MoonlightPairingHelper,
-    savedHost: String,
-    savedPort: String,
-    savedAppId: String,
-    onSaveConnection: (String, String, String) -> Unit,
-    onClearPairing: () -> Unit,
-    onConnect: (String, Int, Int) -> Unit,
-) {
-  val context = LocalContext.current
-  var host by remember { mutableStateOf(savedHost) }
-  var port by remember { mutableStateOf(savedPort) }
-  var appId by remember { mutableStateOf(savedAppId) }
-  var generatedPin by remember { mutableStateOf<String?>(null) }
-  var connectionStatus by remember { mutableStateOf("Ready to connect") }
-  var isConnected by remember { mutableStateOf(false) }
-  var needsPairing by remember { mutableStateOf(false) }
-  var isCheckingPairing by remember { mutableStateOf(false) }
-  var isPairing by remember { mutableStateOf(false) }
-  var pairingAttemptKey by remember { mutableStateOf(0) }
-  var showConfig by remember { mutableStateOf(false) }
-  val defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context)
-  var selectedRes by remember { mutableStateOf(defaultPrefs.getString("list_resolution", "1280x720") ?: "1280x720") }
-  var selectedFps by remember { mutableStateOf(defaultPrefs.getString("list_fps", "60") ?: "60") }
-  // Normalize stored format strings to UI-friendly values
-  var selectedFormat by remember {
-    mutableStateOf(
-        when (defaultPrefs.getString("video_format", "auto")) {
-          "neverh265" -> "h264"
-          "forceh265" -> "hevc"
-          "forceav1" -> "av1"
-          else -> "auto"
-        }
-    )
-  }
-  var resOptions by remember {
-    mutableStateOf(
-        listOf(
-            "640x360",
-            "854x480",
-            "1280x720",
-            "1920x1080",
-            "2560x1440",
-            "3840x2160",
-        )
-    )
-  }
-  var fpsOptions by remember { mutableStateOf(listOf("30", "60", "90", "120")) }
-  var formatOptions by remember { mutableStateOf(listOf("auto", "h264", "hevc", "av1")) }
-  var capabilitySummary by remember { mutableStateOf("") }
-  var capabilityStatus by remember { mutableStateOf<String?>(null) }
-  var enableHdr by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_enable_hdr", false)) }
-  var enableFullRange by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_full_range", false)) }
-
-  val focusManager = LocalFocusManager.current
-  val scrollState = rememberScrollState()
-
-  SpatialTheme(colorScheme = getPanelTheme()) {
-    Column(
-        modifier =
-            Modifier.fillMaxSize()
-                .clip(SpatialTheme.shapes.large)
-                .background(brush = LocalColorScheme.current.panel)
-                .verticalScroll(scrollState)
-                .padding(48.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-      Text(
-          text = "Moonlight Connection",
-          style = MaterialTheme.typography.headlineMedium,
-      )
-      
-      Text(
-          text = connectionStatus,
-          style = MaterialTheme.typography.bodyMedium,
-      )
-
-      OutlinedTextField(
-          value = host,
-          onValueChange = { host = it },
-          label = { Text("Host / IP Address") },
-          enabled = !isConnected,
-          singleLine = true,
-          keyboardOptions = KeyboardOptions(
-              keyboardType = KeyboardType.Text,
-              imeAction = ImeAction.Next
-          ),
-          keyboardActions = KeyboardActions(
-              onNext = { focusManager.moveFocus(FocusDirection.Next) }
-          ),
-          modifier = Modifier.fillMaxWidth(),
-      )
-
-      OutlinedTextField(
-          value = port,
-          onValueChange = { port = it },
-          label = { Text("Port") },
-          enabled = !isConnected,
-          singleLine = true,
-          keyboardOptions = KeyboardOptions(
-              keyboardType = KeyboardType.Number,
-              imeAction = ImeAction.Next
-          ),
-          keyboardActions = KeyboardActions(
-              onNext = { focusManager.moveFocus(FocusDirection.Next) }
-          ),
-          modifier = Modifier.fillMaxWidth(),
-      )
-
-      // App selection dropdown - only show if paired and app list is loaded
-      var appList by remember { mutableStateOf<List<com.limelight.nvstream.http.NvApp>>(emptyList()) }
-      var isLoadingApps by remember { mutableStateOf(false) }
-      var appListError by remember { mutableStateOf<String?>(null) }
-      
-      // Fetch app list when pairing is verified
-      LaunchedEffect(host, port, needsPairing) {
-        if (!needsPairing && host.isNotBlank() && appList.isEmpty() && !isLoadingApps) {
-          isLoadingApps = true
-          appListError = null
-          val portInt = port.toIntOrNull() ?: 47989
-          pairingHelper.fetchAppList(host, portInt) { apps, error ->
-            isLoadingApps = false
-            if (apps != null) {
-              appList = apps
-              // If current appId doesn't match any app, reset to first app (usually Desktop with ID 0)
-              val currentAppIdInt = appId.toIntOrNull() ?: 0
-              val matchingApp = apps.find { it.getAppId() == currentAppIdInt }
-              if (matchingApp == null && apps.isNotEmpty()) {
-                appId = apps.first().getAppId().toString()
-              }
-            } else {
-              appListError = error ?: "Failed to load app list"
-            }
-          }
-        }
-      }
-      
-      if (appList.isNotEmpty()) {
-        val appOptions = appList.map { "${it.getAppName()} (ID: ${it.getAppId()})" }
-        val currentAppIdInt = appId.toIntOrNull() ?: 0
-        val selectedAppName = appList.find { it.getAppId() == currentAppIdInt }?.let { 
-          "${it.getAppName()} (ID: ${it.getAppId()})" 
-        } ?: appOptions.firstOrNull() ?: appId
-        
-        LabeledDropdown(
-            label = "Application",
-            options = appOptions,
-            selected = selectedAppName,
-            onSelect = { selected ->
-              // Extract appId from selected string (format: "App Name (ID: 123)")
-              val appIdMatch = Regex("ID: (\\d+)").find(selected)
-              val newAppId = appIdMatch?.groupValues?.get(1) ?: "0"
-              appId = newAppId
-            },
-        )
-      } else if (isLoadingApps) {
-        Text(
-            text = "Loading applications...",
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.fillMaxWidth(),
-        )
-      } else if (appListError != null) {
-        Text(
-            text = "App list: $appListError",
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-            value = appId,
-            onValueChange = { appId = it },
-            label = { Text("App ID (fallback)") },
-            enabled = !isConnected && !needsPairing,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { focusManager.clearFocus() }
-            ),
-            modifier = Modifier.fillMaxWidth(),
-        )
-      } else {
-        OutlinedTextField(
-            value = appId,
-            onValueChange = { appId = it },
-            label = { Text("App ID (enter host/port and check pairing first)") },
-            enabled = false,
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-      }
-
-      if (needsPairing) {
-        if (generatedPin == null) {
-          // Generate PIN when pairing is needed - use pairingAttemptKey to prevent infinite loop
-          LaunchedEffect(pairingAttemptKey) {
-            generatedPin = PairingManager.generatePinString()
-            isPairing = true
-            connectionStatus = "Enter PIN $generatedPin on your server..."
-            val portInt = port.toIntOrNull() ?: 47989
-            pairingHelper.pairWithServer(host, portInt, generatedPin!!) { success, error ->
-              isPairing = false
-              if (success) {
-                connectionStatus = "Paired! Click Connect to continue"
-                needsPairing = false
-                generatedPin = null
-              } else {
-                when (error) {
-                  "Incorrect PIN" -> {
-                    connectionStatus = "PIN incorrect. Click 'Retry Pairing' to try again."
-                  }
-                  "Pairing already in progress" -> {
-                    connectionStatus = "Another device is pairing. Please wait, then tap Retry."
-                  }
-                  else -> {
-                    connectionStatus = error ?: "Pairing failed. Click 'Retry Pairing' to try again."
-                  }
-                }
-              }
-            }
-          }
-        }
-        
-        if (generatedPin != null) {
-          Column(
-              modifier = Modifier.fillMaxWidth(),
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.spacedBy(16.dp)
-          ) {
-            Text(
-                text = "Enter this PIN on your server:",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Text(
-                text = generatedPin!!,
-                style = MaterialTheme.typography.headlineLarge,
-            )
-            if (isPairing) {
-              Text(
-                  text = "Waiting for PIN entry on server...",
-                  style = MaterialTheme.typography.bodySmall,
-              )
-            }
-          }
-        }
-      }
-
-      if (isConnected) {
-        SecondaryButton(
-            label = "Disconnect",
-            expanded = true,
-            onClick = {
-              isConnected = false
-              connectionStatus = "Disconnected"
-            },
-        )
-      } else {
-        if (isCheckingPairing || isPairing) {
-          PrimaryButton(
-              label = if (isCheckingPairing) "Checking..." else "Pairing...",
-              expanded = true,
-              onClick = { },
-          )
-        } else {
-          if (needsPairing) {
-            if (isPairing) {
-              PrimaryButton(
-                  label = "Pairing in progress...",
-                  expanded = true,
-                  onClick = { },
-              )
-            } else {
-              PrimaryButton(
-                  label = "Retry Pairing",
-                  expanded = true,
-                  onClick = {
-                    pairingAttemptKey++ // Trigger new PIN generation
-                    generatedPin = null
-                  },
-              )
-            }
-          } else {
-            PrimaryButton(
-                label = "Connect",
-                expanded = true,
-                onClick = {
-                  val portInt = port.toIntOrNull() ?: 47989
-                  val appIdInt = appId.toIntOrNull() ?: 0
-                  if (host.isNotBlank()) {
-                    isCheckingPairing = true
-                    connectionStatus = "Checking pairing..."
-                    onSaveConnection(host, port, appId)
-                    pairingHelper.checkPairing(host, portInt) { isPaired, error ->
-                      isCheckingPairing = false
-                      if (isPaired) {
-                        connectionStatus = "Connecting..."
-                        onConnect(host, portInt, appIdInt)
-                      } else {
-                        needsPairing = true
-                        connectionStatus = error ?: "Server requires pairing. Generating PIN..."
-                      }
-                    }
-                  } else {
-                    connectionStatus = "Error: Host cannot be empty"
-                  }
-                },
-            )
-          }
-        }
-      }
-      
-      Spacer(modifier = Modifier.height(16.dp))
-      
-      SecondaryButton(
-          label = "Reset Client Pairing (clear cert & UID)",
-          expanded = true,
-          onClick = {
-            onClearPairing()
-            // Reset local UI state to force a fresh pairing flow
-            isConnected = false
-            needsPairing = true
-            generatedPin = null
-            pairingAttemptKey++
-            connectionStatus = "Cleared client pairing; re-pair required"
-          },
-      )
-
-      Spacer(modifier = Modifier.height(8.dp))
-
-      SecondaryButton(
-          label = if (showConfig) "Hide Stream Configuration" else "Configure Stream (Device Capabilities)",
-          expanded = true,
-          onClick = {
-            showConfig = !showConfig
-            if (showConfig) {
-              capabilitySummary = "Decoder capabilities: Standard H.264/HEVC/AV1 support"
-              capabilityStatus = "Loading server capabilities..."
-              val portInt = port.toIntOrNull() ?: 47989
-              if (host.isBlank()) {
-                capabilityStatus = "Enter host/port to load capabilities"
-              } else {
-                pairingHelper.fetchServerCapabilities(host, portInt) { caps, error ->
-                  if (caps == null || error != null) {
-                    capabilityStatus = error ?: "Failed to load server capabilities"
-                    return@fetchServerCapabilities
-                  }
-                  capabilityStatus = "Capabilities loaded"
-                  val baseRes =
-                      listOf("640x360", "854x480", "1280x720", "1920x1080", "2560x1440", "3840x2160")
-                  val maxPixels = listOf(caps.maxLumaH264, caps.maxLumaHEVC).maxOrNull() ?: 0
-                  val filteredRes =
-                      baseRes.filter { res ->
-                        val parts = res.split("x")
-                        val pixels =
-                            if (parts.size == 2) parts[0].toLong() * parts[1].toLong() else Long.MAX_VALUE
-                        (maxPixels == 0L || pixels <= maxPixels) && (caps.supports4k || res != "3840x2160")
-                      }
-                  resOptions = if (filteredRes.isNotEmpty()) filteredRes else baseRes
-                  if (!resOptions.contains(selectedRes)) {
-                    selectedRes = resOptions.first()
-                  }
-                  val formatList = mutableListOf("auto")
-                  val codec = caps.codecModeSupport
-                  val hasH264 = codec == 0L || (codec and 0x3L) != 0L
-                  val hasHevc = codec == 0L || (codec and (1L shl 8 or (1L shl 9) or (1L shl 10))) != 0L
-                  if (hasH264) formatList.add("h264")
-                  if (hasHevc) formatList.add("hevc")
-                  formatList.add("av1")
-                  formatOptions = formatList.distinct()
-                  if (!formatOptions.contains(selectedFormat)) {
-                    selectedFormat = formatOptions.first()
-                  }
-                }
-              }
-            }
-          },
-      )
-
-      if (showConfig) {
-        Spacer(modifier = Modifier.height(8.dp))
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-          Text(text = "Decoder capabilities: $capabilitySummary", style = MaterialTheme.typography.bodySmall)
-          capabilityStatus?.let {
-            Text(text = it, style = MaterialTheme.typography.bodySmall)
-          }
-          Text(text = "Select resolution / fps / format to apply before launch", style = MaterialTheme.typography.bodySmall)
-
-          LabeledDropdown(
-              label = "Resolution",
-              options = resOptions,
-              selected = selectedRes,
-              onSelect = { selectedRes = it },
-          )
-          LabeledDropdown(
-              label = "FPS",
-              options = fpsOptions,
-              selected = selectedFps,
-              onSelect = { selectedFps = it },
-          )
-          LabeledDropdown(
-              label = "Format",
-              options = formatOptions,
-              selected = selectedFormat,
-              onSelect = { selectedFormat = it },
-          )
-
-          Row(
-              modifier = Modifier.fillMaxWidth(),
-              verticalAlignment = Alignment.CenterVertically
-          ) {
-            Checkbox(checked = enableHdr, onCheckedChange = { enableHdr = it })
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Enable HDR (request from server)")
-          }
-
-          Row(
-              modifier = Modifier.fillMaxWidth(),
-              verticalAlignment = Alignment.CenterVertically
-          ) {
-            Checkbox(checked = enableFullRange, onCheckedChange = { enableFullRange = it })
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Prefer full range (client output)")
-          }
-
-          PrimaryButton(
-              label = "Apply Stream Settings",
-              expanded = true,
-              onClick = {
-            val shared = PreferenceManager.getDefaultSharedPreferences(context)
-                // Map UI-friendly format to stored preference values expected by PreferenceConfiguration
-                val storedFormat =
-                    when (selectedFormat) {
-                      "h264" -> "neverh265"
-                      "hevc" -> "forceh265"
-                      "av1" -> "forceav1"
-                      else -> "auto"
-                    }
-                shared.edit()
-                    .putString("list_resolution", selectedRes)
-                    .putString("list_fps", selectedFps)
-                    .putString("video_format", storedFormat)
-                    .putBoolean("checkbox_enable_hdr", enableHdr)
-                    .putBoolean("checkbox_full_range", enableFullRange)
-                    .apply()
-                connectionStatus = "Applied stream prefs (res/fps/format/HDR/range)"
-              },
-          )
-        }
-      }
-    }
-  }
-}
+// ConnectionPanelImmersive has been moved to ConnectionPanelImmersive.kt
 

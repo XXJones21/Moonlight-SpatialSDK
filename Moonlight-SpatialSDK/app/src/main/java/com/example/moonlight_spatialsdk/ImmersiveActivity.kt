@@ -229,10 +229,10 @@ class ImmersiveActivity : AppSystemActivity() {
     return listOf(
         PanelRegistration(R.id.connection_panel) {
           config {
-            fractionOfScreen = 0.8f
-            height = basePanelHeightMeters
-            width = basePanelHeightMeters * 0.8f
-            layoutDpi = 160
+            fractionOfScreen = 0.4f
+            height = basePanelHeightMeters * 0.75f
+            width = basePanelHeightMeters * 0.6f
+            layoutDpi = 240
             layerConfig = LayerConfig()
             enableTransparent = true
             includeGlass = false
@@ -469,17 +469,13 @@ class ImmersiveActivity : AppSystemActivity() {
   }
 
   private fun createConnectionPanelEntity() {
-    System.out.println("=== CREATE_CONNECTION_PANEL_ENTITY_CALLED ===")
-    android.util.Log.e(TAG, "=== CREATE_CONNECTION_PANEL_ENTITY_CALLED ===")
     Log.i(TAG, "Creating connection panel entity with Panel(R.id.connection_panel)")
     
-    val aspect =
-        if (prefs.height != 0) {
-          prefs.width.toFloat() / prefs.height.toFloat()
-        } else {
-          16f / 9f
-        }
-    val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+    // Connection panel size - match the registration config to UISetSample "UI Components" panel size
+    // Registration: height = 0.75f * basePanelHeightMeters, width = 0.6f * basePanelHeightMeters
+    val connectionPanelHeight = basePanelHeightMeters * 0.75f  // 0.525m
+    val connectionPanelWidth = basePanelHeightMeters * 0.6f      // 0.42m
+    val panelSize = Vector2(connectionPanelWidth, connectionPanelHeight)
     
     val managerEntity = panelManager?.panelManagerEntity
     val parentComponent = if (managerEntity != null) {
@@ -499,9 +495,7 @@ class ImmersiveActivity : AppSystemActivity() {
         )
     )
     
-    System.out.println("=== CONNECTION_PANEL_ENTITY_CREATED ===")
-    android.util.Log.e(TAG, "=== CONNECTION_PANEL_ENTITY_CREATED ===")
-    Log.i(TAG, "Connection panel entity created - parented to PanelManager, visible initially")
+    Log.i(TAG, "Connection panel entity created - size: ${panelSize.x}m x ${panelSize.y}m, parented to PanelManager")
   }
 
   /**
