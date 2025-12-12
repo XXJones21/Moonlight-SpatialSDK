@@ -111,7 +111,7 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 3. **Register scaling components and systems**:
    - Register `Scalable` and `ScaledParent` components with component manager
    - Register `PointerInfoSystem` for hover detection
-   - Register `TouchScalableSystem` for corner-based scaling (minScale=0.5f, maxScale=5.0f)
+   - Register `TouchScalableSystem` for corner-based scaling (minScale=0.5f, maxScale=10.0f)
 4. Read connection params from Intent extras (host/port/appId); store as pending (no connect yet).
 5. Init `NetworkedAssetLoader`.
 
@@ -316,6 +316,78 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
 - **Scale**: Initial scale of 1.0, adjustable via corner handles or `updateVideoPanelScale()` after connection
 - **Scaling Components**: `Scalable()` and `ScaledParent()` components enable corner-based scaling
 - **Surface handling**: Paint black → attachSurface → preConfigureDecoder → mark surface ready → start pending connection if present
+
+#### `onVRPause()` / `onHMDUnmounted()`
+
+**Purpose**: Store connection state before device sleep/pause for resume recovery.
+
+**Key Steps**:
+
+1. Check if connection is active via `connectionManager.isConnected()`
+2. If connected, retrieve connection parameters from `connectionManager.getCurrentConnectionParams()`
+3. Store connection state (`wasConnectedBeforePause = true`) and parameters (`connectionParamsBeforePause`)
+4. Fallback to `pendingConnectionParams` if connection manager doesn't have stored params
+
+**Implementation**:
+
+```kotlin
+override fun onVRPause() {
+    super.onVRPause()
+    wasConnectedBeforePause = connectionManager.isConnected()
+    if (wasConnectedBeforePause) {
+        // Get connection params from connection manager (stored when stream starts)
+        connectionParamsBeforePause = connectionManager.getCurrentConnectionParams()
+        if (connectionParamsBeforePause == null) {
+            // Fallback to pendingConnectionParams
+            connectionParamsBeforePause = pendingConnectionParams
+        }
+    }
+}
+```
+
+**Note**: Both `onVRPause()` and `onHMDUnmounted()` implement the same logic to handle different pause scenarios (system pause vs. headset removal).
+
+#### `onVRReady()` / `onHMDMounted()`
+
+**Purpose**: Re-establish video stream after device wake/resume if it died during sleep.
+
+**Key Steps**:
+
+1. Check if we were connected before pause (`wasConnectedBeforePause`)
+2. If connection is lost, re-establish stream using stored parameters
+3. If connection is still active but video stream may be dead, call `connectionManager.checkAndRestartVideoStreamIfNeeded()`
+4. Reset stored state after recovery attempt
+
+**Implementation**:
+
+```kotlin
+override fun onVRReady() {
+    super.onVRReady()
+    if (wasConnectedBeforePause) {
+        val isCurrentlyConnected = connectionManager.isConnected()
+        if (!isCurrentlyConnected && connectionParamsBeforePause != null) {
+            // Connection lost during sleep - re-establish stream
+            val (host, port, appId) = connectionParamsBeforePause!!
+            pendingConnectionParams = connectionParamsBeforePause
+            isPaired = true
+            startStreamIfReady()
+        } else if (isCurrentlyConnected) {
+            // Connection still active - check if video stream needs recovery
+            connectionManager.checkAndRestartVideoStreamIfNeeded()
+        }
+        // Reset state
+        wasConnectedBeforePause = false
+        connectionParamsBeforePause = null
+    }
+}
+```
+
+**Recovery Strategy**:
+
+- **Connection Lost**: Full stream restart with stored parameters (host, port, appId, prefs)
+- **Connection Active**: Video stream recovery via `checkAndRestartVideoStreamIfNeeded()` which performs full stream restart to re-establish video path
+
+**Note**: Both `onVRReady()` and `onHMDMounted()` implement the same recovery logic to handle different resume scenarios.
 
 #### `createConnectionPanelEntity()`
 
@@ -596,8 +668,65 @@ connectionManager.pairWithServer(host, port, pin) { success, error ->
 1. Call `connection.stop()` to stop Moonlight stream
 2. Set `connection = null`
 3. Set `isConnected = false`
+4. Clear stored connection parameters (`currentConnectionParams = null`)
 
 **Background Execution**: Runs on executor thread
+
+#### `getCurrentConnectionParams()`
+
+**Purpose**: Retrieve stored connection parameters (host, port, appId) for resume recovery.
+
+**Returns**: `Triple<String, Int, Int>?` - Connection parameters or null if no active connection
+
+**Usage**: Called by `ImmersiveActivity` lifecycle methods (`onVRPause`, `onHMDUnmounted`) to store connection state before sleep/pause.
+
+**Storage**: Connection parameters are stored in `currentConnectionParams` when `startStream()` is called.
+
+#### `checkAndRestartVideoStreamIfNeeded()`
+
+**Purpose**: Recover video stream after sleep/wake cycle if it died during sleep.
+
+**Flow**:
+
+1. Check if connection parameters and preferences are stored
+2. Always perform full stream restart (not just decoder restart)
+3. Stop current connection if it exists
+4. Restart stream with stored parameters (host, port, appId, prefs)
+
+**Recovery Strategy**:
+
+- **Full Stream Restart**: Always restarts entire stream, not just decoder
+- **Rationale**: Video stream path in connection may be dead even if connection object appears active
+- **Ensures**: Both video and audio paths are re-established after sleep/wake
+
+**Background Execution**: Runs on executor thread
+
+**Usage**: Called by `ImmersiveActivity.onVRReady()` / `onHMDMounted()` when connection is still active but video stream may have died.
+
+**Implementation**:
+
+```kotlin
+fun checkAndRestartVideoStreamIfNeeded() {
+    executor.execute {
+        val params = currentConnectionParams
+        val prefs = currentPrefs
+        if (params == null || prefs == null) {
+            return@execute
+        }
+        
+        val (host, port, appId) = params
+        
+        // Always restart entire stream after sleep/wake cycle
+        connection?.stop()
+        connection = null
+        isConnected = false
+        
+        Thread.sleep(200) // Ensure connection is fully stopped
+        
+        startStream(host, port, appId, prefs)
+    }
+}
+```
 
 #### NvConnectionListener Implementation
 
@@ -634,7 +763,7 @@ connectionManager.pairWithServer(host, port, pin) { success, error ->
 - **Proportional Scaling**: Corner handles scale proportionally with panel (maintains visibility at all sizes)
 - **Position Locking**: Panel position and rotation are locked during scaling to prevent unwanted movement
 - **Axis Restriction**: Only X and Y axes are scaled; Z axis remains at 1.0 to prevent depth changes
-- **Scale Range**: 0.5x to 5.0x (configurable)
+- **Scale Range**: 0.5x to 10.0x (configurable)
 - **Auto-Hide**: Corner handles automatically hide after 1.5 seconds of inactivity
 
 **User Interaction**:
@@ -658,7 +787,7 @@ val pointerInfoSystem = PointerInfoSystem()
 systemManager.registerSystem(pointerInfoSystem)
 
 // Register touch scalable system
-systemManager.registerSystem(TouchScalableSystem(minScale = 0.5f, maxScale = 5.0f))
+systemManager.registerSystem(TouchScalableSystem(minScale = 0.5f, maxScale = 10.0f))
 ```
 
 **Entity Registration** (in `createVideoPanelEntity()`):
@@ -888,6 +1017,7 @@ Step-by-step flow with expected logging and current gaps:
 - Panel scaling support (`Scale` component, `updateVideoPanelScale()` method)
 - Corner-based scaling system (`TouchScalableSystem`) with proportional corner handles
 - zIndex configuration for rectilinear panels
+- Sleep/wake cycle video stream recovery (automatic re-establishment after device sleep)
 
 **⚠️ Limitations**:
 
@@ -896,8 +1026,10 @@ Step-by-step flow with expected logging and current gaps:
 - No analog stick-based scaling (`AnalogScalableSystem`)
 - Known SDK issue: Video surface color space initialization (affects PremiumMediaSample too)
   - Colors may be incorrect on first frame
-  - Resolves after device sleep/wake cycle
+  - Resolves after device sleep/wake cycle (which also triggers video stream recovery)
   - See `POST_MORTEM.md` for details
+
+**Note**: Video stream recovery after sleep/wake cycles is now implemented. If the video stream dies during a long sleep cycle (while audio continues), the stream is automatically re-established on resume via `onVRReady()` / `onHMDMounted()` lifecycle handlers.
 
 ### Future Enhancements
 
@@ -914,7 +1046,7 @@ Step-by-step flow with expected logging and current gaps:
 - ✅ **Completed**: `TouchScalableSystem` for corner-based scaling
   - Corner handles appear on hover
   - Grab corner with trigger to scale panel
-  - Scale range: 0.5x to 5.0x
+  - Scale range: 0.5x to 10.0x
   - Position and rotation locked during scaling
   - Only X and Y axes scaled (Z axis locked at 1.0)
   - Corner handles scale proportionally with panel
@@ -1004,7 +1136,9 @@ The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 
 - ⚠️ Video surface color space initialization issue (affects PremiumMediaSample too)
   - Colors may be incorrect on first frame
-  - Resolves after device sleep/wake cycle
+  - Resolves after device sleep/wake cycle (which also triggers video stream recovery)
   - See `POST_MORTEM.md` for details
+
+**Note**: Video stream recovery after sleep/wake cycles is implemented. The app automatically detects when the video stream has died during sleep and re-establishes it on resume, ensuring seamless streaming experience even after long sleep periods.
 
 The core streaming functionality is working, with pairing support and proper lifecycle management. The app launches directly into immersive mode with connection UI, transitioning to video streaming once connected. The next phase is to add MRUK features and advanced scaling systems.

@@ -16,6 +16,8 @@ Moonlight SpatialSDK is a port of the Moonlight game streaming client to Meta's 
 - Full audio support
 - Bluetooth controller input passthrough (Xbox, DualShock 4, and compatible gamepads)
 - Configurable stream settings (resolution, FPS, bitrate, codec)
+- Video panel scaling (0.5x to 10.0x) with corner-based controls
+- Automatic video stream recovery after sleep/wake cycles
 
 ## Architecture
 
@@ -140,6 +142,11 @@ The app includes network security configuration to allow cleartext HTTP traffic 
 
 - **Video Panel**: The game stream appears on a floating panel in VR
 - **Passthrough**: Real-world view is visible through the headset
+- **Panel Scaling**: 
+  - Hover over the video panel to reveal corner handles
+  - Grab a corner handle with the trigger and drag to scale the panel
+  - Scale range: 0.5x to 10.0x (proportional scaling)
+  - Position and rotation remain locked during scaling
 - **Controls**: 
   - **Bluetooth Gamepads**: Connect an Xbox Wireless Controller, DualShock 4, or compatible gamepad directly to your Quest 3 via Bluetooth. Input is automatically forwarded to the streaming server when connected.
   - **Quest Controllers**: Use Quest controllers for VR navigation (controller input passthrough is not supported for Quest controllers)
@@ -213,6 +220,23 @@ Moonlight-SpatialSDK/
 - Real-world visibility while gaming
 - Configurable lighting and environment
 
+### Video Panel Scaling
+
+- Corner-based scaling system for resizing the video panel
+- Hover over panel to reveal corner handles
+- Grab corner with trigger and drag to scale
+- Scale range: 0.5x to 10.0x
+- Proportional scaling maintains aspect ratio
+- Position and rotation locked during scaling
+
+### Sleep/Wake Recovery
+
+- Automatic video stream recovery after device sleep/wake cycles
+- Addresses color space initialization issues (known Spatial SDK limitation)
+- Re-establishes video stream if it dies during long sleep periods
+- Seamless recovery without manual reconnection
+- See `Documentation/POST_MORTEM.md` for technical details
+
 ## Development
 
 ### Key Technologies
@@ -240,8 +264,11 @@ The project uses Gradle for build management. Key build files:
 ## Known Limitations
 
 - No MRUK features (anchoring, wall detection) yet
-- No scaling/interaction systems for video panel
-- Static panel registration (not dynamic)
+- Video surface color space initialization issue (affects PremiumMediaSample too)
+  - Colors may be incorrect on first frame after surface creation
+  - **Fixed**: Automatic recovery via sleep/wake cycle handling
+  - Sleep/wake cycle triggers both color space fix and video stream recovery
+  - See `Documentation/POST_MORTEM.md` for details
 
 ## Future Enhancements
 

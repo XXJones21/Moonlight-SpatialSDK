@@ -83,6 +83,10 @@ class ImmersiveActivity : AppSystemActivity() {
   private var panelPositioningSystem: PanelPositioningSystem? = null
   private lateinit var pairingHelper: MoonlightPairingHelper
   
+  // Track connection state before pause for resume recovery
+  private var wasConnectedBeforePause: Boolean = false
+  private var connectionParamsBeforePause: Triple<String, Int, Int>? = null
+  
   // Diagnostic flag: when true, bypass ControllerHandler forwarding to allow UI navigation testing
   // Set to true to test if controller input reaches the app (UI navigation)
   // Set to false to forward input to ControllerHandler for Sunshine passthrough
@@ -151,7 +155,7 @@ class ImmersiveActivity : AppSystemActivity() {
     systemManager.registerSystem(pointerInfoSystem)
     
     // Register touch scalable system
-    systemManager.registerSystem(TouchScalableSystem(minScale = 0.5f, maxScale = 5.0f))
+    systemManager.registerSystem(TouchScalableSystem(minScale = 0.5f, maxScale = 10.0f))
     
     connectionManager = MoonlightConnectionManager(
         context = this,
@@ -311,6 +315,128 @@ class ImmersiveActivity : AppSystemActivity() {
     
     super.onSpatialShutdown()
     disconnect()
+  }
+
+  /**
+   * Handle HMD unmount (device removed from head).
+   * Store connection state for potential resume recovery.
+   */
+  override fun onHMDUnmounted() {
+    super.onHMDUnmounted()
+    Log.i(TAG, "onHMDUnmounted: Storing connection state for resume recovery")
+    
+    // Store connection state before pause
+    wasConnectedBeforePause = connectionManager.isConnected()
+    if (wasConnectedBeforePause) {
+      // Get connection params from connection manager (it stores them when stream starts)
+      connectionParamsBeforePause = connectionManager.getCurrentConnectionParams()
+      if (connectionParamsBeforePause == null) {
+        // Fallback to pendingConnectionParams if connection manager doesn't have them
+        connectionParamsBeforePause = pendingConnectionParams
+        if (connectionParamsBeforePause == null) {
+          Log.w(TAG, "onHMDUnmounted: Connected but no connection params available")
+        }
+      }
+      if (connectionParamsBeforePause != null) {
+        Log.i(TAG, "onHMDUnmounted: Was connected, stored params for resume recovery: ${connectionParamsBeforePause}")
+      }
+    }
+  }
+
+  /**
+   * Handle HMD mount (device placed on head).
+   * Check if video stream needs to be re-established after sleep/wake cycle.
+   */
+  override fun onHMDMounted() {
+    super.onHMDMounted()
+    Log.i(TAG, "onHMDMounted: Checking if video stream needs recovery")
+    
+    // If we were connected before pause, check if we need to re-establish video stream
+    if (wasConnectedBeforePause) {
+      Log.i(TAG, "onHMDMounted: Was connected before pause, checking video stream health")
+      
+      // Check if connection is still alive but video stream may have died
+      val isCurrentlyConnected = connectionManager.isConnected()
+      if (!isCurrentlyConnected && connectionParamsBeforePause != null) {
+        val (host, port, appId) = connectionParamsBeforePause!!
+        Log.i(TAG, "onHMDMounted: Connection lost during sleep, re-establishing video stream host=$host port=$port appId=$appId")
+        
+        // Re-establish connection with stored params
+        pendingConnectionParams = connectionParamsBeforePause
+        isPaired = true // Assume still paired
+        startStreamIfReady()
+      } else if (isCurrentlyConnected) {
+        // Connection still exists, but video stream may have died
+        // Try to restart video decoder if needed
+        Log.i(TAG, "onHMDMounted: Connection still active, checking video decoder state")
+        connectionManager.checkAndRestartVideoStreamIfNeeded()
+      }
+      
+      // Reset state
+      wasConnectedBeforePause = false
+      connectionParamsBeforePause = null
+    }
+  }
+
+  /**
+   * Handle VR pause (system pause event).
+   * Store connection state for potential resume recovery.
+   */
+  override fun onVRPause() {
+    super.onVRPause()
+    Log.i(TAG, "onVRPause: Storing connection state for resume recovery")
+    
+    // Store connection state before pause
+    wasConnectedBeforePause = connectionManager.isConnected()
+    if (wasConnectedBeforePause) {
+      // Get connection params from connection manager (it stores them when stream starts)
+      connectionParamsBeforePause = connectionManager.getCurrentConnectionParams()
+      if (connectionParamsBeforePause == null) {
+        // Fallback to pendingConnectionParams if connection manager doesn't have them
+        connectionParamsBeforePause = pendingConnectionParams
+        if (connectionParamsBeforePause == null) {
+          Log.w(TAG, "onVRPause: Connected but no connection params available")
+        }
+      }
+      if (connectionParamsBeforePause != null) {
+        Log.i(TAG, "onVRPause: Was connected, stored params for resume recovery: ${connectionParamsBeforePause}")
+      }
+    }
+  }
+
+  /**
+   * Handle VR ready (system resume event).
+   * Check if video stream needs to be re-established after sleep/wake cycle.
+   */
+  override fun onVRReady() {
+    super.onVRReady()
+    Log.i(TAG, "onVRReady: Checking if video stream needs recovery")
+    
+    // If we were connected before pause, check if we need to re-establish video stream
+    if (wasConnectedBeforePause) {
+      Log.i(TAG, "onVRReady: Was connected before pause, checking video stream health")
+      
+      // Check if connection is still alive but video stream may have died
+      val isCurrentlyConnected = connectionManager.isConnected()
+      if (!isCurrentlyConnected && connectionParamsBeforePause != null) {
+        val (host, port, appId) = connectionParamsBeforePause!!
+        Log.i(TAG, "onVRReady: Connection lost during sleep, re-establishing video stream host=$host port=$port appId=$appId")
+        
+        // Re-establish connection with stored params
+        pendingConnectionParams = connectionParamsBeforePause
+        isPaired = true // Assume still paired
+        startStreamIfReady()
+      } else if (isCurrentlyConnected) {
+        // Connection still exists, but video stream may have died
+        // Try to restart video decoder if needed
+        Log.i(TAG, "onVRReady: Connection still active, checking video decoder state")
+        connectionManager.checkAndRestartVideoStreamIfNeeded()
+      }
+      
+      // Reset state
+      wasConnectedBeforePause = false
+      connectionParamsBeforePause = null
+    }
   }
 
   /**

@@ -45,6 +45,7 @@ class MoonlightConnectionManager(
     private var isConnected: Boolean = false
     private var controllerHandler: ControllerHandler? = null
     private var currentPrefs: PreferenceConfiguration? = null
+    private var currentConnectionParams: Triple<String, Int, Int>? = null
     private val cryptoProvider: LimelightCryptoProvider = AndroidCryptoProvider(context)
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -279,6 +280,7 @@ class MoonlightConnectionManager(
                 )
                 Log.i(tag, "startStream: NvConnection created, calling start()")
                 currentPrefs = prefs
+                currentConnectionParams = Triple(host, port, appId)
                 connection?.start(audioRenderer, decoderRenderer, this)
                 Log.i(tag, "NvConnection.start invoked host=$host")
             } catch (e: Exception) {
@@ -301,10 +303,62 @@ class MoonlightConnectionManager(
             controllerHandler?.destroy()
             controllerHandler = null
             currentPrefs = null
+            currentConnectionParams = null
             
             connection?.stop()
             connection = null
             isConnected = false
+        }
+    }
+
+    /**
+     * Check if video stream is healthy and restart if needed.
+     * Called after resume to handle cases where video stream died during sleep
+     * but audio connection is still active.
+     * 
+     * This addresses the issue where long sleep/wake cycles cause video stream
+     * to die while audio continues playing.
+     * 
+     * Strategy:
+     * - Always restart the entire stream after sleep/wake cycle
+     * - The video stream path in the connection may be dead even if connection object is active
+     * - Full restart ensures both video and audio paths are re-established
+     */
+    fun checkAndRestartVideoStreamIfNeeded() {
+        executor.execute {
+            try {
+                // Check if we have connection params and prefs stored
+                val params = currentConnectionParams
+                val prefs = currentPrefs
+                if (params == null || prefs == null) {
+                    Log.w(tag, "checkAndRestartVideoStreamIfNeeded: Missing connection params or prefs, cannot restart")
+                    return@execute
+                }
+                
+                val (host, port, appId) = params
+                
+                // Always restart the entire stream after sleep/wake cycle
+                // The video stream path may be dead even if the connection object thinks it's active
+                Log.i(tag, "checkAndRestartVideoStreamIfNeeded: Restarting entire video stream after sleep/wake host=$host port=$port appId=$appId")
+                
+                // Stop current connection if it exists
+                try {
+                    connection?.stop()
+                } catch (e: Exception) {
+                    Log.d(tag, "checkAndRestartVideoStreamIfNeeded: Error stopping connection: ${e.message}")
+                }
+                connection = null
+                isConnected = false
+                
+                // Small delay to ensure connection is fully stopped
+                Thread.sleep(200)
+                
+                // Restart stream with same parameters
+                startStream(host, port, appId, prefs)
+                Log.i(tag, "checkAndRestartVideoStreamIfNeeded: Full stream restart initiated")
+            } catch (e: Exception) {
+                Log.e(tag, "checkAndRestartVideoStreamIfNeeded: Error during video stream recovery", e)
+            }
         }
     }
 
@@ -374,6 +428,7 @@ class MoonlightConnectionManager(
         controllerHandler?.destroy()
         controllerHandler = null
         currentPrefs = null
+        currentConnectionParams = null
         
         onStatusUpdate?.let { postToMain { it(message, false) } }
         try {
@@ -478,6 +533,15 @@ class MoonlightConnectionManager(
      */
     fun isConnected(): Boolean {
         return isConnected
+    }
+
+    /**
+     * Get current connection parameters (host, port, appId).
+     * Returns null if no connection is active.
+     * Used for resume recovery after sleep/wake cycles.
+     */
+    fun getCurrentConnectionParams(): Triple<String, Int, Int>? {
+        return currentConnectionParams
     }
 
     private fun postToMain(block: () -> Unit) {
