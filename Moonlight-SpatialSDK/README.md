@@ -1,6 +1,6 @@
 # Moonlight SpatialSDK
 
-A Meta Quest 3 application that brings Moonlight game streaming to virtual and mixed reality. Stream your PC games to your Quest 3 headset with low-latency video and audio, featuring a hybrid 2D/immersive architecture with passthrough support.
+A Meta Quest 3 application that brings Moonlight game streaming to virtual and mixed reality. Stream your PC games to your Quest 3 headset with low-latency video and audio, featuring a fully immersive VR experience with passthrough support.
 
 ## Overview
 
@@ -9,7 +9,7 @@ Moonlight SpatialSDK is a port of the Moonlight game streaming client to Meta's 
 **Key Features:**
 
 - Stream PC games to Quest 3 with low latency
-- Hybrid 2D/immersive architecture (2D connection UI + VR streaming)
+- Fully immersive VR experience with in-VR connection UI
 - Passthrough mode for mixed reality gaming
 - Secure PIN pairing system
 - Native video decoder with hardware acceleration
@@ -19,12 +19,11 @@ Moonlight SpatialSDK is a port of the Moonlight game streaming client to Meta's 
 
 ## Architecture
 
-The application uses Meta Spatial SDK with a hybrid app pattern, supporting both 2D panel mode and immersive VR mode:
+The application uses Meta Spatial SDK to provide a fully immersive VR experience for game streaming:
 
 ### Main Components
 
-- **PancakeActivity** (`PancakeActivity.kt`): 2D panel activity for connection setup, pairing, and stream configuration
-- **ImmersiveActivity** (`ImmersiveActivity.kt`): VR activity for video streaming with passthrough and input handling
+- **ImmersiveActivity** (`ImmersiveActivity.kt`): Main VR activity for connection UI, pairing, video streaming with passthrough, and input handling
 - **MoonlightConnectionManager** (`MoonlightConnectionManager.kt`): Connection lifecycle, pairing, stream management, and controller input passthrough
 - **MoonlightPanelRenderer** (`MoonlightPanelRenderer.kt`): Bridges Spatial panel Surface to Moonlight native decoder
 - **LegacySurfaceHolderAdapter** (`LegacySurfaceHolderAdapter.kt`): Adapter for Moonlight's SurfaceHolder interface
@@ -32,17 +31,19 @@ The application uses Meta Spatial SDK with a hybrid app pattern, supporting both
 
 ### Connection Flow
 
-1. **2D Mode (PancakeActivity)**:
-   - User enters server host/port
+1. **Launch and Connection**:
+   - App launches directly into immersive VR mode
+   - Connection panel appears in VR for server configuration
+   - User enters server host/port and app ID
    - Checks pairing status
-   - If not paired: Generates PIN, displays to user, pairs with server
-   - Launches immersive mode with connection parameters
 
-2. **Immersive Mode (ImmersiveActivity)**:
+2. **Pairing and Streaming**:
+   - If not paired: Generates PIN, displays to user in VR, pairs with server
    - Registers video panel for streaming
    - Enables passthrough for mixed reality
    - Connects to server and starts streaming
    - Displays game stream on VR panel
+   - Connection panel is automatically hidden when streaming starts
 
 ## Requirements
 
@@ -120,19 +121,20 @@ The app includes network security configuration to allow cleartext HTTP traffic 
 
 ### First-Time Connection
 
-1. **Launch the app** on your Quest 3
-2. **Enter server details**:
+1. **Launch the app** on your Quest 3 (app launches directly into immersive VR mode)
+2. **Enter server details** in the VR connection panel:
    - Host: Your PC's IP address (e.g., `192.168.1.100`)
    - Port: Server port (default: `47989`)
    - App ID: `0` for desktop, or specific app ID
 3. **Pair with server**:
-   - Tap "Connect & Launch Immersive"
-   - If not paired, the app will generate a PIN
+   - Tap "Connect" in the VR connection panel
+   - If not paired, the app will generate a PIN and display it in VR
    - Enter the displayed PIN on your server (Sunshine/GFE pairing dialog)
    - Wait for pairing to complete
 4. **Start streaming**:
-   - After pairing, tap "Connect & Launch Immersive" again
-   - The app will launch immersive mode and start streaming
+   - After pairing, tap "Connect" again in the VR connection panel
+   - The connection panel will disappear and streaming will begin
+   - The game stream appears on a floating panel in VR
 
 ### Streaming
 
@@ -141,7 +143,7 @@ The app includes network security configuration to allow cleartext HTTP traffic 
 - **Controls**: 
   - **Bluetooth Gamepads**: Connect an Xbox Wireless Controller, DualShock 4, or compatible gamepad directly to your Quest 3 via Bluetooth. Input is automatically forwarded to the streaming server when connected.
   - **Quest Controllers**: Use Quest controllers for VR navigation (controller input passthrough is not supported for Quest controllers)
-- **Settings**: Configure resolution, FPS, bitrate, and codec in 2D mode before connecting
+- **Settings**: Stream settings (resolution, FPS, bitrate, codec) are configured via Moonlight preferences
 
 ### Controller Input Passthrough
 
@@ -170,7 +172,6 @@ Moonlight-SpatialSDK/
 ├── app/
 │   ├── src/main/
 │   │   ├── java/              # Kotlin/Java source code
-│   │   │   ├── PancakeActivity.kt
 │   │   │   ├── ImmersiveActivity.kt
 │   │   │   ├── MoonlightConnectionManager.kt
 │   │   │   └── ...
@@ -185,11 +186,11 @@ Moonlight-SpatialSDK/
 
 ## Key Features
 
-### Hybrid Architecture
+### Immersive Architecture
 
-- **2D Mode**: Connection UI, pairing, stream configuration
-- **Immersive Mode**: VR streaming with passthrough
-- Seamless transition between modes
+- **Fully VR Experience**: Connection UI, pairing, and streaming all occur in immersive VR mode
+- **In-VR Connection Panel**: Connection setup and pairing happen directly in VR
+- **Passthrough Support**: Mixed reality gaming with real-world visibility
 
 ### Video Rendering
 
@@ -220,7 +221,7 @@ Moonlight-SpatialSDK/
 - **Meta Spatial SDK**: VR framework
 - **Moonlight Core**: Game streaming protocol (native C code)
 - **Android MediaCodec**: Hardware video decoding
-- **Jetpack Compose**: UI framework (for 2D mode)
+- **Jetpack Compose**: UI framework (for in-VR connection panel)
 
 ### Building from Source
 
@@ -238,16 +239,15 @@ The project uses Gradle for build management. Key build files:
 
 ## Known Limitations
 
-- Video panel currently only works in immersive mode (2D mode shows connection UI only)
 - No MRUK features (anchoring, wall detection) yet
 - No scaling/interaction systems for video panel
 - Static panel registration (not dynamic)
 
 ## Future Enhancements
 
-- **Phase 1**: Add video display in 2D mode
-- **Phase 2**: MRUK integration (anchoring, wall detection)
-- **Phase 3**: Advanced features (scaling, interaction systems)
+- **Phase 1**: MRUK integration (anchoring, wall detection)
+- **Phase 2**: Advanced features (scaling, interaction systems)
+- **Phase 3**: Enhanced UI and configuration options
 
 ## Documentation
 
