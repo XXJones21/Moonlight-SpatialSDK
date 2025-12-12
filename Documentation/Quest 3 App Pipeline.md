@@ -16,7 +16,7 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
   - `MoonlightConnectionManager.kt` - Connection lifecycle, pairing, and stream management
   - `MoonlightPanelRenderer.kt` - Bridges Spatial panel Surface to Moonlight native decoder
   - `LegacySurfaceHolderAdapter.kt` - Adapter for Moonlight's SurfaceHolder interface
-  - `ConnectionPanelImmersive.kt` - Compose UI for connection management in VR
+  - `ConnectionPanelImmersive.kt` - Compose UI for connection management in VR (card-based UI with dialogs)
 
 **Purpose**: Immersive-only Moonlight game streaming application launching directly into VR mode with passthrough. Features connection panel for setup and video panel for streaming, both managed through PanelManager.
 
@@ -123,7 +123,9 @@ Log.i(TAG, "MediaCodecHelper initialized successfully")
 ```
 
 **Benefits**:
+
 - Enables explicit decoder selection via `MediaCodecHelper.findBestDecoderForMime()`
+
 - Leverages MediaCodecHelper's decoder preference and blacklisting logic
 - Enables capability checking (low latency, adaptive playback support)
 - GPU capability detection (low-end Snapdragon, Adreno model detection)
@@ -188,10 +190,10 @@ override fun registerPanels(): List<PanelRegistration> {
     return listOf(
         PanelRegistration(R.id.connection_panel) {
             config {
-                fractionOfScreen = 0.8f
-                height = basePanelHeightMeters
-                width = basePanelHeightMeters * 0.8f
-                layoutDpi = 160
+                fractionOfScreen = 0.4f
+                height = basePanelHeightMeters * 0.75f
+                width = basePanelHeightMeters * 0.6f
+                layoutDpi = 240
                 layerConfig = LayerConfig()
                 enableTransparent = true
                 includeGlass = false
@@ -207,12 +209,19 @@ override fun registerPanels(): List<PanelRegistration> {
 
 **Connection Panel Features**:
 
-- Compose UI for connection management
-- Host/port/appId inputs with persistence
-- Pairing flow (check → generate PIN → pair)
-- Stream preference configuration
-- Connect button that hides connection panel and starts stream
-- Clear pairing button
+- Compose UI for connection management (defined in `ConnectionPanelImmersive.kt`)
+- Card-based connection UI with side-by-side layout:
+  - **Server Card** (`SecondaryCard`): Displays paired server name (e.g., "Vytal") or "Ready to connect" placeholder
+  - **Connect/Pair Card** (`SecondaryCard`): "Connect to PC" or "Pair New Server" with plus icon
+- Server name fetching: Automatically fetches and displays PC name when host is set
+- Application selection dropdown: Shows app names only (no ID in label, e.g., "Desktop" instead of "Desktop (ID: 881448767)")
+- Connection via cards: Clicking server card connects when paired (no separate Connect button)
+- Pairing dialog: `SpatialBasicDialog`-style custom dialog for IP/Port input
+- PIN display: `SpatialIconDialog` shows pairing PIN when pairing is initiated
+- Options dialog: Custom dialog with choices for "Configure Stream" and "Reset Client Pairing"
+- Stream configuration: Collapsible section with resolution/FPS/format dropdowns and HDR/Full Range switches
+- Host/port/appId persistence via `connection_prefs` SharedPreferences
+- Pairing flow: Check pairing → generate PIN → pair → fetch server name
 
 #### `createVideoPanelEntity()`
 
@@ -296,6 +305,50 @@ videoPanelEntity = Entity.create(
 - **Rendering**: Monoscopic (`StereoMode.None`), `zIndex = 0` for rectilinear panels
 - **Scale**: Initial scale of 1.0, adjustable via `updateVideoPanelScale()` after connection
 - **Surface handling**: Paint black → attachSurface → preConfigureDecoder → mark surface ready → start pending connection if present
+
+#### `createConnectionPanelEntity()`
+
+**Purpose**: Create connection panel entity with dimensions matching the panel registration config.
+
+**Key Steps**:
+
+1. Calculate panel dimensions to match registration config:
+   - Height: `basePanelHeightMeters * 0.75f` (0.525m)
+   - Width: `basePanelHeightMeters * 0.6f` (0.42m)
+2. Create entity with `Panel(R.id.connection_panel)` component
+3. Parent entity to PanelManager
+4. Set initial visibility to `true` (shown on launch, hidden when connecting)
+
+**Connection Panel Entity Creation**:
+
+```kotlin
+private fun createConnectionPanelEntity() {
+    // Connection panel size - match the registration config to UISetSample "UI Components" panel size
+    val connectionPanelHeight = basePanelHeightMeters * 0.75f  // 0.525m
+    val connectionPanelWidth = basePanelHeightMeters * 0.6f      // 0.42m
+    val panelSize = Vector2(connectionPanelWidth, connectionPanelHeight)
+    
+    connectionPanelEntity = Entity.create(
+        listOf(
+            Panel(R.id.connection_panel),
+            Transform(Pose(Vector3(0f, 0f, 0f))),
+            PanelDimensions(panelSize),
+            Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
+            Visible(true), // Visible initially, hidden when connect is pressed
+            TransformParent(panelManagerEntity)
+        )
+    )
+}
+```
+
+**Panel Configuration**:
+
+- **Size**: 0.42m × 0.525m (matches UISetSample "UI Components" panel size)
+- **Resolution**: `layoutDpi = 240` for improved text clarity
+- **Visibility**: Starts visible, hidden when user initiates connection
+- **Parenting**: Parented to PanelManager for unified positioning
+
+**Note**: Entity dimensions must match panel registration config to ensure proper rendering. The panel registration uses `fractionOfScreen = 0.4f`, `height = 0.75f * basePanelHeightMeters`, and `width = 0.6f * basePanelHeightMeters`.
 
 #### `registerFeatures()` - Lines 74-88
 
@@ -674,45 +727,46 @@ Step-by-step flow with expected logging and current gaps:
 
 **Immersive Mode (ImmersiveActivity)**:
 
-1. **onCreate()**: 
+1. **onCreate()**:
    - Create decoder/audio/connection manager
    - Initialize `pairingHelper`
    - Read connection params from Intent extras or shared preferences
    - Store as pending (no connect yet)
 
-2. **onSceneReady()**: 
+2. **onSceneReady()**:
    - Configure lighting/passthrough
    - Register `PanelPositioningSystem`
    - Create `PanelManager` entity and set on positioning system
    - Create video panel entity (registers panel dynamically using `executeOnVrActivity`)
    - Create connection panel entity
 
-3. **registerPanels()**: 
+3. **registerPanels()**:
    - Register connection panel (Compose UI)
    - Video panel registered dynamically in `createVideoPanelEntity()`
 
-4. **Panel `surfaceConsumer`** (video panel): 
+4. **Panel `surfaceConsumer`** (video panel):
    - Paint black → attachSurface → preConfigureDecoder → mark `isSurfaceReady`
    - Parent panel to PanelManager
    - If pending params exist, call `connectToHost`
 
-5. **User clicks Connect** (connection panel): 
-   - Hide connection panel (`Visible(false)`)
+5. **User clicks Server Card** (connection panel):
+   - If paired: Hide connection panel (`Visible(false)`)
    - Call `connectToHost(host, port, appId)`
+   - If not paired: Opens pairing dialog or initiates pairing flow
 
-6. **connectToHost()**: 
+6. **connectToHost()**:
    - Sets `isPaired=true`, stores params
    - Calls `startStreamIfReady()`
 
-7. **startStreamIfReady()**: 
+7. **startStreamIfReady()**:
    - If surface ready and paired, calls `connectionManager.startStream` with prefs
    - Stream starts with negotiated resolution/fps/bitrate/format
 
-8. **Stream Ready**: 
+8. **Stream Ready**:
    - `connectionManager.onStatusUpdate` reports `connected = true`
    - Video panel set to `Visible(true)`
 
-9. **stopStream()**: 
+9. **stopStream()**:
    - On shutdown/disconnect, cleans up connection/decoder
 
 **Status Updates**:
