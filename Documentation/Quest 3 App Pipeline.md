@@ -108,8 +108,12 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 
 1. **Initialize MediaCodecHelper**: Call `MediaCodecHelper.initialize(this, getQuestGlRenderer())` with Quest 3's Adreno 740 GPU identifier. This enables explicit decoder selection, decoder preference logic, and capability checking. Must be called BEFORE creating decoder renderer.
 2. Create `MoonlightPanelRenderer` (native decoder), `AndroidAudioRenderer`, `MoonlightConnectionManager`.
-3. Read connection params from Intent extras (host/port/appId); store as pending (no connect yet).
-4. Init `NetworkedAssetLoader`.
+3. **Register scaling components and systems**:
+   - Register `Scalable` and `ScaledParent` components with component manager
+   - Register `PointerInfoSystem` for hover detection
+   - Register `TouchScalableSystem` for corner-based scaling (minScale=0.5f, maxScale=5.0f)
+4. Read connection params from Intent extras (host/port/appId); store as pending (no connect yet).
+5. Init `NetworkedAssetLoader`.
 
 **MediaCodecHelper Initialization**:
 
@@ -293,9 +297,15 @@ videoPanelEntity = Entity.create(
         Scale(Vector3(1f)), // Initial scale of 1.0
         Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
         Visible(false), // Hidden initially
+        Scalable(), // Enable corner scaling
+        ScaledParent(), // Mark as scalable parent
         TransformParent(panelManagerEntity)
     )
 )
+
+// Register video panel with scaling system
+val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+touchScalableSystem?.registerEntity(videoPanelEntity!!)
 ```
 
 **Panel Configuration**:
@@ -303,7 +313,8 @@ videoPanelEntity = Entity.create(
 - **Shape**: Computed from `prefs.width/prefs.height` to match stream aspect ratio
 - **Display**: `PixelDisplayOptions(width = prefs.width, height = prefs.height)` - supports 4K, 1440p, 1080p
 - **Rendering**: Monoscopic (`StereoMode.None`), `zIndex = 0` for rectilinear panels
-- **Scale**: Initial scale of 1.0, adjustable via `updateVideoPanelScale()` after connection
+- **Scale**: Initial scale of 1.0, adjustable via corner handles or `updateVideoPanelScale()` after connection
+- **Scaling Components**: `Scalable()` and `ScaledParent()` components enable corner-based scaling
 - **Surface handling**: Paint black → attachSurface → preConfigureDecoder → mark surface ready → start pending connection if present
 
 #### `createConnectionPanelEntity()`
@@ -605,6 +616,86 @@ connectionManager.pairWithServer(host, port, pin) { success, error ->
 
 ---
 
+## VIDEO PANEL SCALING
+
+### Corner-Based Scaling System
+
+**Purpose**: Allow users to resize the video panel by grabbing corner handles and dragging.
+
+**Implementation**:
+
+- **System**: `TouchScalableSystem` (from PremiumMediaSample pattern)
+- **Components**: `Scalable`, `ScaledParent` (custom ECS components)
+- **Dependencies**: `PointerInfoSystem` for hover detection, `ImageBoxEntity` for corner handles
+
+**Key Features**:
+
+- **Corner Handles**: Four corner handle entities appear when user hovers over panel
+- **Proportional Scaling**: Corner handles scale proportionally with panel (maintains visibility at all sizes)
+- **Position Locking**: Panel position and rotation are locked during scaling to prevent unwanted movement
+- **Axis Restriction**: Only X and Y axes are scaled; Z axis remains at 1.0 to prevent depth changes
+- **Scale Range**: 0.5x to 5.0x (configurable)
+- **Auto-Hide**: Corner handles automatically hide after 1.5 seconds of inactivity
+
+**User Interaction**:
+
+1. User hovers controller/hand over video panel
+2. Corner handles appear at panel corners
+3. User presses trigger while pointing at a corner handle
+4. User drags corner handle in/out to scale panel
+5. Panel scales proportionally while position and rotation remain locked
+6. Corner handles hide automatically after inactivity
+
+**Component Registration** (in `onCreate()`):
+
+```kotlin
+// Register scaling components
+componentManager.registerComponent<Scalable>(Scalable.Companion)
+componentManager.registerComponent<ScaledParent>(ScaledParent.Companion)
+
+// Register pointer info system (required for hover detection)
+val pointerInfoSystem = PointerInfoSystem()
+systemManager.registerSystem(pointerInfoSystem)
+
+// Register touch scalable system
+systemManager.registerSystem(TouchScalableSystem(minScale = 0.5f, maxScale = 5.0f))
+```
+
+**Entity Registration** (in `createVideoPanelEntity()`):
+
+```kotlin
+// Entity created with Scalable and ScaledParent components
+videoPanelEntity = Entity.create(
+    listOf(
+        Panel(R.id.ui_example),
+        // ... other components ...
+        Scalable(), // Enable corner scaling
+        ScaledParent(), // Mark as scalable parent
+    )
+)
+
+// Register entity with scaling system
+val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+touchScalableSystem?.registerEntity(videoPanelEntity!!)
+```
+
+**Lifecycle Management**:
+
+- Entity registered with `TouchScalableSystem` when created
+- Entity unregistered on disconnect and shutdown
+- Locked positions/rotations cleared when scaling ends
+
+**Files**:
+
+- `systems/scalable/TouchScalableSystem.kt` - Main scaling system
+- `systems/pointerInfo/PointerInfoSystem.kt` - Hover detection
+- `entities/ImageBoxEntity.kt` - Corner handle entity creation
+- `components/Scalable.xml` - Scalable component definition
+- `components/ScaledParent.xml` - ScaledParent component definition
+- `res/drawable/corner_round.png` - Corner handle visual
+
+---
+
 ## VIDEO PANEL RENDERING
 
 ### MoonlightPanelRenderer
@@ -795,13 +886,14 @@ Step-by-step flow with expected logging and current gaps:
 - Passthrough mode enabled
 - Connection lifecycle management
 - Panel scaling support (`Scale` component, `updateVideoPanelScale()` method)
+- Corner-based scaling system (`TouchScalableSystem`) with proportional corner handles
 - zIndex configuration for rectilinear panels
 
 **⚠️ Limitations**:
 
 - Immersive-only (no 2D video display)
 - No MRUK features (anchoring, wall detection)
-- No advanced scaling/interaction systems (AnalogScalableSystem, TouchScalableSystem)
+- No analog stick-based scaling (`AnalogScalableSystem`)
 - Known SDK issue: Video surface color space initialization (affects PremiumMediaSample too)
   - Colors may be incorrect on first frame
   - Resolves after device sleep/wake cycle
@@ -819,10 +911,15 @@ Step-by-step flow with expected logging and current gaps:
 
 **Phase 2: Advanced Scaling Systems**:
 
-- Add `AnalogScalableSystem` for controller-based scaling
-- Add `TouchScalableSystem` for touch-based scaling
-- Register video panel entity with scalable system
-- Add `Scalable`, `ScaledParent`, `ScaledChild` components
+- ✅ **Completed**: `TouchScalableSystem` for corner-based scaling
+  - Corner handles appear on hover
+  - Grab corner with trigger to scale panel
+  - Scale range: 0.5x to 5.0x
+  - Position and rotation locked during scaling
+  - Only X and Y axes scaled (Z axis locked at 1.0)
+  - Corner handles scale proportionally with panel
+- ⏳ **Future**: `AnalogScalableSystem` for controller thumbstick-based scaling
+- ⏳ **Future**: `ScaledChild` component for hierarchical scaling
 
 **Phase 3: Panel Transitions**:
 
@@ -894,6 +991,7 @@ The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 - ✅ Background thread execution prevents ANR
 - ✅ Passthrough mode for mixed reality experience
 - ✅ Panel scaling support with `Scale` component
+- ✅ Corner-based scaling system (`TouchScalableSystem`) with proportional handles
 
 **Architecture Alignment**:
 
