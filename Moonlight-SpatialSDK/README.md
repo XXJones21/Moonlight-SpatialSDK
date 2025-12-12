@@ -14,6 +14,7 @@ Moonlight SpatialSDK is a port of the Moonlight game streaming client to Meta's 
 - Secure PIN pairing system
 - Native video decoder with hardware acceleration
 - Full audio support
+- Bluetooth controller input passthrough (Xbox, DualShock 4, and compatible gamepads)
 - Configurable stream settings (resolution, FPS, bitrate, codec)
 
 ## Architecture
@@ -23,10 +24,11 @@ The application uses Meta Spatial SDK with a hybrid app pattern, supporting both
 ### Main Components
 
 - **PancakeActivity** (`PancakeActivity.kt`): 2D panel activity for connection setup, pairing, and stream configuration
-- **ImmersiveActivity** (`ImmersiveActivity.kt`): VR activity for video streaming with passthrough
-- **MoonlightConnectionManager** (`MoonlightConnectionManager.kt`): Connection lifecycle, pairing, and stream management
+- **ImmersiveActivity** (`ImmersiveActivity.kt`): VR activity for video streaming with passthrough and input handling
+- **MoonlightConnectionManager** (`MoonlightConnectionManager.kt`): Connection lifecycle, pairing, stream management, and controller input passthrough
 - **MoonlightPanelRenderer** (`MoonlightPanelRenderer.kt`): Bridges Spatial panel Surface to Moonlight native decoder
 - **LegacySurfaceHolderAdapter** (`LegacySurfaceHolderAdapter.kt`): Adapter for Moonlight's SurfaceHolder interface
+- **ControllerHandler** (Moonlight core): Handles gamepad detection, input mapping, and forwarding to the streaming server
 
 ### Connection Flow
 
@@ -49,6 +51,7 @@ The application uses Meta Spatial SDK with a hybrid app pattern, supporting both
 - Meta Quest 3 headset
 - PC with NVIDIA GPU (for GameStream) or Sunshine server
 - Local network connection (recommended) or internet connection
+- Bluetooth gamepad (optional): Xbox Wireless Controller, DualShock 4, or compatible gamepad for input passthrough
 
 ### Software
 
@@ -135,8 +138,26 @@ The app includes network security configuration to allow cleartext HTTP traffic 
 
 - **Video Panel**: The game stream appears on a floating panel in VR
 - **Passthrough**: Real-world view is visible through the headset
-- **Controls**: Use Quest controllers or connected gamepad
+- **Controls**: 
+  - **Bluetooth Gamepads**: Connect an Xbox Wireless Controller, DualShock 4, or compatible gamepad directly to your Quest 3 via Bluetooth. Input is automatically forwarded to the streaming server when connected.
+  - **Quest Controllers**: Use Quest controllers for VR navigation (controller input passthrough is not supported for Quest controllers)
 - **Settings**: Configure resolution, FPS, bitrate, and codec in 2D mode before connecting
+
+### Controller Input Passthrough
+
+The app supports Bluetooth gamepad input passthrough, allowing you to use Xbox, DualShock 4, or compatible controllers connected directly to your Quest 3 headset:
+
+1. **Pair your controller** with the Quest 3 via Bluetooth (Quest Settings → Controllers → Pair New Controller)
+2. **Connect to your streaming server** using the app
+3. **Controller input is automatically forwarded** to the server once the stream is active
+4. **ControllerHandler initializes automatically** when the video panel becomes visible
+
+**Supported Controllers:**
+- Xbox Wireless Controller (Xbox One, Xbox Series X/S)
+- DualShock 4 (PlayStation 4)
+- Other Android-compatible gamepads with standard gamepad input sources
+
+**Note**: Quest controllers are used for VR navigation and UI interaction, but their input is not forwarded to the streaming server. Use a Bluetooth gamepad for game control.
 
 ### Pairing Notes
 
@@ -183,6 +204,7 @@ Moonlight-SpatialSDK/
 - Automatic pairing with PIN generation
 - Connection status callbacks
 - Graceful error handling
+- Dynamic ControllerHandler initialization when stream is ready
 
 ### Passthrough Support
 
