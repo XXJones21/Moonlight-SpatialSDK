@@ -55,6 +55,10 @@ import com.meta.spatial.toolkit.VideoSurfacePanelRegistration
 import com.meta.spatial.runtime.StereoMode
 import com.meta.spatial.vr.LocomotionSystem
 import com.meta.spatial.vr.VRFeature
+import com.example.moonlight_spatialsdk.Scalable
+import com.example.moonlight_spatialsdk.ScaledParent
+import com.example.moonlight_spatialsdk.systems.pointerInfo.PointerInfoSystem
+import com.example.moonlight_spatialsdk.systems.scalable.TouchScalableSystem
 import java.io.File
 
 class ImmersiveActivity : AppSystemActivity() {
@@ -137,6 +141,18 @@ class ImmersiveActivity : AppSystemActivity() {
     )
     audioRenderer = AndroidAudioRenderer(this, prefs.enableAudioFx)
     pairingHelper = MoonlightPairingHelper(this)
+    
+    // Register scaling components
+    componentManager.registerComponent<Scalable>(Scalable.Companion)
+    componentManager.registerComponent<ScaledParent>(ScaledParent.Companion)
+    
+    // Register pointer info system (required for hover detection)
+    val pointerInfoSystem = PointerInfoSystem()
+    systemManager.registerSystem(pointerInfoSystem)
+    
+    // Register touch scalable system
+    systemManager.registerSystem(TouchScalableSystem(minScale = 0.5f, maxScale = 5.0f))
+    
     connectionManager = MoonlightConnectionManager(
         context = this,
         activity = this,
@@ -284,6 +300,15 @@ class ImmersiveActivity : AppSystemActivity() {
   }
 
   override fun onSpatialShutdown() {
+    // Unregister video panel from scaling system before shutdown
+    videoPanelEntity?.let { entity ->
+      val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+      if (touchScalableSystem != null) {
+        touchScalableSystem.unregisterEntity(entity)
+        Log.i(TAG, "Video panel unregistered from TouchScalableSystem on shutdown")
+      }
+    }
+    
     super.onSpatialShutdown()
     disconnect()
   }
@@ -368,6 +393,16 @@ class ImmersiveActivity : AppSystemActivity() {
 
   private fun disconnect() {
     Log.i(TAG, "disconnect invoked")
+    
+    // Unregister video panel from scaling system
+    videoPanelEntity?.let { entity ->
+      val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+      if (touchScalableSystem != null) {
+        touchScalableSystem.unregisterEntity(entity)
+        Log.i(TAG, "Video panel unregistered from TouchScalableSystem")
+      }
+    }
+    
     connectionManager.stopStream()
     _connectionStatus.value = "Disconnected"
     _isConnected.value = false
@@ -379,14 +414,6 @@ class ImmersiveActivity : AppSystemActivity() {
   private fun createVideoPanelEntity() {
     Log.i(TAG, "Creating video panel entity with Panel(R.id.ui_example)")
     
-    val aspect =
-        if (prefs.height != 0) {
-          prefs.width.toFloat() / prefs.height.toFloat()
-        } else {
-          16f / 9f
-        }
-    val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
-    
     // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
     // This matches PremiumMediaSample pattern and ensures panelManager is initialized
     SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
@@ -395,21 +422,6 @@ class ImmersiveActivity : AppSystemActivity() {
               R.id.ui_example,
               surfaceConsumer = { panelEntity, surface ->
                 Log.i(TAG, "Surface attached for panel entity=$panelEntity")
-                
-                // Store the panel entity reference
-                videoPanelEntity = panelEntity
-                
-                // Parent video panel to PanelManager (now guaranteed to be initialized)
-                val managerEntity = panelManager?.panelManagerEntity
-                if (managerEntity != null) {
-                  panelEntity.setComponent(TransformParent(managerEntity))
-                  panelEntity.setComponent(Transform(Pose(Vector3(0f, 0f, 0f))))
-                  Log.i(TAG, "Video panel parented to PanelManager")
-                }
-                
-                // Panel starts hidden - will be shown when stream is ready
-                panelEntity.setComponent(Visible(false))
-                panelEntity.setComponent(Grabbable(enabled = true, type = GrabbableType.PIVOT_Y))
                 
                 SurfaceUtil.paintBlack(surface)
                 
@@ -446,6 +458,14 @@ class ImmersiveActivity : AppSystemActivity() {
     }
     
     // Create entity after panel registration (panel must be registered before entity creation)
+    val aspect =
+        if (prefs.height != 0) {
+          prefs.width.toFloat() / prefs.height.toFloat()
+        } else {
+          16f / 9f
+        }
+    val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+    
     val managerEntity = panelManager?.panelManagerEntity
     val parentComponent = if (managerEntity != null) {
       TransformParent(managerEntity)
@@ -461,9 +481,20 @@ class ImmersiveActivity : AppSystemActivity() {
             Scale(Vector3(1f)), // Initial scale of 1.0 - can be adjusted after connection
             Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
             Visible(false), // Hidden initially, shown when stream is ready
+            Scalable(), // Enable corner scaling
+            ScaledParent(), // Mark as scalable parent
             parentComponent
         )
     )
+    
+    // Register video panel with scaling system
+    val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+    if (touchScalableSystem != null) {
+      touchScalableSystem.registerEntity(videoPanelEntity!!)
+      Log.i(TAG, "Video panel entity created and registered with TouchScalableSystem")
+    } else {
+      Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
+    }
     
     Log.i(TAG, "Video panel entity created - parented to PanelManager, hidden initially")
   }
