@@ -11,6 +11,11 @@ import android.view.MotionEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
 import com.example.moonlight_spatialsdk.BuildConfig
 import com.limelight.binding.audio.AndroidAudioRenderer
 import com.limelight.binding.video.CrashListener
@@ -21,10 +26,12 @@ import com.meta.spatial.compose.ComposeFeature
 import com.meta.spatial.core.Entity
 import com.meta.spatial.core.Pose
 import com.meta.spatial.core.Quaternion
+import com.meta.spatial.core.Query
 import com.meta.spatial.core.SpatialFeature
 import com.meta.spatial.core.SpatialSDKExperimentalAPI
 import com.meta.spatial.core.Vector2
 import com.meta.spatial.core.Vector3
+import com.example.moonlight_spatialsdk.systems.MenuButtonSystem
 import com.meta.spatial.toolkit.Grabbable
 import com.meta.spatial.toolkit.GrabbableType
 import com.meta.spatial.toolkit.Panel
@@ -59,6 +66,8 @@ import com.example.moonlight_spatialsdk.Scalable
 import com.example.moonlight_spatialsdk.ScaledParent
 import com.example.moonlight_spatialsdk.systems.pointerInfo.PointerInfoSystem
 import com.example.moonlight_spatialsdk.systems.scalable.TouchScalableSystem
+import com.meta.spatial.toolkit.Controller
+import com.meta.spatial.toolkit.ControllerType
 import java.io.File
 
 class ImmersiveActivity : AppSystemActivity() {
@@ -79,9 +88,12 @@ class ImmersiveActivity : AppSystemActivity() {
   private var isSurfaceReady: Boolean = false
   private var videoPanelEntity: Entity? = null
   private var connectionPanelEntity: Entity? = null
+  private var disconnectDialogPanelEntity: Entity? = null
   private var panelManager: PanelManager? = null
   private var panelPositioningSystem: PanelPositioningSystem? = null
+  private var menuButtonSystem: MenuButtonSystem? = null
   private lateinit var pairingHelper: MoonlightPairingHelper
+  private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
   
   // Track connection state before pause for resume recovery
   private var wasConnectedBeforePause: Boolean = false
@@ -91,6 +103,10 @@ class ImmersiveActivity : AppSystemActivity() {
   // Set to true to test if controller input reaches the app (UI navigation)
   // Set to false to forward input to ControllerHandler for Sunshine passthrough
   private val allowControllerUIInput = false
+  
+  // Dialog state for disconnect confirmation
+  private val _showDisconnectDialog = MutableStateFlow(false)
+  val showDisconnectDialog: StateFlow<Boolean> = _showDisconnectDialog.asStateFlow()
 
   /**
    * Get OpenGL renderer string for Quest 3/3S hardware.
@@ -170,6 +186,7 @@ class ImmersiveActivity : AppSystemActivity() {
             videoPanelEntity?.setComponent(Visible(true))
             Log.i(TAG, "Video stream ready (connected=$connected, status=$status), showing video panel")
             
+            
             // Initialize ControllerHandler now that video panel is visible and stream is ready
             val handlerInitialized = connectionManager.initializeControllerHandler()
             if (handlerInitialized) {
@@ -231,9 +248,23 @@ class ImmersiveActivity : AppSystemActivity() {
     val panelManagerEntity = panelManager!!.create()
     panelPositioningSystem?.setPanelEntity(panelManagerEntity)
     Log.i(TAG, "PanelManager created and set on positioning system")
+    
+    // Register menu button polling system (uses ButtonBits to avoid ControllerHandler conflicts)
+    menuButtonSystem = MenuButtonSystem { handleMenuButton() }
+    systemManager.registerSystem(menuButtonSystem!!)
+    Log.i(TAG, "MenuButtonSystem registered")
 
     createVideoPanelEntity()
     createConnectionPanelEntity()
+    // Don't create disconnect dialog entity upfront - create/destroy on menu button press
+    
+    // Observe disconnect dialog state (for Compose UI state, not entity visibility)
+    // Entity will be created/destroyed directly by menu button handler
+    coroutineScope.launch {
+      _showDisconnectDialog.collect { show ->
+        Log.d(TAG, "Disconnect dialog state changed: $show (entity will be created/destroyed on toggle)")
+      }
+    }
   }
 
 
@@ -280,6 +311,43 @@ class ImmersiveActivity : AppSystemActivity() {
                     connectToHost(host, port, appId)
                   }
               )
+            }
+          }
+        },
+        PanelRegistration(R.id.disconnect_dialog_panel) {
+          config {
+            fractionOfScreen = 0.4f
+            height = basePanelHeightMeters * 0.4f
+            width = basePanelHeightMeters * 0.5f
+            layoutDpi = 240
+            layerConfig = LayerConfig()
+            enableTransparent = true
+            includeGlass = false
+            themeResourceId = R.style.PanelAppThemeTransparent
+          }
+          composePanel { setContent {
+          DisconnectDialog(
+            showDialog = showDisconnectDialog,
+            onResetPanelSize = {
+              _showDisconnectDialog.value = false
+              updateVideoPanelScale(1.0f)
+              Log.i(TAG, "Video panel scale reset to default (1.0)")
+              // Destroy entity to close dialog
+              destroyDisconnectDialogPanelEntity()
+            },
+            onEndStream = {
+              _showDisconnectDialog.value = false
+              // Destroy entity before disconnecting
+              destroyDisconnectDialogPanelEntity()
+              disconnect()
+            },
+            onCancel = {
+              _showDisconnectDialog.value = false
+              Log.i(TAG, "User cancelled disconnect dialog")
+              // Destroy entity to close dialog
+              destroyDisconnectDialogPanelEntity()
+            }
+          )
             }
           }
         },
@@ -482,6 +550,18 @@ class ImmersiveActivity : AppSystemActivity() {
     connectionPanelEntity?.destroy()
     connectionPanelEntity = null
     Log.i(TAG, "Connection panel entity destroyed - starting connection")
+    
+
+    // Recreate video panel entity if it doesn't exist (for reconnection after disconnect)
+    if (videoPanelEntity == null) {
+      Log.i(TAG, "Video panel entity doesn't exist, recreating for reconnection")
+      createVideoPanelEntity()
+    } else {
+      // Video panel exists but may be hidden - ensure surface is ready
+      if (!isSurfaceReady) {
+        Log.i(TAG, "Video panel exists but surface not ready, waiting for surface")
+      }
+    }
 
     // PancakeActivity already verified pairing before launching ImmersiveActivity,
     // so we can skip the redundant checkPairing() call and directly start the stream.
@@ -529,13 +609,23 @@ class ImmersiveActivity : AppSystemActivity() {
       }
     }
     
+    // Hide video panel instead of destroying it (allows reconnection without recreating)
+    // Following documentation pattern: manage visibility, not entity lifecycle
+    videoPanelEntity?.setComponent(Visible(false))
+    Log.i(TAG, "Video panel hidden")
+    
     connectionManager.stopStream()
     _connectionStatus.value = "Disconnected"
     _isConnected.value = false
     pendingConnectionParams = null
     isPaired = false
     isSurfaceReady = false
+    
+    // Recreate connection panel
+    createConnectionPanelEntity()
+    Log.i(TAG, "Connection panel recreated")
   }
+  
 
   private fun createVideoPanelEntity() {
     Log.i(TAG, "Creating video panel entity with Panel(R.id.ui_example)")
@@ -656,6 +746,112 @@ class ImmersiveActivity : AppSystemActivity() {
   }
 
   /**
+   * Create disconnect dialog panel entity.
+   * Called when menu button is pressed to show the dialog.
+   */
+  private fun createDisconnectDialogPanelEntity() {
+    // Don't create if already exists
+    if (disconnectDialogPanelEntity != null) {
+      Log.w(TAG, "Disconnect dialog entity already exists, skipping creation")
+      return
+    }
+    
+    Log.i(TAG, "Creating disconnect dialog panel entity with Panel(R.id.disconnect_dialog_panel)")
+    
+    // Disconnect dialog panel size - match the registration config
+    // Registration: height = 0.4f * basePanelHeightMeters, width = 0.5f * basePanelHeightMeters
+    val dialogPanelHeight = basePanelHeightMeters * 0.4f  // 0.28m
+    val dialogPanelWidth = basePanelHeightMeters * 0.5f      // 0.35m
+    val panelSize = Vector2(dialogPanelWidth, dialogPanelHeight)
+    
+    val managerEntity = panelManager?.panelManagerEntity
+    if (managerEntity == null) {
+      Log.e(TAG, "Cannot create disconnect dialog - PanelManager entity is null")
+      return
+    }
+    
+    val parentComponent = TransformParent(managerEntity)
+    
+    disconnectDialogPanelEntity = Entity.create(
+        listOf(
+            Panel(R.id.disconnect_dialog_panel),
+            Transform(Pose(Vector3(0f, 0f, -0.1f))), // Move 0.1m back to test visibility
+            PanelDimensions(panelSize),
+            Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
+            Visible(true), // Visible when created
+            parentComponent
+        )
+    )
+    
+    Log.i(TAG, "Disconnect dialog panel entity created - size: ${panelSize.x}m x ${panelSize.y}m, parented to PanelManager")
+    Log.i(TAG, "Disconnect dialog StateFlow value: ${_showDisconnectDialog.value}, entity: $disconnectDialogPanelEntity")
+    
+    // Verify entity has all required components
+    val hasPanel = disconnectDialogPanelEntity!!.hasComponent<Panel>()
+    val hasVisible = disconnectDialogPanelEntity!!.hasComponent<Visible>()
+    val visibleComponent = disconnectDialogPanelEntity!!.getComponent<Visible>()
+    Log.i(TAG, "Entity verification - hasPanel: $hasPanel, hasVisible: $hasVisible, visibleComponent: $visibleComponent")
+  }
+  
+  /**
+   * Destroy disconnect dialog panel entity.
+   * Called when menu button is pressed again to hide the dialog.
+   */
+  private fun destroyDisconnectDialogPanelEntity() {
+    val entity = disconnectDialogPanelEntity
+    if (entity == null) {
+      Log.w(TAG, "Disconnect dialog entity is null, cannot destroy")
+      return
+    }
+    
+    Log.i(TAG, "Destroying disconnect dialog panel entity")
+    entity.destroy()
+    disconnectDialogPanelEntity = null
+    Log.i(TAG, "Disconnect dialog panel entity destroyed")
+  }
+  
+  /**
+   * Toggle disconnect dialog - create entity if it doesn't exist, destroy if it does.
+   * Called when menu button is pressed.
+   * Following documentation pattern: hide video panel when menu is shown, restore when closed.
+   */
+  private fun toggleDisconnectDialog() {
+    if (disconnectDialogPanelEntity == null) {
+      // Set StateFlow to true FIRST so Compose content is ready when entity is created
+      _showDisconnectDialog.value = true
+      // Hide video panel when menu dialog is shown (following documentation pattern)
+      videoPanelEntity?.setComponent(Visible(false))
+      Log.i(TAG, "Video panel hidden while menu dialog is shown")
+      // Create entity - Compose content should render immediately
+      createDisconnectDialogPanelEntity()
+      Log.i(TAG, "Disconnect dialog toggled ON - StateFlow set to true, entity created")
+    } else {
+      // Hide dialog first, then destroy entity
+      _showDisconnectDialog.value = false
+      destroyDisconnectDialogPanelEntity()
+      // Restore video panel visibility if connected (following documentation pattern)
+      if (connectionManager.isConnected()) {
+        videoPanelEntity?.setComponent(Visible(true))
+        Log.i(TAG, "Video panel restored after menu dialog closed")
+      }
+      Log.i(TAG, "Disconnect dialog toggled OFF - StateFlow set to false, entity destroyed")
+    }
+  }
+  
+  /**
+   * Handle menu button press event.
+   * Called by MenuButtonSystem when menu button is detected via ButtonBits polling.
+   */
+  private fun handleMenuButton() {
+    if (connectionManager.isConnected()) {
+      Log.i(TAG, "Menu button pressed while connected - toggling disconnect dialog")
+      toggleDisconnectDialog()
+    } else {
+      Log.d(TAG, "Menu button pressed but not connected")
+    }
+  }
+
+  /**
    * Updates the scale of the video panel after connection is established.
    * Scale is applied uniformly to all dimensions (x, y, z).
    * 
@@ -689,6 +885,24 @@ class ImmersiveActivity : AppSystemActivity() {
    */
 
   /**
+   * Handle key down events as fallback for Quest controller start button.
+   * This catches events that might not reach dispatchKeyEvent.
+   */
+  override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+    if (keyCode == KeyEvent.KEYCODE_BUTTON_START || keyCode == KeyEvent.KEYCODE_MENU) {
+      val isConnected = connectionManager.isConnected()
+      Log.i(TAG, "onKeyDown: Start button detected (keyCode=$keyCode, connected=$isConnected)")
+      
+      if (isConnected) {
+        Log.i(TAG, "onKeyDown: Start button pressed while connected - showing disconnect dialog")
+        _showDisconnectDialog.value = true
+        return true // Consume the event
+      }
+    }
+    return super.onKeyDown(keyCode, event)
+  }
+
+  /**
    * Forward key events to ControllerHandler for input passthrough.
    * This allows Bluetooth controllers (Xbox/DualShock 4) to send input to the server.
    * Only forwards events when connected, and consumes them to prevent UI handling.
@@ -701,8 +915,33 @@ class ImmersiveActivity : AppSystemActivity() {
       return super.dispatchKeyEvent(event)
     }
     
-    // Log all key events for debugging
-    Log.d(TAG, "dispatchKeyEvent: action=${event.action}, keyCode=${event.keyCode}, device=${event.device?.name}, connected=${connectionManager.isConnected()}")
+    // Log all key events for debugging - especially start button
+    val isStartButton = event.keyCode == KeyEvent.KEYCODE_BUTTON_START || event.keyCode == KeyEvent.KEYCODE_MENU
+    if (isStartButton) {
+      Log.i(TAG, "START BUTTON EVENT: action=${event.action}, keyCode=${event.keyCode}, device=${event.device?.name}, connected=${connectionManager.isConnected()}")
+    } else {
+      Log.d(TAG, "dispatchKeyEvent: action=${event.action}, keyCode=${event.keyCode}, device=${event.device?.name}, connected=${connectionManager.isConnected()}")
+    }
+    
+    // Check for start button press to show options dialog
+    // When connected: shows stream options (Reset Panel Size, End Stream)
+    // When not connected: could show connection options (future enhancement)
+    if (event.action == KeyEvent.ACTION_DOWN &&
+        (event.keyCode == KeyEvent.KEYCODE_BUTTON_START || event.keyCode == KeyEvent.KEYCODE_MENU)) {
+      val isConnected = connectionManager.isConnected()
+      Log.i(TAG, "Start button detected: keyCode=${event.keyCode}, connected=$isConnected, entity=${disconnectDialogPanelEntity}")
+      
+      if (isConnected) {
+        Log.i(TAG, "Start button pressed while connected - showing disconnect dialog. Panel entity=${disconnectDialogPanelEntity}, PanelManager=${panelManager?.panelManagerEntity}")
+        _showDisconnectDialog.value = true
+        Log.i(TAG, "Set _showDisconnectDialog.value = true")
+        return true // Consume the event
+      } else {
+        Log.w(TAG, "Start button pressed but not connected (isConnected=$isConnected) - dialog only available when streaming")
+        // Could show connection panel or other options here in the future
+        return super.dispatchKeyEvent(event)
+      }
+    }
     
     // Only forward input when connected (check directly from connection manager for accuracy)
     if (!connectionManager.isConnected()) {

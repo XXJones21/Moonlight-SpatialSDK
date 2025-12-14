@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.limelight.nvstream.http.PairingManager
 import com.meta.spatial.uiset.button.PrimaryButton
 import com.meta.spatial.uiset.button.SecondaryButton
+import com.meta.spatial.uiset.button.DestructiveButton
 import com.meta.spatial.uiset.card.PrimaryCard
 import com.meta.spatial.uiset.card.SecondaryCard
 import com.meta.spatial.uiset.control.SpatialSwitch
@@ -39,6 +40,8 @@ import com.meta.spatial.uiset.theme.icons.regular.CategoryAll
 import com.meta.spatial.uiset.theme.icons.regular.Info
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.runtime.collectAsState
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun ConnectionPanelImmersive(
@@ -818,6 +821,75 @@ private fun LabeledDropdown(
                     item.title?.let { onSelect(it) }
                 },
             )
+        }
+    }
+}
+
+@Composable
+fun DisconnectDialog(
+    showDialog: StateFlow<Boolean>,
+    onResetPanelSize: () -> Unit,
+    onEndStream: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    val show by showDialog.collectAsState()
+    
+    if (show) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.3f)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .clip(SpatialTheme.shapes.large)
+                    .background(brush = LocalColorScheme.current.panel)
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Stream Options",
+                    style = LocalTypography.current.headline2Strong.copy(
+                        color = SpatialTheme.colorScheme.primaryAlphaBackground
+                    )
+                )
+                
+                // Vertically stacked buttons
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    SecondaryButton(
+                        label = "Reset Panel Size",
+                        expanded = true,
+                        onClick = {
+                            onResetPanelSize()
+                        }
+                    )
+                    Spacer(Modifier.size(28.dp))
+                    DestructiveButton(
+                        label = "End Stream",
+                        expanded = true,
+                        onClick = {
+                            onEndStream()
+                        }
+                    )
+                }
+                
+                Spacer(Modifier.height(8.dp))
+                
+                SecondaryButton(
+                    label = "Cancel",
+                    expanded = true,
+                    onClick = {
+                        onCancel()
+                    }
+                )
+            }
         }
     }
 }
