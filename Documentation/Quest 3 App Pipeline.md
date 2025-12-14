@@ -28,9 +28,11 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 2. [Panel Management](#panel-management)
 3. [Connection Management](#connection-management)
 4. [Video Panel Rendering](#video-panel-rendering)
-5. [Pairing System](#pairing-system)
-6. [Communication Flow](#communication-flow)
-7. [Current State & Future Enhancements](#current-state--future-enhancements)
+5. [Video Panel Scaling](#video-panel-scaling)
+6. [ButtonShelf Controls](#buttonshelf-controls)
+7. [Pairing System](#pairing-system)
+8. [Communication Flow](#communication-flow)
+9. [Current State & Future Enhancements](#current-state--future-enhancements)
 
 ---
 
@@ -812,7 +814,10 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
 
 - Entity registered with `TouchScalableSystem` when created
 - Entity unregistered on disconnect and shutdown
+- Entity re-registered when reconnecting (if entity still exists)
 - Locked positions/rotations cleared when scaling ends
+
+**Note**: ButtonShelf also appears when hovering over the video panel, providing quick access to Settings, Reset Scale, and Disconnect controls. See [ButtonShelf Controls](#buttonshelf-controls) section for details.
 
 **Files**:
 
@@ -822,6 +827,154 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
 - `components/Scalable.xml` - Scalable component definition
 - `components/ScaledParent.xml` - ScaledParent component definition
 - `res/drawable/corner_round.png` - Corner handle visual
+
+---
+
+## BUTTONSHELF CONTROLS
+
+### ButtonShelf Overview
+
+**Purpose**: Provide quick access controls at the bottom of the video panel for common operations during streaming.
+
+**Implementation**:
+
+- **Entity**: `ButtonShelfEntity` - Manages ButtonShelf entity lifecycle and positioning
+- **System**: `ButtonShelfVisibilitySystem` - Manages visibility based on hover, inactivity, grabbing, and scaling
+- **UI**: `ButtonShelfCompose` - Compose UI with three interactive buttons
+- **Component**: `ScaledChild` - Ensures ButtonShelf scales and positions correctly with video panel
+
+**Key Features**:
+
+- **Hover-Activated**: Appears when user hovers over video panel (similar to scaling handles)
+- **Auto-Hide**: Automatically hides after 1.5 seconds of inactivity
+- **Smart Hiding**: Hides when panel is being scaled or grabbed
+- **Scaling-Aware**: Uses `ScaledChild` component to maintain correct position relative to video panel regardless of scale
+- **Parented to Video Panel**: Always positioned below video panel, even when panel is scaled
+
+**Button Functions**:
+
+1. **Settings Button** (Settings icon):
+   - Toggles connection panel visibility
+   - When connection panel is hidden: Shows it to access stream configuration, pairing options, and preferences
+   - When connection panel is visible: Hides it
+   - Provides access to:
+     - Stream configuration (resolution, FPS, bitrate, codec)
+     - Pairing management (pair new server, reset client pairing)
+     - Server information
+
+2. **Reset Scale Button** (Zoom icon):
+   - Resets video panel scale to default size (1.0x)
+   - Useful after scaling panel to large or small sizes
+   - Instantly restores panel to original dimensions
+
+3. **Disconnect Button** (Close icon):
+   - Ends the current streaming session
+   - Hides the video panel
+   - Shows the connection panel for reconnection
+   - Effectively restarts the app experience (returns to connection state)
+   - Unregisters video panel from scaling system
+   - Stops stream and resets connection state
+
+**User Interaction**:
+
+1. User hovers controller/hand over video panel
+2. ButtonShelf appears at the bottom of the video panel
+3. User can interact with any of the three buttons
+4. ButtonShelf hides automatically after inactivity or when panel is scaled/grabbed
+
+**Component Registration** (in `onCreate()`):
+
+```kotlin
+// Register scaling components (required for ButtonShelf)
+componentManager.registerComponent<Scalable>(Scalable.Companion)
+componentManager.registerComponent<ScaledParent>(ScaledParent.Companion)
+componentManager.registerComponent<ScaledChild>(ScaledChild.Companion)
+
+// Register ScaleChildrenSystem (required for ButtonShelf scaling)
+systemManager.registerLateSystem(ScaleChildrenSystem())
+```
+
+**Entity Creation** (in `onSceneReady()`):
+
+```kotlin
+// Create ButtonShelf entity
+buttonShelfEntity = ButtonShelfEntity()
+
+// Attach to video panel when it exists
+videoPanelEntity?.let { videoEntity ->
+    buttonShelfEntity?.attachToEntity(videoEntity)
+    
+    // Force update children to ensure ButtonShelf is positioned correctly
+    val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+    scaleChildrenSystem?.forceUpdateChildren(videoEntity)
+    
+    // Create and register visibility system
+    buttonShelfVisibilitySystem = ButtonShelfVisibilitySystem(
+        buttonShelf = buttonShelfEntity!!,
+        videoPanelEntity = videoEntity
+    )
+    systemManager.registerSystem(buttonShelfVisibilitySystem!!)
+    buttonShelfVisibilitySystem?.startTracking()
+}
+```
+
+**ButtonShelfEntity** (`entities/ButtonShelfEntity.kt`):
+
+- **Dimensions**: 0.5m width × 0.12m height
+- **Positioning**: Positioned below video panel using `ScaledChild` component
+- **Components**: `Panel(R.id.button_shelf)`, `TransformParent`, `ScaledChild`, `Scale(1f)`, `Visible(false)`
+- **Attachment**: Attaches to video panel entity via `TransformParent` and `ScaledChild`
+- **Scaling**: Uses `ScaledChild` with `localPosition` set to shelf offset and `pivotOffset = Vector3(0f, 0f, 0f)`
+
+**ButtonShelfVisibilitySystem** (`systems/buttonShelfVisibility/ButtonShelfVisibilitySystem.kt`):
+
+- **Purpose**: Manages ButtonShelf visibility based on multiple conditions
+- **Visibility Rules**:
+  - Shows when user hovers over video panel
+  - Hides after 1.5 seconds of inactivity
+  - Hides when video panel is being scaled
+  - Hides when video panel is grabbed
+- **Tracking**: Monitors pointer hover state, inactivity timer, scaling state, and grab state
+
+**Panel Registration** (in `registerPanels()`):
+
+```kotlin
+PanelRegistration(R.id.button_shelf) {
+    config {
+        fractionOfScreen = 0.3f
+        height = 0.12f
+        width = 0.5f
+        layoutDpi = 240
+        layerConfig = LayerConfig()
+        enableTransparent = true
+        includeGlass = false
+        themeResourceId = R.style.PanelAppThemeTransparent
+    }
+    composePanel { setContent {
+        ButtonShelfCompose(
+            onSettingsClick = { showOptionsPanel() },
+            onResetScaleClick = { updateVideoPanelScale(1.0f) },
+            onDisconnectClick = { disconnect() }
+        )
+    }}
+}
+```
+
+**Lifecycle Management**:
+
+- ButtonShelf entity created in `onSceneReady()`
+- Attached to video panel when video panel is created
+- Visibility managed by `ButtonShelfVisibilitySystem`
+- Re-attached and re-registered when video panel is recreated after disconnect
+
+**Files**:
+
+- `entities/ButtonShelfEntity.kt` - ButtonShelf entity management
+- `systems/buttonShelfVisibility/ButtonShelfVisibilitySystem.kt` - Visibility management system
+- `panels/buttonShelf/ButtonShelfCompose.kt` - Compose UI for buttons
+- `panels/buttonShelf/ButtonShelfActivity.kt` - Activity wrapper (legacy, not used in primary registration)
+- `components/ScaledChild.xml` - ScaledChild component definition (for scaling with parent)
+- `systems/scaleChildren/ScaleChildrenSystem.kt` - System that updates child positions when parent scales
 
 ---
 
@@ -1016,6 +1169,8 @@ Step-by-step flow with expected logging and current gaps:
 - Connection lifecycle management
 - Panel scaling support (`Scale` component, `updateVideoPanelScale()` method)
 - Corner-based scaling system (`TouchScalableSystem`) with proportional corner handles
+- ButtonShelf controls (Settings, Reset Scale, Disconnect) with hover-activated visibility
+- ScaledChild component and ScaleChildrenSystem for hierarchical scaling (ButtonShelf scales with video panel)
 - zIndex configuration for rectilinear panels
 - Sleep/wake cycle video stream recovery (automatic re-establishment after device sleep)
 
@@ -1047,11 +1202,16 @@ Step-by-step flow with expected logging and current gaps:
   - Corner handles appear on hover
   - Grab corner with trigger to scale panel
   - Scale range: 0.5x to 10.0x
-  - Position and rotation locked during scaling
-  - Only X and Y axes scaled (Z axis locked at 1.0)
+  - Uniform scaling (all axes scale together)
   - Corner handles scale proportionally with panel
+- ✅ **Completed**: `ScaledChild` component and `ScaleChildrenSystem` for hierarchical scaling
+  - ButtonShelf uses `ScaledChild` to scale and position correctly with video panel
+  - Child entities maintain relative position when parent scales
+- ✅ **Completed**: ButtonShelf controls with hover-activated visibility
+  - Settings button toggles connection panel
+  - Reset Scale button resets panel to 1.0x
+  - Disconnect button ends stream and returns to connection panel
 - ⏳ **Future**: `AnalogScalableSystem` for controller thumbstick-based scaling
-- ⏳ **Future**: `ScaledChild` component for hierarchical scaling
 
 **Phase 3: Panel Transitions**:
 
@@ -1083,6 +1243,10 @@ Step-by-step flow with expected logging and current gaps:
 - `MoonlightPanelRenderer.kt` - Video decoder integration
 - `LegacySurfaceHolderAdapter.kt` - Surface adapter for Moonlight
 - `ConnectionPanelImmersive.kt` - Compose UI for connection management in VR
+- `entities/ButtonShelfEntity.kt` - ButtonShelf entity management
+- `systems/buttonShelfVisibility/ButtonShelfVisibilitySystem.kt` - ButtonShelf visibility management
+- `systems/scaleChildren/ScaleChildrenSystem.kt` - Hierarchical scaling system for child entities
+- `panels/buttonShelf/ButtonShelfCompose.kt` - ButtonShelf Compose UI
 
 ### Configuration Files
 
@@ -1124,6 +1288,7 @@ The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 - ✅ Passthrough mode for mixed reality experience
 - ✅ Panel scaling support with `Scale` component
 - ✅ Corner-based scaling system (`TouchScalableSystem`) with proportional handles
+- ✅ ButtonShelf controls with hover-activated visibility and hierarchical scaling support
 
 **Architecture Alignment**:
 
