@@ -363,6 +363,14 @@ class ImmersiveActivity : AppSystemActivity() {
                 onSettingsClick = {
                   Log.i(TAG, "ButtonShelf Settings clicked - showing OptionsPanel")
                   showOptionsPanel()
+                },
+                onResetScaleClick = {
+                  Log.i(TAG, "ButtonShelf Reset Scale clicked - resetting video panel scale to 1.0")
+                  updateVideoPanelScale(1.0f)
+                },
+                onDisconnectClick = {
+                  Log.i(TAG, "ButtonShelf Disconnect clicked - ending stream")
+                  disconnect()
                 }
             )
           }

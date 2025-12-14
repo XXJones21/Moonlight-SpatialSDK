@@ -13,6 +13,12 @@ class ButtonShelfActivity : ComponentActivity() {
     
     @Volatile
     var onSettingsClickCallback: (() -> Unit)? = null
+    
+    @Volatile
+    var onResetScaleClickCallback: (() -> Unit)? = null
+    
+    @Volatile
+    var onDisconnectClickCallback: (() -> Unit)? = null
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,6 +28,12 @@ class ButtonShelfActivity : ComponentActivity() {
       ButtonShelfCompose(
           onSettingsClick = {
             onSettingsClickCallback?.invoke()
+          },
+          onResetScaleClick = {
+            onResetScaleClickCallback?.invoke()
+          },
+          onDisconnectClick = {
+            onDisconnectClickCallback?.invoke()
           }
       )
     }
