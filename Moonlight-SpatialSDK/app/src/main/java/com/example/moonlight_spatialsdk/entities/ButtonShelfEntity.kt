@@ -1,16 +1,18 @@
 package com.example.moonlight_spatialsdk.entities
 
+import com.example.moonlight_spatialsdk.R
+import com.example.moonlight_spatialsdk.ScaledChild
 import com.meta.spatial.core.Entity
 import com.meta.spatial.core.Pose
 import com.meta.spatial.core.Vector2
 import com.meta.spatial.core.Vector3
 import com.meta.spatial.toolkit.Panel
 import com.meta.spatial.toolkit.PanelDimensions
+import com.meta.spatial.toolkit.Scale
 import com.meta.spatial.toolkit.Transform
 import com.meta.spatial.toolkit.TransformParent
 import com.meta.spatial.toolkit.Visible
 import com.meta.spatial.toolkit.getAbsoluteTransform
-import com.example.moonlight_spatialsdk.R
 
 class ButtonShelfEntity {
   companion object {
@@ -64,13 +66,20 @@ class ButtonShelfEntity {
       transformParent.entity = parent
       updateTransform()
       entity.setComponent(transformParent)
+      entity.setComponent(ScaledChild(localPosition = shelfOffset, pivotOffset = Vector3(0f, 0f, 0f)))
     }
+    entity.setComponent(Scale(1f))
   }
 
   fun detachFromEntity() {
+    val scaledChild = entity.tryGetComponent<ScaledChild>()
+    scaledChild?.isEnabled = false
     val globalPosition = getAbsoluteTransform(entity)
     entity.setComponent(TransformParent(Entity.nullEntity()))
     entity.setComponent(Transform(globalPosition))
+    if (scaledChild != null) {
+      entity.setComponent(scaledChild)
+    }
     parentEntity = null
   }
 

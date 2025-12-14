@@ -42,8 +42,6 @@ class TouchScalableSystem(private val minScale: Float = 0.5f, private val maxSca
   private val registeredEntities = ArrayList<Entity>()
   private val viewData = mutableMapOf<Entity, PanelData>()
   val currentlyScaling = ArrayList<Entity>()
-  private val lockedLocalPositions = mutableMapOf<Entity, Vector3>()
-  private val lockedLocalRotations = mutableMapOf<Entity, Quaternion>()
 
   data class PanelData(var startPanelDimensions: Vector2, var scale: Number = 1f)
 
@@ -240,11 +238,6 @@ class TouchScalableSystem(private val minScale: Float = 0.5f, private val maxSca
     if (!triggerIsHeldDown) {
       // Trigger Up (drop item)
       if (triggerChangedThisFrame) {
-        // Unlock positions and rotations when scaling ends
-        currentlyScaling.forEach { 
-          lockedLocalPositions.remove(it)
-          lockedLocalRotations.remove(it)
-        }
         currentlyScaling.clear()
       }
       return
@@ -255,12 +248,7 @@ class TouchScalableSystem(private val minScale: Float = 0.5f, private val maxSca
       val hitInfo = getScene().lineSegmentIntersect(controllerOrigin, controllerForward * 1000f)
       if (hitInfo != null) {
         if (corners.contains(hitInfo.entity) && lastSelectedEntity != null) {
-          val entity = lastSelectedEntity!!
-          // Lock local position and rotation when scaling starts
-          val currentTransform = entity.getComponent<Transform>()
-          lockedLocalPositions[entity] = currentTransform.transform.t
-          lockedLocalRotations[entity] = currentTransform.transform.q
-          currentlyScaling.add(entity)
+          currentlyScaling.add(lastSelectedEntity!!)
         }
       }
     }
@@ -291,21 +279,8 @@ class TouchScalableSystem(private val minScale: Float = 0.5f, private val maxSca
     var width = wantedScale * startPanelDimensions.x
     width = width.coerceIn(minScale, maxScale)
     val clampedScale = width / startPanelDimensions.x
-    // Only scale X and Y axes, keep Z at 1.0 to prevent depth changes
-    val scale = Scale(Vector3(clampedScale, clampedScale, 1.0f))
+    val scale = Scale(Vector3(clampedScale))
     entity.setComponent(scale)
-    
-    // Lock position and rotation during scaling - restore locked local transform if it exists
-    val lockedLocalPosition = lockedLocalPositions[entity]
-    val lockedLocalRotation = lockedLocalRotations[entity]
-    if (lockedLocalPosition != null && lockedLocalRotation != null) {
-      val currentTransform = entity.getComponent<Transform>()
-      // Restore both position and rotation to prevent movement/rotation during scaling
-      currentTransform.transform.t = lockedLocalPosition
-      currentTransform.transform.q = lockedLocalRotation
-      entity.setComponent(currentTransform)
-    }
-    
     updatePanel(entity) // Updates scale
     hidingTime = 0f
   }
@@ -320,8 +295,6 @@ class TouchScalableSystem(private val minScale: Float = 0.5f, private val maxSca
 
     viewData.remove(entity)
     currentlyScaling.remove(entity)
-    lockedLocalPositions.remove(entity)
-    lockedLocalRotations.remove(entity)
     registeredEntities.remove(entity)
   }
 
