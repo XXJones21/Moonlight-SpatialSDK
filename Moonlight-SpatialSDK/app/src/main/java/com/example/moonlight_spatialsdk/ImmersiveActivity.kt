@@ -42,7 +42,7 @@ import com.meta.spatial.toolkit.Visible
 import com.meta.spatial.toolkit.Scale
 import com.meta.spatial.datamodelinspector.DataModelInspectorFeature
 import com.meta.spatial.debugtools.HotReloadFeature
-import com.meta.spatial.isdk.IsdkFeature
+// import com.meta.spatial.isdk.IsdkFeature (no longer needed)
 import com.meta.spatial.okhttp3.OkHttpAssetFetcher
 import com.meta.spatial.ovrmetrics.OVRMetricsDataModel
 import com.meta.spatial.ovrmetrics.OVRMetricsFeature
@@ -62,9 +62,11 @@ import com.meta.spatial.runtime.StereoMode
 import com.meta.spatial.vr.LocomotionSystem
 import com.meta.spatial.vr.VRFeature
 import com.example.moonlight_spatialsdk.Scalable
+import com.example.moonlight_spatialsdk.ScaledChild
 import com.example.moonlight_spatialsdk.ScaledParent
 import com.example.moonlight_spatialsdk.systems.pointerInfo.PointerInfoSystem
 import com.example.moonlight_spatialsdk.systems.scalable.TouchScalableSystem
+import com.example.moonlight_spatialsdk.systems.scaleChildren.ScaleChildrenSystem
 import com.meta.spatial.toolkit.Controller
 import com.meta.spatial.toolkit.ControllerType
 import java.io.File
@@ -88,6 +90,8 @@ class ImmersiveActivity : AppSystemActivity() {
   private var videoPanelEntity: Entity? = null
   private var connectionPanelEntity: Entity? = null
   private var disconnectDialogPanelEntity: Entity? = null
+  private var buttonShelfEntity: com.example.moonlight_spatialsdk.entities.ButtonShelfEntity? = null
+  private var buttonShelfVisibilitySystem: com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem? = null
   private var panelManager: PanelManager? = null
   private var panelPositioningSystem: PanelPositioningSystem? = null
   private lateinit var pairingHelper: MoonlightPairingHelper
@@ -125,7 +129,7 @@ class ImmersiveActivity : AppSystemActivity() {
         mutableListOf<SpatialFeature>(
             VRFeature(this),
             ComposeFeature(),
-            IsdkFeature(this, spatial, systemManager),
+            //IsdkFeature(this, spatial, systemManager),
         )
     if (BuildConfig.DEBUG) {
       features.add(CastInputForwardFeature(this))
@@ -163,6 +167,7 @@ class ImmersiveActivity : AppSystemActivity() {
     // Register scaling components
     componentManager.registerComponent<Scalable>(Scalable.Companion)
     componentManager.registerComponent<ScaledParent>(ScaledParent.Companion)
+    componentManager.registerComponent<ScaledChild>(ScaledChild.Companion)
     
     // Register pointer info system (required for hover detection)
     val pointerInfoSystem = PointerInfoSystem()
@@ -241,6 +246,10 @@ class ImmersiveActivity : AppSystemActivity() {
     systemManager.registerSystem(panelPositioningSystem!!)
     Log.i(TAG, "PanelPositioningSystem registered")
 
+    // Register ScaleChildrenSystem for handling child entities that scale with parent
+    systemManager.registerLateSystem(ScaleChildrenSystem())
+    Log.i(TAG, "ScaleChildrenSystem registered")
+
     // Create PanelManager first - this will be the root for all panels
     panelManager = PanelManager()
     val panelManagerEntity = panelManager!!.create()
@@ -249,6 +258,7 @@ class ImmersiveActivity : AppSystemActivity() {
 
     createVideoPanelEntity()
     createConnectionPanelEntity()
+    createButtonShelfEntity()
     // Don't create disconnect dialog entity upfront - create/destroy on menu button press
     
     // Observe disconnect dialog state (for Compose UI state, not entity visibility)
@@ -342,6 +352,35 @@ class ImmersiveActivity : AppSystemActivity() {
             }
           )
             }
+          }
+        },
+        PanelRegistration(R.id.button_shelf) {
+          config {
+            fractionOfScreen = 0.3f
+            height = 0.12f
+            width = 0.5f
+            layoutDpi = 240
+            layerConfig = LayerConfig()
+            enableTransparent = true
+            includeGlass = false
+            themeResourceId = R.style.PanelAppThemeTransparent
+          }
+          composePanel { setContent {
+            com.example.moonlight_spatialsdk.panels.buttonShelf.ButtonShelfCompose(
+                onSettingsClick = {
+                  Log.i(TAG, "ButtonShelf Settings clicked - showing OptionsPanel")
+                  showOptionsPanel()
+                },
+                onResetScaleClick = {
+                  Log.i(TAG, "ButtonShelf Reset Scale clicked - resetting video panel scale to 1.0")
+                  updateVideoPanelScale(1.0f)
+                },
+                onDisconnectClick = {
+                  Log.i(TAG, "ButtonShelf Disconnect clicked - ending stream")
+                  disconnect()
+                }
+            )
+          }
           }
         },
     )
@@ -538,11 +577,14 @@ class ImmersiveActivity : AppSystemActivity() {
       return
     }
 
-    // Destroy connection panel entity when connect is pressed to prevent it from receiving input
+    // Hide and destroy connection panel entity when connect is pressed to prevent it from receiving input
     // Following PremiumMediaSample pattern: destroy entity, not just hide it
-    connectionPanelEntity?.destroy()
+    connectionPanelEntity?.let { entity ->
+      entity.setComponent(Visible(false))
+      entity.destroy()
+      Log.i(TAG, "Connection panel entity hidden and destroyed - starting connection")
+    }
     connectionPanelEntity = null
-    Log.i(TAG, "Connection panel entity destroyed - starting connection")
     
 
     // Recreate video panel entity if it doesn't exist (for reconnection after disconnect)
@@ -550,10 +592,27 @@ class ImmersiveActivity : AppSystemActivity() {
       Log.i(TAG, "Video panel entity doesn't exist, recreating for reconnection")
       createVideoPanelEntity()
     } else {
-      // Video panel exists but may be hidden - ensure surface is ready
+      // Video panel exists but may be hidden from previous disconnect
+      // Surface should still be attached if entity exists (surfaceConsumer was called during initial registration)
+      // Restore isSurfaceReady state to allow stream to start
       if (!isSurfaceReady) {
-        Log.i(TAG, "Video panel exists but surface not ready, waiting for surface")
+        Log.i(TAG, "Video panel exists but isSurfaceReady is false - restoring surface ready state for reconnection")
+        isSurfaceReady = true
       }
+      // Reconfigure decoder for new connection
+      moonlightPanelRenderer.preConfigureDecoder()
+      Log.i(TAG, "Video panel exists, decoder reconfigured for reconnection")
+      
+      // Re-register video panel with scaling system (was unregistered on disconnect)
+      val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+      if (touchScalableSystem != null) {
+        touchScalableSystem.registerEntity(videoPanelEntity!!)
+        Log.i(TAG, "Video panel re-registered with TouchScalableSystem for reconnection")
+      } else {
+        Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
+      }
+      
+      // Panel will be made visible when stream is ready (in onStatusUpdate callback)
     }
 
     // PancakeActivity already verified pairing before launching ImmersiveActivity,
@@ -706,6 +765,30 @@ class ImmersiveActivity : AppSystemActivity() {
     }
     
     Log.i(TAG, "Video panel entity created - parented to PanelManager, hidden initially")
+    
+    // Attach ButtonShelf to video panel if it was created before video panel
+    buttonShelfEntity?.let { shelf ->
+      shelf.attachToEntity(videoPanelEntity!!)
+      Log.i(TAG, "ButtonShelf attached to video panel")
+      
+      // Force update children to ensure ButtonShelf is positioned correctly
+      val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+      if (scaleChildrenSystem != null) {
+        scaleChildrenSystem.forceUpdateChildren(videoPanelEntity!!)
+        Log.i(TAG, "ScaleChildrenSystem force update called for ButtonShelf")
+      }
+      
+      // Create and register visibility system if not already done
+      if (buttonShelfVisibilitySystem == null) {
+        buttonShelfVisibilitySystem = com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem(
+            buttonShelf = shelf,
+            videoPanelEntity = videoPanelEntity!!
+        )
+        systemManager.registerSystem(buttonShelfVisibilitySystem!!)
+        buttonShelfVisibilitySystem?.startTracking()
+        Log.i(TAG, "ButtonShelfVisibilitySystem registered and started tracking")
+      }
+    }
   }
 
   private fun createConnectionPanelEntity() {
@@ -736,6 +819,71 @@ class ImmersiveActivity : AppSystemActivity() {
     )
     
     Log.i(TAG, "Connection panel entity created - size: ${panelSize.x}m x ${panelSize.y}m, parented to PanelManager")
+  }
+
+  private fun createButtonShelfEntity() {
+    Log.i(TAG, "Creating ButtonShelf entity")
+    
+    buttonShelfEntity = com.example.moonlight_spatialsdk.entities.ButtonShelfEntity()
+    
+    // Attach to video panel when it exists
+    videoPanelEntity?.let { videoEntity ->
+      buttonShelfEntity?.attachToEntity(videoEntity)
+      Log.i(TAG, "ButtonShelf attached to video panel")
+      
+      // Force update children to ensure ButtonShelf is positioned correctly
+      val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+      if (scaleChildrenSystem != null) {
+        scaleChildrenSystem.forceUpdateChildren(videoEntity)
+        Log.i(TAG, "ScaleChildrenSystem force update called for ButtonShelf")
+      }
+      
+      // Create and register visibility system
+      buttonShelfVisibilitySystem = com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem(
+          buttonShelf = buttonShelfEntity!!,
+          videoPanelEntity = videoEntity
+      )
+      systemManager.registerSystem(buttonShelfVisibilitySystem!!)
+      buttonShelfVisibilitySystem?.startTracking()
+      Log.i(TAG, "ButtonShelfVisibilitySystem registered and started tracking")
+    } ?: run {
+      Log.w(TAG, "Video panel entity not yet created, ButtonShelf will be attached later")
+    }
+  }
+
+  /**
+   * Toggle the OptionsPanel (connection panel) visibility when Settings button is clicked.
+   */
+  fun showOptionsPanel() {
+    // Check if connection panel entity exists (either in our reference or in the scene)
+    val existingEntity = connectionPanelEntity ?: run {
+      // Query for existing connection panel entity in case our reference is null but entity still exists
+      val query = Query.where { has(Panel.id) }
+      query.eval().firstOrNull { entity ->
+        val panel = entity.tryGetComponent<Panel>()
+        panel != null && panel.panelRegistrationId == R.id.connection_panel
+      }
+    }
+    
+    if (existingEntity == null) {
+      Log.i(TAG, "Creating connection panel entity to show OptionsPanel")
+      createConnectionPanelEntity()
+    } else {
+      // Update our reference if we found an existing entity
+      if (connectionPanelEntity == null) {
+        connectionPanelEntity = existingEntity
+        Log.i(TAG, "Found existing connection panel entity, updating reference")
+      }
+      
+      val isVisible = existingEntity.getComponent<Visible>().isVisible
+      if (isVisible) {
+        Log.i(TAG, "Connection panel is visible, hiding it")
+        existingEntity.setComponent(Visible(false))
+      } else {
+        Log.i(TAG, "Connection panel is hidden, making it visible")
+        existingEntity.setComponent(Visible(true))
+      }
+    }
   }
 
   /**
