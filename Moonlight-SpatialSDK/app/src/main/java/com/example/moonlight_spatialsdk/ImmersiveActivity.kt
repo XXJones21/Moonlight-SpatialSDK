@@ -129,7 +129,7 @@ class ImmersiveActivity : AppSystemActivity() {
         mutableListOf<SpatialFeature>(
             VRFeature(this),
             ComposeFeature(),
-            IsdkFeature(this, spatial, systemManager),
+            //IsdkFeature(this, spatial, systemManager),
         )
     if (BuildConfig.DEBUG) {
       features.add(CastInputForwardFeature(this))
@@ -602,6 +602,16 @@ class ImmersiveActivity : AppSystemActivity() {
       // Reconfigure decoder for new connection
       moonlightPanelRenderer.preConfigureDecoder()
       Log.i(TAG, "Video panel exists, decoder reconfigured for reconnection")
+      
+      // Re-register video panel with scaling system (was unregistered on disconnect)
+      val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+      if (touchScalableSystem != null) {
+        touchScalableSystem.registerEntity(videoPanelEntity!!)
+        Log.i(TAG, "Video panel re-registered with TouchScalableSystem for reconnection")
+      } else {
+        Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
+      }
+      
       // Panel will be made visible when stream is ready (in onStatusUpdate callback)
     }
 
