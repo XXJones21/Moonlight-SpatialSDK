@@ -4,4 +4,5 @@
   <item type="id" name="options_panel" />
   <item type="id" name="connection_panel" />
   <item type="id" name="disconnect_dialog_panel" />
+  <item type="id" name="button_shelf" />
 </resources>

@@ -88,6 +88,8 @@ class ImmersiveActivity : AppSystemActivity() {
   private var videoPanelEntity: Entity? = null
   private var connectionPanelEntity: Entity? = null
   private var disconnectDialogPanelEntity: Entity? = null
+  private var buttonShelfEntity: com.example.moonlight_spatialsdk.entities.ButtonShelfEntity? = null
+  private var buttonShelfVisibilitySystem: com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem? = null
   private var panelManager: PanelManager? = null
   private var panelPositioningSystem: PanelPositioningSystem? = null
   private lateinit var pairingHelper: MoonlightPairingHelper
@@ -249,6 +251,7 @@ class ImmersiveActivity : AppSystemActivity() {
 
     createVideoPanelEntity()
     createConnectionPanelEntity()
+    createButtonShelfEntity()
     // Don't create disconnect dialog entity upfront - create/destroy on menu button press
     
     // Observe disconnect dialog state (for Compose UI state, not entity visibility)
@@ -342,6 +345,27 @@ class ImmersiveActivity : AppSystemActivity() {
             }
           )
             }
+          }
+        },
+        PanelRegistration(R.id.button_shelf) {
+          config {
+            fractionOfScreen = 0.3f
+            height = 0.12f
+            width = 0.5f
+            layoutDpi = 240
+            layerConfig = LayerConfig()
+            enableTransparent = true
+            includeGlass = false
+            themeResourceId = R.style.PanelAppThemeTransparent
+          }
+          composePanel { setContent {
+            com.example.moonlight_spatialsdk.panels.buttonShelf.ButtonShelfCompose(
+                onSettingsClick = {
+                  Log.i(TAG, "ButtonShelf Settings clicked - showing OptionsPanel")
+                  showOptionsPanel()
+                }
+            )
+          }
           }
         },
     )
@@ -706,6 +730,23 @@ class ImmersiveActivity : AppSystemActivity() {
     }
     
     Log.i(TAG, "Video panel entity created - parented to PanelManager, hidden initially")
+    
+    // Attach ButtonShelf to video panel if it was created before video panel
+    buttonShelfEntity?.let { shelf ->
+      shelf.attachToEntity(videoPanelEntity!!)
+      Log.i(TAG, "ButtonShelf attached to video panel")
+      
+      // Create and register visibility system if not already done
+      if (buttonShelfVisibilitySystem == null) {
+        buttonShelfVisibilitySystem = com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem(
+            buttonShelf = shelf,
+            videoPanelEntity = videoPanelEntity!!
+        )
+        systemManager.registerSystem(buttonShelfVisibilitySystem!!)
+        buttonShelfVisibilitySystem?.startTracking()
+        Log.i(TAG, "ButtonShelfVisibilitySystem registered and started tracking")
+      }
+    }
   }
 
   private fun createConnectionPanelEntity() {
@@ -736,6 +777,42 @@ class ImmersiveActivity : AppSystemActivity() {
     )
     
     Log.i(TAG, "Connection panel entity created - size: ${panelSize.x}m x ${panelSize.y}m, parented to PanelManager")
+  }
+
+  private fun createButtonShelfEntity() {
+    Log.i(TAG, "Creating ButtonShelf entity")
+    
+    buttonShelfEntity = com.example.moonlight_spatialsdk.entities.ButtonShelfEntity()
+    
+    // Attach to video panel when it exists
+    videoPanelEntity?.let { videoEntity ->
+      buttonShelfEntity?.attachToEntity(videoEntity)
+      Log.i(TAG, "ButtonShelf attached to video panel")
+      
+      // Create and register visibility system
+      buttonShelfVisibilitySystem = com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem(
+          buttonShelf = buttonShelfEntity!!,
+          videoPanelEntity = videoEntity
+      )
+      systemManager.registerSystem(buttonShelfVisibilitySystem!!)
+      buttonShelfVisibilitySystem?.startTracking()
+      Log.i(TAG, "ButtonShelfVisibilitySystem registered and started tracking")
+    } ?: run {
+      Log.w(TAG, "Video panel entity not yet created, ButtonShelf will be attached later")
+    }
+  }
+
+  /**
+   * Show the OptionsPanel (connection panel) when Settings button is clicked.
+   */
+  fun showOptionsPanel() {
+    if (connectionPanelEntity == null) {
+      Log.i(TAG, "Creating connection panel entity to show OptionsPanel")
+      createConnectionPanelEntity()
+    } else {
+      Log.i(TAG, "Connection panel entity already exists, making it visible")
+      connectionPanelEntity?.setComponent(Visible(true))
+    }
   }
 
   /**
