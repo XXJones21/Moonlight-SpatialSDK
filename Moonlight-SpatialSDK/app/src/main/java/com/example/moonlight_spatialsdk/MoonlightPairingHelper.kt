@@ -151,6 +151,27 @@ class MoonlightPairingHelper(
         }
     }
 
+    fun fetchServerName(
+        host: String,
+        port: Int,
+        callback: (String?) -> Unit
+    ) {
+        executor.execute {
+            try {
+                val computerDetails = ComputerDetails.AddressTuple(host, port)
+                val uniqueId = IdentityStore.getOrCreateUniqueId(context)
+                val serverCert = IdentityStore.loadServerCert(context, host)
+                val http = NvHTTP(computerDetails, 0, uniqueId, serverCert, cryptoProvider)
+                val computerDetailsObj = http.getComputerDetails(true)
+                val serverName = computerDetailsObj.name?.takeIf { it.isNotBlank() && it != "UNKNOWN" } ?: host
+                postToMain { callback(serverName) }
+            } catch (e: Exception) {
+                Log.e(tag, "fetchServerName error host=$host", e)
+                postToMain { callback(null) }
+            }
+        }
+    }
+
     private fun postToMain(block: () -> Unit) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             block()

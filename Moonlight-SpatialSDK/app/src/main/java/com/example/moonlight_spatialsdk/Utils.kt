@@ -31,3 +31,36 @@ fun Quaternion.Companion.fromSequentialPYR(
       .normalize()
 }
 
+// Function to project a ray onto a plane
+fun projectRayOntoPlane(
+    rayOrigin: Vector3,
+    rayDirection: Vector3,
+    planePoint: Vector3,
+    planeNormal: Vector3,
+): Vector3? {
+  // Normalize the plane normal and ray direction
+  val normalizedPlaneNormal = planeNormal.normalize()
+  val normalizedRayDirection = rayDirection.normalize()
+
+  // Compute the dot product between the ray direction and the plane normal
+  val denominator = normalizedRayDirection.dot(normalizedPlaneNormal)
+
+  // If the denominator is 0, the ray is parallel to the plane (no intersection)
+  if (denominator == 0f) {
+    return null // No intersection
+  }
+
+  // Compute the parameter t for the intersection point
+  val t = (planePoint - rayOrigin).dot(normalizedPlaneNormal) / denominator
+
+  // If t < 0, the intersection is behind the ray origin, so ignore it
+  if (t < 0f) {
+    return null // No valid intersection in the ray's forward direction
+  }
+
+  // Calculate the intersection point
+  val intersectionPoint = rayOrigin + normalizedRayDirection * t
+
+  return intersectionPoint
+}
+

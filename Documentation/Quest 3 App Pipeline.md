@@ -16,7 +16,7 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
   - `MoonlightConnectionManager.kt` - Connection lifecycle, pairing, and stream management
   - `MoonlightPanelRenderer.kt` - Bridges Spatial panel Surface to Moonlight native decoder
   - `LegacySurfaceHolderAdapter.kt` - Adapter for Moonlight's SurfaceHolder interface
-  - `ConnectionPanelImmersive.kt` - Compose UI for connection management in VR
+  - `ConnectionPanelImmersive.kt` - Compose UI for connection management in VR (card-based UI with dialogs)
 
 **Purpose**: Immersive-only Moonlight game streaming application launching directly into VR mode with passthrough. Features connection panel for setup and video panel for streaming, both managed through PanelManager.
 
@@ -108,8 +108,12 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 
 1. **Initialize MediaCodecHelper**: Call `MediaCodecHelper.initialize(this, getQuestGlRenderer())` with Quest 3's Adreno 740 GPU identifier. This enables explicit decoder selection, decoder preference logic, and capability checking. Must be called BEFORE creating decoder renderer.
 2. Create `MoonlightPanelRenderer` (native decoder), `AndroidAudioRenderer`, `MoonlightConnectionManager`.
-3. Read connection params from Intent extras (host/port/appId); store as pending (no connect yet).
-4. Init `NetworkedAssetLoader`.
+3. **Register scaling components and systems**:
+   - Register `Scalable` and `ScaledParent` components with component manager
+   - Register `PointerInfoSystem` for hover detection
+   - Register `TouchScalableSystem` for corner-based scaling (minScale=0.5f, maxScale=10.0f)
+4. Read connection params from Intent extras (host/port/appId); store as pending (no connect yet).
+5. Init `NetworkedAssetLoader`.
 
 **MediaCodecHelper Initialization**:
 
@@ -123,7 +127,9 @@ Log.i(TAG, "MediaCodecHelper initialized successfully")
 ```
 
 **Benefits**:
+
 - Enables explicit decoder selection via `MediaCodecHelper.findBestDecoderForMime()`
+
 - Leverages MediaCodecHelper's decoder preference and blacklisting logic
 - Enables capability checking (low latency, adaptive playback support)
 - GPU capability detection (low-end Snapdragon, Adreno model detection)
@@ -188,10 +194,10 @@ override fun registerPanels(): List<PanelRegistration> {
     return listOf(
         PanelRegistration(R.id.connection_panel) {
             config {
-                fractionOfScreen = 0.8f
-                height = basePanelHeightMeters
-                width = basePanelHeightMeters * 0.8f
-                layoutDpi = 160
+                fractionOfScreen = 0.4f
+                height = basePanelHeightMeters * 0.75f
+                width = basePanelHeightMeters * 0.6f
+                layoutDpi = 240
                 layerConfig = LayerConfig()
                 enableTransparent = true
                 includeGlass = false
@@ -207,12 +213,19 @@ override fun registerPanels(): List<PanelRegistration> {
 
 **Connection Panel Features**:
 
-- Compose UI for connection management
-- Host/port/appId inputs with persistence
-- Pairing flow (check → generate PIN → pair)
-- Stream preference configuration
-- Connect button that hides connection panel and starts stream
-- Clear pairing button
+- Compose UI for connection management (defined in `ConnectionPanelImmersive.kt`)
+- Card-based connection UI with side-by-side layout:
+  - **Server Card** (`SecondaryCard`): Displays paired server name (e.g., "Vytal") or "Ready to connect" placeholder
+  - **Connect/Pair Card** (`SecondaryCard`): "Connect to PC" or "Pair New Server" with plus icon
+- Server name fetching: Automatically fetches and displays PC name when host is set
+- Application selection dropdown: Shows app names only (no ID in label, e.g., "Desktop" instead of "Desktop (ID: 881448767)")
+- Connection via cards: Clicking server card connects when paired (no separate Connect button)
+- Pairing dialog: `SpatialBasicDialog`-style custom dialog for IP/Port input
+- PIN display: `SpatialIconDialog` shows pairing PIN when pairing is initiated
+- Options dialog: Custom dialog with choices for "Configure Stream" and "Reset Client Pairing"
+- Stream configuration: Collapsible section with resolution/FPS/format dropdowns and HDR/Full Range switches
+- Host/port/appId persistence via `connection_prefs` SharedPreferences
+- Pairing flow: Check pairing → generate PIN → pair → fetch server name
 
 #### `createVideoPanelEntity()`
 
@@ -284,9 +297,15 @@ videoPanelEntity = Entity.create(
         Scale(Vector3(1f)), // Initial scale of 1.0
         Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
         Visible(false), // Hidden initially
+        Scalable(), // Enable corner scaling
+        ScaledParent(), // Mark as scalable parent
         TransformParent(panelManagerEntity)
     )
 )
+
+// Register video panel with scaling system
+val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+touchScalableSystem?.registerEntity(videoPanelEntity!!)
 ```
 
 **Panel Configuration**:
@@ -294,8 +313,125 @@ videoPanelEntity = Entity.create(
 - **Shape**: Computed from `prefs.width/prefs.height` to match stream aspect ratio
 - **Display**: `PixelDisplayOptions(width = prefs.width, height = prefs.height)` - supports 4K, 1440p, 1080p
 - **Rendering**: Monoscopic (`StereoMode.None`), `zIndex = 0` for rectilinear panels
-- **Scale**: Initial scale of 1.0, adjustable via `updateVideoPanelScale()` after connection
+- **Scale**: Initial scale of 1.0, adjustable via corner handles or `updateVideoPanelScale()` after connection
+- **Scaling Components**: `Scalable()` and `ScaledParent()` components enable corner-based scaling
 - **Surface handling**: Paint black → attachSurface → preConfigureDecoder → mark surface ready → start pending connection if present
+
+#### `onVRPause()` / `onHMDUnmounted()`
+
+**Purpose**: Store connection state before device sleep/pause for resume recovery.
+
+**Key Steps**:
+
+1. Check if connection is active via `connectionManager.isConnected()`
+2. If connected, retrieve connection parameters from `connectionManager.getCurrentConnectionParams()`
+3. Store connection state (`wasConnectedBeforePause = true`) and parameters (`connectionParamsBeforePause`)
+4. Fallback to `pendingConnectionParams` if connection manager doesn't have stored params
+
+**Implementation**:
+
+```kotlin
+override fun onVRPause() {
+    super.onVRPause()
+    wasConnectedBeforePause = connectionManager.isConnected()
+    if (wasConnectedBeforePause) {
+        // Get connection params from connection manager (stored when stream starts)
+        connectionParamsBeforePause = connectionManager.getCurrentConnectionParams()
+        if (connectionParamsBeforePause == null) {
+            // Fallback to pendingConnectionParams
+            connectionParamsBeforePause = pendingConnectionParams
+        }
+    }
+}
+```
+
+**Note**: Both `onVRPause()` and `onHMDUnmounted()` implement the same logic to handle different pause scenarios (system pause vs. headset removal).
+
+#### `onVRReady()` / `onHMDMounted()`
+
+**Purpose**: Re-establish video stream after device wake/resume if it died during sleep.
+
+**Key Steps**:
+
+1. Check if we were connected before pause (`wasConnectedBeforePause`)
+2. If connection is lost, re-establish stream using stored parameters
+3. If connection is still active but video stream may be dead, call `connectionManager.checkAndRestartVideoStreamIfNeeded()`
+4. Reset stored state after recovery attempt
+
+**Implementation**:
+
+```kotlin
+override fun onVRReady() {
+    super.onVRReady()
+    if (wasConnectedBeforePause) {
+        val isCurrentlyConnected = connectionManager.isConnected()
+        if (!isCurrentlyConnected && connectionParamsBeforePause != null) {
+            // Connection lost during sleep - re-establish stream
+            val (host, port, appId) = connectionParamsBeforePause!!
+            pendingConnectionParams = connectionParamsBeforePause
+            isPaired = true
+            startStreamIfReady()
+        } else if (isCurrentlyConnected) {
+            // Connection still active - check if video stream needs recovery
+            connectionManager.checkAndRestartVideoStreamIfNeeded()
+        }
+        // Reset state
+        wasConnectedBeforePause = false
+        connectionParamsBeforePause = null
+    }
+}
+```
+
+**Recovery Strategy**:
+
+- **Connection Lost**: Full stream restart with stored parameters (host, port, appId, prefs)
+- **Connection Active**: Video stream recovery via `checkAndRestartVideoStreamIfNeeded()` which performs full stream restart to re-establish video path
+
+**Note**: Both `onVRReady()` and `onHMDMounted()` implement the same recovery logic to handle different resume scenarios.
+
+#### `createConnectionPanelEntity()`
+
+**Purpose**: Create connection panel entity with dimensions matching the panel registration config.
+
+**Key Steps**:
+
+1. Calculate panel dimensions to match registration config:
+   - Height: `basePanelHeightMeters * 0.75f` (0.525m)
+   - Width: `basePanelHeightMeters * 0.6f` (0.42m)
+2. Create entity with `Panel(R.id.connection_panel)` component
+3. Parent entity to PanelManager
+4. Set initial visibility to `true` (shown on launch, hidden when connecting)
+
+**Connection Panel Entity Creation**:
+
+```kotlin
+private fun createConnectionPanelEntity() {
+    // Connection panel size - match the registration config to UISetSample "UI Components" panel size
+    val connectionPanelHeight = basePanelHeightMeters * 0.75f  // 0.525m
+    val connectionPanelWidth = basePanelHeightMeters * 0.6f      // 0.42m
+    val panelSize = Vector2(connectionPanelWidth, connectionPanelHeight)
+    
+    connectionPanelEntity = Entity.create(
+        listOf(
+            Panel(R.id.connection_panel),
+            Transform(Pose(Vector3(0f, 0f, 0f))),
+            PanelDimensions(panelSize),
+            Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
+            Visible(true), // Visible initially, hidden when connect is pressed
+            TransformParent(panelManagerEntity)
+        )
+    )
+}
+```
+
+**Panel Configuration**:
+
+- **Size**: 0.42m × 0.525m (matches UISetSample "UI Components" panel size)
+- **Resolution**: `layoutDpi = 240` for improved text clarity
+- **Visibility**: Starts visible, hidden when user initiates connection
+- **Parenting**: Parented to PanelManager for unified positioning
+
+**Note**: Entity dimensions must match panel registration config to ensure proper rendering. The panel registration uses `fractionOfScreen = 0.4f`, `height = 0.75f * basePanelHeightMeters`, and `width = 0.6f * basePanelHeightMeters`.
 
 #### `registerFeatures()` - Lines 74-88
 
@@ -532,8 +668,65 @@ connectionManager.pairWithServer(host, port, pin) { success, error ->
 1. Call `connection.stop()` to stop Moonlight stream
 2. Set `connection = null`
 3. Set `isConnected = false`
+4. Clear stored connection parameters (`currentConnectionParams = null`)
 
 **Background Execution**: Runs on executor thread
+
+#### `getCurrentConnectionParams()`
+
+**Purpose**: Retrieve stored connection parameters (host, port, appId) for resume recovery.
+
+**Returns**: `Triple<String, Int, Int>?` - Connection parameters or null if no active connection
+
+**Usage**: Called by `ImmersiveActivity` lifecycle methods (`onVRPause`, `onHMDUnmounted`) to store connection state before sleep/pause.
+
+**Storage**: Connection parameters are stored in `currentConnectionParams` when `startStream()` is called.
+
+#### `checkAndRestartVideoStreamIfNeeded()`
+
+**Purpose**: Recover video stream after sleep/wake cycle if it died during sleep.
+
+**Flow**:
+
+1. Check if connection parameters and preferences are stored
+2. Always perform full stream restart (not just decoder restart)
+3. Stop current connection if it exists
+4. Restart stream with stored parameters (host, port, appId, prefs)
+
+**Recovery Strategy**:
+
+- **Full Stream Restart**: Always restarts entire stream, not just decoder
+- **Rationale**: Video stream path in connection may be dead even if connection object appears active
+- **Ensures**: Both video and audio paths are re-established after sleep/wake
+
+**Background Execution**: Runs on executor thread
+
+**Usage**: Called by `ImmersiveActivity.onVRReady()` / `onHMDMounted()` when connection is still active but video stream may have died.
+
+**Implementation**:
+
+```kotlin
+fun checkAndRestartVideoStreamIfNeeded() {
+    executor.execute {
+        val params = currentConnectionParams
+        val prefs = currentPrefs
+        if (params == null || prefs == null) {
+            return@execute
+        }
+        
+        val (host, port, appId) = params
+        
+        // Always restart entire stream after sleep/wake cycle
+        connection?.stop()
+        connection = null
+        isConnected = false
+        
+        Thread.sleep(200) // Ensure connection is fully stopped
+        
+        startStream(host, port, appId, prefs)
+    }
+}
+```
 
 #### NvConnectionListener Implementation
 
@@ -549,6 +742,86 @@ connectionManager.pairWithServer(host, port, pin) { success, error ->
 - `displayTransientMessage()` - Transient status message
 
 **Status Updates**: All callbacks invoke `onStatusUpdate` callback if provided
+
+---
+
+## VIDEO PANEL SCALING
+
+### Corner-Based Scaling System
+
+**Purpose**: Allow users to resize the video panel by grabbing corner handles and dragging.
+
+**Implementation**:
+
+- **System**: `TouchScalableSystem` (from PremiumMediaSample pattern)
+- **Components**: `Scalable`, `ScaledParent` (custom ECS components)
+- **Dependencies**: `PointerInfoSystem` for hover detection, `ImageBoxEntity` for corner handles
+
+**Key Features**:
+
+- **Corner Handles**: Four corner handle entities appear when user hovers over panel
+- **Proportional Scaling**: Corner handles scale proportionally with panel (maintains visibility at all sizes)
+- **Position Locking**: Panel position and rotation are locked during scaling to prevent unwanted movement
+- **Axis Restriction**: Only X and Y axes are scaled; Z axis remains at 1.0 to prevent depth changes
+- **Scale Range**: 0.5x to 10.0x (configurable)
+- **Auto-Hide**: Corner handles automatically hide after 1.5 seconds of inactivity
+
+**User Interaction**:
+
+1. User hovers controller/hand over video panel
+2. Corner handles appear at panel corners
+3. User presses trigger while pointing at a corner handle
+4. User drags corner handle in/out to scale panel
+5. Panel scales proportionally while position and rotation remain locked
+6. Corner handles hide automatically after inactivity
+
+**Component Registration** (in `onCreate()`):
+
+```kotlin
+// Register scaling components
+componentManager.registerComponent<Scalable>(Scalable.Companion)
+componentManager.registerComponent<ScaledParent>(ScaledParent.Companion)
+
+// Register pointer info system (required for hover detection)
+val pointerInfoSystem = PointerInfoSystem()
+systemManager.registerSystem(pointerInfoSystem)
+
+// Register touch scalable system
+systemManager.registerSystem(TouchScalableSystem(minScale = 0.5f, maxScale = 10.0f))
+```
+
+**Entity Registration** (in `createVideoPanelEntity()`):
+
+```kotlin
+// Entity created with Scalable and ScaledParent components
+videoPanelEntity = Entity.create(
+    listOf(
+        Panel(R.id.ui_example),
+        // ... other components ...
+        Scalable(), // Enable corner scaling
+        ScaledParent(), // Mark as scalable parent
+    )
+)
+
+// Register entity with scaling system
+val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+touchScalableSystem?.registerEntity(videoPanelEntity!!)
+```
+
+**Lifecycle Management**:
+
+- Entity registered with `TouchScalableSystem` when created
+- Entity unregistered on disconnect and shutdown
+- Locked positions/rotations cleared when scaling ends
+
+**Files**:
+
+- `systems/scalable/TouchScalableSystem.kt` - Main scaling system
+- `systems/pointerInfo/PointerInfoSystem.kt` - Hover detection
+- `entities/ImageBoxEntity.kt` - Corner handle entity creation
+- `components/Scalable.xml` - Scalable component definition
+- `components/ScaledParent.xml` - ScaledParent component definition
+- `res/drawable/corner_round.png` - Corner handle visual
 
 ---
 
@@ -674,45 +947,46 @@ Step-by-step flow with expected logging and current gaps:
 
 **Immersive Mode (ImmersiveActivity)**:
 
-1. **onCreate()**: 
+1. **onCreate()**:
    - Create decoder/audio/connection manager
    - Initialize `pairingHelper`
    - Read connection params from Intent extras or shared preferences
    - Store as pending (no connect yet)
 
-2. **onSceneReady()**: 
+2. **onSceneReady()**:
    - Configure lighting/passthrough
    - Register `PanelPositioningSystem`
    - Create `PanelManager` entity and set on positioning system
    - Create video panel entity (registers panel dynamically using `executeOnVrActivity`)
    - Create connection panel entity
 
-3. **registerPanels()**: 
+3. **registerPanels()**:
    - Register connection panel (Compose UI)
    - Video panel registered dynamically in `createVideoPanelEntity()`
 
-4. **Panel `surfaceConsumer`** (video panel): 
+4. **Panel `surfaceConsumer`** (video panel):
    - Paint black → attachSurface → preConfigureDecoder → mark `isSurfaceReady`
    - Parent panel to PanelManager
    - If pending params exist, call `connectToHost`
 
-5. **User clicks Connect** (connection panel): 
-   - Hide connection panel (`Visible(false)`)
+5. **User clicks Server Card** (connection panel):
+   - If paired: Hide connection panel (`Visible(false)`)
    - Call `connectToHost(host, port, appId)`
+   - If not paired: Opens pairing dialog or initiates pairing flow
 
-6. **connectToHost()**: 
+6. **connectToHost()**:
    - Sets `isPaired=true`, stores params
    - Calls `startStreamIfReady()`
 
-7. **startStreamIfReady()**: 
+7. **startStreamIfReady()**:
    - If surface ready and paired, calls `connectionManager.startStream` with prefs
    - Stream starts with negotiated resolution/fps/bitrate/format
 
-8. **Stream Ready**: 
+8. **Stream Ready**:
    - `connectionManager.onStatusUpdate` reports `connected = true`
    - Video panel set to `Visible(true)`
 
-9. **stopStream()**: 
+9. **stopStream()**:
    - On shutdown/disconnect, cleans up connection/decoder
 
 **Status Updates**:
@@ -741,17 +1015,21 @@ Step-by-step flow with expected logging and current gaps:
 - Passthrough mode enabled
 - Connection lifecycle management
 - Panel scaling support (`Scale` component, `updateVideoPanelScale()` method)
+- Corner-based scaling system (`TouchScalableSystem`) with proportional corner handles
 - zIndex configuration for rectilinear panels
+- Sleep/wake cycle video stream recovery (automatic re-establishment after device sleep)
 
 **⚠️ Limitations**:
 
 - Immersive-only (no 2D video display)
 - No MRUK features (anchoring, wall detection)
-- No advanced scaling/interaction systems (AnalogScalableSystem, TouchScalableSystem)
+- No analog stick-based scaling (`AnalogScalableSystem`)
 - Known SDK issue: Video surface color space initialization (affects PremiumMediaSample too)
   - Colors may be incorrect on first frame
-  - Resolves after device sleep/wake cycle
+  - Resolves after device sleep/wake cycle (which also triggers video stream recovery)
   - See `POST_MORTEM.md` for details
+
+**Note**: Video stream recovery after sleep/wake cycles is now implemented. If the video stream dies during a long sleep cycle (while audio continues), the stream is automatically re-established on resume via `onVRReady()` / `onHMDMounted()` lifecycle handlers.
 
 ### Future Enhancements
 
@@ -765,10 +1043,15 @@ Step-by-step flow with expected logging and current gaps:
 
 **Phase 2: Advanced Scaling Systems**:
 
-- Add `AnalogScalableSystem` for controller-based scaling
-- Add `TouchScalableSystem` for touch-based scaling
-- Register video panel entity with scalable system
-- Add `Scalable`, `ScaledParent`, `ScaledChild` components
+- ✅ **Completed**: `TouchScalableSystem` for corner-based scaling
+  - Corner handles appear on hover
+  - Grab corner with trigger to scale panel
+  - Scale range: 0.5x to 10.0x
+  - Position and rotation locked during scaling
+  - Only X and Y axes scaled (Z axis locked at 1.0)
+  - Corner handles scale proportionally with panel
+- ⏳ **Future**: `AnalogScalableSystem` for controller thumbstick-based scaling
+- ⏳ **Future**: `ScaledChild` component for hierarchical scaling
 
 **Phase 3: Panel Transitions**:
 
@@ -840,6 +1123,7 @@ The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 - ✅ Background thread execution prevents ANR
 - ✅ Passthrough mode for mixed reality experience
 - ✅ Panel scaling support with `Scale` component
+- ✅ Corner-based scaling system (`TouchScalableSystem`) with proportional handles
 
 **Architecture Alignment**:
 
@@ -852,7 +1136,9 @@ The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 
 - ⚠️ Video surface color space initialization issue (affects PremiumMediaSample too)
   - Colors may be incorrect on first frame
-  - Resolves after device sleep/wake cycle
+  - Resolves after device sleep/wake cycle (which also triggers video stream recovery)
   - See `POST_MORTEM.md` for details
+
+**Note**: Video stream recovery after sleep/wake cycles is implemented. The app automatically detects when the video stream has died during sleep and re-establishes it on resume, ensuring seamless streaming experience even after long sleep periods.
 
 The core streaming functionality is working, with pairing support and proper lifecycle management. The app launches directly into immersive mode with connection UI, transitioning to video streaming once connected. The next phase is to add MRUK features and advanced scaling systems.

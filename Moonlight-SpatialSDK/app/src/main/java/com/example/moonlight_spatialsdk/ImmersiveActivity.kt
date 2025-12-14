@@ -11,6 +11,11 @@ import android.view.MotionEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
 import com.example.moonlight_spatialsdk.BuildConfig
 import com.limelight.binding.audio.AndroidAudioRenderer
 import com.limelight.binding.video.CrashListener
@@ -21,6 +26,7 @@ import com.meta.spatial.compose.ComposeFeature
 import com.meta.spatial.core.Entity
 import com.meta.spatial.core.Pose
 import com.meta.spatial.core.Quaternion
+import com.meta.spatial.core.Query
 import com.meta.spatial.core.SpatialFeature
 import com.meta.spatial.core.SpatialSDKExperimentalAPI
 import com.meta.spatial.core.Vector2
@@ -55,6 +61,12 @@ import com.meta.spatial.toolkit.VideoSurfacePanelRegistration
 import com.meta.spatial.runtime.StereoMode
 import com.meta.spatial.vr.LocomotionSystem
 import com.meta.spatial.vr.VRFeature
+import com.example.moonlight_spatialsdk.Scalable
+import com.example.moonlight_spatialsdk.ScaledParent
+import com.example.moonlight_spatialsdk.systems.pointerInfo.PointerInfoSystem
+import com.example.moonlight_spatialsdk.systems.scalable.TouchScalableSystem
+import com.meta.spatial.toolkit.Controller
+import com.meta.spatial.toolkit.ControllerType
 import java.io.File
 
 class ImmersiveActivity : AppSystemActivity() {
@@ -75,14 +87,24 @@ class ImmersiveActivity : AppSystemActivity() {
   private var isSurfaceReady: Boolean = false
   private var videoPanelEntity: Entity? = null
   private var connectionPanelEntity: Entity? = null
+  private var disconnectDialogPanelEntity: Entity? = null
   private var panelManager: PanelManager? = null
   private var panelPositioningSystem: PanelPositioningSystem? = null
   private lateinit var pairingHelper: MoonlightPairingHelper
+  private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+  
+  // Track connection state before pause for resume recovery
+  private var wasConnectedBeforePause: Boolean = false
+  private var connectionParamsBeforePause: Triple<String, Int, Int>? = null
   
   // Diagnostic flag: when true, bypass ControllerHandler forwarding to allow UI navigation testing
   // Set to true to test if controller input reaches the app (UI navigation)
   // Set to false to forward input to ControllerHandler for Sunshine passthrough
   private val allowControllerUIInput = false
+  
+  // Dialog state for disconnect confirmation
+  private val _showDisconnectDialog = MutableStateFlow(false)
+  val showDisconnectDialog: StateFlow<Boolean> = _showDisconnectDialog.asStateFlow()
 
   /**
    * Get OpenGL renderer string for Quest 3/3S hardware.
@@ -137,6 +159,18 @@ class ImmersiveActivity : AppSystemActivity() {
     )
     audioRenderer = AndroidAudioRenderer(this, prefs.enableAudioFx)
     pairingHelper = MoonlightPairingHelper(this)
+    
+    // Register scaling components
+    componentManager.registerComponent<Scalable>(Scalable.Companion)
+    componentManager.registerComponent<ScaledParent>(ScaledParent.Companion)
+    
+    // Register pointer info system (required for hover detection)
+    val pointerInfoSystem = PointerInfoSystem()
+    systemManager.registerSystem(pointerInfoSystem)
+    
+    // Register touch scalable system
+    systemManager.registerSystem(TouchScalableSystem(minScale = 0.5f, maxScale = 10.0f))
+    
     connectionManager = MoonlightConnectionManager(
         context = this,
         activity = this,
@@ -149,6 +183,7 @@ class ImmersiveActivity : AppSystemActivity() {
           if (connected) {
             videoPanelEntity?.setComponent(Visible(true))
             Log.i(TAG, "Video stream ready (connected=$connected, status=$status), showing video panel")
+            
             
             // Initialize ControllerHandler now that video panel is visible and stream is ready
             val handlerInitialized = connectionManager.initializeControllerHandler()
@@ -214,6 +249,15 @@ class ImmersiveActivity : AppSystemActivity() {
 
     createVideoPanelEntity()
     createConnectionPanelEntity()
+    // Don't create disconnect dialog entity upfront - create/destroy on menu button press
+    
+    // Observe disconnect dialog state (for Compose UI state, not entity visibility)
+    // Entity will be created/destroyed directly by menu button handler
+    coroutineScope.launch {
+      _showDisconnectDialog.collect { show ->
+        Log.d(TAG, "Disconnect dialog state changed: $show (entity will be created/destroyed on toggle)")
+      }
+    }
   }
 
 
@@ -229,10 +273,10 @@ class ImmersiveActivity : AppSystemActivity() {
     return listOf(
         PanelRegistration(R.id.connection_panel) {
           config {
-            fractionOfScreen = 0.8f
-            height = basePanelHeightMeters
-            width = basePanelHeightMeters * 0.8f
-            layoutDpi = 160
+            fractionOfScreen = 0.4f
+            height = basePanelHeightMeters * 0.75f
+            width = basePanelHeightMeters * 0.6f
+            layoutDpi = 240
             layerConfig = LayerConfig()
             enableTransparent = true
             includeGlass = false
@@ -263,6 +307,43 @@ class ImmersiveActivity : AppSystemActivity() {
             }
           }
         },
+        PanelRegistration(R.id.disconnect_dialog_panel) {
+          config {
+            fractionOfScreen = 0.4f
+            height = basePanelHeightMeters * 0.4f
+            width = basePanelHeightMeters * 0.5f
+            layoutDpi = 240
+            layerConfig = LayerConfig()
+            enableTransparent = true
+            includeGlass = false
+            themeResourceId = R.style.PanelAppThemeTransparent
+          }
+          composePanel { setContent {
+          DisconnectDialog(
+            showDialog = showDisconnectDialog,
+            onResetPanelSize = {
+              _showDisconnectDialog.value = false
+              updateVideoPanelScale(1.0f)
+              Log.i(TAG, "Video panel scale reset to default (1.0)")
+              // Destroy entity to close dialog
+              destroyDisconnectDialogPanelEntity()
+            },
+            onEndStream = {
+              _showDisconnectDialog.value = false
+              // Destroy entity before disconnecting
+              destroyDisconnectDialogPanelEntity()
+              disconnect()
+            },
+            onCancel = {
+              _showDisconnectDialog.value = false
+              Log.i(TAG, "User cancelled disconnect dialog")
+              // Destroy entity to close dialog
+              destroyDisconnectDialogPanelEntity()
+            }
+          )
+            }
+          }
+        },
     )
   }
 
@@ -284,8 +365,139 @@ class ImmersiveActivity : AppSystemActivity() {
   }
 
   override fun onSpatialShutdown() {
+    // Unregister video panel from scaling system before shutdown
+    videoPanelEntity?.let { entity ->
+      val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+      if (touchScalableSystem != null) {
+        touchScalableSystem.unregisterEntity(entity)
+        Log.i(TAG, "Video panel unregistered from TouchScalableSystem on shutdown")
+      }
+    }
+    
     super.onSpatialShutdown()
     disconnect()
+  }
+
+  /**
+   * Handle HMD unmount (device removed from head).
+   * Store connection state for potential resume recovery.
+   */
+  override fun onHMDUnmounted() {
+    super.onHMDUnmounted()
+    Log.i(TAG, "onHMDUnmounted: Storing connection state for resume recovery")
+    
+    // Store connection state before pause
+    wasConnectedBeforePause = connectionManager.isConnected()
+    if (wasConnectedBeforePause) {
+      // Get connection params from connection manager (it stores them when stream starts)
+      connectionParamsBeforePause = connectionManager.getCurrentConnectionParams()
+      if (connectionParamsBeforePause == null) {
+        // Fallback to pendingConnectionParams if connection manager doesn't have them
+        connectionParamsBeforePause = pendingConnectionParams
+        if (connectionParamsBeforePause == null) {
+          Log.w(TAG, "onHMDUnmounted: Connected but no connection params available")
+        }
+      }
+      if (connectionParamsBeforePause != null) {
+        Log.i(TAG, "onHMDUnmounted: Was connected, stored params for resume recovery: ${connectionParamsBeforePause}")
+      }
+    }
+  }
+
+  /**
+   * Handle HMD mount (device placed on head).
+   * Check if video stream needs to be re-established after sleep/wake cycle.
+   */
+  override fun onHMDMounted() {
+    super.onHMDMounted()
+    Log.i(TAG, "onHMDMounted: Checking if video stream needs recovery")
+    
+    // If we were connected before pause, check if we need to re-establish video stream
+    if (wasConnectedBeforePause) {
+      Log.i(TAG, "onHMDMounted: Was connected before pause, checking video stream health")
+      
+      // Check if connection is still alive but video stream may have died
+      val isCurrentlyConnected = connectionManager.isConnected()
+      if (!isCurrentlyConnected && connectionParamsBeforePause != null) {
+        val (host, port, appId) = connectionParamsBeforePause!!
+        Log.i(TAG, "onHMDMounted: Connection lost during sleep, re-establishing video stream host=$host port=$port appId=$appId")
+        
+        // Re-establish connection with stored params
+        pendingConnectionParams = connectionParamsBeforePause
+        isPaired = true // Assume still paired
+        startStreamIfReady()
+      } else if (isCurrentlyConnected) {
+        // Connection still exists, but video stream may have died
+        // Try to restart video decoder if needed
+        Log.i(TAG, "onHMDMounted: Connection still active, checking video decoder state")
+        connectionManager.checkAndRestartVideoStreamIfNeeded()
+      }
+      
+      // Reset state
+      wasConnectedBeforePause = false
+      connectionParamsBeforePause = null
+    }
+  }
+
+  /**
+   * Handle VR pause (system pause event).
+   * Store connection state for potential resume recovery.
+   */
+  override fun onVRPause() {
+    super.onVRPause()
+    Log.i(TAG, "onVRPause: Storing connection state for resume recovery")
+    
+    // Store connection state before pause
+    wasConnectedBeforePause = connectionManager.isConnected()
+    if (wasConnectedBeforePause) {
+      // Get connection params from connection manager (it stores them when stream starts)
+      connectionParamsBeforePause = connectionManager.getCurrentConnectionParams()
+      if (connectionParamsBeforePause == null) {
+        // Fallback to pendingConnectionParams if connection manager doesn't have them
+        connectionParamsBeforePause = pendingConnectionParams
+        if (connectionParamsBeforePause == null) {
+          Log.w(TAG, "onVRPause: Connected but no connection params available")
+        }
+      }
+      if (connectionParamsBeforePause != null) {
+        Log.i(TAG, "onVRPause: Was connected, stored params for resume recovery: ${connectionParamsBeforePause}")
+      }
+    }
+  }
+
+  /**
+   * Handle VR ready (system resume event).
+   * Check if video stream needs to be re-established after sleep/wake cycle.
+   */
+  override fun onVRReady() {
+    super.onVRReady()
+    Log.i(TAG, "onVRReady: Checking if video stream needs recovery")
+    
+    // If we were connected before pause, check if we need to re-establish video stream
+    if (wasConnectedBeforePause) {
+      Log.i(TAG, "onVRReady: Was connected before pause, checking video stream health")
+      
+      // Check if connection is still alive but video stream may have died
+      val isCurrentlyConnected = connectionManager.isConnected()
+      if (!isCurrentlyConnected && connectionParamsBeforePause != null) {
+        val (host, port, appId) = connectionParamsBeforePause!!
+        Log.i(TAG, "onVRReady: Connection lost during sleep, re-establishing video stream host=$host port=$port appId=$appId")
+        
+        // Re-establish connection with stored params
+        pendingConnectionParams = connectionParamsBeforePause
+        isPaired = true // Assume still paired
+        startStreamIfReady()
+      } else if (isCurrentlyConnected) {
+        // Connection still exists, but video stream may have died
+        // Try to restart video decoder if needed
+        Log.i(TAG, "onVRReady: Connection still active, checking video decoder state")
+        connectionManager.checkAndRestartVideoStreamIfNeeded()
+      }
+      
+      // Reset state
+      wasConnectedBeforePause = false
+      connectionParamsBeforePause = null
+    }
   }
 
   /**
@@ -331,6 +543,18 @@ class ImmersiveActivity : AppSystemActivity() {
     connectionPanelEntity?.destroy()
     connectionPanelEntity = null
     Log.i(TAG, "Connection panel entity destroyed - starting connection")
+    
+
+    // Recreate video panel entity if it doesn't exist (for reconnection after disconnect)
+    if (videoPanelEntity == null) {
+      Log.i(TAG, "Video panel entity doesn't exist, recreating for reconnection")
+      createVideoPanelEntity()
+    } else {
+      // Video panel exists but may be hidden - ensure surface is ready
+      if (!isSurfaceReady) {
+        Log.i(TAG, "Video panel exists but surface not ready, waiting for surface")
+      }
+    }
 
     // PancakeActivity already verified pairing before launching ImmersiveActivity,
     // so we can skip the redundant checkPairing() call and directly start the stream.
@@ -368,24 +592,36 @@ class ImmersiveActivity : AppSystemActivity() {
 
   private fun disconnect() {
     Log.i(TAG, "disconnect invoked")
+    
+    // Unregister video panel from scaling system
+    videoPanelEntity?.let { entity ->
+      val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+      if (touchScalableSystem != null) {
+        touchScalableSystem.unregisterEntity(entity)
+        Log.i(TAG, "Video panel unregistered from TouchScalableSystem")
+      }
+    }
+    
+    // Hide video panel instead of destroying it (allows reconnection without recreating)
+    // Following documentation pattern: manage visibility, not entity lifecycle
+    videoPanelEntity?.setComponent(Visible(false))
+    Log.i(TAG, "Video panel hidden")
+    
     connectionManager.stopStream()
     _connectionStatus.value = "Disconnected"
     _isConnected.value = false
     pendingConnectionParams = null
     isPaired = false
     isSurfaceReady = false
+    
+    // Recreate connection panel
+    createConnectionPanelEntity()
+    Log.i(TAG, "Connection panel recreated")
   }
+  
 
   private fun createVideoPanelEntity() {
     Log.i(TAG, "Creating video panel entity with Panel(R.id.ui_example)")
-    
-    val aspect =
-        if (prefs.height != 0) {
-          prefs.width.toFloat() / prefs.height.toFloat()
-        } else {
-          16f / 9f
-        }
-    val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
     
     // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
     // This matches PremiumMediaSample pattern and ensures panelManager is initialized
@@ -395,21 +631,6 @@ class ImmersiveActivity : AppSystemActivity() {
               R.id.ui_example,
               surfaceConsumer = { panelEntity, surface ->
                 Log.i(TAG, "Surface attached for panel entity=$panelEntity")
-                
-                // Store the panel entity reference
-                videoPanelEntity = panelEntity
-                
-                // Parent video panel to PanelManager (now guaranteed to be initialized)
-                val managerEntity = panelManager?.panelManagerEntity
-                if (managerEntity != null) {
-                  panelEntity.setComponent(TransformParent(managerEntity))
-                  panelEntity.setComponent(Transform(Pose(Vector3(0f, 0f, 0f))))
-                  Log.i(TAG, "Video panel parented to PanelManager")
-                }
-                
-                // Panel starts hidden - will be shown when stream is ready
-                panelEntity.setComponent(Visible(false))
-                panelEntity.setComponent(Grabbable(enabled = true, type = GrabbableType.PIVOT_Y))
                 
                 SurfaceUtil.paintBlack(surface)
                 
@@ -446,6 +667,14 @@ class ImmersiveActivity : AppSystemActivity() {
     }
     
     // Create entity after panel registration (panel must be registered before entity creation)
+    val aspect =
+        if (prefs.height != 0) {
+          prefs.width.toFloat() / prefs.height.toFloat()
+        } else {
+          16f / 9f
+        }
+    val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+    
     val managerEntity = panelManager?.panelManagerEntity
     val parentComponent = if (managerEntity != null) {
       TransformParent(managerEntity)
@@ -461,25 +690,32 @@ class ImmersiveActivity : AppSystemActivity() {
             Scale(Vector3(1f)), // Initial scale of 1.0 - can be adjusted after connection
             Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
             Visible(false), // Hidden initially, shown when stream is ready
+            Scalable(), // Enable corner scaling
+            ScaledParent(), // Mark as scalable parent
             parentComponent
         )
     )
+    
+    // Register video panel with scaling system
+    val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+    if (touchScalableSystem != null) {
+      touchScalableSystem.registerEntity(videoPanelEntity!!)
+      Log.i(TAG, "Video panel entity created and registered with TouchScalableSystem")
+    } else {
+      Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
+    }
     
     Log.i(TAG, "Video panel entity created - parented to PanelManager, hidden initially")
   }
 
   private fun createConnectionPanelEntity() {
-    System.out.println("=== CREATE_CONNECTION_PANEL_ENTITY_CALLED ===")
-    android.util.Log.e(TAG, "=== CREATE_CONNECTION_PANEL_ENTITY_CALLED ===")
     Log.i(TAG, "Creating connection panel entity with Panel(R.id.connection_panel)")
     
-    val aspect =
-        if (prefs.height != 0) {
-          prefs.width.toFloat() / prefs.height.toFloat()
-        } else {
-          16f / 9f
-        }
-    val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+    // Connection panel size - match the registration config to UISetSample "UI Components" panel size
+    // Registration: height = 0.75f * basePanelHeightMeters, width = 0.6f * basePanelHeightMeters
+    val connectionPanelHeight = basePanelHeightMeters * 0.75f  // 0.525m
+    val connectionPanelWidth = basePanelHeightMeters * 0.6f      // 0.42m
+    val panelSize = Vector2(connectionPanelWidth, connectionPanelHeight)
     
     val managerEntity = panelManager?.panelManagerEntity
     val parentComponent = if (managerEntity != null) {
@@ -499,9 +735,100 @@ class ImmersiveActivity : AppSystemActivity() {
         )
     )
     
-    System.out.println("=== CONNECTION_PANEL_ENTITY_CREATED ===")
-    android.util.Log.e(TAG, "=== CONNECTION_PANEL_ENTITY_CREATED ===")
-    Log.i(TAG, "Connection panel entity created - parented to PanelManager, visible initially")
+    Log.i(TAG, "Connection panel entity created - size: ${panelSize.x}m x ${panelSize.y}m, parented to PanelManager")
+  }
+
+  /**
+   * Create disconnect dialog panel entity.
+   * Called when menu button is pressed to show the dialog.
+   */
+  private fun createDisconnectDialogPanelEntity() {
+    // Don't create if already exists
+    if (disconnectDialogPanelEntity != null) {
+      Log.w(TAG, "Disconnect dialog entity already exists, skipping creation")
+      return
+    }
+    
+    Log.i(TAG, "Creating disconnect dialog panel entity with Panel(R.id.disconnect_dialog_panel)")
+    
+    // Disconnect dialog panel size - match the registration config
+    // Registration: height = 0.4f * basePanelHeightMeters, width = 0.5f * basePanelHeightMeters
+    val dialogPanelHeight = basePanelHeightMeters * 0.4f  // 0.28m
+    val dialogPanelWidth = basePanelHeightMeters * 0.5f      // 0.35m
+    val panelSize = Vector2(dialogPanelWidth, dialogPanelHeight)
+    
+    val managerEntity = panelManager?.panelManagerEntity
+    if (managerEntity == null) {
+      Log.e(TAG, "Cannot create disconnect dialog - PanelManager entity is null")
+      return
+    }
+    
+    val parentComponent = TransformParent(managerEntity)
+    
+    disconnectDialogPanelEntity = Entity.create(
+        listOf(
+            Panel(R.id.disconnect_dialog_panel),
+            Transform(Pose(Vector3(0f, 0f, -0.1f))), // Move 0.1m back to test visibility
+            PanelDimensions(panelSize),
+            Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
+            Visible(true), // Visible when created
+            parentComponent
+        )
+    )
+    
+    Log.i(TAG, "Disconnect dialog panel entity created - size: ${panelSize.x}m x ${panelSize.y}m, parented to PanelManager")
+    Log.i(TAG, "Disconnect dialog StateFlow value: ${_showDisconnectDialog.value}, entity: $disconnectDialogPanelEntity")
+    
+    // Verify entity has all required components
+    val hasPanel = disconnectDialogPanelEntity!!.hasComponent<Panel>()
+    val hasVisible = disconnectDialogPanelEntity!!.hasComponent<Visible>()
+    val visibleComponent = disconnectDialogPanelEntity!!.getComponent<Visible>()
+    Log.i(TAG, "Entity verification - hasPanel: $hasPanel, hasVisible: $hasVisible, visibleComponent: $visibleComponent")
+  }
+  
+  /**
+   * Destroy disconnect dialog panel entity.
+   * Called when menu button is pressed again to hide the dialog.
+   */
+  private fun destroyDisconnectDialogPanelEntity() {
+    val entity = disconnectDialogPanelEntity
+    if (entity == null) {
+      Log.w(TAG, "Disconnect dialog entity is null, cannot destroy")
+      return
+    }
+    
+    Log.i(TAG, "Destroying disconnect dialog panel entity")
+    entity.destroy()
+    disconnectDialogPanelEntity = null
+    Log.i(TAG, "Disconnect dialog panel entity destroyed")
+  }
+  
+  /**
+   * Toggle disconnect dialog - create entity if it doesn't exist, destroy if it does.
+   * Called when menu button is pressed.
+   * Following documentation pattern: hide video panel when menu is shown, restore when closed.
+   */
+  private fun toggleDisconnectDialog() {
+    if (disconnectDialogPanelEntity == null) {
+      // Set StateFlow to true FIRST so Compose content is ready when entity is created
+      _showDisconnectDialog.value = true
+      // Hide video panel when menu dialog is shown (following documentation pattern)
+      videoPanelEntity?.setComponent(Visible(false))
+      Log.i(TAG, "Video panel hidden while menu dialog is shown")
+      // Create entity - Compose content should render immediately
+      createDisconnectDialogPanelEntity()
+      Log.i(TAG, "Disconnect dialog toggled ON - StateFlow set to true, entity created")
+    } else {
+      // Hide dialog first, then destroy entity
+      _showDisconnectDialog.value = false
+      destroyDisconnectDialogPanelEntity()
+      // Restore video panel visibility if connected (following documentation pattern)
+      if (connectionManager.isConnected()) {
+        videoPanelEntity?.setComponent(Visible(true))
+        Log.i(TAG, "Video panel restored after menu dialog closed")
+      }
+      Log.i(TAG, "Disconnect dialog toggled OFF - StateFlow set to false, entity destroyed")
+    }
   }
 
   /**
@@ -549,9 +876,6 @@ class ImmersiveActivity : AppSystemActivity() {
       Log.d(TAG, "dispatchKeyEvent: action=${event.action}, keyCode=${event.keyCode}, device=${event.device?.name}")
       return super.dispatchKeyEvent(event)
     }
-    
-    // Log all key events for debugging
-    Log.d(TAG, "dispatchKeyEvent: action=${event.action}, keyCode=${event.keyCode}, device=${event.device?.name}, connected=${connectionManager.isConnected()}")
     
     // Only forward input when connected (check directly from connection manager for accuracy)
     if (!connectionManager.isConnected()) {
