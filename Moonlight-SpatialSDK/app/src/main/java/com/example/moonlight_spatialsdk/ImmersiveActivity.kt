@@ -31,7 +31,6 @@ import com.meta.spatial.core.SpatialFeature
 import com.meta.spatial.core.SpatialSDKExperimentalAPI
 import com.meta.spatial.core.Vector2
 import com.meta.spatial.core.Vector3
-import com.example.moonlight_spatialsdk.systems.MenuButtonSystem
 import com.meta.spatial.toolkit.Grabbable
 import com.meta.spatial.toolkit.GrabbableType
 import com.meta.spatial.toolkit.Panel
@@ -91,7 +90,6 @@ class ImmersiveActivity : AppSystemActivity() {
   private var disconnectDialogPanelEntity: Entity? = null
   private var panelManager: PanelManager? = null
   private var panelPositioningSystem: PanelPositioningSystem? = null
-  private var menuButtonSystem: MenuButtonSystem? = null
   private lateinit var pairingHelper: MoonlightPairingHelper
   private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
   
@@ -248,11 +246,6 @@ class ImmersiveActivity : AppSystemActivity() {
     val panelManagerEntity = panelManager!!.create()
     panelPositioningSystem?.setPanelEntity(panelManagerEntity)
     Log.i(TAG, "PanelManager created and set on positioning system")
-    
-    // Register menu button polling system (uses ButtonBits to avoid ControllerHandler conflicts)
-    menuButtonSystem = MenuButtonSystem { handleMenuButton() }
-    systemManager.registerSystem(menuButtonSystem!!)
-    Log.i(TAG, "MenuButtonSystem registered")
 
     createVideoPanelEntity()
     createConnectionPanelEntity()
@@ -837,19 +830,6 @@ class ImmersiveActivity : AppSystemActivity() {
       Log.i(TAG, "Disconnect dialog toggled OFF - StateFlow set to false, entity destroyed")
     }
   }
-  
-  /**
-   * Handle menu button press event.
-   * Called by MenuButtonSystem when menu button is detected via ButtonBits polling.
-   */
-  private fun handleMenuButton() {
-    if (connectionManager.isConnected()) {
-      Log.i(TAG, "Menu button pressed while connected - toggling disconnect dialog")
-      toggleDisconnectDialog()
-    } else {
-      Log.d(TAG, "Menu button pressed but not connected")
-    }
-  }
 
   /**
    * Updates the scale of the video panel after connection is established.
@@ -885,24 +865,6 @@ class ImmersiveActivity : AppSystemActivity() {
    */
 
   /**
-   * Handle key down events as fallback for Quest controller start button.
-   * This catches events that might not reach dispatchKeyEvent.
-   */
-  override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-    if (keyCode == KeyEvent.KEYCODE_BUTTON_START || keyCode == KeyEvent.KEYCODE_MENU) {
-      val isConnected = connectionManager.isConnected()
-      Log.i(TAG, "onKeyDown: Start button detected (keyCode=$keyCode, connected=$isConnected)")
-      
-      if (isConnected) {
-        Log.i(TAG, "onKeyDown: Start button pressed while connected - showing disconnect dialog")
-        _showDisconnectDialog.value = true
-        return true // Consume the event
-      }
-    }
-    return super.onKeyDown(keyCode, event)
-  }
-
-  /**
    * Forward key events to ControllerHandler for input passthrough.
    * This allows Bluetooth controllers (Xbox/DualShock 4) to send input to the server.
    * Only forwards events when connected, and consumes them to prevent UI handling.
@@ -913,34 +875,6 @@ class ImmersiveActivity : AppSystemActivity() {
       // Log to verify all events are reaching this method
       Log.d(TAG, "dispatchKeyEvent: action=${event.action}, keyCode=${event.keyCode}, device=${event.device?.name}")
       return super.dispatchKeyEvent(event)
-    }
-    
-    // Log all key events for debugging - especially start button
-    val isStartButton = event.keyCode == KeyEvent.KEYCODE_BUTTON_START || event.keyCode == KeyEvent.KEYCODE_MENU
-    if (isStartButton) {
-      Log.i(TAG, "START BUTTON EVENT: action=${event.action}, keyCode=${event.keyCode}, device=${event.device?.name}, connected=${connectionManager.isConnected()}")
-    } else {
-      Log.d(TAG, "dispatchKeyEvent: action=${event.action}, keyCode=${event.keyCode}, device=${event.device?.name}, connected=${connectionManager.isConnected()}")
-    }
-    
-    // Check for start button press to show options dialog
-    // When connected: shows stream options (Reset Panel Size, End Stream)
-    // When not connected: could show connection options (future enhancement)
-    if (event.action == KeyEvent.ACTION_DOWN &&
-        (event.keyCode == KeyEvent.KEYCODE_BUTTON_START || event.keyCode == KeyEvent.KEYCODE_MENU)) {
-      val isConnected = connectionManager.isConnected()
-      Log.i(TAG, "Start button detected: keyCode=${event.keyCode}, connected=$isConnected, entity=${disconnectDialogPanelEntity}")
-      
-      if (isConnected) {
-        Log.i(TAG, "Start button pressed while connected - showing disconnect dialog. Panel entity=${disconnectDialogPanelEntity}, PanelManager=${panelManager?.panelManagerEntity}")
-        _showDisconnectDialog.value = true
-        Log.i(TAG, "Set _showDisconnectDialog.value = true")
-        return true // Consume the event
-      } else {
-        Log.w(TAG, "Start button pressed but not connected (isConnected=$isConnected) - dialog only available when streaming")
-        // Could show connection panel or other options here in the future
-        return super.dispatchKeyEvent(event)
-      }
     }
     
     // Only forward input when connected (check directly from connection manager for accuracy)
