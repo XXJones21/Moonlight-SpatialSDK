@@ -106,6 +106,10 @@ class ImmersiveActivity : AppSystemActivity() {
   // Set to false to forward input to ControllerHandler for Sunshine passthrough
   private val allowControllerUIInput = false
   
+  // Gate flag for input forwarding: only forward inputs when connection is established and ControllerHandler is ready
+  // Prevents inputs from being consumed when video panel is registered but no connection exists
+  private var shouldForwardInputs: Boolean = false
+  
   // Dialog state for disconnect confirmation
   private val _showDisconnectDialog = MutableStateFlow(false)
   val showDisconnectDialog: StateFlow<Boolean> = _showDisconnectDialog.asStateFlow()
@@ -194,9 +198,16 @@ class ImmersiveActivity : AppSystemActivity() {
             val handlerInitialized = connectionManager.initializeControllerHandler()
             if (handlerInitialized) {
               Log.i(TAG, "ControllerHandler initialized successfully for input passthrough")
+              // Only enable input forwarding after ControllerHandler is ready
+              shouldForwardInputs = true
+              Log.i(TAG, "Input forwarding enabled - connection established and ControllerHandler ready")
             } else {
               Log.w(TAG, "ControllerHandler initialization failed - input passthrough may not work")
+              shouldForwardInputs = false
             }
+          } else {
+            shouldForwardInputs = false
+            Log.i(TAG, "Input forwarding disabled - connection lost")
           }
         }
     )
@@ -652,6 +663,10 @@ class ImmersiveActivity : AppSystemActivity() {
   private fun disconnect() {
     Log.i(TAG, "disconnect invoked")
     
+    // Disable input forwarding immediately on disconnect
+    shouldForwardInputs = false
+    Log.i(TAG, "Input forwarding disabled - disconnect initiated")
+    
     // Unregister video panel from scaling system
     videoPanelEntity?.let { entity ->
       val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
@@ -1025,6 +1040,12 @@ class ImmersiveActivity : AppSystemActivity() {
       return super.dispatchKeyEvent(event)
     }
     
+    // Gate input forwarding with explicit flag
+    if (!shouldForwardInputs) {
+      Log.d(TAG, "dispatchKeyEvent: Input forwarding disabled, passing to super")
+      return super.dispatchKeyEvent(event)
+    }
+    
     // Only forward input when connected (check directly from connection manager for accuracy)
     if (!connectionManager.isConnected()) {
       Log.d(TAG, "dispatchKeyEvent: Not connected, passing to super")
@@ -1079,6 +1100,12 @@ class ImmersiveActivity : AppSystemActivity() {
     if (allowControllerUIInput) {
       // Log to verify all events are reaching this method
       Log.d(TAG, "dispatchGenericMotionEvent: action=${event.action}, source=${event.source}, device=${event.device?.name}")
+      return super.dispatchGenericMotionEvent(event)
+    }
+    
+    // Gate input forwarding with explicit flag
+    if (!shouldForwardInputs) {
+      Log.d(TAG, "dispatchGenericMotionEvent: Input forwarding disabled, passing to super")
       return super.dispatchGenericMotionEvent(event)
     }
     
