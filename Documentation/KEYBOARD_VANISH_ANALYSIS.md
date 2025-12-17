@@ -9,10 +9,12 @@ The system keyboard briefly appears and then becomes invisible/non-interactive, 
 ### Phase 1: Initial Keyboard Closure (21:25:07.003 - 21:25:07.280)
 
 #### Trigger Event
+
 - **21:25:07.003**: `PinchObserver` detects a pinch gesture (Hand: 1, Finger: 1)
 - This gesture triggers the keyboard dismissal sequence
 
 #### Keyboard Closure Sequence
+
 - **21:25:07.006** (7x repeated): `SystemKeyboardController::DeferCloseKeyboard` called with:
   - `isKeyboardActive: true`
   - `panelHost: true` 
@@ -26,6 +28,7 @@ The system keyboard briefly appears and then becomes invisible/non-interactive, 
   - **Critical**: `No focused panel entity; skipping save` - indicates focus loss before proper cleanup
 
 #### Panel Destruction
+
 - **21:25:07.007**: `PanelAppHost destructor` for panel ID **437**
   - Component: `com.oculus.vrshell/com.oculus.panelapp.keyboardv2.KeyboardPanelService`
   - **Warning**: `PanelAppHost entity destroyed externally without ExitNextFrame - marking as SystemClosure`
@@ -38,6 +41,7 @@ The system keyboard briefly appears and then becomes invisible/non-interactive, 
 - **21:25:07.013**: `AndroidPanelApp::Destroyed`
 
 #### Volumetric Window Cleanup Issues
+
 - **21:25:07.007**: `removeVolumetricWindow` called for panel ID 437
   - Token: `953c796f-3e25-4008-b21e-7d09555c8cba`
   - Window properties show: `visible: true, active: true, drawn: true` at time of removal
@@ -61,6 +65,7 @@ The system keyboard briefly appears and then becomes invisible/non-interactive, 
   - But still marked as `visible: true, active: true`
 
 #### Input Connection Issues
+
 - **21:25:07.025**: `KeyboardInputMethodService::onFinishInput`
 - **21:25:07.026**: `KeyboardInputMethodService::unregister keyboard callback`
 - **21:25:07.046-047**: Multiple warnings:
@@ -70,6 +75,7 @@ The system keyboard briefly appears and then becomes invisible/non-interactive, 
   **Analysis**: The app is attempting to interact with an InputConnection that has already been deactivated, indicating a timing/synchronization issue.
 
 #### Display and Resource Cleanup
+
 - **21:25:07.019**: Display device removed (virtual display for keyboard)
 - **21:25:07.025**: Logical display removed: Display 1341
 - **21:25:07.026**: `VolumetricContainerPlacement released`
@@ -79,6 +85,7 @@ The system keyboard briefly appears and then becomes invisible/non-interactive, 
 ### Phase 2: Keyboard Re-opening Attempt (21:25:08.304 - 21:25:08.365)
 
 #### Service Binding
+
 - **21:25:08.304**: `ActivityManager::bindService` for `KeyboardInputMethodService`
 - **21:25:08.322**: `KeyboardInputMethodService::onStartInput`
 - **21:25:08.322**: `ImeTracker::onRequestShow` 
@@ -87,11 +94,13 @@ The system keyboard briefly appears and then becomes invisible/non-interactive, 
   - Session ID: `47aad225`
 
 #### Panel Positioning Failures
+
 - **21:25:08.317, 326, 337, 348, 360**: Multiple `PanelPositioningSystem::Failed to position panel after 60 attempts`
   
   **Analysis**: The panel positioning system is completely failing to position the keyboard panel. This is a critical issue that prevents proper keyboard display.
 
 #### IME Show Request
+
 - **21:25:08.322**: `InputMethodManager::showSoftInput()` called
   - View: `AndroidComposeView{2bf55ed}`
   - Package: `com.example.moonlight_spatialsdk`

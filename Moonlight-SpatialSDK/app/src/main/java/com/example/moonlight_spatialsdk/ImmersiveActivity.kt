@@ -42,7 +42,7 @@ import com.meta.spatial.toolkit.Visible
 import com.meta.spatial.toolkit.Scale
 import com.meta.spatial.datamodelinspector.DataModelInspectorFeature
 import com.meta.spatial.debugtools.HotReloadFeature
-// import com.meta.spatial.isdk.IsdkFeature (no longer needed)
+import com.meta.spatial.isdk.IsdkFeature
 import com.meta.spatial.okhttp3.OkHttpAssetFetcher
 import com.meta.spatial.ovrmetrics.OVRMetricsDataModel
 import com.meta.spatial.ovrmetrics.OVRMetricsFeature
@@ -133,7 +133,7 @@ class ImmersiveActivity : AppSystemActivity() {
         mutableListOf<SpatialFeature>(
             VRFeature(this),
             ComposeFeature(),
-            //IsdkFeature(this, spatial, systemManager),
+            IsdkFeature(this, spatial, systemManager),
         )
     if (BuildConfig.DEBUG) {
       features.add(CastInputForwardFeature(this))

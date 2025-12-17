@@ -186,3 +186,4 @@ However, if we want to keep Compose, **Option 2 (Separate ComponentActivity)** i
 4. Remove Compose code from connection panel
 5. Keep Compose for other panels if needed
 
+

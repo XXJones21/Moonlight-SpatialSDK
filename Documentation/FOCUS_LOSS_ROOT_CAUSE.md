@@ -62,3 +62,4 @@ Remove nested `fillMaxSize()` boxes from dialog and use simpler structure:
 - `onWindowFocusChanged` override is trying to recover focus reactively, but it's too late - `FocusPlaceholderActivity` already launches
 - Focus recovery strategies fail because the panel window has already gained focus
 - Need to prevent the initial focus loss, not recover from it
+
