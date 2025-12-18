@@ -187,3 +187,5 @@ However, if we want to keep Compose, **Option 2 (Separate ComponentActivity)** i
 5. Keep Compose for other panels if needed
 
 
+
+

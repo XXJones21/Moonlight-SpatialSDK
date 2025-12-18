@@ -63,3 +63,5 @@ Remove nested `fillMaxSize()` boxes from dialog and use simpler structure:
 - Focus recovery strategies fail because the panel window has already gained focus
 - Need to prevent the initial focus loss, not recover from it
 
+
+
