@@ -2,14 +2,14 @@
 
 This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Quest 3 application architecture, focusing on the immersive-only VR mode structure, connection management, and video streaming integration.
 
-**Architecture**: The Quest 3 app uses Meta Spatial SDK with an immersive-only pattern, launching directly into VR mode for Moonlight game streaming. The app features a connection panel for setup and a video panel for streaming, both managed through a PanelManager entity.
+**Architecture**: The Quest 3 app uses Meta Spatial SDK with a hybrid app pattern, launching into 2D panel mode first (workaround for virtual keyboard issues), then transitioning to immersive VR mode for Moonlight game streaming. The app features a connection panel for setup and a video panel for streaming, both managed through a PanelManager entity.
 
 ## Client Architecture
 
 ### File Structure
 
-- **Immersive Activity**: `ImmersiveActivity.kt` - VR activity (default launcher) for connection UI and video streaming
-- **2D Activity**: `PancakeActivity.kt` - 2D panel activity (legacy, not default launcher) for connection UI and pairing
+- **2D Activity**: `PancakeActivity.kt` - 2D panel activity (default launcher) for connection UI and pairing
+- **Immersive Activity**: `ImmersiveActivity.kt` - VR activity for video streaming (launched from 2D panel)
 - **Core Components**:
   - `PanelManager.kt` - Manages root entity for all panel entities
   - `PanelPositioningSystem.kt` - Positions PanelManager entity in front of user
@@ -18,7 +18,7 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
   - `LegacySurfaceHolderAdapter.kt` - Adapter for Moonlight's SurfaceHolder interface
   - `ConnectionPanelImmersive.kt` - Compose UI for connection management in VR (card-based UI with dialogs)
 
-**Purpose**: Immersive-only Moonlight game streaming application launching directly into VR mode with passthrough. Features connection panel for setup and video panel for streaming, both managed through PanelManager.
+**Purpose**: Hybrid Moonlight game streaming application launching into 2D panel mode first (workaround for Meta Horizon OS virtual keyboard issues), then transitioning to immersive VR mode with passthrough. Features connection panel for setup and video panel for streaming, both managed through PanelManager.
 
 ---
 
@@ -28,24 +28,55 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 2. [Panel Management](#panel-management)
 3. [Connection Management](#connection-management)
 4. [Video Panel Rendering](#video-panel-rendering)
-5. [Pairing System](#pairing-system)
-6. [Communication Flow](#communication-flow)
-7. [Current State & Future Enhancements](#current-state--future-enhancements)
+5. [Video Panel Scaling](#video-panel-scaling)
+6. [ButtonShelf Controls](#buttonshelf-controls)
+7. [Pairing System](#pairing-system)
+8. [Communication Flow](#communication-flow)
+9. [Current State & Future Enhancements](#current-state--future-enhancements)
 
 ---
 
 ## MAIN ACTIVITIES
 
-### ImmersiveActivity (VR Mode - Default Launcher)
+### PancakeActivity (2D Mode - Default Launcher)
 
-**File**: `ImmersiveActivity.kt`
+**File**: `PancakeActivity.kt`
 
-**Purpose**: Immersive VR activity that serves as the default launcher. Provides connection UI and video streaming in a single immersive experience.
+**Purpose**: 2D panel activity that serves as the default launcher. Provides connection UI and pairing with working system keyboard (workaround for virtual keyboard issues in immersive mode).
 
 **Launch Configuration**:
 
-- **Default Launcher**: `ImmersiveActivity` is set as the default launcher in `AndroidManifest.xml`
-- **Intent Categories**: `android.intent.category.LAUNCHER` and `com.oculus.intent.category.VR`
+- **Default Launcher**: `PancakeActivity` is set as the default launcher in `AndroidManifest.xml`
+- **Intent Categories**: `android.intent.category.LAUNCHER` and `com.oculus.intent.category.2D`
+- **Panel Size**: 800dp x 550dp when not in immersive mode
+
+**Key Features**:
+
+- **Card-Based Connection UI**: Modern card-based layout matching immersive version
+- **Server Cards**: Shows connected server name/IP and "Connect to PC" / "Pair New Server" options
+- **Pairing Dialog**: Overlay dialog for entering server connection details
+- **PIN Display**: Dialog showing pairing PIN for server entry
+- **Options Dialog**: Stream configuration and reset pairing options
+- **Application Selection**: Dropdown for selecting target application
+- **Working Keyboard**: System keyboard works reliably in 2D panel mode
+- Launches `ImmersiveActivity` with connection params when ready
+
+**Why 2D Panel First?**:
+
+Meta Horizon OS has known issues with virtual keyboard positioning in immersive mode (see `KEYBOARD_VANISH_ANALYSIS.md`). The keyboard fails to position properly, becomes invisible, or blocks UI interaction. By launching in 2D panel mode first, we leverage the stable system keyboard in the Home environment for reliable text input.
+
+---
+
+### ImmersiveActivity (VR Mode)
+
+**File**: `ImmersiveActivity.kt`
+
+**Purpose**: Immersive VR activity for video streaming. Launched from PancakeActivity after connection setup.
+
+**Launch Configuration**:
+
+- **Not Default Launcher**: `ImmersiveActivity` is launched programmatically from PancakeActivity
+- **Intent Categories**: `com.oculus.intent.category.VR` only
 - **Launch Mode**: `singleTask` to prevent multiple instances
 
 **Key Features**:
@@ -66,22 +97,6 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 - Both panels positioned at same location (Vector3(0f, 0f, 0f)) relative to PanelManager
 
 ---
-
-### PancakeActivity (2D Mode - Legacy)
-
-**File**: `PancakeActivity.kt`
-
-**Purpose**: 2D panel activity for connection setup and pairing (legacy, not default launcher).
-
-**Status**: Available but not used as default launcher. ImmersiveActivity now provides connection UI in VR mode.
-
-**Key Features**:
-
-- Host/port/appId inputs with persistence (`connection_prefs`)
-- Pairing flow using `MoonlightPairingHelper` and `PairingManager`
-- Optional app list and server capability fetch
-- Stream preference configuration
-- Can launch `ImmersiveActivity` with connection params
 
 ---
 
@@ -812,7 +827,10 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
 
 - Entity registered with `TouchScalableSystem` when created
 - Entity unregistered on disconnect and shutdown
+- Entity re-registered when reconnecting (if entity still exists)
 - Locked positions/rotations cleared when scaling ends
+
+**Note**: ButtonShelf also appears when hovering over the video panel, providing quick access to Settings, Reset Scale, and Disconnect controls. See [ButtonShelf Controls](#buttonshelf-controls) section for details.
 
 **Files**:
 
@@ -822,6 +840,157 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
 - `components/Scalable.xml` - Scalable component definition
 - `components/ScaledParent.xml` - ScaledParent component definition
 - `res/drawable/corner_round.png` - Corner handle visual
+
+---
+
+## BUTTONSHELF CONTROLS
+
+### ButtonShelf Overview
+
+**Purpose**: Provide quick access controls at the bottom of the video panel for common operations during streaming.
+
+**Implementation**:
+
+- **Entity**: `ButtonShelfEntity` - Manages ButtonShelf entity lifecycle and positioning
+- **System**: `ButtonShelfVisibilitySystem` - Manages visibility based on hover, inactivity, grabbing, and scaling
+- **UI**: `ButtonShelfCompose` - Compose UI with three interactive buttons
+- **Component**: `ScaledChild` - Ensures ButtonShelf scales and positions correctly with video panel
+
+**Key Features**:
+
+- **Hover-Activated**: Appears when user hovers over video panel (similar to scaling handles)
+- **Auto-Hide**: Automatically hides after 1.5 seconds of inactivity
+- **Smart Hiding**: Hides when panel is being scaled or grabbed
+- **Scaling-Aware**: Uses `ScaledChild` component to maintain correct position relative to video panel regardless of scale
+- **Parented to Video Panel**: Always positioned below video panel, even when panel is scaled
+
+**Button Functions**:
+
+1. **Settings Button** (Settings icon):
+   - Opens `PancakeActivity` as an overlay panel within the immersive scene
+   - Allows users to adjust stream settings with a working keyboard while staying in VR
+   - Uses `FLAG_ACTIVITY_NEW_TASK` to launch as overlay (immersive activity continues in background)
+   - Provides access to:
+     - Stream configuration (resolution, FPS, bitrate, codec)
+     - Pairing management (pair new server, reset client pairing)
+     - Server information
+   - **Note**: This is a workaround for virtual keyboard issues in immersive mode - the 2D panel overlay has a reliable system keyboard
+
+2. **Reset Scale Button** (Zoom icon):
+   - Resets video panel scale to default size (1.0x)
+   - Useful after scaling panel to large or small sizes
+   - Instantly restores panel to original dimensions
+
+3. **Disconnect Button** (Close icon):
+   - Ends the current streaming session
+   - Calls `disconnect()` to stop stream and reset connection state
+   - Calls `launchPanelModeInHome()` to exit immersive mode and return to 2D panel in Home environment
+   - Uses Meta's hybrid app pattern for seamless transition back to Home
+   - User can reconnect from the 2D panel after disconnect
+
+**User Interaction**:
+
+1. User hovers controller/hand over video panel
+2. ButtonShelf appears at the bottom of the video panel
+3. User can interact with any of the three buttons
+4. ButtonShelf hides automatically after inactivity or when panel is scaled/grabbed
+
+**Component Registration** (in `onCreate()`):
+
+```kotlin
+// Register scaling components (required for ButtonShelf)
+componentManager.registerComponent<Scalable>(Scalable.Companion)
+componentManager.registerComponent<ScaledParent>(ScaledParent.Companion)
+componentManager.registerComponent<ScaledChild>(ScaledChild.Companion)
+
+// Register ScaleChildrenSystem (required for ButtonShelf scaling)
+systemManager.registerLateSystem(ScaleChildrenSystem())
+```
+
+**Entity Creation** (in `onSceneReady()`):
+
+```kotlin
+// Create ButtonShelf entity
+buttonShelfEntity = ButtonShelfEntity()
+
+// Attach to video panel when it exists
+videoPanelEntity?.let { videoEntity ->
+    buttonShelfEntity?.attachToEntity(videoEntity)
+    
+    // Force update children to ensure ButtonShelf is positioned correctly
+    val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+    scaleChildrenSystem?.forceUpdateChildren(videoEntity)
+    
+    // Create and register visibility system
+    buttonShelfVisibilitySystem = ButtonShelfVisibilitySystem(
+        buttonShelf = buttonShelfEntity!!,
+        videoPanelEntity = videoEntity
+    )
+    systemManager.registerSystem(buttonShelfVisibilitySystem!!)
+    buttonShelfVisibilitySystem?.startTracking()
+}
+```
+
+**ButtonShelfEntity** (`entities/ButtonShelfEntity.kt`):
+
+- **Dimensions**: 0.5m width × 0.12m height
+- **Positioning**: Positioned below video panel using `ScaledChild` component
+- **Components**: `Panel(R.id.button_shelf)`, `TransformParent`, `ScaledChild`, `Scale(1f)`, `Visible(false)`
+- **Attachment**: Attaches to video panel entity via `TransformParent` and `ScaledChild`
+- **Scaling**: Uses `ScaledChild` with `localPosition` set to shelf offset and `pivotOffset = Vector3(0f, 0f, 0f)`
+
+**ButtonShelfVisibilitySystem** (`systems/buttonShelfVisibility/ButtonShelfVisibilitySystem.kt`):
+
+- **Purpose**: Manages ButtonShelf visibility based on multiple conditions
+- **Visibility Rules**:
+  - Shows when user hovers over video panel
+  - Hides after 1.5 seconds of inactivity
+  - Hides when video panel is being scaled
+  - Hides when video panel is grabbed
+- **Tracking**: Monitors pointer hover state, inactivity timer, scaling state, and grab state
+
+**Panel Registration** (in `registerPanels()`):
+
+```kotlin
+PanelRegistration(R.id.button_shelf) {
+    config {
+        fractionOfScreen = 0.3f
+        height = 0.12f
+        width = 0.5f
+        layoutDpi = 240
+        layerConfig = LayerConfig()
+        enableTransparent = true
+        includeGlass = false
+        themeResourceId = R.style.PanelAppThemeTransparent
+    }
+    composePanel { setContent {
+        ButtonShelfCompose(
+            onSettingsClick = { startPanelActivityInOverlay() },
+            onResetScaleClick = { updateVideoPanelScale(1.0f) },
+            onDisconnectClick = { 
+                disconnect()
+                launchPanelModeInHome()
+            }
+        )
+    }}
+}
+```
+
+**Lifecycle Management**:
+
+- ButtonShelf entity created in `onSceneReady()`
+- Attached to video panel when video panel is created
+- Visibility managed by `ButtonShelfVisibilitySystem`
+- Re-attached and re-registered when video panel is recreated after disconnect
+
+**Files**:
+
+- `entities/ButtonShelfEntity.kt` - ButtonShelf entity management
+- `systems/buttonShelfVisibility/ButtonShelfVisibilitySystem.kt` - Visibility management system
+- `panels/buttonShelf/ButtonShelfCompose.kt` - Compose UI for buttons
+- `panels/buttonShelf/ButtonShelfActivity.kt` - Activity wrapper (legacy, not used in primary registration)
+- `components/ScaledChild.xml` - ScaledChild component definition (for scaling with parent)
+- `systems/scaleChildren/ScaleChildrenSystem.kt` - System that updates child positions when parent scales
 
 ---
 
@@ -1016,6 +1185,8 @@ Step-by-step flow with expected logging and current gaps:
 - Connection lifecycle management
 - Panel scaling support (`Scale` component, `updateVideoPanelScale()` method)
 - Corner-based scaling system (`TouchScalableSystem`) with proportional corner handles
+- ButtonShelf controls (Settings, Reset Scale, Disconnect) with hover-activated visibility
+- ScaledChild component and ScaleChildrenSystem for hierarchical scaling (ButtonShelf scales with video panel)
 - zIndex configuration for rectilinear panels
 - Sleep/wake cycle video stream recovery (automatic re-establishment after device sleep)
 
@@ -1047,11 +1218,16 @@ Step-by-step flow with expected logging and current gaps:
   - Corner handles appear on hover
   - Grab corner with trigger to scale panel
   - Scale range: 0.5x to 10.0x
-  - Position and rotation locked during scaling
-  - Only X and Y axes scaled (Z axis locked at 1.0)
+  - Uniform scaling (all axes scale together)
   - Corner handles scale proportionally with panel
+- ✅ **Completed**: `ScaledChild` component and `ScaleChildrenSystem` for hierarchical scaling
+  - ButtonShelf uses `ScaledChild` to scale and position correctly with video panel
+  - Child entities maintain relative position when parent scales
+- ✅ **Completed**: ButtonShelf controls with hover-activated visibility
+  - Settings button toggles connection panel
+  - Reset Scale button resets panel to 1.0x
+  - Disconnect button ends stream and returns to connection panel
 - ⏳ **Future**: `AnalogScalableSystem` for controller thumbstick-based scaling
-- ⏳ **Future**: `ScaledChild` component for hierarchical scaling
 
 **Phase 3: Panel Transitions**:
 
@@ -1083,6 +1259,10 @@ Step-by-step flow with expected logging and current gaps:
 - `MoonlightPanelRenderer.kt` - Video decoder integration
 - `LegacySurfaceHolderAdapter.kt` - Surface adapter for Moonlight
 - `ConnectionPanelImmersive.kt` - Compose UI for connection management in VR
+- `entities/ButtonShelfEntity.kt` - ButtonShelf entity management
+- `systems/buttonShelfVisibility/ButtonShelfVisibilitySystem.kt` - ButtonShelf visibility management
+- `systems/scaleChildren/ScaleChildrenSystem.kt` - Hierarchical scaling system for child entities
+- `panels/buttonShelf/ButtonShelfCompose.kt` - ButtonShelf Compose UI
 
 ### Configuration Files
 
@@ -1124,6 +1304,7 @@ The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 - ✅ Passthrough mode for mixed reality experience
 - ✅ Panel scaling support with `Scale` component
 - ✅ Corner-based scaling system (`TouchScalableSystem`) with proportional handles
+- ✅ ButtonShelf controls with hover-activated visibility and hierarchical scaling support
 
 **Architecture Alignment**:
 

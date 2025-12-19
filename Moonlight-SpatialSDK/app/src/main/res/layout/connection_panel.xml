@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/layout_bg"
+    android:padding="20dp">
+    
+    <!-- Header -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Moonlight Connection"
+        android:textSize="24sp"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:padding="16dp"
+        android:textStyle="bold"
+        android:shadowColor="#000000"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="4"/>
+    
+    <!-- Connection Status -->
+    <TextView
+        android:id="@+id/connection_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ready to connect"
+        android:textColor="#CCCCCC"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:padding="8dp"
+        android:shadowColor="#000000"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="2"/>
+    
+    <!-- Server Info -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:layout_marginTop="8dp">
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Server IP Address"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:paddingBottom="4dp"/>
+            
+        <EditText
+            android:id="@+id/server_host"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="192.168.1.100"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#CCCCCC"
+            android:background="#33FFFFFF"
+            android:padding="12dp"
+            android:textSize="14sp"
+            android:inputType="textUri"
+            android:imeOptions="actionNext"
+            android:privateImeOptions="nm,com.google.android.inputmethod.latin.dictation"/>
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Port"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:paddingTop="8dp"
+            android:paddingBottom="4dp"/>
+            
+        <EditText
+            android:id="@+id/server_port"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="47989"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#CCCCCC"
+            android:background="#33FFFFFF"
+            android:padding="12dp"
+            android:textSize="14sp"
+            android:inputType="number"
+            android:imeOptions="actionDone"
+            android:privateImeOptions="nm,com.google.android.inputmethod.latin.dictation"/>
+    </LinearLayout>
+    
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+        
+        <Button
+            android:id="@+id/connect_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Connect to PC"
+            android:textColor="#FFFFFF"
+            android:background="#2196F3"
+            android:padding="15dp"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp"/>
+            
+        <Button
+            android:id="@+id/clear_pairing_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Clear Pairing"
+            android:textColor="#FFFFFF"
+            android:background="#FF5722"
+            android:padding="15dp"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+    
+    <!-- Options Button -->
+    <Button
+        android:id="@+id/options_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Options"
+        android:textColor="#FFFFFF"
+        android:background="#9C27B0"
+        android:padding="12dp"
+        android:textSize="12sp"
+        android:layout_marginTop="8dp"/>
+</LinearLayout>

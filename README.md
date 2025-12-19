@@ -17,6 +17,7 @@ Moonlight SpatialSDK is a port of the Moonlight game streaming client to Meta's 
 - Bluetooth controller input passthrough (Xbox, DualShock 4, and compatible gamepads)
 - Configurable stream settings (resolution, FPS, bitrate, codec)
 - Video panel scaling (0.5x to 10.0x) with corner-based controls
+- ButtonShelf with quick access controls (Settings, Reset Scale, Disconnect)
 - Automatic video stream recovery after sleep/wake cycles
 
 ## Architecture
@@ -38,8 +39,7 @@ The application uses Meta Spatial SDK to provide a fully immersive VR experience
    - Connection panel appears in VR for server configuration
    - User enters server host/port and app ID
    - Checks pairing status
-
-2. **Pairing and Streaming**:
+1. **Pairing and Streaming**:
    - If not paired: Generates PIN, displays to user in VR, pairs with server
    - Registers video panel for streaming
    - Enables passthrough for mixed reality
@@ -54,7 +54,8 @@ The application uses Meta Spatial SDK to provide a fully immersive VR experience
 - Meta Quest 3 headset
 - PC with NVIDIA GPU (for GameStream) or Sunshine server
 - Local network connection (recommended) or internet connection
-- Bluetooth gamepad (optional): Xbox Wireless Controller, DualShock 4, or compatible gamepad for input passthrough
+- Bluetooth gamepad: Xbox Wireless Controller, DualShock 4, or compatible gamepad for input passthrough
+   **Note**: Quest controllers as input is not support for the moment. Moonlight Spatial SDK requires a Bluetooth Gamepad for any input for gaming.
 
 ### Software
 
@@ -72,15 +73,10 @@ The application uses Meta Spatial SDK to provide a fully immersive VR experience
 
 ### Prerequisites
 
-1. **Install Meta Spatial Editor**:
-   - Download from [Meta Developer Portal](https://developers.meta.com/horizon/documentation/spatial-sdk/spatial-editor-overview)
-   - Required for editing scenes (`Moonlight-SpatialSDK/app/scenes/Main.metaspatial`)
-
-2. **Configure Android Studio**:
+1. **Configure Android Studio**:
    - Install Android SDK and build tools
    - Configure Quest 3 for development (enable Developer Mode)
-
-3. **Set Up Server**:
+1. **Set Up Server**:
    - Install and configure Sunshine or enable NVIDIA GameStream
    - Note your server's IP address and port (default: 47989)
 
@@ -124,16 +120,16 @@ The app includes network security configuration to allow cleartext HTTP traffic 
 ### First-Time Connection
 
 1. **Launch the app** on your Quest 3 (app launches directly into immersive VR mode)
-2. **Enter server details** in the VR connection panel:
+1. **Enter server details** in the VR connection panel:
    - Host: Your PC's IP address (e.g., `192.168.1.100`)
    - Port: Server port (default: `47989`)
    - App ID: `0` for desktop, or specific app ID
-3. **Pair with server**:
+1. **Pair with server**:
    - Tap "Connect" in the VR connection panel
    - If not paired, the app will generate a PIN and display it in VR
    - Enter the displayed PIN on your server (Sunshine/GFE pairing dialog)
    - Wait for pairing to complete
-4. **Start streaming**:
+1. **Start streaming**:
    - After pairing, tap "Connect" again in the VR connection panel
    - The connection panel will disappear and streaming will begin
    - The game stream appears on a floating panel in VR
@@ -142,12 +138,19 @@ The app includes network security configuration to allow cleartext HTTP traffic 
 
 - **Video Panel**: The game stream appears on a floating panel in VR
 - **Passthrough**: Real-world view is visible through the headset
-- **Panel Scaling**: 
+- **Panel Scaling**:
   - Hover over the video panel to reveal corner handles
   - Grab a corner handle with the trigger and drag to scale the panel
   - Scale range: 0.5x to 10.0x (proportional scaling)
   - Position and rotation remain locked during scaling
-- **Controls**: 
+- **ButtonShelf**: 
+  - Appears at the bottom of the video panel when hovering over it (similar to scaling handles)
+  - Provides quick access to three controls:
+    - **Settings**: Toggles the connection panel visibility to access stream configuration and pairing options
+    - **Reset Scale**: Resets the video panel scale back to default size (1.0x)
+    - **Disconnect**: Ends the current stream, hides the video panel, and shows the connection panel for reconnection
+  - Automatically hides after inactivity or when the panel is being scaled or grabbed
+- **Controls**:
   - **Bluetooth Gamepads**: Connect an Xbox Wireless Controller, DualShock 4, or compatible gamepad directly to your Quest 3 via Bluetooth. Input is automatically forwarded to the streaming server when connected.
   - **Quest Controllers**: Use Quest controllers for VR navigation (controller input passthrough is not supported for Quest controllers)
 - **Settings**: Stream settings (resolution, FPS, bitrate, codec) are configured via Moonlight preferences
@@ -157,9 +160,9 @@ The app includes network security configuration to allow cleartext HTTP traffic 
 The app supports Bluetooth gamepad input passthrough, allowing you to use Xbox, DualShock 4, or compatible controllers connected directly to your Quest 3 headset:
 
 1. **Pair your controller** with the Quest 3 via Bluetooth (Quest Settings → Controllers → Pair New Controller)
-2. **Connect to your streaming server** using the app
-3. **Controller input is automatically forwarded** to the server once the stream is active
-4. **ControllerHandler initializes automatically** when the video panel becomes visible
+1. **Connect to your streaming server** using the app
+1. **Controller input is automatically forwarded** to the server once the stream is active
+1. **ControllerHandler initializes automatically** when the video panel becomes visible
 
 **Supported Controllers:**
 
@@ -167,7 +170,7 @@ The app supports Bluetooth gamepad input passthrough, allowing you to use Xbox, 
 - DualShock 4 (PlayStation 4)
 - Other Android-compatible gamepads with standard gamepad input sources
 
-**Note**: Quest controllers are used for VR navigation and UI interaction, but their input is not forwarded to the streaming server. Use a Bluetooth gamepad for game control.
+**Note**: Quest controllers and ISDK are used for VR navigation and UI interaction, but their input is not forwarded to the streaming server. Use a Bluetooth gamepad for game control.
 
 ### Pairing Notes
 
@@ -232,6 +235,17 @@ Moonlight-SpatialSDK/
 - Proportional scaling maintains aspect ratio
 - Position and rotation locked during scaling
 
+### ButtonShelf Controls
+
+- Quick access control panel that appears at the bottom of the video panel
+- Only visible when hovering over the video panel (auto-hides after inactivity)
+- Three buttons for common operations:
+  - **Settings**: Toggle connection panel to access stream configuration, pairing options, and preferences
+  - **Reset Scale**: Instantly reset video panel scale to default size (1.0x)
+  - **Disconnect**: End current stream and return to connection panel for reconnection
+- ButtonShelf scales and positions correctly with the video panel using `ScaledChild` component
+- Automatically hidden during panel scaling or when panel is grabbed
+
 ### Sleep/Wake Recovery
 
 - Automatic video stream recovery after device sleep/wake cycles
@@ -276,8 +290,7 @@ The project uses Gradle for build management. Key build files:
 ## Future Enhancements
 
 - **Phase 1**: MRUK integration (anchoring, wall detection)
-- **Phase 2**: Advanced features (scaling, interaction systems)
-- **Phase 3**: Enhanced UI and configuration options
+- **Phase 2**: Enhanced UI and configuration options
 
 ## Documentation
 

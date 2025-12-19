@@ -81,6 +81,7 @@
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="com.oculus.intent.category.2D" />
+        <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
     <activity
@@ -95,7 +96,6 @@
         <action android:name="android.intent.action.MAIN" />
         <category android:name="com.oculus.intent.category.VR" />
         <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
   </application>

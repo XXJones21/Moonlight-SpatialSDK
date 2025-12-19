@@ -9,15 +9,16 @@ Moonlight SpatialSDK is a port of the Moonlight game streaming client to Meta's 
 **Key Features:**
 
 - Stream PC games to Quest 3 with low latency
-- Fully immersive VR experience with in-VR connection UI
+- Hybrid app pattern: Launches in 2D panel mode first (workaround for virtual keyboard issues), then transitions to immersive VR
 - Passthrough mode for mixed reality gaming
-- Secure PIN pairing system
+- Secure PIN pairing system with working keyboard in 2D mode
 - Native video decoder with hardware acceleration
 - Full audio support
 - Bluetooth controller input passthrough (Xbox, DualShock 4, and compatible gamepads)
 - Configurable stream settings (resolution, FPS, bitrate, codec)
 - Video panel scaling (0.5x to 10.0x) with corner-based controls
 - Automatic video stream recovery after sleep/wake cycles
+- Settings overlay: Access 2D panel for adjustments while in VR
 
 ## Architecture
 
@@ -25,7 +26,8 @@ The application uses Meta Spatial SDK to provide a fully immersive VR experience
 
 ### Main Components
 
-- **ImmersiveActivity** (`ImmersiveActivity.kt`): Main VR activity for connection UI, pairing, video streaming with passthrough, and input handling
+- **PancakeActivity** (`PancakeActivity.kt`): Default launcher - 2D panel activity for connection UI and pairing (workaround for virtual keyboard issues)
+- **ImmersiveActivity** (`ImmersiveActivity.kt`): VR activity for video streaming with passthrough and input handling (launched from 2D panel)
 - **MoonlightConnectionManager** (`MoonlightConnectionManager.kt`): Connection lifecycle, pairing, stream management, and controller input passthrough
 - **MoonlightPanelRenderer** (`MoonlightPanelRenderer.kt`): Bridges Spatial panel Surface to Moonlight native decoder
 - **LegacySurfaceHolderAdapter** (`LegacySurfaceHolderAdapter.kt`): Adapter for Moonlight's SurfaceHolder interface
@@ -33,19 +35,24 @@ The application uses Meta Spatial SDK to provide a fully immersive VR experience
 
 ### Connection Flow
 
-1. **Launch and Connection**:
-   - App launches directly into immersive VR mode
-   - Connection panel appears in VR for server configuration
-   - User enters server host/port and app ID
+1. **Launch and Connection** (2D Panel Mode):
+   - App launches into 2D panel mode in Home environment (default launcher)
+   - **Why 2D First?**: Meta Horizon OS has known virtual keyboard issues in immersive mode (see `Documentation/KEYBOARD_VANISH_ANALYSIS.md`). The system keyboard works reliably in 2D panel mode.
+   - Connection UI appears in 2D panel with card-based layout
+   - User enters server host/port and app ID using working keyboard
    - Checks pairing status
 
 2. **Pairing and Streaming**:
-   - If not paired: Generates PIN, displays to user in VR, pairs with server
-   - Registers video panel for streaming
+   - If not paired: Generates PIN, displays to user in 2D panel, pairs with server
+   - Launches `ImmersiveActivity` with connection parameters
+   - Registers video panel for streaming in VR
    - Enables passthrough for mixed reality
    - Connects to server and starts streaming
    - Displays game stream on VR panel
-   - Connection panel is automatically hidden when streaming starts
+
+3. **Settings and Disconnect**:
+   - **Settings Button**: Opens 2D panel overlay within VR for adjustments (working keyboard)
+   - **Disconnect Button**: Stops stream and exits to 2D panel in Home environment
 
 ## Requirements
 
@@ -193,10 +200,11 @@ Moonlight-SpatialSDK/
 
 ## Key Features
 
-### Immersive Architecture
+### Hybrid App Architecture
 
-- **Fully VR Experience**: Connection UI, pairing, and streaming all occur in immersive VR mode
-- **In-VR Connection Panel**: Connection setup and pairing happen directly in VR
+- **2D Panel Launcher**: App launches in 2D panel mode first (workaround for virtual keyboard issues)
+- **VR Streaming**: Transitions to immersive VR mode for video streaming after connection setup
+- **Settings Overlay**: Access 2D panel for adjustments while in VR (working keyboard)
 - **Passthrough Support**: Mixed reality gaming with real-world visibility
 
 ### Video Rendering
@@ -263,6 +271,10 @@ The project uses Gradle for build management. Key build files:
 
 ## Known Limitations
 
+- **Virtual Keyboard in Immersive Mode**: Meta Horizon OS has known issues with virtual keyboard positioning in immersive mode (see `Documentation/KEYBOARD_VANISH_ANALYSIS.md`)
+  - Keyboard fails to position properly, becomes invisible, or blocks UI interaction
+  - **Workaround**: App launches in 2D panel mode first where system keyboard works reliably
+  - Settings button opens 2D panel overlay within VR for adjustments
 - No MRUK features (anchoring, wall detection) yet
 - Video surface color space initialization issue (affects PremiumMediaSample too)
   - Colors may be incorrect on first frame after surface creation
@@ -280,6 +292,7 @@ The project uses Gradle for build management. Key build files:
 
 - [Quest 3 App Pipeline](Documentation/Quest%203%20App%20Pipeline.md): Comprehensive architecture documentation
 - [POST_MORTEM](Documentation/POST_MORTEM.md): Issue investigation and resolution report
+- [Keyboard Vanishing Analysis](Documentation/KEYBOARD_VANISH_ANALYSIS.md): Virtual keyboard issue investigation
 - [Native Video Path Plan](Documentation/Native_Video_Path_Plan.md): Video rendering architecture
 - [Native Rendering Overview](Documentation/Native_Rendering_Overview.md): Rendering system details
 
