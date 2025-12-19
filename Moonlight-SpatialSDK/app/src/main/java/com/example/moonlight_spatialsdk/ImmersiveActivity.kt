@@ -42,7 +42,7 @@ import com.meta.spatial.toolkit.Visible
 import com.meta.spatial.toolkit.Scale
 import com.meta.spatial.datamodelinspector.DataModelInspectorFeature
 import com.meta.spatial.debugtools.HotReloadFeature
-import com.meta.spatial.isdk.IsdkFeature
+// import com.meta.spatial.isdk.IsdkFeature (not required anymore)
 import com.meta.spatial.okhttp3.OkHttpAssetFetcher
 import com.meta.spatial.ovrmetrics.OVRMetricsDataModel
 import com.meta.spatial.ovrmetrics.OVRMetricsFeature
@@ -133,7 +133,7 @@ class ImmersiveActivity : AppSystemActivity() {
         mutableListOf<SpatialFeature>(
             VRFeature(this),
             ComposeFeature(),
-            IsdkFeature(this, spatial, systemManager),
+            // IsdkFeature(this, spatial, systemManager), (not required anymore)
         )
     if (BuildConfig.DEBUG) {
       features.add(CastInputForwardFeature(this))
@@ -231,6 +231,32 @@ class ImmersiveActivity : AppSystemActivity() {
       pendingConnectionParams = Triple(host, port, appId)
     } else {
       Log.i(TAG, "No host provided; immersive launched without connection params")
+    }
+  }
+
+  /**
+   * Handle new intents when activity is relaunched (singleTask mode).
+   * This is called when PancakeActivity launches ImmersiveActivity with new connection params
+   * after a previous disconnect.
+   */
+  override fun onNewIntent(intent: Intent) {
+    super.onNewIntent(intent)
+    setIntent(intent) // Update the stored intent
+    
+    val host = intent.getStringExtra("host")
+    val port = intent.getIntExtra("port", 47989)
+    val appId = intent.getIntExtra("appId", 0)
+    Log.i(TAG, "onNewIntent: Received new connection params host=$host port=$port appId=$appId")
+    
+    if (!host.isNullOrBlank()) {
+      Log.i(TAG, "onNewIntent: Processing new connection request")
+      pendingConnectionParams = Triple(host, port, appId)
+      isPaired = true // Assume paired since PancakeActivity verified it
+      
+      // Always use connectToHost which will create video panel if needed
+      // The video panel was destroyed on disconnect, so we need a fresh one
+      Log.i(TAG, "onNewIntent: Calling connectToHost for reconnection")
+      connectToHost(host, port, appId)
     }
   }
 
@@ -379,16 +405,17 @@ class ImmersiveActivity : AppSystemActivity() {
           composePanel { setContent {
             com.example.moonlight_spatialsdk.panels.buttonShelf.ButtonShelfCompose(
                 onSettingsClick = {
-                  Log.i(TAG, "ButtonShelf Settings clicked - showing OptionsPanel")
-                  showOptionsPanel()
+                  Log.i(TAG, "ButtonShelf Settings clicked - opening 2D panel overlay for adjustments")
+                  startPanelActivityInOverlay()
                 },
                 onResetScaleClick = {
                   Log.i(TAG, "ButtonShelf Reset Scale clicked - resetting video panel scale to 1.0")
                   updateVideoPanelScale(1.0f)
                 },
                 onDisconnectClick = {
-                  Log.i(TAG, "ButtonShelf Disconnect clicked - ending stream")
+                  Log.i(TAG, "ButtonShelf Disconnect clicked - ending stream and returning to 2D panel")
                   disconnect()
+                  launchPanelModeInHome()
                 }
             )
           }
@@ -551,6 +578,18 @@ class ImmersiveActivity : AppSystemActivity() {
   }
 
   /**
+   * Opens PancakeActivity as an overlay panel within the immersive scene.
+   * This allows settings adjustments with working keyboard while staying in VR.
+   * Don't call finishAndRemoveTask(), as it will close the immersive activity.
+   */
+  private fun startPanelActivityInOverlay() {
+    val panelIntent = Intent(this, PancakeActivity::class.java).apply {
+      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    startActivity(panelIntent)
+  }
+
+  /**
    * Returns to 2D panel mode in Home environment.
    * This follows the Meta Spatial SDK hybrid app pattern for seamless transitions.
    * See: https://developers.meta.com/horizon/documentation/spatial-sdk/hybrid-apps-overview
@@ -676,10 +715,14 @@ class ImmersiveActivity : AppSystemActivity() {
       }
     }
     
-    // Hide video panel instead of destroying it (allows reconnection without recreating)
-    // Following documentation pattern: manage visibility, not entity lifecycle
-    videoPanelEntity?.setComponent(Visible(false))
-    Log.i(TAG, "Video panel hidden")
+    // Destroy video panel entity completely on disconnect
+    // The surface becomes invalid after stream stops, so we need a fresh panel for reconnection
+    videoPanelEntity?.let { entity ->
+      entity.setComponent(Visible(false))
+      entity.destroy()
+      Log.i(TAG, "Video panel entity destroyed for clean reconnection")
+    }
+    videoPanelEntity = null
     
     connectionManager.stopStream()
     _connectionStatus.value = "Disconnected"
@@ -1033,10 +1076,13 @@ class ImmersiveActivity : AppSystemActivity() {
    * Only forwards events when connected, and consumes them to prevent UI handling.
    */
   override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+    // Always log key events to diagnose controller input issues
+    Log.i(TAG, "dispatchKeyEvent: action=${event.action}, keyCode=${event.keyCode}, device=${event.device?.name}, source=${event.source}, shouldForward=$shouldForwardInputs")
+    
     // Diagnostic: allow controller input to reach UI for testing
     if (allowControllerUIInput) {
       // Log to verify all events are reaching this method
-      Log.d(TAG, "dispatchKeyEvent: action=${event.action}, keyCode=${event.keyCode}, device=${event.device?.name}")
+      Log.d(TAG, "dispatchKeyEvent: allowControllerUIInput=true, passing to super")
       return super.dispatchKeyEvent(event)
     }
     
@@ -1096,25 +1142,36 @@ class ImmersiveActivity : AppSystemActivity() {
    * Only forwards gamepad events when connected, and consumes them to prevent UI handling.
    */
   override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
+    // Check if this is a gamepad/joystick event for logging (reduce noise from other motion events)
+    val isGamepadSource = (event.source and InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK ||
+        (event.source and InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD
+    
+    // Always log gamepad motion events to diagnose controller input issues
+    if (isGamepadSource) {
+      Log.i(TAG, "dispatchGenericMotionEvent: action=${event.action}, source=${event.source}, device=${event.device?.name}, shouldForward=$shouldForwardInputs, connected=${connectionManager.isConnected()}")
+    }
+    
     // Diagnostic: allow controller input to reach UI for testing
     if (allowControllerUIInput) {
-      // Log to verify all events are reaching this method
-      Log.d(TAG, "dispatchGenericMotionEvent: action=${event.action}, source=${event.source}, device=${event.device?.name}")
+      if (isGamepadSource) {
+        Log.d(TAG, "dispatchGenericMotionEvent: allowControllerUIInput=true, passing to super")
+      }
       return super.dispatchGenericMotionEvent(event)
     }
     
     // Gate input forwarding with explicit flag
     if (!shouldForwardInputs) {
-      Log.d(TAG, "dispatchGenericMotionEvent: Input forwarding disabled, passing to super")
+      if (isGamepadSource) {
+        Log.d(TAG, "dispatchGenericMotionEvent: Input forwarding disabled, passing to super")
+      }
       return super.dispatchGenericMotionEvent(event)
     }
     
-    // Log motion events for debugging
-    Log.d(TAG, "dispatchGenericMotionEvent: action=${event.action}, source=${event.source}, device=${event.device?.name}, connected=${connectionManager.isConnected()}")
-    
     // Only forward input when connected (check directly from connection manager for accuracy)
     if (!connectionManager.isConnected()) {
-      Log.d(TAG, "dispatchGenericMotionEvent: Not connected, passing to super")
+      if (isGamepadSource) {
+        Log.d(TAG, "dispatchGenericMotionEvent: Not connected, passing to super")
+      }
       return super.dispatchGenericMotionEvent(event)
     }
     
@@ -1124,22 +1181,16 @@ class ImmersiveActivity : AppSystemActivity() {
       return super.dispatchGenericMotionEvent(event)
     }
     
-    // Check if this is a gamepad/joystick event
-    val isGamepad = (event.source and InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK ||
-        (event.source and InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD
-    if (isGamepad) {
+    // Forward gamepad/joystick events to ControllerHandler
+    if (isGamepadSource) {
       val handled = controllerHandler.handleMotionEvent(event)
       Log.d(TAG, "dispatchGenericMotionEvent: handleMotionEvent returned $handled")
       if (handled) {
         // Consume the event to prevent UI from handling it
-        Log.d(TAG, "dispatchGenericMotionEvent: ControllerHandler handled event, consuming")
         return true
       }
-    } else {
-      Log.d(TAG, "dispatchGenericMotionEvent: Not a gamepad event (source=${event.source}), passing to super")
     }
     
-    Log.d(TAG, "dispatchGenericMotionEvent: ControllerHandler did not handle, passing to super")
     return super.dispatchGenericMotionEvent(event)
   }
 

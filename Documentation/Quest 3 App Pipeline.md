@@ -2,14 +2,14 @@
 
 This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Quest 3 application architecture, focusing on the immersive-only VR mode structure, connection management, and video streaming integration.
 
-**Architecture**: The Quest 3 app uses Meta Spatial SDK with an immersive-only pattern, launching directly into VR mode for Moonlight game streaming. The app features a connection panel for setup and a video panel for streaming, both managed through a PanelManager entity.
+**Architecture**: The Quest 3 app uses Meta Spatial SDK with a hybrid app pattern, launching into 2D panel mode first (workaround for virtual keyboard issues), then transitioning to immersive VR mode for Moonlight game streaming. The app features a connection panel for setup and a video panel for streaming, both managed through a PanelManager entity.
 
 ## Client Architecture
 
 ### File Structure
 
-- **Immersive Activity**: `ImmersiveActivity.kt` - VR activity (default launcher) for connection UI and video streaming
-- **2D Activity**: `PancakeActivity.kt` - 2D panel activity (legacy, not default launcher) for connection UI and pairing
+- **2D Activity**: `PancakeActivity.kt` - 2D panel activity (default launcher) for connection UI and pairing
+- **Immersive Activity**: `ImmersiveActivity.kt` - VR activity for video streaming (launched from 2D panel)
 - **Core Components**:
   - `PanelManager.kt` - Manages root entity for all panel entities
   - `PanelPositioningSystem.kt` - Positions PanelManager entity in front of user
@@ -18,7 +18,7 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
   - `LegacySurfaceHolderAdapter.kt` - Adapter for Moonlight's SurfaceHolder interface
   - `ConnectionPanelImmersive.kt` - Compose UI for connection management in VR (card-based UI with dialogs)
 
-**Purpose**: Immersive-only Moonlight game streaming application launching directly into VR mode with passthrough. Features connection panel for setup and video panel for streaming, both managed through PanelManager.
+**Purpose**: Hybrid Moonlight game streaming application launching into 2D panel mode first (workaround for Meta Horizon OS virtual keyboard issues), then transitioning to immersive VR mode with passthrough. Features connection panel for setup and video panel for streaming, both managed through PanelManager.
 
 ---
 
@@ -38,16 +38,45 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 
 ## MAIN ACTIVITIES
 
-### ImmersiveActivity (VR Mode - Default Launcher)
+### PancakeActivity (2D Mode - Default Launcher)
 
-**File**: `ImmersiveActivity.kt`
+**File**: `PancakeActivity.kt`
 
-**Purpose**: Immersive VR activity that serves as the default launcher. Provides connection UI and video streaming in a single immersive experience.
+**Purpose**: 2D panel activity that serves as the default launcher. Provides connection UI and pairing with working system keyboard (workaround for virtual keyboard issues in immersive mode).
 
 **Launch Configuration**:
 
-- **Default Launcher**: `ImmersiveActivity` is set as the default launcher in `AndroidManifest.xml`
-- **Intent Categories**: `android.intent.category.LAUNCHER` and `com.oculus.intent.category.VR`
+- **Default Launcher**: `PancakeActivity` is set as the default launcher in `AndroidManifest.xml`
+- **Intent Categories**: `android.intent.category.LAUNCHER` and `com.oculus.intent.category.2D`
+- **Panel Size**: 800dp x 550dp when not in immersive mode
+
+**Key Features**:
+
+- **Card-Based Connection UI**: Modern card-based layout matching immersive version
+- **Server Cards**: Shows connected server name/IP and "Connect to PC" / "Pair New Server" options
+- **Pairing Dialog**: Overlay dialog for entering server connection details
+- **PIN Display**: Dialog showing pairing PIN for server entry
+- **Options Dialog**: Stream configuration and reset pairing options
+- **Application Selection**: Dropdown for selecting target application
+- **Working Keyboard**: System keyboard works reliably in 2D panel mode
+- Launches `ImmersiveActivity` with connection params when ready
+
+**Why 2D Panel First?**:
+
+Meta Horizon OS has known issues with virtual keyboard positioning in immersive mode (see `KEYBOARD_VANISH_ANALYSIS.md`). The keyboard fails to position properly, becomes invisible, or blocks UI interaction. By launching in 2D panel mode first, we leverage the stable system keyboard in the Home environment for reliable text input.
+
+---
+
+### ImmersiveActivity (VR Mode)
+
+**File**: `ImmersiveActivity.kt`
+
+**Purpose**: Immersive VR activity for video streaming. Launched from PancakeActivity after connection setup.
+
+**Launch Configuration**:
+
+- **Not Default Launcher**: `ImmersiveActivity` is launched programmatically from PancakeActivity
+- **Intent Categories**: `com.oculus.intent.category.VR` only
 - **Launch Mode**: `singleTask` to prevent multiple instances
 
 **Key Features**:
@@ -68,22 +97,6 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 - Both panels positioned at same location (Vector3(0f, 0f, 0f)) relative to PanelManager
 
 ---
-
-### PancakeActivity (2D Mode - Legacy)
-
-**File**: `PancakeActivity.kt`
-
-**Purpose**: 2D panel activity for connection setup and pairing (legacy, not default launcher).
-
-**Status**: Available but not used as default launcher. ImmersiveActivity now provides connection UI in VR mode.
-
-**Key Features**:
-
-- Host/port/appId inputs with persistence (`connection_prefs`)
-- Pairing flow using `MoonlightPairingHelper` and `PairingManager`
-- Optional app list and server capability fetch
-- Stream preference configuration
-- Can launch `ImmersiveActivity` with connection params
 
 ---
 
@@ -854,13 +867,14 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
 **Button Functions**:
 
 1. **Settings Button** (Settings icon):
-   - Toggles connection panel visibility
-   - When connection panel is hidden: Shows it to access stream configuration, pairing options, and preferences
-   - When connection panel is visible: Hides it
+   - Opens `PancakeActivity` as an overlay panel within the immersive scene
+   - Allows users to adjust stream settings with a working keyboard while staying in VR
+   - Uses `FLAG_ACTIVITY_NEW_TASK` to launch as overlay (immersive activity continues in background)
    - Provides access to:
      - Stream configuration (resolution, FPS, bitrate, codec)
      - Pairing management (pair new server, reset client pairing)
      - Server information
+   - **Note**: This is a workaround for virtual keyboard issues in immersive mode - the 2D panel overlay has a reliable system keyboard
 
 2. **Reset Scale Button** (Zoom icon):
    - Resets video panel scale to default size (1.0x)
@@ -869,11 +883,10 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
 
 3. **Disconnect Button** (Close icon):
    - Ends the current streaming session
-   - Hides the video panel
-   - Shows the connection panel for reconnection
-   - Effectively restarts the app experience (returns to connection state)
-   - Unregisters video panel from scaling system
-   - Stops stream and resets connection state
+   - Calls `disconnect()` to stop stream and reset connection state
+   - Calls `launchPanelModeInHome()` to exit immersive mode and return to 2D panel in Home environment
+   - Uses Meta's hybrid app pattern for seamless transition back to Home
+   - User can reconnect from the 2D panel after disconnect
 
 **User Interaction**:
 
@@ -952,9 +965,12 @@ PanelRegistration(R.id.button_shelf) {
     }
     composePanel { setContent {
         ButtonShelfCompose(
-            onSettingsClick = { showOptionsPanel() },
+            onSettingsClick = { startPanelActivityInOverlay() },
             onResetScaleClick = { updateVideoPanelScale(1.0f) },
-            onDisconnectClick = { disconnect() }
+            onDisconnectClick = { 
+                disconnect()
+                launchPanelModeInHome()
+            }
         )
     }}
 }

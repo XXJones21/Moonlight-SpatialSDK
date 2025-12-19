@@ -189,3 +189,4 @@ However, if we want to keep Compose, **Option 2 (Separate ComponentActivity)** i
 
 
 
+

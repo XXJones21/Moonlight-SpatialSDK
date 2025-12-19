@@ -598,33 +598,37 @@ fun ConnectionPanelImmersive(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        SecondaryButton(
-                            label = "Cancel",
-                            expanded = true,
-                            onClick = { showPairingDialog = false }
-                        )
-                        PrimaryButton(
-                            label = "Connect",
-                            expanded = true,
-                            onClick = {
-                                host = dialogHost
-                                port = dialogPort
-                                showPairingDialog = false
-                                val portInt = dialogPort.toIntOrNull() ?: 47989
-                                pairingHelper.checkPairing(dialogHost, portInt) { isPairedResult, error ->
-                                    if (isPairedResult) {
-                                        connectionStatus = "Paired. Ready to connect."
-                                        isPaired = true
-                                        pairingHelper.fetchServerName(dialogHost, portInt) { name ->
-                                            serverName = name
+                        Box(modifier = Modifier.weight(1f)) {
+                            SecondaryButton(
+                                label = "Cancel",
+                                expanded = true,
+                                onClick = { showPairingDialog = false }
+                            )
+                        }
+                        Box(modifier = Modifier.weight(1f)) {
+                            PrimaryButton(
+                                label = "Connect",
+                                expanded = true,
+                                onClick = {
+                                    host = dialogHost
+                                    port = dialogPort
+                                    showPairingDialog = false
+                                    val portInt = dialogPort.toIntOrNull() ?: 47989
+                                    pairingHelper.checkPairing(dialogHost, portInt) { isPairedResult, error ->
+                                        if (isPairedResult) {
+                                            connectionStatus = "Paired. Ready to connect."
+                                            isPaired = true
+                                            pairingHelper.fetchServerName(dialogHost, portInt) { name ->
+                                                serverName = name
+                                            }
+                                        } else {
+                                            needsPairing = true
+                                            initiatePairing(dialogHost, dialogPort)
                                         }
-                                    } else {
-                                        needsPairing = true
-                                        initiatePairing(dialogHost, dialogPort)
                                     }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }
