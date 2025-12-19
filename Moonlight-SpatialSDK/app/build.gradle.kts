@@ -100,6 +100,11 @@ dependencies {
   implementation(libs.meta.spatial.sdk.datamodelinspector)
   implementation(libs.meta.spatial.sdk.uiset)
 
+  // MRUK and Spatial Audio for room meshing and spatialized audio
+  implementation(libs.meta.spatial.sdk.mruk)
+  implementation(libs.meta.spatial.sdk.spatialaudio)
+  implementation(libs.meta.spatial.sdk.physics) // Required for MRUK colliders
+
   // Compose Dependencies
   implementation("androidx.compose.material3:material3")
   implementation(libs.androidx.lifecycle.runtime.ktx)

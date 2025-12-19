@@ -230,4 +230,28 @@ public class AndroidAudioRenderer implements AudioRenderer {
 
         track.release();
     }
+
+    /**
+     * Returns the audio session ID for the underlying AudioTrack.
+     * 
+     * This ID can be used to register with the Spatial Audio feature
+     * for spatialized audio rendering. Returns 0 if no track is available.
+     * 
+     * @return The audio session ID, or 0 if unavailable
+     */
+    public int getAudioSessionId() {
+        if (track != null) {
+            return track.getAudioSessionId();
+        }
+        return 0;
+    }
+
+    /**
+     * Returns whether the audio track is initialized and playing.
+     * 
+     * @return true if audio is currently active
+     */
+    public boolean isActive() {
+        return track != null && track.getState() == AudioTrack.STATE_INITIALIZED;
+    }
 }
