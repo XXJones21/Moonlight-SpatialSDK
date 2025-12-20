@@ -1,15 +1,11 @@
 package com.example.moonlight_spatialsdk.systems.mruk
 
 import android.util.Log
-import com.meta.spatial.core.Color4
 import com.meta.spatial.mruk.AnchorProceduralMesh
 import com.meta.spatial.mruk.AnchorProceduralMeshConfig
-import com.meta.spatial.mruk.MRUKAnchor
 import com.meta.spatial.mruk.MRUKFeature
 import com.meta.spatial.mruk.MRUKLabel
 import com.meta.spatial.mruk.MRUKLoadDeviceResult
-import com.meta.spatial.toolkit.Material
-import com.meta.spatial.toolkit.Transform
 
 /**
  * Manages MRUK room mesh visualization for spatial audio and visual feedback.
@@ -82,10 +78,9 @@ class RoomMeshManager(
             val room = mrukFeature.getCurrentRoom()
             if (room != null) {
                 Log.i(TAG, "Current room has ${room.anchors.size} anchors")
-                logAnchorDetails(room.anchors)
                 
-                // Create AnchorProceduralMesh AFTER scene loads (Valinor pattern)
-                initializeMeshVisualization()
+                // Create AnchorProceduralMesh AFTER scene loads
+                initializeMeshColliders()
             } else {
                 Log.w(TAG, "No current room found after scene load")
             }
@@ -95,75 +90,38 @@ class RoomMeshManager(
     }
     
     /**
-     * Logs details about each anchor for debugging coordinate system issues.
-     */
-    private fun logAnchorDetails(anchors: List<com.meta.spatial.core.Entity>) {
-        anchors.forEachIndexed { index, anchorEntity ->
-            val anchor = anchorEntity.tryGetComponent<MRUKAnchor>()
-            val transform = anchorEntity.tryGetComponent<Transform>()
-            
-            if (anchor != null && transform != null) {
-                val pos = transform.transform.t
-                val forward = transform.transform.forward()
-                Log.i(TAG, "Anchor #$index: Labels=${anchor.labels}, " +
-                        "Pos=(${pos.x}, ${pos.y}, ${pos.z}), " +
-                        "Forward=(${forward.x}, ${forward.y}, ${forward.z})")
-            }
-        }
-    }
-    
-    /**
-     * Initializes the AnchorProceduralMesh after scene data is loaded.
+     * Initializes the AnchorProceduralMesh with colliders only (no visible materials).
      * 
-     * Following the Valinor pattern: create AnchorProceduralMesh AFTER scene loads.
-     * This ensures the mesh spawner has access to the loaded anchor data.
+     * Uses null materials like MRUKSample - creates invisible collision geometry
+     * for physics/raycasting without visual rendering.
      */
-    private fun initializeMeshVisualization() {
-        // Destroy existing spawner if present
+    private fun initializeMeshColliders() {
         procMeshSpawner?.destroy()
         
-        Log.i(TAG, "Creating AnchorProceduralMesh after scene load (Valinor pattern)...")
+        Log.i(TAG, "Creating AnchorProceduralMesh with colliders only (no visualization)...")
         
-        // Create semi-transparent materials for room surfaces
-        // Using unlit materials with alpha for visibility
-        val wallMaterial = Material().apply {
-            baseColor = Color4(0.2f, 0.4f, 0.8f, 0.15f) // Light blue, semi-transparent
-            unlit = true
-        }
-        
-        val floorMaterial = Material().apply {
-            baseColor = Color4(0.2f, 0.6f, 0.3f, 0.1f) // Light green, semi-transparent
-            unlit = true
-        }
-        
-        val ceilingMaterial = Material().apply {
-            baseColor = Color4(0.3f, 0.3f, 0.5f, 0.1f) // Light purple, semi-transparent
-            unlit = true
-        }
-        
-        // Create AnchorProceduralMesh AFTER scene is loaded
-        // The collider parameter (second boolean) enables physics colliders
+        // Use null materials - creates invisible colliders only (MRUKSample pattern)
         procMeshSpawner = AnchorProceduralMesh(
             mrukFeature,
             mapOf(
-                MRUKLabel.WALL_FACE to AnchorProceduralMeshConfig(wallMaterial, true),
-                MRUKLabel.FLOOR to AnchorProceduralMeshConfig(floorMaterial, true),
-                MRUKLabel.CEILING to AnchorProceduralMeshConfig(ceilingMaterial, true),
+                MRUKLabel.WALL_FACE to AnchorProceduralMeshConfig(null, true),
+                MRUKLabel.FLOOR to AnchorProceduralMeshConfig(null, true),
+                MRUKLabel.CEILING to AnchorProceduralMeshConfig(null, true),
             ),
         )
         
         isMeshVisible = true
-        Log.i(TAG, "AnchorProceduralMesh created with wall/floor/ceiling materials")
+        Log.i(TAG, "AnchorProceduralMesh created with colliders only")
     }
     
     /**
-     * Shows the room mesh visualization.
+     * Shows the room mesh colliders.
      * 
      * Recreates the AnchorProceduralMesh if it was previously destroyed.
      */
     fun showRoomMesh() {
         if (isMeshVisible && procMeshSpawner != null) {
-            Log.d(TAG, "Room mesh already visible")
+            Log.d(TAG, "Room mesh colliders already active")
             return
         }
         
@@ -172,9 +130,9 @@ class RoomMeshManager(
             return
         }
         
-        Log.i(TAG, "Showing room mesh visualization...")
-        initializeMeshVisualization()
-        Log.i(TAG, "Room mesh visualization enabled")
+        Log.i(TAG, "Enabling room mesh colliders...")
+        initializeMeshColliders()
+        Log.i(TAG, "Room mesh colliders enabled")
     }
     
     /**

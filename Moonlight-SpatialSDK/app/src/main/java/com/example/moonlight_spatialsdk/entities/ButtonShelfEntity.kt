@@ -16,7 +16,7 @@ import com.meta.spatial.toolkit.getAbsoluteTransform
 
 class ButtonShelfEntity {
   companion object {
-    private const val WIDTH_IN_METERS = 0.7f // Increased width to accommodate 5 buttons
+    private const val WIDTH_IN_METERS = 0.9f
     private const val HEIGHT_IN_METERS = 0.12f
   }
 

@@ -443,7 +443,7 @@ class ImmersiveActivity : AppSystemActivity() {
           config {
             fractionOfScreen = 0.3f
             height = 0.12f
-            width = 0.7f // Increased width to accommodate more buttons
+            width = 0.9f
             layoutDpi = 240
             layerConfig = LayerConfig()
             enableTransparent = true
@@ -614,14 +614,18 @@ class ImmersiveActivity : AppSystemActivity() {
   
   /**
    * Enables spatial audio for the video panel if audio is ready.
+   * 
+   * Uses the actual channel count from the audio renderer to enable proper
+   * surround sound support (5.1/7.1) when configured in Sunshine.
    */
   private fun enableSpatialAudioIfReady() {
     val entity = videoPanelEntity ?: return
     val audioSessionId = audioRenderer.audioSessionId
+    val channelCount = audioRenderer.channelCount
     
     if (audioSessionId > 0) {
-      Log.i(TAG, "Enabling spatial audio with session ID: $audioSessionId")
-      spatialAudioManager?.enableSpatialAudio(entity, audioSessionId, 2) // Stereo audio
+      Log.i(TAG, "Enabling spatial audio with session ID: $audioSessionId, channels: $channelCount")
+      spatialAudioManager?.enableSpatialAudio(entity, audioSessionId, channelCount)
     } else {
       Log.w(TAG, "Audio session ID not available yet, spatial audio will be enabled when audio starts")
     }
@@ -795,10 +799,22 @@ class ImmersiveActivity : AppSystemActivity() {
    * Opens PancakeActivity as an overlay panel within the immersive scene.
    * This allows settings adjustments with working keyboard while staying in VR.
    * Don't call finishAndRemoveTask(), as it will close the immersive activity.
+   * Passes current streaming info for debugging display.
    */
   private fun startPanelActivityInOverlay() {
+    val prefs = PreferenceConfiguration.readPreferences(this)
+    val isConnected = connectionManager.isConnected()
+    val connectionParams = connectionManager.getCurrentConnectionParams()
+    
     val panelIntent = Intent(this, PancakeActivity::class.java).apply {
       addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      putExtra("streaming_active", isConnected)
+      if (isConnected && connectionParams != null) {
+        putExtra("connected_host", connectionParams.first)
+        putExtra("streaming_resolution", "${prefs.width}x${prefs.height}")
+        putExtra("streaming_fps", prefs.fps)
+        putExtra("streaming_audio_channels", audioRenderer.channelCount)
+      }
     }
     startActivity(panelIntent)
   }
