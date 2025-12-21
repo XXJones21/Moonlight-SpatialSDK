@@ -71,6 +71,7 @@ import com.example.moonlight_spatialsdk.AnchorOnLoad
 import com.example.moonlight_spatialsdk.Scalable
 import com.example.moonlight_spatialsdk.ScaledChild
 import com.example.moonlight_spatialsdk.ScaledParent
+import com.example.moonlight_spatialsdk.WallSnap
 import com.example.moonlight_spatialsdk.systems.pointerInfo.PointerInfoSystem
 import com.example.moonlight_spatialsdk.systems.scalable.TouchScalableSystem
 import com.example.moonlight_spatialsdk.systems.scaleChildren.ScaleChildrenSystem
@@ -215,6 +216,7 @@ class ImmersiveActivity : AppSystemActivity() {
     // Register anchor snapping components for MRUK wall/floor/ceiling snapping
     componentManager.registerComponent<Anchorable>(Anchorable.Companion)
     componentManager.registerComponent<AnchorOnLoad>(AnchorOnLoad.Companion)
+    componentManager.registerComponent<WallSnap>(WallSnap.Companion)
     
     // Register pointer info system (required for hover detection)
     val pointerInfoSystem = PointerInfoSystem()
@@ -644,28 +646,33 @@ class ImmersiveActivity : AppSystemActivity() {
   /**
    * Toggle snap-to-wall behavior for the video panel.
    * 
-   * When enabled, the video panel will automatically snap to walls,
-   * ceiling, or floor surfaces when grabbed and moved near them.
+   * When enabled, the video panel will snap to the nearest wall when grabbed
+   * and movement will be constrained to the wall plane (X/Y sliding with Z locked).
    */
   fun toggleSnapToWall() {
     val newEnabled = !_isSnapEnabled.value
     _isSnapEnabled.value = newEnabled
     
-    // Enable/disable Anchorable component on video panel
+    // Enable/disable WallSnap component on video panel
     videoPanelEntity?.let { entity ->
       if (newEnabled) {
-        // Add Anchorable component to enable snap-to-wall
-        entity.setComponent(Anchorable(0.02f)) // 2cm offset from wall
-        Log.i(TAG, "Anchorable component added to video panel")
+        // Add WallSnap component to enable wall-constrained movement
+        entity.setComponent(WallSnap(
+            isEnabled = true,
+            isSnappedToWall = false,
+            wallPlaneNormal = Vector3(0f, 0f, 1f),
+            wallPlanePoint = Vector3(0f, 0f, 0f),
+            wallOffset = 0.02f
+        ))
+        Log.i(TAG, "WallSnap component enabled on video panel")
       } else {
-        // Remove Anchorable component by setting offset to a special "disabled" value
-        // The AnchorSnappingSystem won't find entities without the Anchorable component
-        // We'll use a workaround: set a very large negative offset which effectively disables snapping
-        // Note: A cleaner approach would be to remove the component, but the SDK may not support that
-        if (entity.hasComponent<Anchorable>()) {
-          // For now, we can't truly remove components, so we'll leave it but the system
-          // only processes grabbed entities with Anchorable, so not grabbing = no snapping
-          Log.i(TAG, "Snap to wall disabled (component remains but snapping inactive when not grabbing)")
+        // Disable WallSnap by setting isEnabled to false
+        if (entity.hasComponent<WallSnap>()) {
+          val wallSnap = entity.getComponent<WallSnap>()
+          wallSnap.isEnabled = false
+          wallSnap.isSnappedToWall = false
+          entity.setComponent(wallSnap)
+          Log.i(TAG, "WallSnap component disabled on video panel")
         }
       }
     }
