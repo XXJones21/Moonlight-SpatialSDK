@@ -100,13 +100,9 @@ class SpatialAudioManager(
         
         Log.i(TAG, "Disabling spatial audio")
         
-        // Remove AudioSessionId component from entity
-        registeredEntity?.let { entity ->
-            // Set to a null/disabled state by removing the component
-            // Note: The SDK may require a different approach to "remove" the component
-            // For now, we set it to an invalid session ID of 0
-            entity.setComponent(AudioSessionId(0, AudioType.STEREO))
-        }
+        // Note: We don't remove the AudioSessionId component because the SDK doesn't support
+        // component removal. The entity will be destroyed on disconnect anyway.
+        // Just clear our tracking state.
         
         isEnabled = false
         registeredEntity = null

@@ -12,6 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
@@ -62,6 +63,8 @@ fun ButtonShelfCompose(
     onSnapToWallClick: () -> Unit = {},
     onDisconnectClick: () -> Unit
 ) {
+  val focusManager = LocalFocusManager.current
+  
   Column(
       modifier = Modifier.fillMaxSize(),
       verticalArrangement = Arrangement.Center,
@@ -76,7 +79,7 @@ fun ButtonShelfCompose(
             icon = { Icon(SpatialIcons.Regular.Settings, contentDescription = "Settings") },
             label = "Settings",
             selected = false,
-            onSelectionChange = { onSettingsClick() },
+            onSelectionChange = { focusManager.clearFocus(); onSettingsClick() },
         )
       }
       
@@ -85,7 +88,7 @@ fun ButtonShelfCompose(
             icon = { Icon(SpatialIcons.Regular.Zoom, contentDescription = "Resize") },
             label = "Resize",
             selected = false,
-            onSelectionChange = { onResetScaleClick() },
+            onSelectionChange = { focusManager.clearFocus(); onResetScaleClick() },
         )
       }
       
@@ -94,7 +97,7 @@ fun ButtonShelfCompose(
             icon = { Icon(SpatialIcons.Regular.VolumeOn, contentDescription = "Spatialize") },
             label = "Spatialize",
             selected = isSpatializeEnabled,
-            onSelectionChange = { onSpatializeClick() },
+            onSelectionChange = { focusManager.clearFocus(); onSpatializeClick() },
         )
       }
       
@@ -103,7 +106,7 @@ fun ButtonShelfCompose(
             icon = { Icon(SpatialIcons.Regular.SidebarPin, contentDescription = "Snap") },
             label = "Snap",
             selected = isSnapEnabled,
-            onSelectionChange = { onSnapToWallClick() },
+            onSelectionChange = { focusManager.clearFocus(); onSnapToWallClick() },
         )
       }
       
@@ -112,7 +115,7 @@ fun ButtonShelfCompose(
             icon = { Icon(SpatialIcons.Regular.Close, contentDescription = "Disconnect") },
             label = "Disconnect",
             selected = false,
-            onSelectionChange = { onDisconnectClick() },
+            onSelectionChange = { focusManager.clearFocus(); onDisconnectClick() },
         )
       }
     }

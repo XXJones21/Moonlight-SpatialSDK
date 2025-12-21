@@ -3,6 +3,7 @@ package com.example.moonlight_spatialsdk.systems.anchor
 import android.util.Log
 import com.example.moonlight_spatialsdk.Anchorable
 import com.example.moonlight_spatialsdk.AnchorOnLoad
+import com.example.moonlight_spatialsdk.WallSnap
 import com.meta.spatial.core.Entity
 import com.meta.spatial.core.Pose
 import com.meta.spatial.core.Quaternion
@@ -25,13 +26,15 @@ import com.meta.spatial.toolkit.getAbsoluteTransform
 import kotlin.math.absoluteValue
 
 /**
- * System that snaps entities with the Anchorable component to MRUK-detected planes
- * (walls, ceiling, floor) when they are grabbed and moved near those surfaces.
+ * System that handles two types of anchor snapping behavior:
  * 
- * This system provides auto-snap-while-grabbed behavior, meaning:
- * - When a user grabs a panel and moves it near a wall, the panel automatically
- *   snaps to the wall surface and rotates to face the wall normal.
- * - When moved near the ceiling or floor, the panel snaps to that surface.
+ * 1. **Anchorable Component**: Proximity-based snapping to MRUK-detected planes
+ *    (walls, ceiling, floor) when entities are grabbed and moved near those surfaces.
+ * 
+ * 2. **WallSnap Component**: Wall-plane-constrained movement where:
+ *    - On grab: Entity snaps to the nearest wall
+ *    - While grabbed: Movement is constrained to the wall plane (X/Y sliding, Z locked)
+ *    - On release: Entity stays on the wall
  * 
  * Based on PremiumMediaSample's AnchorSnappingSystem implementation.
  */
@@ -53,14 +56,138 @@ class AnchorSnappingSystem : SystemBase() {
             return
         }
         
-        // Grab all the anchorable objects, and also the walls/ceiling/floors
-        val anchorables = Query.where { has(Anchorable.id, Transform.id, Grabbable.id) }.eval()
+        // Get all planes (walls/ceiling/floors) for snapping
         val planes = Query.where { has(MRUKPlane.id, Transform.id, MRUKAnchor.id) }.eval()
         
+        // Process Anchorable entities (proximity-based snapping)
+        val anchorables = Query.where { has(Anchorable.id, Transform.id, Grabbable.id) }.eval()
         for (anchorable in anchorables) {
             if (!anchorable.getComponent<Grabbable>().isGrabbed) continue
             processGrabbedAnchorable(anchorable, planes)
         }
+        
+        // Process WallSnap entities (wall-plane-constrained movement)
+        val wallSnapEntities = Query.where { has(WallSnap.id, Transform.id, Grabbable.id) }.eval()
+        for (entity in wallSnapEntities) {
+            val wallSnap = entity.getComponent<WallSnap>()
+            val grabbable = entity.getComponent<Grabbable>()
+            
+            if (!wallSnap.isEnabled) continue
+            
+            if (grabbable.isGrabbed) {
+                processWallSnapGrabbed(entity, wallSnap, planes)
+            } else if (wallSnap.isSnappedToWall) {
+                // Released - clear the snapped state for next grab
+                wallSnap.isSnappedToWall = false
+                entity.setComponent(wallSnap)
+            }
+        }
+    }
+    
+    /**
+     * Process a WallSnap entity that is currently grabbed.
+     * 
+     * On first frame grabbed: Find the nearest wall and store plane data in the component.
+     * While grabbed: Project the entity position onto the stored wall plane.
+     */
+    private fun processWallSnapGrabbed(entity: Entity, wallSnap: WallSnap, planes: Sequence<Entity>) {
+        val entityPose = getAbsoluteTransform(entity)
+        
+        if (!wallSnap.isSnappedToWall) {
+            // First frame grabbed: find and snap to nearest wall
+            val nearestWall = findNearestWall(entityPose.t, planes)
+            if (nearestWall != null) {
+                wallSnap.wallPlaneNormal = nearestWall.normal
+                wallSnap.wallPlanePoint = nearestWall.point
+                wallSnap.isSnappedToWall = true
+                entity.setComponent(wallSnap)
+                Log.d(TAG, "WallSnap: Snapped to wall, normal=${nearestWall.normal}, point=${nearestWall.point}")
+            }
+        }
+        
+        if (wallSnap.isSnappedToWall) {
+            // Project current position onto the stored wall plane
+            val projectedPos = projectPointOntoPlane(
+                entityPose.t,
+                wallSnap.wallPlanePoint,
+                wallSnap.wallPlaneNormal
+            ) + wallSnap.wallPlaneNormal * wallSnap.wallOffset
+            
+            // Calculate wall-facing rotation
+            val wallRotation = calculateWallFacingRotation(wallSnap.wallPlaneNormal)
+            
+            // Apply constrained position and rotation
+            entity.setComponent(
+                Transform(fromAbsoluteToLocal(Pose(projectedPos, wallRotation), entity))
+            )
+        }
+    }
+    
+    /**
+     * Data class representing a wall plane for WallSnap.
+     */
+    private data class WallPlaneInfo(val normal: Vector3, val point: Vector3)
+    
+    /**
+     * Find the nearest wall to the given position using a raycast from head through the entity.
+     * Only considers walls (not ceiling or floor) for WallSnap behavior.
+     */
+    private fun findNearestWall(entityPosition: Vector3, planes: Sequence<Entity>): WallPlaneInfo? {
+        val headPose = getHeadPose()
+        val rayDirection = (entityPosition - headPose.t).normalize()
+        
+        var nearestWall: WallPlaneInfo? = null
+        var nearestDistance = Float.MAX_VALUE
+        
+        for (plane in planes) {
+            val planeAnchor = plane.getComponent<MRUKAnchor>()
+            
+            // Only consider walls for WallSnap
+            if (!planeAnchor.hasLabel(MRUKLabel.WALL_FACE)) continue
+            
+            val hitInfo = doesRayIntersectPlane(headPose.t, rayDirection, plane)
+            if (hitInfo != null) {
+                val distance = (hitInfo.point - headPose.t).length()
+                if (distance < nearestDistance) {
+                    nearestDistance = distance
+                    val planeTransform = getAbsoluteTransform(plane)
+                    nearestWall = WallPlaneInfo(
+                        normal = planeTransform.forward().normalize(),
+                        point = hitInfo.point
+                    )
+                }
+            }
+        }
+        
+        // If raycast didn't find a wall, try finding the closest wall by proximity
+        if (nearestWall == null) {
+            for (plane in planes) {
+                val planeAnchor = plane.getComponent<MRUKAnchor>()
+                if (!planeAnchor.hasLabel(MRUKLabel.WALL_FACE)) continue
+                
+                val planeTransform = getAbsoluteTransform(plane)
+                val planeNormal = planeTransform.forward().normalize()
+                val projectedPoint = projectPointOntoPlane(entityPosition, planeTransform.t, planeNormal)
+                val distance = (projectedPoint - entityPosition).length()
+                
+                if (distance < nearestDistance) {
+                    nearestDistance = distance
+                    nearestWall = WallPlaneInfo(normal = planeNormal, point = projectedPoint)
+                }
+            }
+        }
+        
+        return nearestWall
+    }
+    
+    /**
+     * Calculate the rotation for an entity to face a wall (opposite to wall normal).
+     */
+    private fun calculateWallFacingRotation(wallNormal: Vector3): Quaternion {
+        var adjustedRotation = lookAt(Vector3(0f, 0f, 1f), Vector3(0f, 1f, 0f), wallNormal)
+        // Flip 180 degrees to face opposite the wall normal (facing outward from wall)
+        adjustedRotation = adjustedRotation.times(Quaternion(0f, 1f, 0f, 0f))
+        return adjustedRotation
     }
     
     /**
