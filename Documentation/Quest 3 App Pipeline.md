@@ -30,9 +30,10 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 4. [Video Panel Rendering](#video-panel-rendering)
 5. [Video Panel Scaling](#video-panel-scaling)
 6. [ButtonShelf Controls](#buttonshelf-controls)
-7. [Pairing System](#pairing-system)
-8. [Communication Flow](#communication-flow)
-9. [Current State & Future Enhancements](#current-state--future-enhancements)
+7. [Snap to Wall](#snap-to-wall)
+8. [Pairing System](#pairing-system)
+9. [Communication Flow](#communication-flow)
+10. [Current State & Future Enhancements](#current-state--future-enhancements)
 
 ---
 
@@ -853,7 +854,7 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
 
 - **Entity**: `ButtonShelfEntity` - Manages ButtonShelf entity lifecycle and positioning
 - **System**: `ButtonShelfVisibilitySystem` - Manages visibility based on hover, inactivity, grabbing, and scaling
-- **UI**: `ButtonShelfCompose` - Compose UI with three interactive buttons
+- **UI**: `ButtonShelfCompose` - Compose UI with five interactive buttons
 - **Component**: `ScaledChild` - Ensures ButtonShelf scales and positions correctly with video panel
 
 **Key Features**:
@@ -881,7 +882,20 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
    - Useful after scaling panel to large or small sizes
    - Instantly restores panel to original dimensions
 
-3. **Disconnect Button** (Close icon):
+3. **Spatialize Button** (VolumeOn icon):
+   - Toggles spatial audio and room mesh visualization
+   - When enabled: Audio appears to emanate from video panel position
+   - Requires `USE_SCENE` permission for MRUK room detection
+   - See [Spatial Audio](#spatial-audio) section for details
+
+4. **Snap to Wall Button** (SidebarPin icon):
+   - Toggles wall-constrained panel movement
+   - When enabled: Panel snaps to nearest wall on grab
+   - Movement constrained to wall plane (X/Y sliding, Z locked)
+   - Scaling handles also respect wall plane constraint
+   - See [Snap to Wall](#snap-to-wall) section for details
+
+5. **Disconnect Button** (Close icon):
    - Ends the current streaming session
    - Calls `disconnect()` to stop stream and reset connection state
    - Calls `launchPanelModeInHome()` to exit immersive mode and return to 2D panel in Home environment
@@ -892,8 +906,14 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
 
 1. User hovers controller/hand over video panel
 2. ButtonShelf appears at the bottom of the video panel
-3. User can interact with any of the three buttons
+3. User can interact with any of the five buttons
 4. ButtonShelf hides automatically after inactivity or when panel is scaled/grabbed
+
+**Focus Management**:
+
+- ButtonShelf clears focus after each button click using `LocalFocusManager.clearFocus()`
+- This prevents Compose panel from capturing Bluetooth controller input after button interactions
+- Ensures controller input continues to flow to the game stream after using ButtonShelf
 
 **Component Registration** (in `onCreate()`):
 
@@ -956,7 +976,7 @@ PanelRegistration(R.id.button_shelf) {
     config {
         fractionOfScreen = 0.3f
         height = 0.12f
-        width = 0.5f
+        width = 0.9f  // Wider to accommodate 5 buttons
         layoutDpi = 240
         layerConfig = LayerConfig()
         enableTransparent = true
@@ -964,9 +984,16 @@ PanelRegistration(R.id.button_shelf) {
         themeResourceId = R.style.PanelAppThemeTransparent
     }
     composePanel { setContent {
+        val spatializeEnabled = isSpatializeEnabled.collectAsState()
+        val snapEnabled = isSnapEnabled.collectAsState()
+        
         ButtonShelfCompose(
+            isSpatializeEnabled = spatializeEnabled.value,
+            isSnapEnabled = snapEnabled.value,
             onSettingsClick = { startPanelActivityInOverlay() },
             onResetScaleClick = { updateVideoPanelScale(1.0f) },
+            onSpatializeClick = { toggleSpatialize() },
+            onSnapToWallClick = { toggleSnapToWall() },
             onDisconnectClick = { 
                 disconnect()
                 launchPanelModeInHome()
@@ -991,6 +1018,165 @@ PanelRegistration(R.id.button_shelf) {
 - `panels/buttonShelf/ButtonShelfActivity.kt` - Activity wrapper (legacy, not used in primary registration)
 - `components/ScaledChild.xml` - ScaledChild component definition (for scaling with parent)
 - `systems/scaleChildren/ScaleChildrenSystem.kt` - System that updates child positions when parent scales
+
+---
+
+## SNAP TO WALL
+
+### Overview
+
+**Purpose**: Allow users to snap the video panel to a wall and move it along the wall surface while keeping the distance from the wall locked.
+
+**Implementation**:
+
+- **Component**: `WallSnap` - ECS component storing wall plane data and snap state
+- **System**: `AnchorSnappingSystem` - Handles wall detection and constrained movement
+- **Integration**: `TouchScalableSystem` - Corner handles respect wall plane constraint
+
+**Key Features**:
+
+- **Toggle-Based**: Enabled/disabled via ButtonShelf "Snap" button
+- **Raycast Wall Detection**: On first grab, finds nearest wall via raycast from head through panel
+- **Constrained Movement**: While grabbed, panel slides along wall (X/Y free, Z locked)
+- **Wall-Facing Rotation**: Panel automatically rotates to face outward from wall
+- **Scaling Respects Wall**: Corner scaling handles are also projected onto wall plane
+
+### WallSnap Component
+
+**File**: `components/WallSnap.xml`
+
+**Attributes**:
+
+- `isEnabled` (Boolean): Whether wall snap mode is active
+- `isSnappedToWall` (Boolean): Whether currently snapped to a wall
+- `wallPlaneNormal` (Vector3): Normal vector of the wall plane
+- `wallPlanePoint` (Vector3): A point on the wall plane
+- `wallOffset` (Float): Distance offset from wall (default: 0.02m / 2cm)
+
+**Component Definition**:
+
+```xml
+<ComponentSchema packageName="com.example.moonlight_spatialsdk">
+  <Component name="WallSnap">
+    <BooleanAttribute name="isEnabled" defaultValue="false" />
+    <BooleanAttribute name="isSnappedToWall" defaultValue="false" />
+    <Vector3Attribute name="wallPlaneNormal" defaultValue="0f, 0f, 1f" />
+    <Vector3Attribute name="wallPlanePoint" defaultValue="0f, 0f, 0f" />
+    <FloatAttribute name="wallOffset" defaultValue="0.02f" />
+  </Component>
+</ComponentSchema>
+```
+
+### Toggle Function
+
+**File**: `ImmersiveActivity.kt`
+
+**Function**: `toggleSnapToWall()`
+
+```kotlin
+fun toggleSnapToWall() {
+    val newEnabled = !_isSnapEnabled.value
+    _isSnapEnabled.value = newEnabled
+    
+    videoPanelEntity?.let { entity ->
+        if (newEnabled) {
+            // Add WallSnap component to enable wall-constrained movement
+            entity.setComponent(WallSnap(
+                isEnabled = true,
+                isSnappedToWall = false,
+                wallPlaneNormal = Vector3(0f, 0f, 1f),
+                wallPlanePoint = Vector3(0f, 0f, 0f),
+                wallOffset = 0.02f
+            ))
+        } else {
+            // Disable WallSnap by setting isEnabled to false
+            if (entity.hasComponent<WallSnap>()) {
+                val wallSnap = entity.getComponent<WallSnap>()
+                wallSnap.isEnabled = false
+                wallSnap.isSnappedToWall = false
+                entity.setComponent(wallSnap)
+            }
+        }
+    }
+}
+```
+
+### AnchorSnappingSystem Enhancement
+
+**File**: `systems/anchor/AnchorSnappingSystem.kt`
+
+**WallSnap Processing** (in `execute()`):
+
+```kotlin
+// Process WallSnap entities (wall-plane-constrained movement)
+val wallSnapEntities = Query.where { has(WallSnap.id, Transform.id, Grabbable.id) }.eval()
+for (entity in wallSnapEntities) {
+    val wallSnap = entity.getComponent<WallSnap>()
+    val grabbable = entity.getComponent<Grabbable>()
+    
+    if (!wallSnap.isEnabled) continue
+    
+    if (grabbable.isGrabbed) {
+        processWallSnapGrabbed(entity, wallSnap, planes)
+    } else if (wallSnap.isSnappedToWall) {
+        // Released - clear the snapped state for next grab
+        wallSnap.isSnappedToWall = false
+        entity.setComponent(wallSnap)
+    }
+}
+```
+
+**Key Methods**:
+
+- `processWallSnapGrabbed()`: On first grab, finds nearest wall and stores plane data; while grabbed, projects position onto wall plane
+- `findNearestWall()`: Raycasts from head through entity to find nearest wall, falls back to proximity search
+- `calculateWallFacingRotation()`: Computes rotation to face outward from wall
+- `projectPointOntoPlane()`: Projects a point onto the stored wall plane
+
+### TouchScalableSystem Integration
+
+**File**: `systems/scalable/TouchScalableSystem.kt`
+
+**Wall-Constrained Corner Handles**:
+
+When the video panel is snapped to a wall, corner scaling handles are also projected onto the wall plane to prevent them from "jumping around" in 3D space.
+
+```kotlin
+// In updatePanel()
+val wallSnap = entity.tryGetComponent<WallSnap>()
+val isWallSnapped = wallSnap != null && wallSnap.isEnabled && wallSnap.isSnappedToWall
+
+corners.forEachIndexed { index, corner ->
+    var cornerPos = pose.t + offsets[index]
+    
+    // Constrain corner to wall plane if panel is wall-snapped
+    if (isWallSnapped) {
+        cornerPos = projectPointOntoWallPlane(cornerPos, wallSnap!!) + 
+            wallSnap.wallPlaneNormal * wallSnap.wallOffset
+    }
+    
+    corner.setComponent(Transform(Pose(cornerPos, pose.q.times(cornerRotations[index]))))
+}
+```
+
+### User Interaction Flow
+
+1. User clicks "Snap" button on ButtonShelf → `toggleSnapToWall()` called
+2. WallSnap component added to video panel with `isEnabled = true`
+3. User grabs video panel with Meta controller
+4. `AnchorSnappingSystem` detects grab, raycasts to find nearest wall
+5. Panel instantly snaps to wall, stores plane data in WallSnap component
+6. While grabbed, panel slides along wall (X/Y movement allowed, Z locked)
+7. Panel rotation locked to face outward from wall
+8. User releases panel → `isSnappedToWall` cleared, ready for next grab
+9. If scaled while snapped, corner handles stay on wall plane
+
+### Files
+
+- `components/WallSnap.xml` - WallSnap component definition
+- `systems/anchor/AnchorSnappingSystem.kt` - Wall detection and constrained movement
+- `systems/scalable/TouchScalableSystem.kt` - Corner handle wall projection
+- `ImmersiveActivity.kt` - Toggle function and component registration
 
 ---
 
@@ -1185,15 +1371,17 @@ Step-by-step flow with expected logging and current gaps:
 - Connection lifecycle management
 - Panel scaling support (`Scale` component, `updateVideoPanelScale()` method)
 - Corner-based scaling system (`TouchScalableSystem`) with proportional corner handles
-- ButtonShelf controls (Settings, Reset Scale, Disconnect) with hover-activated visibility
+- ButtonShelf controls (Settings, Reset Scale, Spatialize, Snap, Disconnect) with hover-activated visibility
+- ButtonShelf focus management (clears focus after button clicks to prevent controller input capture)
 - ScaledChild component and ScaleChildrenSystem for hierarchical scaling (ButtonShelf scales with video panel)
+- Snap to Wall feature (`WallSnap` component, wall-constrained movement with X/Y sliding and Z locked)
+- Wall-aware scaling (corner handles respect wall plane when panel is wall-snapped)
 - zIndex configuration for rectilinear panels
 - Sleep/wake cycle video stream recovery (automatic re-establishment after device sleep)
 
 **⚠️ Limitations**:
 
 - Immersive-only (no 2D video display)
-- No MRUK features (anchoring, wall detection)
 - No analog stick-based scaling (`AnalogScalableSystem`)
 - Known SDK issue: Video surface color space initialization (affects PremiumMediaSample too)
   - Colors may be incorrect on first frame
@@ -1262,7 +1450,9 @@ Step-by-step flow with expected logging and current gaps:
 - `entities/ButtonShelfEntity.kt` - ButtonShelf entity management
 - `systems/buttonShelfVisibility/ButtonShelfVisibilitySystem.kt` - ButtonShelf visibility management
 - `systems/scaleChildren/ScaleChildrenSystem.kt` - Hierarchical scaling system for child entities
+- `systems/anchor/AnchorSnappingSystem.kt` - Wall detection and snap-to-wall constrained movement
 - `panels/buttonShelf/ButtonShelfCompose.kt` - ButtonShelf Compose UI
+- `components/WallSnap.xml` - WallSnap component for wall-constrained movement
 
 ### Configuration Files
 
@@ -1304,7 +1494,9 @@ The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 - ✅ Passthrough mode for mixed reality experience
 - ✅ Panel scaling support with `Scale` component
 - ✅ Corner-based scaling system (`TouchScalableSystem`) with proportional handles
-- ✅ ButtonShelf controls with hover-activated visibility and hierarchical scaling support
+- ✅ ButtonShelf controls (5 buttons) with hover-activated visibility and hierarchical scaling support
+- ✅ Snap to Wall feature with wall-constrained movement (X/Y sliding, Z locked)
+- ✅ Wall-aware scaling handles that respect wall plane constraint
 
 **Architecture Alignment**:
 
