@@ -16,7 +16,7 @@ import com.meta.spatial.toolkit.getAbsoluteTransform
 
 class ButtonShelfEntity {
   companion object {
-    private const val WIDTH_IN_METERS = 0.5f
+    private const val WIDTH_IN_METERS = 0.9f
     private const val HEIGHT_IN_METERS = 0.12f
   }
 

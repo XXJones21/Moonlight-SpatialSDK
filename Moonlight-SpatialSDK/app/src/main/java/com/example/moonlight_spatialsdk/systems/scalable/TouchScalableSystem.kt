@@ -8,6 +8,7 @@
 package com.example.moonlight_spatialsdk.systems.scalable
 
 import com.example.moonlight_spatialsdk.R
+import com.example.moonlight_spatialsdk.WallSnap
 import com.example.moonlight_spatialsdk.entities.ImageBoxEntity
 import com.example.moonlight_spatialsdk.projectRayOntoPlane
 import com.example.moonlight_spatialsdk.systems.pointerInfo.PointerInfoSystem
@@ -175,15 +176,37 @@ class TouchScalableSystem(private val minScale: Float = 0.5f, private val maxSca
                 pose.up() * -(offset.y - cornerOffsetPivot),
         )
 
+    // Check if entity is snapped to wall - if so, project corner positions onto wall plane
+    val wallSnap = entity.tryGetComponent<WallSnap>()
+    val isWallSnapped = wallSnap != null && wallSnap.isEnabled && wallSnap.isSnappedToWall
+
     // Update position and scale of corners proportionally with panel
     corners.forEachIndexed { index, corner ->
       corner.setComponent(Scale(Vector3(panelScale)))
+      
+      var cornerPos = pose.t + offsets[index]
+      
+      // Constrain corner to wall plane if panel is wall-snapped
+      if (isWallSnapped) {
+        cornerPos = projectPointOntoWallPlane(cornerPos, wallSnap!!) + 
+            wallSnap.wallPlaneNormal * wallSnap.wallOffset
+      }
+      
       corner.setComponent(
-          Transform(Pose(pose.t + offsets[index], pose.q.times(cornerRotations[index])))
+          Transform(Pose(cornerPos, pose.q.times(cornerRotations[index])))
       )
     }
 
     if (resetTime) hidingTime = 0f
+  }
+  
+  /**
+   * Project a point onto the wall plane stored in WallSnap component.
+   */
+  private fun projectPointOntoWallPlane(point: Vector3, wallSnap: WallSnap): Vector3 {
+    val pointToPlane = point - wallSnap.wallPlanePoint
+    val distanceToPlane = pointToPlane.dot(wallSnap.wallPlaneNormal)
+    return point - wallSnap.wallPlaneNormal * distanceToPlane
   }
 
   private fun firstHidePanel() {

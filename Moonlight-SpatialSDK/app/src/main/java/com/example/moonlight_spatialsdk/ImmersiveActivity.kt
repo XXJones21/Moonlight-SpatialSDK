@@ -3,6 +3,7 @@ package com.example.moonlight_spatialsdk
 import android.app.PendingIntent
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.InputDevice
@@ -16,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collect
+import androidx.compose.runtime.collectAsState
 import com.example.moonlight_spatialsdk.BuildConfig
 import com.limelight.binding.audio.AndroidAudioRenderer
 import com.limelight.binding.video.CrashListener
@@ -61,12 +63,21 @@ import com.meta.spatial.toolkit.VideoSurfacePanelRegistration
 import com.meta.spatial.runtime.StereoMode
 import com.meta.spatial.vr.LocomotionSystem
 import com.meta.spatial.vr.VRFeature
+import com.meta.spatial.mruk.MRUKFeature
+import com.meta.spatial.physics.PhysicsFeature
+import com.meta.spatial.spatialaudio.SpatialAudioFeature
+import com.example.moonlight_spatialsdk.Anchorable
+import com.example.moonlight_spatialsdk.AnchorOnLoad
 import com.example.moonlight_spatialsdk.Scalable
 import com.example.moonlight_spatialsdk.ScaledChild
 import com.example.moonlight_spatialsdk.ScaledParent
+import com.example.moonlight_spatialsdk.WallSnap
 import com.example.moonlight_spatialsdk.systems.pointerInfo.PointerInfoSystem
 import com.example.moonlight_spatialsdk.systems.scalable.TouchScalableSystem
 import com.example.moonlight_spatialsdk.systems.scaleChildren.ScaleChildrenSystem
+import com.example.moonlight_spatialsdk.systems.mruk.RoomMeshManager
+import com.example.moonlight_spatialsdk.systems.audio.SpatialAudioManager
+import com.example.moonlight_spatialsdk.systems.anchor.AnchorSnappingSystem
 import com.meta.spatial.toolkit.Controller
 import com.meta.spatial.toolkit.ControllerType
 import java.io.File
@@ -113,6 +124,29 @@ class ImmersiveActivity : AppSystemActivity() {
   // Dialog state for disconnect confirmation
   private val _showDisconnectDialog = MutableStateFlow(false)
   val showDisconnectDialog: StateFlow<Boolean> = _showDisconnectDialog.asStateFlow()
+  
+  // MRUK and Spatial Audio features for room meshing and spatialized audio
+  private lateinit var mrukFeature: MRUKFeature
+  private lateinit var spatialAudioFeature: SpatialAudioFeature
+  
+  // MRUK spatial features state
+  private val _isSpatializeEnabled = MutableStateFlow(false)
+  val isSpatializeEnabled: StateFlow<Boolean> = _isSpatializeEnabled.asStateFlow()
+  
+  private val _isSnapEnabled = MutableStateFlow(false)
+  val isSnapEnabled: StateFlow<Boolean> = _isSnapEnabled.asStateFlow()
+  
+  // RoomMeshManager for MRUK room mesh visualization
+  private var roomMeshManager: RoomMeshManager? = null
+  
+  // SpatialAudioManager for spatialized audio from the video panel
+  private var spatialAudioManager: SpatialAudioManager? = null
+  
+  // Permission request codes for MRUK scene access
+  companion object {
+    private const val PERMISSION_USE_SCENE = "com.oculus.permission.USE_SCENE"
+    private const val REQUEST_CODE_PERMISSION_USE_SCENE = 100
+  }
 
   /**
    * Get OpenGL renderer string for Quest 3/3S hardware.
@@ -129,11 +163,17 @@ class ImmersiveActivity : AppSystemActivity() {
   }
 
   override fun registerFeatures(): List<SpatialFeature> {
+    // Initialize MRUK and Spatial Audio features for room meshing and spatialized audio
+    mrukFeature = MRUKFeature(this, systemManager)
+    spatialAudioFeature = SpatialAudioFeature()
+    
     val features =
         mutableListOf<SpatialFeature>(
             VRFeature(this),
             ComposeFeature(),
-            // IsdkFeature(this, spatial, systemManager), (not required anymore)
+            PhysicsFeature(spatial), // Required for MRUK colliders
+            mrukFeature,
+            spatialAudioFeature,
         )
     if (BuildConfig.DEBUG) {
       features.add(CastInputForwardFeature(this))
@@ -173,12 +213,20 @@ class ImmersiveActivity : AppSystemActivity() {
     componentManager.registerComponent<ScaledParent>(ScaledParent.Companion)
     componentManager.registerComponent<ScaledChild>(ScaledChild.Companion)
     
+    // Register anchor snapping components for MRUK wall/floor/ceiling snapping
+    componentManager.registerComponent<Anchorable>(Anchorable.Companion)
+    componentManager.registerComponent<AnchorOnLoad>(AnchorOnLoad.Companion)
+    componentManager.registerComponent<WallSnap>(WallSnap.Companion)
+    
     // Register pointer info system (required for hover detection)
     val pointerInfoSystem = PointerInfoSystem()
     systemManager.registerSystem(pointerInfoSystem)
     
     // Register touch scalable system
     systemManager.registerSystem(TouchScalableSystem(minScale = 0.5f, maxScale = 10.0f))
+    
+    // Register anchor snapping system (will be enabled when snap-to-wall is toggled)
+    systemManager.registerSystem(AnchorSnappingSystem())
     
     connectionManager = MoonlightConnectionManager(
         context = this,
@@ -277,7 +325,9 @@ class ImmersiveActivity : AppSystemActivity() {
     )
     scene.updateIBLEnvironment("environment.env")
 
-    scene.setViewOrigin(0.0f, 0.0f, 2.0f, 180.0f)
+    // NOTE: Do NOT use scene.setViewOrigin() with rotation - it affects the entire
+    // scene coordinate system including MRUK meshes, causing them to appear inverted.
+    // Video panel positioning should use direct entity transforms instead.
 
     panelPositioningSystem = PanelPositioningSystem()
     systemManager.registerSystem(panelPositioningSystem!!)
@@ -395,7 +445,7 @@ class ImmersiveActivity : AppSystemActivity() {
           config {
             fractionOfScreen = 0.3f
             height = 0.12f
-            width = 0.5f
+            width = 0.9f
             layoutDpi = 240
             layerConfig = LayerConfig()
             enableTransparent = true
@@ -403,7 +453,13 @@ class ImmersiveActivity : AppSystemActivity() {
             themeResourceId = R.style.PanelAppThemeTransparent
           }
           composePanel { setContent {
+            // Collect state flows for button selection states
+            val spatializeEnabled = isSpatializeEnabled.collectAsState()
+            val snapEnabled = isSnapEnabled.collectAsState()
+            
             com.example.moonlight_spatialsdk.panels.buttonShelf.ButtonShelfCompose(
+                isSpatializeEnabled = spatializeEnabled.value,
+                isSnapEnabled = snapEnabled.value,
                 onSettingsClick = {
                   Log.i(TAG, "ButtonShelf Settings clicked - opening 2D panel overlay for adjustments")
                   startPanelActivityInOverlay()
@@ -411,6 +467,14 @@ class ImmersiveActivity : AppSystemActivity() {
                 onResetScaleClick = {
                   Log.i(TAG, "ButtonShelf Reset Scale clicked - resetting video panel scale to 1.0")
                   updateVideoPanelScale(1.0f)
+                },
+                onSpatializeClick = {
+                  Log.i(TAG, "ButtonShelf Spatialize clicked - toggling spatial audio and room mesh")
+                  toggleSpatialize()
+                },
+                onSnapToWallClick = {
+                  Log.i(TAG, "ButtonShelf Snap clicked - toggling snap-to-wall behavior")
+                  toggleSnapToWall()
                 },
                 onDisconnectClick = {
                   Log.i(TAG, "ButtonShelf Disconnect clicked - ending stream and returning to 2D panel")
@@ -451,8 +515,169 @@ class ImmersiveActivity : AppSystemActivity() {
       }
     }
     
+    // Clean up MRUK RoomMeshManager and SpatialAudioManager
+    roomMeshManager?.destroy()
+    roomMeshManager = null
+    spatialAudioManager?.destroy()
+    spatialAudioManager = null
+    
     super.onSpatialShutdown()
     disconnect()
+  }
+  
+  /**
+   * Handle permission request results for MRUK scene access.
+   */
+  override fun onRequestPermissionsResult(
+      requestCode: Int,
+      permissions: Array<out String>,
+      grantResults: IntArray
+  ) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    
+    if (requestCode == REQUEST_CODE_PERMISSION_USE_SCENE &&
+        permissions.isNotEmpty() &&
+        permissions[0] == PERMISSION_USE_SCENE) {
+      val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+      if (granted) {
+        Log.i(TAG, "USE_SCENE permission granted, enabling spatialize features")
+        enableSpatializeFeatures()
+      } else {
+        Log.w(TAG, "USE_SCENE permission denied, spatialize features unavailable")
+        _isSpatializeEnabled.value = false
+      }
+    }
+  }
+  
+  /**
+   * Toggle spatialized audio and room mesh visualization.
+   * 
+   * When enabled:
+   * - Requests USE_SCENE permission if not granted
+   * - Loads MRUK scene from device
+   * - Creates room mesh visualization for walls/floor/ceiling
+   * - Enables spatialized audio for the video panel
+   * 
+   * When disabled:
+   * - Hides room mesh visualization
+   * - Disables spatialized audio
+   */
+  fun toggleSpatialize() {
+    val newEnabled = !_isSpatializeEnabled.value
+    
+    if (newEnabled) {
+      // Check and request USE_SCENE permission if needed
+      if (checkSelfPermission(PERMISSION_USE_SCENE) != PackageManager.PERMISSION_GRANTED) {
+        Log.i(TAG, "Requesting USE_SCENE permission for spatialize features")
+        requestPermissions(arrayOf(PERMISSION_USE_SCENE), REQUEST_CODE_PERMISSION_USE_SCENE)
+        return // Will continue in onRequestPermissionsResult
+      }
+      enableSpatializeFeatures()
+    } else {
+      disableSpatializeFeatures()
+    }
+  }
+  
+  /**
+   * Enables spatialize features after permission is granted.
+   * 
+   * Following the Valinor pattern: load scene data first, then create
+   * AnchorProceduralMesh AFTER scene loads successfully.
+   */
+  private fun enableSpatializeFeatures() {
+    _isSpatializeEnabled.value = true
+    
+    // Initialize RoomMeshManager if needed
+    if (roomMeshManager == null) {
+      roomMeshManager = RoomMeshManager(mrukFeature)
+    }
+    
+    // Initialize SpatialAudioManager if needed
+    if (spatialAudioManager == null) {
+      spatialAudioManager = SpatialAudioManager(spatialAudioFeature)
+    }
+    
+    // Load MRUK scene - AnchorProceduralMesh is created AFTER scene loads (Valinor pattern)
+    roomMeshManager?.loadSceneFromDevice(
+      onSceneLoaded = {
+        Log.i(TAG, "MRUK scene loaded - AnchorProceduralMesh created")
+        
+        // Enable spatial audio for video panel if connected
+        enableSpatialAudioIfReady()
+        
+        Log.i(TAG, "Spatialize features enabled")
+      },
+      onSceneLoadFailed = { result ->
+        Log.e(TAG, "Failed to load MRUK scene: $result")
+        _isSpatializeEnabled.value = false
+      }
+    )
+  }
+  
+  /**
+   * Enables spatial audio for the video panel if audio is ready.
+   * 
+   * Uses the actual channel count from the audio renderer to enable proper
+   * surround sound support (5.1/7.1) when configured in Sunshine.
+   */
+  private fun enableSpatialAudioIfReady() {
+    val entity = videoPanelEntity ?: return
+    val audioSessionId = audioRenderer.audioSessionId
+    val channelCount = audioRenderer.channelCount
+    
+    if (audioSessionId > 0) {
+      Log.i(TAG, "Enabling spatial audio with session ID: $audioSessionId, channels: $channelCount")
+      spatialAudioManager?.enableSpatialAudio(entity, audioSessionId, channelCount)
+    } else {
+      Log.w(TAG, "Audio session ID not available yet, spatial audio will be enabled when audio starts")
+    }
+  }
+  
+  /**
+   * Disables spatialize features.
+   */
+  private fun disableSpatializeFeatures() {
+    _isSpatializeEnabled.value = false
+    roomMeshManager?.hideRoomMesh()
+    spatialAudioManager?.disableSpatialAudio()
+    Log.i(TAG, "Spatialize features disabled")
+  }
+  
+  /**
+   * Toggle snap-to-wall behavior for the video panel.
+   * 
+   * When enabled, the video panel will snap to the nearest wall when grabbed
+   * and movement will be constrained to the wall plane (X/Y sliding with Z locked).
+   */
+  fun toggleSnapToWall() {
+    val newEnabled = !_isSnapEnabled.value
+    _isSnapEnabled.value = newEnabled
+    
+    // Enable/disable WallSnap component on video panel
+    videoPanelEntity?.let { entity ->
+      if (newEnabled) {
+        // Add WallSnap component to enable wall-constrained movement
+        entity.setComponent(WallSnap(
+            isEnabled = true,
+            isSnappedToWall = false,
+            wallPlaneNormal = Vector3(0f, 0f, 1f),
+            wallPlanePoint = Vector3(0f, 0f, 0f),
+            wallOffset = 0.02f
+        ))
+        Log.i(TAG, "WallSnap component enabled on video panel")
+      } else {
+        // Disable WallSnap by setting isEnabled to false
+        if (entity.hasComponent<WallSnap>()) {
+          val wallSnap = entity.getComponent<WallSnap>()
+          wallSnap.isEnabled = false
+          wallSnap.isSnappedToWall = false
+          entity.setComponent(wallSnap)
+          Log.i(TAG, "WallSnap component disabled on video panel")
+        }
+      }
+    }
+    
+    Log.i(TAG, "Snap to wall ${if (newEnabled) "enabled" else "disabled"}")
   }
 
   /**
@@ -581,10 +806,22 @@ class ImmersiveActivity : AppSystemActivity() {
    * Opens PancakeActivity as an overlay panel within the immersive scene.
    * This allows settings adjustments with working keyboard while staying in VR.
    * Don't call finishAndRemoveTask(), as it will close the immersive activity.
+   * Passes current streaming info for debugging display.
    */
   private fun startPanelActivityInOverlay() {
+    val prefs = PreferenceConfiguration.readPreferences(this)
+    val isConnected = connectionManager.isConnected()
+    val connectionParams = connectionManager.getCurrentConnectionParams()
+    
     val panelIntent = Intent(this, PancakeActivity::class.java).apply {
       addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      putExtra("streaming_active", isConnected)
+      if (isConnected && connectionParams != null) {
+        putExtra("connected_host", connectionParams.first)
+        putExtra("streaming_resolution", "${prefs.width}x${prefs.height}")
+        putExtra("streaming_fps", prefs.fps)
+        putExtra("streaming_audio_channels", audioRenderer.channelCount)
+      }
     }
     startActivity(panelIntent)
   }

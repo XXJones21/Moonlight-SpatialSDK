@@ -19,6 +19,7 @@ public class AndroidAudioRenderer implements AudioRenderer {
     private final boolean enableAudioFx;
 
     private AudioTrack track;
+    private int currentChannelCount = 2;
 
     public AndroidAudioRenderer(Context context, boolean enableAudioFx) {
         this.context = context;
@@ -68,6 +69,8 @@ public class AndroidAudioRenderer implements AudioRenderer {
     public int setup(MoonBridge.AudioConfiguration audioConfiguration, int sampleRate, int samplesPerFrame) {
         int channelConfig;
         int bytesPerFrame;
+
+        currentChannelCount = audioConfiguration.channelCount;
 
         switch (audioConfiguration.channelCount)
         {
@@ -229,5 +232,44 @@ public class AndroidAudioRenderer implements AudioRenderer {
         track.flush();
 
         track.release();
+    }
+
+    /**
+     * Returns the audio session ID for the underlying AudioTrack.
+     * 
+     * This ID can be used to register with the Spatial Audio feature
+     * for spatialized audio rendering. Returns 0 if no track is available.
+     * 
+     * @return The audio session ID, or 0 if unavailable
+     */
+    public int getAudioSessionId() {
+        if (track != null) {
+            return track.getAudioSessionId();
+        }
+        return 0;
+    }
+
+    /**
+     * Returns whether the audio track is initialized and playing.
+     * 
+     * @return true if audio is currently active
+     */
+    public boolean isActive() {
+        return track != null && track.getState() == AudioTrack.STATE_INITIALIZED;
+    }
+
+    /**
+     * Returns the current audio channel count.
+     * 
+     * This can be used to determine the appropriate AudioType for spatial audio:
+     * - 1 channel: MONO
+     * - 2 channels: STEREO
+     * - 6 channels: 5.1 surround (use SOUNDFIELD)
+     * - 8 channels: 7.1 surround (use SOUNDFIELD)
+     * 
+     * @return The number of audio channels (default 2 if not yet configured)
+     */
+    public int getChannelCount() {
+        return currentChannelCount;
     }
 }

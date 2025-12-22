@@ -74,12 +74,25 @@ class PancakeActivity : ComponentActivity() {
     val savedHost = shared.getString("saved_host", "") ?: ""
     val savedPort = shared.getString("saved_port", "47989") ?: "47989"
     val savedAppId = shared.getString("saved_appId", "0") ?: "0"
+    
+    // Read streaming info from intent (passed from ImmersiveActivity when opening settings)
+    val isStreamingActive = intent.getBooleanExtra("streaming_active", false)
+    val connectedHost = intent.getStringExtra("connected_host")
+    val streamingResolution = intent.getStringExtra("streaming_resolution")
+    val streamingFps = intent.getIntExtra("streaming_fps", 0)
+    val streamingAudioChannels = intent.getIntExtra("streaming_audio_channels", 2)
+    
     setContent {
       ConnectionPanel2D(
           pairingHelper = pairingHelper,
           savedHost = savedHost,
           savedPort = savedPort,
           savedAppId = savedAppId,
+          isStreamingActive = isStreamingActive,
+          connectedHost = connectedHost,
+          streamingResolution = streamingResolution,
+          streamingFps = streamingFps,
+          streamingAudioChannels = streamingAudioChannels,
           onSaveConnection = { h: String, p: String, a: String ->
             getSharedPreferences("connection_prefs", MODE_PRIVATE).edit()
                 .putString("saved_host", h)
@@ -188,12 +201,30 @@ private fun getConnectedControllerStatus(): String {
 fun getPanelTheme(): SpatialColorScheme =
     if (isSystemInDarkTheme()) darkSpatialColorScheme() else lightSpatialColorScheme()
 
+/**
+ * Converts audio channel count to human-readable format.
+ */
+private fun getAudioChannelLabel(channelCount: Int): String {
+    return when (channelCount) {
+        1 -> "Mono"
+        2 -> "Stereo"
+        6 -> "5.1 Surround"
+        8 -> "7.1 Surround"
+        else -> "$channelCount channels"
+    }
+}
+
 @Composable
 fun ConnectionPanel2D(
     pairingHelper: MoonlightPairingHelper,
     savedHost: String,
     savedPort: String,
     savedAppId: String,
+    isStreamingActive: Boolean = false,
+    connectedHost: String? = null,
+    streamingResolution: String? = null,
+    streamingFps: Int = 0,
+    streamingAudioChannels: Int = 2,
     onSaveConnection: (String, String, String) -> Unit,
     onClearPairing: () -> Unit,
     onConnect: (String, Int, Int) -> Unit,
@@ -204,8 +235,13 @@ fun ConnectionPanel2D(
     var port by remember { mutableStateOf(savedPort) }
     var appId by remember { mutableStateOf(savedAppId) }
     var generatedPin by remember { mutableStateOf<String?>(null) }
-    var connectionStatus by remember { mutableStateOf("Ready to connect") }
-    var isConnected by remember { mutableStateOf(false) }
+    var connectionStatus by remember { 
+        mutableStateOf(
+            if (isStreamingActive && connectedHost != null) "Connected to $connectedHost"
+            else "Ready to connect"
+        )
+    }
+    var isConnected by remember { mutableStateOf(isStreamingActive) }
     var needsPairing by remember { mutableStateOf(false) }
     var isCheckingPairing by remember { mutableStateOf(false) }
     var isPairing by remember { mutableStateOf(false) }
@@ -239,6 +275,16 @@ fun ConnectionPanel2D(
     }
     var fpsOptions by remember { mutableStateOf(listOf("30", "60", "90", "120")) }
     var formatOptions by remember { mutableStateOf(listOf("auto", "h264", "hevc", "av1")) }
+    var audioOptions by remember { mutableStateOf(listOf("Stereo", "5.1 Surround", "7.1 Surround")) }
+    var selectedAudio by remember {
+        mutableStateOf(
+            when (defaultPrefs.getString("list_audio_config", "2")) {
+                "51" -> "5.1 Surround"
+                "71" -> "7.1 Surround"
+                else -> "Stereo"
+            }
+        )
+    }
     var capabilitySummary by remember { mutableStateOf("") }
     var capabilityStatus by remember { mutableStateOf<String?>(null) }
     var enableHdr by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_enable_hdr", false)) }
@@ -469,63 +515,110 @@ fun ConnectionPanel2D(
                     }
                 }
 
-                // Application Selection Section
-                if (appList.isNotEmpty()) {
-                    val appOptions = appList.map { it.getAppName() }
-                    val currentAppIdInt = appId.toIntOrNull() ?: 0
-                    val selectedAppName = appList.find { it.getAppId() == currentAppIdInt }?.getAppName()
-                        ?: appOptions.firstOrNull() ?: appId
-
-                    LabeledDropdown(
-                        label = "Application",
-                        options = appOptions,
-                        selected = selectedAppName,
-                        onSelect = { selected ->
-                            val selectedApp = appList.find { it.getAppName() == selected }
-                            appId = selectedApp?.getAppId()?.toString() ?: "0"
-                        },
-                    )
-                } else if (isLoadingApps) {
-                    Text(
-                        text = "Loading applications...",
-                        style = LocalTypography.current.body1.copy(
-                            color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                } else if (appListError != null) {
-                    Text(
-                        text = "App list: $appListError",
-                        style = LocalTypography.current.body1.copy(
-                            color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    SpatialTextField(
-                        label = "App ID (fallback)",
-                        placeholder = "0",
-                        value = appId,
-                        onValueChange = { appId = it },
-                        enabled = !isConnected && !needsPairing,
-                        autoValidate = false,
-                        helperText = "Enter app ID manually if app list failed to load",
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-
-                // Controller status indicator
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = controllerStatus.value,
-                    style = LocalTypography.current.body2.copy(
-                        color = if (controllerStatus.value.startsWith("No"))
-                            SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.5f)
-                        else
-                            SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
-                    ),
+                // Application Selection Section with Controller Status on the right
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                )
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    // Application dropdown on the left
+                    Column(modifier = Modifier.weight(1f)) {
+                        if (appList.isNotEmpty()) {
+                            val appOptions = appList.map { it.getAppName() }
+                            val currentAppIdInt = appId.toIntOrNull() ?: 0
+                            val selectedAppName = appList.find { it.getAppId() == currentAppIdInt }?.getAppName()
+                                ?: appOptions.firstOrNull() ?: appId
+
+                            LabeledDropdown(
+                                label = "Application",
+                                options = appOptions,
+                                selected = selectedAppName,
+                                onSelect = { selected ->
+                                    val selectedApp = appList.find { it.getAppName() == selected }
+                                    appId = selectedApp?.getAppId()?.toString() ?: "0"
+                                },
+                            )
+                        } else if (isLoadingApps) {
+                            Text(
+                                text = "Loading applications...",
+                                style = LocalTypography.current.body1.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                                ),
+                            )
+                        } else if (appListError != null) {
+                            Text(
+                                text = "App list: $appListError",
+                                style = LocalTypography.current.body1.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                                ),
+                            )
+                            Spacer(Modifier.height(10.dp))
+                            SpatialTextField(
+                                label = "App ID (fallback)",
+                                placeholder = "0",
+                                value = appId,
+                                onValueChange = { appId = it },
+                                enabled = !isConnected && !needsPairing,
+                                autoValidate = false,
+                                helperText = "Enter app ID manually if app list failed to load",
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
+                    
+                    // Debug info on the right side
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "Debug Info",
+                            style = LocalTypography.current.body1Strong.copy(
+                                color = SpatialTheme.colorScheme.primaryAlphaBackground
+                            )
+                        )
+                        
+                        // Controller status
+                        Text(
+                            text = controllerStatus.value,
+                            style = LocalTypography.current.body2.copy(
+                                color = if (controllerStatus.value.startsWith("No"))
+                                    SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.5f)
+                                else
+                                    SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                            ),
+                        )
+                        
+                        // Streaming info (only show when actively streaming)
+                        if (isStreamingActive) {
+                            Text(
+                                text = "Resolution: ${streamingResolution ?: "Unknown"}",
+                                style = LocalTypography.current.body2.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                                ),
+                            )
+                            Text(
+                                text = "FPS: ${if (streamingFps > 0) streamingFps else "Unknown"}",
+                                style = LocalTypography.current.body2.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                                ),
+                            )
+                            Text(
+                                text = "Audio: ${getAudioChannelLabel(streamingAudioChannels)}",
+                                style = LocalTypography.current.body2.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                                ),
+                            )
+                        } else {
+                            Text(
+                                text = "Not streaming",
+                                style = LocalTypography.current.body2.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.5f)
+                                ),
+                            )
+                        }
+                    }
+                }
 
                 Spacer(Modifier.height(10.dp))
                 HorizontalDivider(color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.3f))
@@ -639,6 +732,12 @@ fun ConnectionPanel2D(
                             selected = selectedFormat,
                             onSelect = { selectedFormat = it },
                         )
+                        LabeledDropdown(
+                            label = "Audio",
+                            options = audioOptions,
+                            selected = selectedAudio,
+                            onSelect = { selectedAudio = it },
+                        )
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -702,14 +801,21 @@ fun ConnectionPanel2D(
                                         "av1" -> "forceav1"
                                         else -> "auto"
                                     }
+                                val storedAudio =
+                                    when (selectedAudio) {
+                                        "5.1 Surround" -> "51"
+                                        "7.1 Surround" -> "71"
+                                        else -> "2"
+                                    }
                                 shared.edit()
                                     .putString("list_resolution", selectedRes)
                                     .putString("list_fps", selectedFps)
                                     .putString("video_format", storedFormat)
+                                    .putString("list_audio_config", storedAudio)
                                     .putBoolean("checkbox_enable_hdr", enableHdr)
                                     .putBoolean("checkbox_full_range", enableFullRange)
                                     .apply()
-                                connectionStatus = "Applied stream prefs (res/fps/format/HDR/range)"
+                                connectionStatus = "Applied stream prefs (res/fps/format/audio/HDR/range)"
                             },
                         )
                     }

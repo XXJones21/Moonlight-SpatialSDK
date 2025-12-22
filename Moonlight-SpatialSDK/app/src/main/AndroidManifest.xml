@@ -55,6 +55,9 @@
     android:required="false"
   />
   <uses-permission android:name="com.oculus.permission.RENDER_MODEL" />
+  <!-- MRUK Scene Understanding for room meshing and anchor snapping -->
+  <uses-permission android:name="com.oculus.permission.USE_SCENE" />
+  <uses-permission android:name="com.oculus.permission.USE_ANCHOR_API" />
   <!-- Volume Control -->
   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
   <application 
