@@ -18,6 +18,17 @@ import com.meta.spatial.toolkit.Transform
 import com.meta.spatial.toolkit.TransformParent
 
 class ScaleChildrenSystem : SystemBase() {
+  
+  private val scaleListeners = mutableMapOf<Entity, () -> Unit>()
+  
+  fun addScaleListener(entity: Entity, listener: () -> Unit) {
+    scaleListeners[entity] = listener
+  }
+  
+  fun removeScaleListener(entity: Entity) {
+    scaleListeners.remove(entity)
+  }
+  
   override fun execute() {
     val scalesChanged = Query.where { has(ScaledParent.id).and(changed(Scale.id)) }
     for (scaleParent in scalesChanged.eval()) {
@@ -29,6 +40,9 @@ class ScaleChildrenSystem : SystemBase() {
 
         updateChildTransform(child, scaledChild, parentScale)
       }
+      
+      // Notify scale listeners for this entity
+      scaleListeners[scaleParent]?.invoke()
     }
   }
 

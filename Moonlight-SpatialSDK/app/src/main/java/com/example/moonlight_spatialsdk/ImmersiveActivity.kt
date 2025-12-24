@@ -60,7 +60,14 @@ import com.meta.spatial.toolkit.PanelStyleOptions
 import com.meta.spatial.toolkit.PixelDisplayOptions
 import com.meta.spatial.toolkit.QuadShapeOptions
 import com.meta.spatial.toolkit.VideoSurfacePanelRegistration
+import com.meta.spatial.toolkit.ReadableVideoSurfacePanelRegistration
+import com.meta.spatial.toolkit.ReadableMediaPanelSettings
+import com.meta.spatial.toolkit.ReadableMediaPanelRenderOptions
 import com.meta.spatial.runtime.StereoMode
+import com.example.moonlight_spatialsdk.data.ImmersiveSettings
+import com.example.moonlight_spatialsdk.systems.heroLighting.HeroLightingSystem
+import com.example.moonlight_spatialsdk.systems.heroLighting.WallLightingSystem
+import com.example.moonlight_spatialsdk.systems.lighting.LightingPassthroughHandler
 import com.meta.spatial.vr.LocomotionSystem
 import com.meta.spatial.vr.VRFeature
 import com.meta.spatial.mruk.MRUKFeature
@@ -78,6 +85,7 @@ import com.example.moonlight_spatialsdk.systems.scaleChildren.ScaleChildrenSyste
 import com.example.moonlight_spatialsdk.systems.mruk.RoomMeshManager
 import com.example.moonlight_spatialsdk.systems.audio.SpatialAudioManager
 import com.example.moonlight_spatialsdk.systems.anchor.AnchorSnappingSystem
+import com.example.moonlight_spatialsdk.entities.BiasLightingEntity
 import com.meta.spatial.toolkit.Controller
 import com.meta.spatial.toolkit.ControllerType
 import java.io.File
@@ -129,9 +137,9 @@ class ImmersiveActivity : AppSystemActivity() {
   private lateinit var mrukFeature: MRUKFeature
   private lateinit var spatialAudioFeature: SpatialAudioFeature
   
-  // MRUK spatial features state
-  private val _isSpatializeEnabled = MutableStateFlow(false)
-  val isSpatializeEnabled: StateFlow<Boolean> = _isSpatializeEnabled.asStateFlow()
+  // Immersive mode features state
+  private val _isImmersiveModeEnabled = MutableStateFlow(false)
+  val isImmersiveModeEnabled: StateFlow<Boolean> = _isImmersiveModeEnabled.asStateFlow()
   
   private val _isSnapEnabled = MutableStateFlow(false)
   val isSnapEnabled: StateFlow<Boolean> = _isSnapEnabled.asStateFlow()
@@ -141,6 +149,21 @@ class ImmersiveActivity : AppSystemActivity() {
   
   // SpatialAudioManager for spatialized audio from the video panel
   private var spatialAudioManager: SpatialAudioManager? = null
+  
+  // Hero lighting system for emissive lighting effects
+  private var heroLightingSystem: HeroLightingSystem? = null
+  
+  // Lighting passthrough handler for room dimming
+  private var lightingPassthroughHandler: LightingPassthroughHandler? = null
+  
+  // Wall lighting system for MRUK surface reflections
+  private var wallLightingSystem: WallLightingSystem? = null
+  
+  // Bias lighting entity for edge-based ambient glow effect
+  private var biasLightingEntity: BiasLightingEntity? = null
+  
+  // Cached immersive settings for panel creation decisions
+  private var immersiveSettings: ImmersiveSettings = ImmersiveSettings()
   
   // Permission request codes for MRUK scene access
   companion object {
@@ -217,6 +240,21 @@ class ImmersiveActivity : AppSystemActivity() {
     componentManager.registerComponent<Anchorable>(Anchorable.Companion)
     componentManager.registerComponent<AnchorOnLoad>(AnchorOnLoad.Companion)
     componentManager.registerComponent<WallSnap>(WallSnap.Companion)
+    
+    // Register hero lighting components for emissive lighting effects
+    componentManager.registerComponent<HeroLighting>(HeroLighting.Companion)
+    componentManager.registerComponent<ReceiveLighting>(ReceiveLighting.Companion)
+    
+    // Register hero lighting system for lighting emission
+    heroLightingSystem = HeroLightingSystem(autoDetectTexture = true, isProcessingShaders = true)
+    systemManager.registerSystem(heroLightingSystem!!)
+    Log.i(TAG, "HeroLightingSystem registered")
+    
+    // Register wall lighting system for MRUK surface reflections
+    // (Registered at startup like PremiumMediaSample - starts hidden, only visible when reflections enabled)
+    wallLightingSystem = WallLightingSystem(_isVisible = false)
+    systemManager.registerSystem(wallLightingSystem!!)
+    Log.i(TAG, "WallLightingSystem registered")
     
     // Register pointer info system (required for hover detection)
     val pointerInfoSystem = PointerInfoSystem()
@@ -324,6 +362,10 @@ class ImmersiveActivity : AppSystemActivity() {
         environmentIntensity = 0.3f,
     )
     scene.updateIBLEnvironment("environment.env")
+    
+    // Initialize LightingPassthroughHandler for room dimming effects
+    lightingPassthroughHandler = LightingPassthroughHandler(scene)
+    Log.i(TAG, "LightingPassthroughHandler initialized")
 
     // NOTE: Do NOT use scene.setViewOrigin() with rotation - it affects the entire
     // scene coordinate system including MRUK meshes, causing them to appear inverted.
@@ -454,11 +496,11 @@ class ImmersiveActivity : AppSystemActivity() {
           }
           composePanel { setContent {
             // Collect state flows for button selection states
-            val spatializeEnabled = isSpatializeEnabled.collectAsState()
+            val immersiveModeEnabled = isImmersiveModeEnabled.collectAsState()
             val snapEnabled = isSnapEnabled.collectAsState()
             
             com.example.moonlight_spatialsdk.panels.buttonShelf.ButtonShelfCompose(
-                isSpatializeEnabled = spatializeEnabled.value,
+                isImmersiveModeEnabled = immersiveModeEnabled.value,
                 isSnapEnabled = snapEnabled.value,
                 onSettingsClick = {
                   Log.i(TAG, "ButtonShelf Settings clicked - opening 2D panel overlay for adjustments")
@@ -468,9 +510,9 @@ class ImmersiveActivity : AppSystemActivity() {
                   Log.i(TAG, "ButtonShelf Reset Scale clicked - resetting video panel scale to 1.0")
                   updateVideoPanelScale(1.0f)
                 },
-                onSpatializeClick = {
-                  Log.i(TAG, "ButtonShelf Spatialize clicked - toggling spatial audio and room mesh")
-                  toggleSpatialize()
+                onImmersiveModeClick = {
+                  Log.i(TAG, "ButtonShelf Immersive Mode clicked - toggling immersive features")
+                  toggleImmersiveMode()
                 },
                 onSnapToWallClick = {
                   Log.i(TAG, "ButtonShelf Snap clicked - toggling snap-to-wall behavior")
@@ -540,30 +582,29 @@ class ImmersiveActivity : AppSystemActivity() {
         permissions[0] == PERMISSION_USE_SCENE) {
       val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
       if (granted) {
-        Log.i(TAG, "USE_SCENE permission granted, enabling spatialize features")
-        enableSpatializeFeatures()
+        Log.i(TAG, "USE_SCENE permission granted, enabling immersive features")
+        enableImmersiveFeatures()
       } else {
-        Log.w(TAG, "USE_SCENE permission denied, spatialize features unavailable")
-        _isSpatializeEnabled.value = false
+        Log.w(TAG, "USE_SCENE permission denied, immersive features unavailable")
+        _isImmersiveModeEnabled.value = false
       }
     }
   }
   
   /**
-   * Toggle spatialized audio and room mesh visualization.
+   * Toggle immersive mode features.
    * 
    * When enabled:
    * - Requests USE_SCENE permission if not granted
    * - Loads MRUK scene from device
-   * - Creates room mesh visualization for walls/floor/ceiling
-   * - Enables spatialized audio for the video panel
+   * - Enables features configured in ImmersiveSettings (spatial audio, room dimming, 
+   *   lighting emission, reflections)
    * 
    * When disabled:
-   * - Hides room mesh visualization
-   * - Disables spatialized audio
+   * - Disables all immersive effects immediately
    */
-  fun toggleSpatialize() {
-    val newEnabled = !_isSpatializeEnabled.value
+  fun toggleImmersiveMode() {
+    val newEnabled = !_isImmersiveModeEnabled.value
     
     if (newEnabled) {
       // Check and request USE_SCENE permission if needed
@@ -572,29 +613,56 @@ class ImmersiveActivity : AppSystemActivity() {
         requestPermissions(arrayOf(PERMISSION_USE_SCENE), REQUEST_CODE_PERMISSION_USE_SCENE)
         return // Will continue in onRequestPermissionsResult
       }
-      enableSpatializeFeatures()
+      enableImmersiveFeatures()
     } else {
-      disableSpatializeFeatures()
+      disableImmersiveFeatures()
     }
   }
   
   /**
-   * Enables spatialize features after permission is granted.
+   * Enables immersive features after permission is granted.
+   * 
+   * Reads ImmersiveSettings to determine which features to enable:
+   * - Spatial Audio: Audio from panel position
+   * - Room Dimming: Dim passthrough when streaming
+   * - Lighting Emission: Panel emits ambient light
+   * - Reflections: Reflect video on room surfaces
    * 
    * Following the Valinor pattern: load scene data first, then create
    * AnchorProceduralMesh AFTER scene loads successfully.
    */
-  private fun enableSpatializeFeatures() {
-    _isSpatializeEnabled.value = true
+  private fun enableImmersiveFeatures() {
+    _isImmersiveModeEnabled.value = true
     
-    // Initialize RoomMeshManager if needed
+    // Load latest immersive settings
+    immersiveSettings = ImmersiveSettings.load(this)
+    Log.i(TAG, "Enabling immersive features with settings: spatialAudio=${immersiveSettings.spatialAudioEnabled}, " +
+        "roomDimming=${immersiveSettings.roomDimmingEnabled}, " +
+        "lightingEmission=${immersiveSettings.lightingEmissionEnabled}, " +
+        "reflections=${immersiveSettings.reflectionsEnabled}")
+    
+    // Initialize RoomMeshManager if needed (for MRUK features)
     if (roomMeshManager == null) {
       roomMeshManager = RoomMeshManager(mrukFeature)
     }
     
-    // Initialize SpatialAudioManager if needed
-    if (spatialAudioManager == null) {
+    // Initialize SpatialAudioManager if spatial audio is enabled
+    if (immersiveSettings.spatialAudioEnabled && spatialAudioManager == null) {
       spatialAudioManager = SpatialAudioManager(spatialAudioFeature)
+    }
+    
+    // Enable room dimming if configured
+    if (immersiveSettings.roomDimmingEnabled) {
+      lightingPassthroughHandler?.enableRoomDimming()
+      Log.i(TAG, "Room dimming enabled")
+    }
+    
+    // Enable lighting emission if configured
+    if (immersiveSettings.lightingEmissionEnabled) {
+      heroLightingSystem?.lightingAlpha = 0.8f
+      biasLightingEntity?.setVisible(true)
+      biasLightingEntity?.setIntensity(0.8f)
+      Log.i(TAG, "Lighting emission enabled")
     }
     
     // Load MRUK scene - AnchorProceduralMesh is created AFTER scene loads (Valinor pattern)
@@ -602,14 +670,23 @@ class ImmersiveActivity : AppSystemActivity() {
       onSceneLoaded = {
         Log.i(TAG, "MRUK scene loaded - AnchorProceduralMesh created")
         
-        // Enable spatial audio for video panel if connected
-        enableSpatialAudioIfReady()
+        // Enable spatial audio for video panel if configured
+        if (immersiveSettings.spatialAudioEnabled) {
+          enableSpatialAudioIfReady()
+        }
         
-        Log.i(TAG, "Spatialize features enabled")
+        // Enable wall lighting only for reflections (MRUK surface projections)
+        // BiasLightingEntity handles lighting emission separately
+        if (immersiveSettings.reflectionsEnabled) {
+          wallLightingSystem?.transitionInstant(true)
+          Log.i(TAG, "Wall reflections enabled")
+        }
+        
+        Log.i(TAG, "Immersive features enabled")
       },
       onSceneLoadFailed = { result ->
         Log.e(TAG, "Failed to load MRUK scene: $result")
-        _isSpatializeEnabled.value = false
+        _isImmersiveModeEnabled.value = false
       }
     )
   }
@@ -634,13 +711,28 @@ class ImmersiveActivity : AppSystemActivity() {
   }
   
   /**
-   * Disables spatialize features.
+   * Disables all immersive features immediately.
    */
-  private fun disableSpatializeFeatures() {
-    _isSpatializeEnabled.value = false
+  private fun disableImmersiveFeatures() {
+    _isImmersiveModeEnabled.value = false
+    
+    // Disable room mesh
     roomMeshManager?.hideRoomMesh()
+    
+    // Disable spatial audio
     spatialAudioManager?.disableSpatialAudio()
-    Log.i(TAG, "Spatialize features disabled")
+    
+    // Disable room dimming
+    lightingPassthroughHandler?.disableRoomDimming()
+    
+    // Disable lighting emission
+    heroLightingSystem?.lightingAlpha = 0f
+    biasLightingEntity?.setVisible(false)
+    
+    // Disable wall reflections
+    wallLightingSystem?.transitionInstant(false)
+    
+    Log.i(TAG, "Immersive features disabled")
   }
   
   /**
@@ -977,47 +1069,95 @@ class ImmersiveActivity : AppSystemActivity() {
   private fun createVideoPanelEntity() {
     Log.i(TAG, "Creating video panel entity with Panel(R.id.ui_example)")
     
+    // Load immersive settings to determine panel type
+    immersiveSettings = ImmersiveSettings.load(this)
+    val useLightingEmission = immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled
+    
     // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
     // This matches PremiumMediaSample pattern and ensures panelManager is initialized
     SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
-      immersiveActivity.registerPanel(
-          VideoSurfacePanelRegistration(
-              R.id.ui_example,
-              surfaceConsumer = { panelEntity, surface ->
-                Log.i(TAG, "Surface attached for panel entity=$panelEntity")
-                
-                SurfaceUtil.paintBlack(surface)
-                
-                // Configure decoder with preferences when panel is created
-                moonlightPanelRenderer.attachSurface(surface)
-                moonlightPanelRenderer.preConfigureDecoder()
-                
-                isSurfaceReady = true
-                
-                // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
-                val params = pendingConnectionParams
-                if (params != null) {
-                  val (host, port, appId) = params
-                  Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
-                  connectToHost(host, port, appId)
-                } else {
-                  Log.d(TAG, "Panel surface ready but no pending connection params")
-                }
-              },
-              settingsCreator = {
-                MediaPanelSettings(
-                    shape = computePanelShape(),
-                    display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
-                    rendering = MediaPanelRenderOptions(
-                        isDRM = false,
-                        stereoMode = StereoMode.None,
-                        zIndex = 0 // Rectilinear panels use zIndex 0 (Equirect180 uses -1)
-                    ),
-                    style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
-                )
-              },
-          )
-      )
+      if (useLightingEmission) {
+        // Use ReadableVideoSurfacePanelRegistration for lighting emission (allows texture sampling)
+        Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for lighting emission")
+        immersiveActivity.registerPanel(
+            ReadableVideoSurfacePanelRegistration(
+                R.id.ui_example,
+                surfaceConsumer = { panelEntity, surface ->
+                  Log.i(TAG, "Readable surface attached for panel entity=$panelEntity")
+                  
+                  SurfaceUtil.paintBlack(surface)
+                  
+                  // Configure decoder with preferences when panel is created
+                  moonlightPanelRenderer.attachSurface(surface)
+                  moonlightPanelRenderer.preConfigureDecoder()
+                  
+                  isSurfaceReady = true
+                  
+                  // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
+                  val params = pendingConnectionParams
+                  if (params != null) {
+                    val (host, port, appId) = params
+                    Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
+                    connectToHost(host, port, appId)
+                  } else {
+                    Log.d(TAG, "Panel surface ready but no pending connection params")
+                  }
+                },
+                settingsCreator = {
+                  ReadableMediaPanelSettings(
+                      shape = computePanelShape(),
+                      display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
+                      rendering = ReadableMediaPanelRenderOptions(
+                          mips = 4, // Mip levels for shader sampling (used for blur in lighting)
+                          stereoMode = StereoMode.None,
+                      ),
+                      style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
+                  )
+                },
+            )
+        )
+      } else {
+        // Use standard VideoSurfacePanelRegistration for better performance
+        Log.i(TAG, "Using VideoSurfacePanelRegistration (standard mode)")
+        immersiveActivity.registerPanel(
+            VideoSurfacePanelRegistration(
+                R.id.ui_example,
+                surfaceConsumer = { panelEntity, surface ->
+                  Log.i(TAG, "Surface attached for panel entity=$panelEntity")
+                  
+                  SurfaceUtil.paintBlack(surface)
+                  
+                  // Configure decoder with preferences when panel is created
+                  moonlightPanelRenderer.attachSurface(surface)
+                  moonlightPanelRenderer.preConfigureDecoder()
+                  
+                  isSurfaceReady = true
+                  
+                  // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
+                  val params = pendingConnectionParams
+                  if (params != null) {
+                    val (host, port, appId) = params
+                    Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
+                    connectToHost(host, port, appId)
+                  } else {
+                    Log.d(TAG, "Panel surface ready but no pending connection params")
+                  }
+                },
+                settingsCreator = {
+                  MediaPanelSettings(
+                      shape = computePanelShape(),
+                      display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
+                      rendering = MediaPanelRenderOptions(
+                          isDRM = false,
+                          stereoMode = StereoMode.None,
+                          zIndex = 0 // Rectilinear panels use zIndex 0 (Equirect180 uses -1)
+                      ),
+                      style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
+                  )
+                },
+            )
+        )
+      }
     }
     
     // Create entity after panel registration (panel must be registered before entity creation)
@@ -1036,19 +1176,26 @@ class ImmersiveActivity : AppSystemActivity() {
       TransformParent(Entity.nullEntity())
     }
     
-    videoPanelEntity = Entity.create(
-        listOf(
-            Panel(R.id.ui_example),
-            Transform(Pose(Vector3(0f, 0f, 0f))),
-            PanelDimensions(panelSize),
-            Scale(Vector3(1f)), // Initial scale of 1.0 - can be adjusted after connection
-            Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
-            Visible(false), // Hidden initially, shown when stream is ready
-            Scalable(), // Enable corner scaling
-            ScaledParent(), // Mark as scalable parent
-            parentComponent
-        )
+    // Build component list - add HeroLighting if using readable panel for lighting emission
+    val baseComponents = mutableListOf(
+        Panel(R.id.ui_example),
+        Transform(Pose(Vector3(0f, 0f, 0f))),
+        PanelDimensions(panelSize),
+        Scale(Vector3(1f)), // Initial scale of 1.0 - can be adjusted after connection
+        Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
+        Visible(false), // Hidden initially, shown when stream is ready
+        Scalable(), // Enable corner scaling
+        ScaledParent(), // Mark as scalable parent
+        parentComponent
     )
+    
+    // Add HeroLighting component if lighting emission is enabled (useLightingEmission already defined above)
+    if (useLightingEmission) {
+        baseComponents.add(HeroLighting(isEnabled = true))
+        Log.i(TAG, "HeroLighting component added to video panel")
+    }
+    
+    videoPanelEntity = Entity.create(baseComponents)
     
     // Register video panel with scaling system
     val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
@@ -1083,6 +1230,20 @@ class ImmersiveActivity : AppSystemActivity() {
         buttonShelfVisibilitySystem?.startTracking()
         Log.i(TAG, "ButtonShelfVisibilitySystem registered and started tracking")
       }
+    }
+    
+    // Create BiasLightingEntity if lighting emission is enabled
+    if (useLightingEmission && biasLightingEntity == null) {
+      biasLightingEntity = BiasLightingEntity(heroLightingSystem)
+      biasLightingEntity?.attachToPanel(videoPanelEntity!!)
+      
+      // Register scale listener to update bias lighting when panel scales
+      val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+      scaleChildrenSystem?.addScaleListener(videoPanelEntity!!) {
+        biasLightingEntity?.updateFromParentScale()
+      }
+      
+      Log.i(TAG, "BiasLightingEntity created and attached to video panel")
     }
   }
 

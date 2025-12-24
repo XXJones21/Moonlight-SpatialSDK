@@ -1,3 +1,5 @@
+// This is currently not in use due to the keyboard bug with immersive activity. The pancakeActivity is what is used instead.
+
 package com.example.moonlight_spatialsdk
 
 import android.preference.PreferenceManager
@@ -42,6 +44,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.flow.StateFlow
+import com.example.moonlight_spatialsdk.data.ImmersiveSettings
 
 @Composable
 fun ConnectionPanelImmersive(
@@ -68,6 +71,8 @@ fun ConnectionPanelImmersive(
     var showPairingDialog by remember { mutableStateOf(false) }
     var showPinDialog by remember { mutableStateOf(false) }
     var showOptionsDialog by remember { mutableStateOf(false) }
+    var showImmersiveOptionsDialog by remember { mutableStateOf(false) }
+    var immersiveSettings by remember { mutableStateOf(ImmersiveSettings.load(context)) }
     var dialogHost by remember { mutableStateOf("") }
     var dialogPort by remember { mutableStateOf("47989") }
     var serverName by remember { mutableStateOf<String?>(null) }
@@ -654,6 +659,7 @@ fun ConnectionPanelImmersive(
 
         // Options Dialog with list of choices
         if (showOptionsDialog) {
+            val optionsScrollState = rememberScrollState()
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -665,8 +671,10 @@ fun ConnectionPanelImmersive(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth(0.7f)
+                        .heightIn(max = 500.dp)
                         .clip(SpatialTheme.shapes.large)
                         .background(brush = LocalColorScheme.current.panel)
+                        .verticalScroll(optionsScrollState)
                         .padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -779,12 +787,197 @@ fun ConnectionPanelImmersive(
                         }
                     }
 
+                    // Immersive Options
+                    SecondaryCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            showOptionsDialog = false
+                            showImmersiveOptionsDialog = true
+                        }
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp)
+                        ) {
+                            Text(
+                                text = "Immersive Options",
+                                style = LocalTypography.current.body1Strong.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground
+                                )
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = "Enable immersive features",
+                                style = LocalTypography.current.body2.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                                )
+                            )
+                        }
+                    }
+
                     Spacer(Modifier.height(8.dp))
                     
                     SecondaryButton(
                         label = "Cancel",
                         expanded = true,
                         onClick = { showOptionsDialog = false }
+                    )
+                }
+            }
+        }
+
+        // Immersive Options Dialog
+        if (showImmersiveOptionsDialog) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.3f)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .clip(SpatialTheme.shapes.large)
+                        .background(brush = LocalColorScheme.current.panel)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = "Immersive Options",
+                        style = LocalTypography.current.headline2Strong.copy(
+                            color = SpatialTheme.colorScheme.primaryAlphaBackground
+                        )
+                    )
+                    Text(
+                        text = "Configure immersive features for streaming",
+                        style = LocalTypography.current.body1.copy(
+                            color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                        )
+                    )
+                    Spacer(Modifier.height(8.dp))
+
+                    // Spatial Audio toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Spatial Audio",
+                                style = LocalTypography.current.body1.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground
+                                )
+                            )
+                            Text(
+                                text = "Audio from panel position",
+                                style = LocalTypography.current.body2.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                                )
+                            )
+                        }
+                        SpatialSwitch(
+                            checked = immersiveSettings.spatialAudioEnabled,
+                            onCheckedChange = {
+                                immersiveSettings = immersiveSettings.copy(spatialAudioEnabled = it)
+                                ImmersiveSettings.save(context, immersiveSettings)
+                            }
+                        )
+                    }
+
+                    // Room Dimming toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Room Dimming",
+                                style = LocalTypography.current.body1.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground
+                                )
+                            )
+                            Text(
+                                text = "Dim passthrough when streaming",
+                                style = LocalTypography.current.body2.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                                )
+                            )
+                        }
+                        SpatialSwitch(
+                            checked = immersiveSettings.roomDimmingEnabled,
+                            onCheckedChange = {
+                                immersiveSettings = immersiveSettings.copy(roomDimmingEnabled = it)
+                                ImmersiveSettings.save(context, immersiveSettings)
+                            }
+                        )
+                    }
+
+                    // Lighting Emission toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Lighting Emission",
+                                style = LocalTypography.current.body1.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground
+                                )
+                            )
+                            Text(
+                                text = "Panel emits ambient light",
+                                style = LocalTypography.current.body2.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                                )
+                            )
+                        }
+                        SpatialSwitch(
+                            checked = immersiveSettings.lightingEmissionEnabled,
+                            onCheckedChange = {
+                                immersiveSettings = immersiveSettings.copy(lightingEmissionEnabled = it)
+                                ImmersiveSettings.save(context, immersiveSettings)
+                            }
+                        )
+                    }
+
+                    // Reflections toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Reflections",
+                                style = LocalTypography.current.body1.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground
+                                )
+                            )
+                            Text(
+                                text = "Reflect on room surfaces",
+                                style = LocalTypography.current.body2.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                                )
+                            )
+                        }
+                        SpatialSwitch(
+                            checked = immersiveSettings.reflectionsEnabled,
+                            onCheckedChange = {
+                                immersiveSettings = immersiveSettings.copy(reflectionsEnabled = it)
+                                ImmersiveSettings.save(context, immersiveSettings)
+                            }
+                        )
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+                    SecondaryButton(
+                        label = "Done",
+                        expanded = true,
+                        onClick = { showImmersiveOptionsDialog = false }
                     )
                 }
             }
