@@ -50,6 +50,7 @@ class HeroLightingSystem(
 
     private val registeredMaterials: MutableList<SceneMaterial> = mutableListOf()
     private val registeredMaterialsCustom: MutableList<SceneMaterial> = mutableListOf()
+    private val registeredMaterialsTextureOnly: MutableList<SceneMaterial> = mutableListOf()
     private val unprocessedEntities: MutableList<Entity> = mutableListOf()
     private val materialsToGrabLater = mutableListOf<Entity>()
 
@@ -93,7 +94,10 @@ class HeroLightingSystem(
             for (mat in registeredMaterialsCustom) {
                 mat.setTexture("emissive", texture!!)
             }
-            Log.d(TAG, "Texture set on ${registeredMaterials.size + registeredMaterialsCustom.size} materials")
+            for (mat in registeredMaterialsTextureOnly) {
+                mat.setTexture("emissive", texture!!)
+            }
+            Log.d(TAG, "Texture set on ${registeredMaterials.size + registeredMaterialsCustom.size + registeredMaterialsTextureOnly.size} materials")
         }
     }
 
@@ -179,19 +183,26 @@ class HeroLightingSystem(
      * 
      * @param material The material to register
      * @param custom If true, material uses custom shader with matParams attribute
+     * @param textureOnly If true, only update texture (don't overwrite emissiveFactor/albedoFactor)
      */
-    fun registerMaterial(material: SceneMaterial, custom: Boolean = false) {
+    fun registerMaterial(material: SceneMaterial, custom: Boolean = false, textureOnly: Boolean = false) {
         if (texture != null) {
             material.setTexture("emissive", texture!!)
         }
-        material.setStereoMode(stereoMode)
-        updateMaterial(material, custom)
-        if (custom) {
-            registeredMaterialsCustom.add(material)
+        if (textureOnly) {
+            // Only register for texture updates, not position updates
+            registeredMaterialsTextureOnly.add(material)
+            Log.d(TAG, "Registered material (texture-only)")
         } else {
-            registeredMaterials.add(material)
+            material.setStereoMode(stereoMode)
+            updateMaterial(material, custom)
+            if (custom) {
+                registeredMaterialsCustom.add(material)
+            } else {
+                registeredMaterials.add(material)
+            }
+            Log.d(TAG, "Registered material (custom=$custom)")
         }
-        Log.d(TAG, "Registered material (custom=$custom)")
     }
 
     /**
@@ -203,6 +214,7 @@ class HeroLightingSystem(
         } else {
             registeredMaterials.remove(material)
         }
+        registeredMaterialsTextureOnly.remove(material)
     }
 
     /**
@@ -293,7 +305,9 @@ class HeroLightingSystem(
      * Checks if a material is registered with this system.
      */
     fun hasRegisteredMaterial(material: SceneMaterial): Boolean {
-        return registeredMaterials.contains(material) || registeredMaterialsCustom.contains(material)
+        return registeredMaterials.contains(material) || 
+               registeredMaterialsCustom.contains(material) ||
+               registeredMaterialsTextureOnly.contains(material)
     }
 }
 

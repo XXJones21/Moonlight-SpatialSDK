@@ -1053,6 +1053,29 @@ class ImmersiveActivity : AppSystemActivity() {
     }
     videoPanelEntity = null
     
+    // Unregister panel registration to allow recreation
+    // This is critical for proper cleanup after crashes or improper disconnects
+    SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
+      try {
+        immersiveActivity.unregisterPanel(R.id.ui_example)
+        Log.i(TAG, "Video panel registration unregistered for cleanup")
+      } catch (e: Exception) {
+        Log.w(TAG, "Failed to unregister panel (may already be unregistered)", e)
+      }
+    }
+    
+    // Clean up decoder renderer - detach surface and cleanup
+    try {
+      val decoder = moonlightPanelRenderer.getDecoder()
+      decoder.stop()
+      decoder.cleanup()
+      // Clear the render target (set to null) - this detaches the surface
+      (decoder as? com.limelight.binding.video.NativeDecoderRenderer)?.setRenderTarget(null)
+      Log.i(TAG, "Decoder renderer cleaned up")
+    } catch (e: Exception) {
+      Log.w(TAG, "Error cleaning up decoder renderer", e)
+    }
+    
     connectionManager.stopStream()
     _connectionStatus.value = "Disconnected"
     _isConnected.value = false

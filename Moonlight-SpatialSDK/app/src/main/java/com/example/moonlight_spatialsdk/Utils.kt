@@ -6,6 +6,8 @@ import com.meta.spatial.core.Quaternion
 import com.meta.spatial.core.Vector3
 import com.meta.spatial.runtime.SceneMaterial
 import com.meta.spatial.runtime.TriangleMesh
+import com.meta.spatial.toolkit.AppSystemActivity
+import com.meta.spatial.toolkit.PanelCreationSystem
 import com.meta.spatial.toolkit.PanelDimensions
 import com.meta.spatial.toolkit.Scale
 import kotlin.math.PI
@@ -181,4 +183,13 @@ fun quadTriangleMesh(
     triangleMesh.updatePrimitives(0, triangles)
 
     return triangleMesh
+}
+
+/**
+ * Unregister panel removes functions from maps, to stop these functions from leaking objects.
+ * This is critical for proper cleanup when disconnecting or when the app crashes.
+ */
+fun AppSystemActivity.unregisterPanel(panelId: Int) {
+    panelRegistrations.remove(panelId)
+    systemManager.findSystem<PanelCreationSystem>()?.panelCreator?.remove(panelId)
 }
