@@ -1215,6 +1215,27 @@ fun ConnectionPanel2D(
                         )
                     }
 
+                    // Stereoscopic 3D Depth Toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Stereoscopic 3D Depth",
+                            style = LocalTypography.current.body1.copy(
+                                color = SpatialTheme.colorScheme.primaryAlphaBackground
+                            )
+                        )
+                        SpatialSwitch(
+                            checked = immersiveSettings.stereoscopicDepthEnabled,
+                            onCheckedChange = {
+                                immersiveSettings = immersiveSettings.copy(stereoscopicDepthEnabled = it)
+                                ImmersiveSettings.save(context, immersiveSettings)
+                            }
+                        )
+                    }
+
                     // Hint about lighting features requiring immersive mode
                     if (immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled) {
                         Spacer(Modifier.height(8.dp))

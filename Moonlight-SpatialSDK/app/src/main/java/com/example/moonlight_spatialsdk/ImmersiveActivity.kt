@@ -17,7 +17,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import com.example.moonlight_spatialsdk.BuildConfig
 import com.limelight.binding.audio.AndroidAudioRenderer
 import com.limelight.binding.video.CrashListener
@@ -161,6 +166,15 @@ class ImmersiveActivity : AppSystemActivity() {
   
   // Bias lighting entity for edge-based ambient glow effect
   private var biasLightingEntity: BiasLightingEntity? = null
+  
+  // Stereo video system for stereoscopic 3D depth control
+  private var stereoVideoSystem: com.example.moonlight_spatialsdk.systems.stereo.StereoVideoSystem? = null
+  
+  // Stereo depth slider entity for runtime depth control
+  private var stereoDepthSliderEntity: com.example.moonlight_spatialsdk.entities.StereoDepthSliderEntity? = null
+  
+  // Stereo depth slider visibility system
+  private var stereoDepthSliderVisibilitySystem: com.example.moonlight_spatialsdk.systems.stereoDepthSlider.StereoDepthSliderVisibilitySystem? = null
   
   // Cached immersive settings for panel creation decisions
   private var immersiveSettings: ImmersiveSettings = ImmersiveSettings()
@@ -523,6 +537,42 @@ class ImmersiveActivity : AppSystemActivity() {
                   disconnect()
                   launchPanelModeInHome()
                 }
+            )
+          }
+          }
+        },
+        PanelRegistration(R.id.stereo_depth_slider) {
+          config {
+            fractionOfScreen = 0.3f
+            height = 0.12f
+            width = 0.9f
+            layoutDpi = 240
+            layerConfig = LayerConfig()
+            enableTransparent = true
+            includeGlass = false
+            themeResourceId = R.style.PanelAppThemeTransparent
+          }
+          composePanel { setContent {
+            // Use a local state for the slider value, initialized from stereo system if available
+            val initialValue = stereoVideoSystem?.depthFactor ?: 0.5f
+            var currentDepthFactor by remember { mutableStateOf(initialValue) }
+            
+            // Update local state when stereo system value changes (if system exists)
+            stereoVideoSystem?.let { system ->
+              // Sync with system's current value
+              val systemValue = system.depthFactor
+              if (systemValue != currentDepthFactor) {
+                currentDepthFactor = systemValue
+              }
+            }
+            
+            com.example.moonlight_spatialsdk.panels.stereoDepthSlider.StereoDepthSliderCompose(
+              depthFactor = currentDepthFactor,
+              onDepthChange = { newValue ->
+                stereoVideoSystem?.updateDepthFactor(newValue)
+                currentDepthFactor = newValue
+                newValue
+              }
             )
           }
           }
@@ -1044,6 +1094,19 @@ class ImmersiveActivity : AppSystemActivity() {
       }
     }
     
+    // Clean up stereo depth slider visibility system
+    stereoDepthSliderVisibilitySystem?.stopTracking()
+    stereoDepthSliderVisibilitySystem = null
+    
+    // Clean up stereo depth slider entity
+    stereoDepthSliderEntity?.detachFromEntity()
+    stereoDepthSliderEntity?.destroy()
+    stereoDepthSliderEntity = null
+    
+    // Clean up stereo video system
+    stereoVideoSystem?.cleanup()
+    stereoVideoSystem = null
+    
     // Destroy video panel entity completely on disconnect
     // The surface becomes invalid after stream stops, so we need a fresh panel for reconnection
     videoPanelEntity?.let { entity ->
@@ -1095,13 +1158,15 @@ class ImmersiveActivity : AppSystemActivity() {
     // Load immersive settings to determine panel type
     immersiveSettings = ImmersiveSettings.load(this)
     val useLightingEmission = immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled
+    val useStereoscopicDepth = immersiveSettings.stereoscopicDepthEnabled
     
     // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
     // This matches PremiumMediaSample pattern and ensures panelManager is initialized
     SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
-      if (useLightingEmission) {
-        // Use ReadableVideoSurfacePanelRegistration for lighting emission (allows texture sampling)
-        Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for lighting emission")
+      // Use ReadableVideoSurfacePanelRegistration if lighting emission OR stereoscopic depth is enabled
+      if (useLightingEmission || useStereoscopicDepth) {
+        // Use ReadableVideoSurfacePanelRegistration for lighting emission or stereoscopic depth (allows texture sampling)
+        Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for lighting emission or stereoscopic depth")
         immersiveActivity.registerPanel(
             ReadableVideoSurfacePanelRegistration(
                 R.id.ui_example,
@@ -1129,10 +1194,13 @@ class ImmersiveActivity : AppSystemActivity() {
                 settingsCreator = {
                   ReadableMediaPanelSettings(
                       shape = computePanelShape(),
-                      display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
+                      display = PixelDisplayOptions(
+                          width = if (useStereoscopicDepth) prefs.width * 2 else prefs.width, // Double width for side-by-side stereo
+                          height = prefs.height
+                      ),
                       rendering = ReadableMediaPanelRenderOptions(
-                          mips = 4, // Mip levels for shader sampling (used for blur in lighting)
-                          stereoMode = StereoMode.None,
+                          mips = if (useStereoscopicDepth) 1 else 4, // Disable mipmaps for low latency in stereo mode
+                          stereoMode = if (useStereoscopicDepth) StereoMode.LeftRight else StereoMode.None,
                       ),
                       style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
                   )
@@ -1184,13 +1252,9 @@ class ImmersiveActivity : AppSystemActivity() {
     }
     
     // Create entity after panel registration (panel must be registered before entity creation)
-    val aspect =
-        if (prefs.height != 0) {
-          prefs.width.toFloat() / prefs.height.toFloat()
-        } else {
-          16f / 9f
-        }
-    val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+    // Use computePanelShape() to get correct aspect ratio (maintains original resolution aspect, not doubled)
+    val panelShape = computePanelShape()
+    val panelSize = Vector2(panelShape.width, panelShape.height)
     
     val managerEntity = panelManager?.panelManagerEntity
     val parentComponent = if (managerEntity != null) {
@@ -1267,6 +1331,52 @@ class ImmersiveActivity : AppSystemActivity() {
       }
       
       Log.i(TAG, "BiasLightingEntity created and attached to video panel")
+    }
+    
+    // Initialize stereo video system if stereoscopic depth is enabled
+    if (useStereoscopicDepth) {
+      if (stereoVideoSystem == null) {
+        stereoVideoSystem = com.example.moonlight_spatialsdk.systems.stereo.StereoVideoSystem(stereoFormat = 0.0f) // 0.0 = side-by-side
+        systemManager.registerSystem(stereoVideoSystem!!)
+        Log.i(TAG, "StereoVideoSystem registered")
+      }
+      
+      // Register video texture with stereo system after panel is ready
+      videoPanelEntity?.let { entity ->
+        // Delay texture registration slightly to ensure panel is fully initialized
+        coroutineScope.launch {
+          delay(100) // Small delay to ensure SceneObject is ready
+          stereoVideoSystem?.registerVideoTexture(entity)
+          Log.i(TAG, "Video texture registered with StereoVideoSystem")
+        }
+      }
+      
+      // Create stereo depth slider entity if not already created
+      if (stereoDepthSliderEntity == null) {
+        stereoDepthSliderEntity = com.example.moonlight_spatialsdk.entities.StereoDepthSliderEntity()
+        Log.i(TAG, "StereoDepthSliderEntity created")
+      }
+      
+      // Attach slider to video panel
+      videoPanelEntity?.let { entity ->
+        stereoDepthSliderEntity?.attachToEntity(entity)
+        Log.i(TAG, "StereoDepthSliderEntity attached to video panel")
+        
+        // Force update children to ensure slider is positioned correctly
+        val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+        scaleChildrenSystem?.forceUpdateChildren(entity)
+        
+        // Create and register visibility system if not already done
+        if (stereoDepthSliderVisibilitySystem == null) {
+          stereoDepthSliderVisibilitySystem = com.example.moonlight_spatialsdk.systems.stereoDepthSlider.StereoDepthSliderVisibilitySystem(
+              slider = stereoDepthSliderEntity!!,
+              videoPanelEntity = entity
+          )
+          systemManager.registerSystem(stereoDepthSliderVisibilitySystem!!)
+          stereoDepthSliderVisibilitySystem?.startTracking()
+          Log.i(TAG, "StereoDepthSliderVisibilitySystem registered and started tracking")
+        }
+      }
     }
   }
 
