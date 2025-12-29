@@ -33,7 +33,8 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 7. [Snap to Wall](#snap-to-wall)
 8. [Pairing System](#pairing-system)
 9. [Communication Flow](#communication-flow)
-10. [Current State & Future Enhancements](#current-state--future-enhancements)
+10. [Entity Creation Redundancy](#entity-creation-redundancy)
+11. [Current State & Future Enhancements](#current-state--future-enhancements)
 
 ---
 
@@ -247,13 +248,18 @@ override fun registerPanels(): List<PanelRegistration> {
 
 **Purpose**: Create video panel entity and register panel dynamically using `executeOnVrActivity`.
 
+**⚠️ Known Issue**: Entity Creation Redundancy
+
+The current implementation creates entities twice - once by the SDK during panel registration, and again manually after registration. This causes entity duplication and dimension desync issues, particularly in stereoscopic mode. See [Entity Creation Redundancy](#entity-creation-redundancy) section for details.
+
 **Key Steps**:
 
 1. Register video panel using `SpatialActivityManager.executeOnVrActivity` (ensures activity is ready)
-2. Configure `VideoSurfacePanelRegistration` with surface consumer and settings
-3. Create entity with `Panel(R.id.ui_example)` component
-4. Parent entity to PanelManager
-5. Set initial visibility to `false` (shown when stream ready)
+2. Configure panel registration (`PanelCreator`, `ReadableVideoSurfacePanelRegistration`, or `VideoSurfacePanelRegistration`) with surface consumer and settings
+3. **SDK creates entity automatically** during registration (provided in callbacks)
+4. **Manual entity creation** (lines 1338-1369) creates a second entity, overwriting/ignoring the SDK-provided one
+5. Parent entity to PanelManager
+6. Set initial visibility to `false` (shown when stream ready)
 
 **Video Panel Registration**:
 
@@ -326,12 +332,30 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
 
 **Panel Configuration**:
 
-- **Shape**: Computed from `prefs.width/prefs.height` to match stream aspect ratio
-- **Display**: `PixelDisplayOptions(width = prefs.width, height = prefs.height)` - supports 4K, 1440p, 1080p
-- **Rendering**: Monoscopic (`StereoMode.None`), `zIndex = 0` for rectilinear panels
+- **Shape**: Computed from `prefs.width/prefs.height` to match stream aspect ratio (or doubled width for stereoscopic mode)
+- **Display**: `PixelDisplayOptions(width = prefs.width, height = prefs.height)` - supports 4K, 1440p, 1080p (or doubled width for stereoscopic)
+- **Rendering**: Monoscopic (`StereoMode.None`), `zIndex = 0` for rectilinear panels (or `StereoMode.LeftRight`/`UpDown` for stereoscopic)
 - **Scale**: Initial scale of 1.0, adjustable via corner handles or `updateVideoPanelScale()` after connection
 - **Scaling Components**: `Scalable()` and `ScaledParent()` components enable corner-based scaling
 - **Surface handling**: Paint black → attachSurface → preConfigureDecoder → mark surface ready → start pending connection if present
+
+**Registration Modes**:
+
+1. **Stereoscopic Depth Mode** (`PanelCreator`):
+   - Uses `PanelCreator` with `PanelConfigOptions` for custom shader support
+   - SDK creates entity in `panelCreator` lambda (line 1190)
+   - Entity stored in `videoPanelEntity` (line 1191)
+   - **Issue**: Manual entity creation (line 1369) overwrites SDK-created entity with wrong dimensions
+
+2. **Lighting Emission Mode** (`ReadableVideoSurfacePanelRegistration`):
+   - Uses `ReadableVideoSurfacePanelRegistration` for texture sampling
+   - SDK provides `panelEntity` in `surfaceConsumer` callback (line 1258)
+   - **Issue**: Entity is logged but ignored, then new entity created manually (line 1369)
+
+3. **Standard Mode** (`VideoSurfacePanelRegistration`):
+   - Uses `VideoSurfacePanelRegistration` for direct-to-surface rendering
+   - SDK provides `panelEntity` in `surfaceConsumer` callback (line 1300)
+   - **Issue**: Entity is logged but ignored, then new entity created manually (line 1369)
 
 #### `onVRPause()` / `onHMDUnmounted()`
 
@@ -1352,6 +1376,81 @@ Step-by-step flow with expected logging and current gaps:
 
 ---
 
+## ENTITY CREATION REDUNDANCY
+
+### Problem
+
+The video panel entity is created twice - once by the SDK during panel registration, and again manually after registration. This causes:
+
+- **Entity Duplication**: Two entities exist for the same panel ID (`R.id.ui_example`)
+- **Dimension Desync**: Panel outline shows wrong size (2560x1440p) while scale handles respect correct size (5120x1440p in stereoscopic mode)
+- **Component Conflicts**: Components added to one entity may not affect the other
+- **Rendering Issues**: Potential conflicts from duplicate entities
+
+### Root Cause
+
+**All Three Registration Modes**:
+
+1. **Stereoscopic Depth Mode** (`PanelCreator`):
+   - SDK creates entity in `panelCreator` lambda (line 1190)
+   - Entity stored in `videoPanelEntity` (line 1191)
+   - Manual entity creation (line 1369) overwrites SDK-created entity
+   - Manual creation uses `computePanelShape()` which returns non-doubled aspect ratio (2560x1440p), causing mismatch
+
+2. **Lighting Emission Mode** (`ReadableVideoSurfacePanelRegistration`):
+   - SDK provides `panelEntity` in `surfaceConsumer` callback (line 1258)
+   - Entity is logged but not stored
+   - Manual entity creation (line 1369) creates duplicate entity
+
+3. **Standard Mode** (`VideoSurfacePanelRegistration`):
+   - SDK provides `panelEntity` in `surfaceConsumer` callback (line 1300)
+   - Entity is logged but not stored
+   - Manual entity creation (line 1369) creates duplicate entity
+
+**Common Issue**: Lines 1338-1369 execute for all modes, creating a second entity regardless of registration type.
+
+### Impact
+
+- **Stereoscopic Mode**: Panel outline shows 2560x1440p instead of 5120x1440p
+- **All Modes**: Potential rendering conflicts from duplicate entities
+- **Scaling System**: May register wrong entity, causing scaling to affect wrong panel
+- **Component Desync**: Components added to one entity don't affect the other
+
+### Solution Approaches
+
+1. **Use SDK-Provided Entity (Recommended)**:
+   - Store SDK-provided entity from callbacks (`panelEntity` or `entity`)
+   - Add additional components to that entity (don't create new one)
+   - Skip manual entity creation when SDK provides entity
+   - For stereoscopic mode: Use entity from `panelCreator` lambda, add components in callback
+
+2. **Conditional Entity Creation**:
+   - Only create manual entity if SDK doesn't provide one
+   - Check if `videoPanelEntity` is already set before creating new one
+   - Add guard: `if (videoPanelEntity == null) { /* create entity */ }`
+
+3. **Component Addition Pattern**:
+   - Store SDK-provided entity reference
+   - Add required components (`PanelDimensions`, `Scale`, `Grabbable`, `Scalable`, `ScaledParent`, `TransformParent`, `HeroLighting`) to existing entity
+   - Register with scaling system using SDK-provided entity
+
+### Reference Pattern
+
+PremiumMediaSample's `ExoVideoEntity.kt` (line 191):
+```kotlin
+entity = Entity.create(Panel(id), Transform(), Visible(false), PanelLayerAlpha(0f))
+```
+
+They create a minimal reference entity after registration, but use the SDK-provided `panelEnt` from callbacks for actual operations (line 164).
+
+### Files Affected
+
+- `ImmersiveActivity.kt` - Lines 1160-1380 (`createVideoPanelEntity()`)
+
+**Status**: ⚠️ Known Issue - Requires refactoring
+
+---
+
 ## CURRENT STATE & FUTURE ENHANCEMENTS
 
 ### Current Implementation
@@ -1383,6 +1482,10 @@ Step-by-step flow with expected logging and current gaps:
 
 - Immersive-only (no 2D video display)
 - No analog stick-based scaling (`AnalogScalableSystem`)
+- **Entity Creation Redundancy**: Video panel entity created twice (SDK + manual), causing dimension desync
+  - Panel outline shows wrong size in stereoscopic mode
+  - Potential rendering conflicts from duplicate entities
+  - See [Entity Creation Redundancy](#entity-creation-redundancy) section for details
 - Known SDK issue: Video surface color space initialization (affects PremiumMediaSample too)
   - Colors may be incorrect on first frame
   - Resolves after device sleep/wake cycle (which also triggers video stream recovery)
@@ -1507,6 +1610,10 @@ The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 
 **Known Issues**:
 
+- ⚠️ Entity creation redundancy (affects all panel registration modes)
+  - Video panel entity created twice (SDK + manual)
+  - Causes dimension desync in stereoscopic mode
+  - See [Entity Creation Redundancy](#entity-creation-redundancy) section for details
 - ⚠️ Video surface color space initialization issue (affects PremiumMediaSample too)
   - Colors may be incorrect on first frame
   - Resolves after device sleep/wake cycle (which also triggers video stream recovery)

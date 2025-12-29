@@ -69,6 +69,11 @@ import com.meta.spatial.toolkit.ReadableVideoSurfacePanelRegistration
 import com.meta.spatial.toolkit.ReadableMediaPanelSettings
 import com.meta.spatial.toolkit.ReadableMediaPanelRenderOptions
 import com.meta.spatial.runtime.StereoMode
+import com.meta.spatial.runtime.PanelConfigOptions
+import com.meta.spatial.runtime.PanelSceneObject
+import com.meta.spatial.toolkit.SceneObjectSystem
+import com.meta.spatial.toolkit.PanelCreator
+import java.util.concurrent.CompletableFuture
 import com.example.moonlight_spatialsdk.data.ImmersiveSettings
 import com.example.moonlight_spatialsdk.systems.heroLighting.HeroLightingSystem
 import com.example.moonlight_spatialsdk.systems.heroLighting.WallLightingSystem
@@ -1163,10 +1168,90 @@ class ImmersiveActivity : AppSystemActivity() {
     // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
     // This matches PremiumMediaSample pattern and ensures panelManager is initialized
     SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
-      // Use ReadableVideoSurfacePanelRegistration if lighting emission OR stereoscopic depth is enabled
-      if (useLightingEmission || useStereoscopicDepth) {
-        // Use ReadableVideoSurfacePanelRegistration for lighting emission or stereoscopic depth (allows texture sampling)
-        Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for lighting emission or stereoscopic depth")
+      // Use PanelCreator with PanelConfigOptions for stereoscopic depth (allows panelShader to be set directly)
+      if (useStereoscopicDepth) {
+        Log.i(TAG, "Using PanelCreator with PanelConfigOptions for stereoscopic depth (custom shader support)")
+        
+        // Foundation: Panel size matches doubled texture resolution for side-by-side stereo
+        // User resolution (e.g., 2560x1440p) -> Panel texture (5120x1440p) -> Panel physical size matches aspect ratio
+        // This ensures the shader output matches the panel size
+        val textureWidth = prefs.width * 2  // Doubled width for side-by-side stereo (e.g., 2560 -> 5120)
+        val textureHeight = prefs.height    // Height remains same (e.g., 1440)
+        val aspectRatio = textureWidth.toFloat() / textureHeight.toFloat()
+        val panelWidth = basePanelHeightMeters * aspectRatio
+        val panelHeight = basePanelHeightMeters
+        
+        Log.i(TAG, "Creating ultrawide panel: ${panelWidth}m x ${panelHeight}m (aspect ratio: $aspectRatio)")
+        Log.i(TAG, "Panel texture resolution: ${textureWidth}x${textureHeight} (user resolution: ${prefs.width}x${prefs.height})")
+        
+        immersiveActivity.registerPanel(
+            PanelCreator(
+                registrationId = R.id.ui_example,
+                panelCreator = { entity ->
+                  videoPanelEntity = entity
+                  
+                  val panelConfigOptions = PanelConfigOptions().apply {
+                    // Texture resolution: doubled width for side-by-side stereo
+                    // This ensures the surface/texture matches the panel size
+                    layoutWidthInPx = textureWidth  // e.g., 5120 for 2560x1440p user resolution
+                    layoutHeightInPx = textureHeight  // e.g., 1440
+                    // Physical panel dimensions in meters (matches texture aspect ratio)
+                    width = panelWidth
+                    height = panelHeight
+                    mips = 1 // Disable mipmaps for low latency
+                    stereoMode = StereoMode.None // TEST: Set to None to see full ultrawide panel (left half red, right half blue)
+                    panelShader = "stereo_video" // Set custom shader directly - this is the key!
+                    forceSceneTexture = true // Enable scene texture for shader support
+                    enableTransparent = false
+                    themeResourceId = R.style.PanelAppThemeTransparent
+                  }
+                  
+                  val panelSceneObject = PanelSceneObject(immersiveActivity.scene, entity, panelConfigOptions)
+                  
+                  // Set physical panel dimensions on the entity AFTER PanelSceneObject creation
+                  // This ensures PanelDimensions matches PanelConfigOptions and panel outline shows correct size
+                  // PanelDimensions must match PanelConfigOptions.width/height for panel entity and panel creation to be in sync
+                  entity.setComponent(PanelDimensions(Vector2(panelWidth, panelHeight)))
+                  Log.i(TAG, "Set PanelDimensions on entity: ${panelWidth}m x ${panelHeight}m (matches PanelConfigOptions)")
+                  
+                  // Get surface from PanelSceneObject
+                  val surface = panelSceneObject.getSurface()
+                  Log.i(TAG, "Panel surface created for stereoscopic depth panel entity=$entity")
+                  Log.i(TAG, "Panel surface size: ${panelConfigOptions.layoutWidthInPx}x${panelConfigOptions.layoutHeightInPx} (matches panel texture resolution)")
+                  Log.i(TAG, "Panel physical size: ${panelWidth}m x ${panelHeight}m (aspect ratio: $aspectRatio)")
+                  
+                  SurfaceUtil.paintBlack(surface)
+                  
+                  // Configure decoder with preferences when panel is created
+                  // Note: Decoder will output at prefs.width x prefs.height, but surface is prefs.width*2 x prefs.height
+                  // The shader will handle mapping the decoder output to the full panel size
+                  moonlightPanelRenderer.attachSurface(surface)
+                  moonlightPanelRenderer.preConfigureDecoder()
+                  
+                  isSurfaceReady = true
+                  
+                  // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
+                  val params = pendingConnectionParams
+                  if (params != null) {
+                    val (host, port, appId) = params
+                    Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
+                    connectToHost(host, port, appId)
+                  } else {
+                    Log.d(TAG, "Panel surface ready but no pending connection params")
+                  }
+                  
+                  // Add SceneObject to system
+                  immersiveActivity.systemManager
+                      .findSystem<SceneObjectSystem>()
+                      ?.addSceneObject(entity, CompletableFuture.completedFuture(panelSceneObject))
+                  
+                  panelSceneObject
+                }
+            )
+        )
+      } else if (useLightingEmission) {
+        // Use ReadableVideoSurfacePanelRegistration for lighting emission (allows texture sampling)
+        Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for lighting emission")
         immersiveActivity.registerPanel(
             ReadableVideoSurfacePanelRegistration(
                 R.id.ui_example,
@@ -1195,12 +1280,11 @@ class ImmersiveActivity : AppSystemActivity() {
                   ReadableMediaPanelSettings(
                       shape = computePanelShape(),
                       display = PixelDisplayOptions(
-                          width = if (useStereoscopicDepth) prefs.width * 2 else prefs.width, // Double width for side-by-side stereo
+                          width = prefs.width,
                           height = prefs.height
                       ),
                       rendering = ReadableMediaPanelRenderOptions(
-                          mips = if (useStereoscopicDepth) 1 else 4, // Disable mipmaps for low latency in stereo mode
-                          stereoMode = if (useStereoscopicDepth) StereoMode.LeftRight else StereoMode.None,
+                          mips = 4,
                       ),
                       style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
                   )
