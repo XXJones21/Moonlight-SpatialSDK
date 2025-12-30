@@ -23,6 +23,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.Composable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import com.meta.spatial.uiset.button.SecondaryButton
+import com.meta.spatial.uiset.button.DestructiveButton
+import com.meta.spatial.uiset.theme.SpatialTheme
+import com.meta.spatial.uiset.theme.LocalColorScheme
+import com.meta.spatial.uiset.theme.LocalTypography
+import androidx.compose.material3.Text
 import com.example.moonlight_spatialsdk.BuildConfig
 import com.limelight.binding.audio.AndroidAudioRenderer
 import com.limelight.binding.video.CrashListener
@@ -117,7 +138,6 @@ class ImmersiveActivity : AppSystemActivity() {
   private var isPaired: Boolean = false
   private var isSurfaceReady: Boolean = false
   private var videoPanelEntity: Entity? = null
-  private var connectionPanelEntity: Entity? = null
   private var disconnectDialogPanelEntity: Entity? = null
   private var buttonShelfEntity: com.example.moonlight_spatialsdk.entities.ButtonShelfEntity? = null
   private var buttonShelfVisibilitySystem: com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem? = null
@@ -405,9 +425,6 @@ class ImmersiveActivity : AppSystemActivity() {
     Log.i(TAG, "PanelManager created and set on positioning system")
 
     createVideoPanelEntity()
-    // Connection panel is created by SDK via registerPanels() - query for it and hide it initially
-    // PancakeActivity handles connection UI, so ImmersiveActivity should not show it on launch
-    queryAndHideConnectionPanel()
     createButtonShelfEntity()
     // Don't create disconnect dialog entity upfront - create/destroy on menu button press
     
@@ -423,50 +440,9 @@ class ImmersiveActivity : AppSystemActivity() {
 
   @OptIn(SpatialSDKExperimentalAPI::class)
   override fun registerPanels(): List<PanelRegistration> {
-    val shared = getSharedPreferences("connection_prefs", MODE_PRIVATE)
-    val savedHost = shared.getString("saved_host", "") ?: ""
-    val savedPort = shared.getString("saved_port", "47989") ?: "47989"
-    val savedAppId = shared.getString("saved_appId", "0") ?: "0"
-    
     // Video panel is registered dynamically in createVideoPanelEntity() using executeOnVrActivity
     // to ensure panelManager is initialized before registration (lifecycle alignment)
     return listOf(
-        PanelRegistration(R.id.connection_panel) {
-          config {
-            fractionOfScreen = 0.4f
-            height = basePanelHeightMeters * 0.75f
-            width = basePanelHeightMeters * 0.6f
-            layoutDpi = 240
-            layerConfig = LayerConfig()
-            enableTransparent = true
-            includeGlass = false
-            themeResourceId = R.style.PanelAppThemeTransparent
-          }
-          composePanel { setContent {
-            ConnectionPanelImmersive(
-                  pairingHelper = pairingHelper,
-                  savedHost = savedHost,
-                  savedPort = savedPort,
-                  savedAppId = savedAppId,
-                  onSaveConnection = { h: String, p: String, a: String ->
-                    getSharedPreferences("connection_prefs", MODE_PRIVATE).edit()
-                        .putString("saved_host", h)
-                        .putString("saved_port", p)
-                        .putString("saved_appId", a)
-                        .apply()
-                  },
-                  onClearPairing = {
-                    IdentityStore.clearAll(this@ImmersiveActivity)
-                    Log.i(TAG, "Cleared client pairing state and pinned certificates")
-                  },
-                  onConnect = { host, port, appId ->
-                    Log.i(TAG, "Connection panel connect clicked host=$host port=$port appId=$appId")
-                    connectToHost(host, port, appId)
-                  }
-              )
-            }
-          }
-        },
         PanelRegistration(R.id.disconnect_dialog_panel) {
           config {
             fractionOfScreen = 0.4f
@@ -1174,16 +1150,6 @@ class ImmersiveActivity : AppSystemActivity() {
       return
     }
 
-    // Hide and destroy connection panel entity when connect is pressed to prevent it from receiving input
-    // Following PremiumMediaSample pattern: destroy entity, not just hide it
-    connectionPanelEntity?.let { entity ->
-      entity.setComponent(Visible(false))
-      entity.destroy()
-      Log.i(TAG, "Connection panel entity hidden and destroyed - starting connection")
-    }
-    connectionPanelEntity = null
-    
-
     // Recreate video panel entity if it doesn't exist (for reconnection after disconnect)
     if (videoPanelEntity == null) {
       Log.i(TAG, "Video panel entity doesn't exist, recreating for reconnection")
@@ -1314,12 +1280,108 @@ class ImmersiveActivity : AppSystemActivity() {
     isPaired = false
     isSurfaceReady = false
     
-    // Connection panel is managed by SDK via registerPanels() - query for it and show it
-    queryAndHideConnectionPanel()
-    connectionPanelEntity?.setComponent(Visible(true))
-    Log.i(TAG, "Connection panel shown after disconnect")
+    Log.i(TAG, "Disconnected - returning to 2D panel mode")
   }
   
+
+  /**
+   * Poll for video panel entity creation via Query if SDK callback didn't set it.
+   * Maximum 10 attempts with 50ms delay between attempts.
+   */
+  private suspend fun pollForVideoPanelEntity() {
+    var pollAttempts = 0
+    val maxPollAttempts = 10
+    val pollDelayMs = 50L
+    
+    while (pollAttempts < maxPollAttempts && videoPanelEntity == null) {
+      delay(pollDelayMs)
+      val query = Query.where { has(Panel.id) }
+      val entity = query.eval().firstOrNull { entity ->
+        val panel = entity.tryGetComponent<Panel>()
+        panel != null && panel.panelRegistrationId == R.id.ui_example
+      }
+      if (entity != null) {
+        videoPanelEntity = entity
+        Log.i(TAG, "Found video panel entity via Query polling (attempt ${pollAttempts + 1})")
+        return
+      }
+      pollAttempts++
+    }
+    
+    if (videoPanelEntity == null) {
+      Log.w(TAG, "Video panel entity not found after $maxPollAttempts polling attempts")
+    }
+  }
+
+  /**
+   * Create fallback video panel entity if SDK callbacks fail.
+   * This ensures at least something is visible when ImmersiveActivity launches.
+   */
+  private fun createFallbackVideoPanelEntity(panelSize: Vector2, useLightingEmission: Boolean) {
+    Log.w(TAG, "Creating fallback video panel entity - SDK callbacks did not execute")
+    
+    val managerEntity = panelManager?.panelManagerEntity
+    if (managerEntity == null) {
+      Log.e(TAG, "Cannot create fallback entity - PanelManager entity is null")
+      return
+    }
+    
+    val parentComponent = TransformParent(managerEntity)
+    
+    videoPanelEntity = Entity.create(
+        listOf(
+            Panel(R.id.ui_example),
+            Transform(Pose(Vector3(0f, 0f, 0f))),
+            PanelDimensions(panelSize),
+            Scale(Vector3(1f)),
+            Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
+            Visible(pendingConnectionParams == null), // Visible if no pending params
+            Scalable(),
+            ScaledParent(),
+            parentComponent
+        )
+    )
+    
+    if (useLightingEmission) {
+      videoPanelEntity?.setComponent(HeroLighting(isEnabled = true))
+    }
+    
+    // Register with scaling system
+    val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+    touchScalableSystem?.registerEntity(videoPanelEntity!!)
+    
+    Log.i(TAG, "Fallback video panel entity created - size: ${panelSize.x}m x ${panelSize.y}m")
+  }
+
+  /**
+   * Verify video panel entity was created and finalize setup.
+   * If entity is null, polls for it, then creates fallback if still null.
+   */
+  private suspend fun verifyAndFinalizeVideoPanelEntity(
+      panelSize: Vector2,
+      useLightingEmission: Boolean,
+      registrationMode: String
+  ) {
+    // If entity not set by callback, poll for it
+    if (videoPanelEntity == null) {
+      Log.w(TAG, "Video panel entity not set by $registrationMode callback, polling for entity...")
+      pollForVideoPanelEntity()
+    }
+    
+    // If still null after polling, create fallback
+    if (videoPanelEntity == null) {
+      Log.e(TAG, "Video panel entity still null after polling, creating fallback entity")
+      createFallbackVideoPanelEntity(panelSize, useLightingEmission)
+    } else {
+      Log.i(TAG, "Video panel entity verified: $videoPanelEntity")
+      
+      // Ensure visibility if no pending connection params
+      if (pendingConnectionParams == null) {
+        videoPanelEntity?.setComponent(Visible(true))
+        Log.i(TAG, "Video panel made visible on launch (no pending connection params)")
+      }
+    }
+  }
 
   private fun createVideoPanelEntity() {
     Log.i(TAG, "Creating video panel entity with Panel(R.id.ui_example)")
@@ -1331,11 +1393,25 @@ class ImmersiveActivity : AppSystemActivity() {
     
     Log.i(TAG, "Video panel settings: lightingEmission=$useLightingEmission, stereoscopicDepth=$useStereoscopicDepth")
     
-    // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
-    // This matches PremiumMediaSample pattern and ensures panelManager is initialized
-    Log.i(TAG, "Calling executeOnVrActivity to register video panel...")
-    SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
-      Log.i(TAG, "executeOnVrActivity callback executed - registering video panel")
+    // Retry logic for executeOnVrActivity with exponential backoff
+    var retryCount = 0
+    val maxRetries = 3
+    val retryDelays = listOf(100L, 200L, 400L)
+    var isRegistrationInProgress = false
+    
+    fun attemptRegistration() {
+      if (isRegistrationInProgress) {
+        Log.d(TAG, "Registration already in progress, skipping duplicate attempt")
+        return
+      }
+      
+      isRegistrationInProgress = true
+      Log.i(TAG, "Attempting video panel registration (attempt ${retryCount + 1}/$maxRetries)...")
+      
+      // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
+      // This matches PremiumMediaSample pattern and ensures panelManager is initialized
+      SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
+        Log.i(TAG, "executeOnVrActivity callback executed - registering video panel")
       // Use PanelCreator with PanelConfigOptions for stereoscopic depth (allows panelShader to be set directly)
       if (useStereoscopicDepth) {
         Log.i(TAG, "Using PanelCreator with PanelConfigOptions for stereoscopic depth (custom shader support)")
@@ -1426,6 +1502,11 @@ class ImmersiveActivity : AppSystemActivity() {
                   // Attach child entities after panel is ready
                   attachChildEntitiesToVideoPanel()
                   
+                  // Verify entity was set and finalize setup
+                  coroutineScope.launch {
+                    verifyAndFinalizeVideoPanelEntity(panelSize, useLightingEmission, "PanelCreator (stereoscopic)")
+                  }
+                  
                   panelSceneObject
                 }
             )
@@ -1467,6 +1548,11 @@ class ImmersiveActivity : AppSystemActivity() {
                   
                   // Attach child entities after panel is ready
                   attachChildEntitiesToVideoPanel()
+                  
+                  // Verify entity was set and finalize setup
+                  coroutineScope.launch {
+                    verifyAndFinalizeVideoPanelEntity(panelSize, useLightingEmission, "ReadableVideoSurfacePanelRegistration")
+                  }
                 },
                 settingsCreator = {
                   ReadableMediaPanelSettings(
@@ -1520,6 +1606,11 @@ class ImmersiveActivity : AppSystemActivity() {
                   
                   // Attach child entities after panel is ready
                   attachChildEntitiesToVideoPanel()
+                  
+                  // Verify entity was set and finalize setup
+                  coroutineScope.launch {
+                    verifyAndFinalizeVideoPanelEntity(panelSize, useLightingEmission, "VideoSurfacePanelRegistration")
+                  }
                 },
                 settingsCreator = {
                   MediaPanelSettings(
@@ -1538,33 +1629,39 @@ class ImmersiveActivity : AppSystemActivity() {
       }
     }
     
-    // Note: videoPanelEntity will be set by the SDK in the panel registration callbacks
-    // (panelCreator lambda for stereoscopic, surfaceConsumer for standard/lighting modes)
-    // Do NOT create a fallback entity here - it would create a panel with wrong dimensions
-    // that cannot be fixed later. The SDK callbacks are async but will execute.
-  }
-
-  /**
-   * Query for SDK-created connection panel entity and ensure it's hidden initially.
-   * The entity is created by PanelRegistration in registerPanels(), not manually.
-   * PancakeActivity handles connection UI, so ImmersiveActivity should not show it on launch.
-   */
-  private fun queryAndHideConnectionPanel() {
-    // Query for SDK-created connection panel entity (created by PanelRegistration)
-    val query = Query.where { has(Panel.id) }
-    val entity = query.eval().firstOrNull { entity ->
-      val panel = entity.tryGetComponent<Panel>()
-      panel != null && panel.panelRegistrationId == R.id.connection_panel
+    // After registration attempt, verify entity was created
+    // If not set and we haven't exhausted retries, schedule retry
+    coroutineScope.launch {
+      delay(500) // Wait for callbacks to potentially execute (increased from 300ms for reliability)
+      isRegistrationInProgress = false // Allow new registration attempts
+      
+      if (videoPanelEntity == null && retryCount < maxRetries) {
+        retryCount++
+        Log.w(TAG, "Video panel entity not set after registration attempt ${retryCount}, retrying in ${retryDelays[retryCount - 1]}ms...")
+        delay(retryDelays[retryCount - 1])
+        attemptRegistration()
+      } else if (videoPanelEntity == null) {
+        // All retries exhausted - determine panel size and create fallback
+        val panelSize = if (useStereoscopicDepth) {
+          val textureWidth = prefs.width * 2
+          val textureHeight = prefs.height
+          val aspectRatio = textureWidth.toFloat() / textureHeight.toFloat()
+          Vector2(basePanelHeightMeters * aspectRatio, basePanelHeightMeters)
+        } else {
+          val panelShape = computePanelShape()
+          Vector2(panelShape.width, panelShape.height)
+        }
+        Log.e(TAG, "All registration retries exhausted, creating fallback entity")
+        createFallbackVideoPanelEntity(panelSize, useLightingEmission)
+      } else {
+        Log.i(TAG, "Video panel entity successfully created after ${retryCount + 1} attempt(s)")
+      }
+    }
     }
     
-    if (entity != null) {
-      connectionPanelEntity = entity
-      entity.setComponent(Visible(false))
-      Log.i(TAG, "Found SDK-created connection panel entity, hiding it initially (PancakeActivity handles connection UI)")
-    } else {
-      Log.d(TAG, "Connection panel entity not found yet - SDK may create it later")
-    }
+    attemptRegistration()
   }
+
 
   private fun createButtonShelfEntity() {
     Log.i(TAG, "Creating ButtonShelf entity")
@@ -1596,40 +1693,6 @@ class ImmersiveActivity : AppSystemActivity() {
     }
   }
 
-  /**
-   * Toggle the OptionsPanel (connection panel) visibility when Settings button is clicked.
-   */
-  fun showOptionsPanel() {
-    // Check if connection panel entity exists (either in our reference or in the scene)
-    val existingEntity = connectionPanelEntity ?: run {
-      // Query for existing connection panel entity in case our reference is null but entity still exists
-      val query = Query.where { has(Panel.id) }
-      query.eval().firstOrNull { entity ->
-        val panel = entity.tryGetComponent<Panel>()
-        panel != null && panel.panelRegistrationId == R.id.connection_panel
-      }
-    }
-    
-    if (existingEntity == null) {
-      Log.w(TAG, "Connection panel entity not found - SDK may not have created it yet")
-      return
-    } else {
-      // Update our reference if we found an existing entity
-      if (connectionPanelEntity == null) {
-        connectionPanelEntity = existingEntity
-        Log.i(TAG, "Found existing connection panel entity, updating reference")
-      }
-      
-      val isVisible = existingEntity.getComponent<Visible>().isVisible
-      if (isVisible) {
-        Log.i(TAG, "Connection panel is visible, hiding it")
-        existingEntity.setComponent(Visible(false))
-      } else {
-        Log.i(TAG, "Connection panel is hidden, making it visible")
-        existingEntity.setComponent(Visible(true))
-      }
-    }
-  }
 
   /**
    * Create disconnect dialog panel entity.
@@ -1881,4 +1944,77 @@ class ImmersiveActivity : AppSystemActivity() {
     return super.dispatchGenericMotionEvent(event)
   }
 
+}
+
+/**
+ * Disconnect dialog composable for stream options.
+ * Provides options to reset panel size or end the stream.
+ */
+@Composable
+private fun DisconnectDialog(
+    showDialog: StateFlow<Boolean>,
+    onResetPanelSize: () -> Unit,
+    onEndStream: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    val show by showDialog.collectAsState()
+    
+    if (show) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.3f)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .clip(SpatialTheme.shapes.large)
+                    .background(brush = LocalColorScheme.current.panel)
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Stream Options",
+                    style = LocalTypography.current.headline2Strong.copy(
+                        color = SpatialTheme.colorScheme.primaryAlphaBackground
+                    )
+                )
+                
+                // Vertically stacked buttons
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    SecondaryButton(
+                        label = "Reset Panel Size",
+                        expanded = true,
+                        onClick = {
+                            onResetPanelSize()
+                        }
+                    )
+                    Spacer(Modifier.size(28.dp))
+                    DestructiveButton(
+                        label = "End Stream",
+                        expanded = true,
+                        onClick = {
+                            onEndStream()
+                        }
+                    )
+                }
+                
+                Spacer(Modifier.height(8.dp))
+                
+                SecondaryButton(
+                    label = "Cancel",
+                    expanded = true,
+                    onClick = {
+                        onCancel()
+                    }
+                )
+            }
+        }
+    }
 }
