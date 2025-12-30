@@ -16,7 +16,6 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
   - `MoonlightConnectionManager.kt` - Connection lifecycle, pairing, and stream management
   - `MoonlightPanelRenderer.kt` - Bridges Spatial panel Surface to Moonlight native decoder
   - `LegacySurfaceHolderAdapter.kt` - Adapter for Moonlight's SurfaceHolder interface
-  - `ConnectionPanelImmersive.kt` - Compose UI for connection management in VR (card-based UI with dialogs)
 
 **Purpose**: Hybrid Moonlight game streaming application launching into 2D panel mode first (workaround for Meta Horizon OS virtual keyboard issues), then transitioning to immersive VR mode with passthrough. Features connection panel for setup and video panel for streaming, both managed through PanelManager.
 
@@ -200,7 +199,7 @@ createConnectionPanelEntity()
 
 #### `registerPanels()`
 
-**Purpose**: Register the connection panel (Compose UI). Video panel is registered dynamically in `createVideoPanelEntity()`.
+**Purpose**: Register panels for Compose UI. Video panel is registered dynamically in `createVideoPanelEntity()`.
 
 **Panel Registration**:
 
@@ -209,57 +208,30 @@ override fun registerPanels(): List<PanelRegistration> {
     // Video panel is registered dynamically in createVideoPanelEntity() using executeOnVrActivity
     // to ensure panelManager is initialized before registration (lifecycle alignment)
     return listOf(
-        PanelRegistration(R.id.connection_panel) {
-            config {
-                fractionOfScreen = 0.4f
-                height = basePanelHeightMeters * 0.75f
-                width = basePanelHeightMeters * 0.6f
-                layoutDpi = 240
-                layerConfig = LayerConfig()
-                enableTransparent = true
-                includeGlass = false
-                themeResourceId = R.style.PanelAppThemeTransparent
-            }
-            composePanel { setContent {
-                ConnectionPanelImmersive(...)
-            }}
-        },
+        PanelRegistration(R.id.disconnect_dialog_panel) { /* ... */ },
+        PanelRegistration(R.id.button_shelf) { /* ... */ },
+        PanelRegistration(R.id.stereo_depth_slider) { /* ... */ },
     )
 }
 ```
 
-**Connection Panel Features**:
-
-- Compose UI for connection management (defined in `ConnectionPanelImmersive.kt`)
-- Card-based connection UI with side-by-side layout:
-  - **Server Card** (`SecondaryCard`): Displays paired server name (e.g., "Vytal") or "Ready to connect" placeholder
-  - **Connect/Pair Card** (`SecondaryCard`): "Connect to PC" or "Pair New Server" with plus icon
-- Server name fetching: Automatically fetches and displays PC name when host is set
-- Application selection dropdown: Shows app names only (no ID in label, e.g., "Desktop" instead of "Desktop (ID: 881448767)")
-- Connection via cards: Clicking server card connects when paired (no separate Connect button)
-- Pairing dialog: `SpatialBasicDialog`-style custom dialog for IP/Port input
-- PIN display: `SpatialIconDialog` shows pairing PIN when pairing is initiated
-- Options dialog: Custom dialog with choices for "Configure Stream" and "Reset Client Pairing"
-- Stream configuration: Collapsible section with resolution/FPS/format dropdowns and HDR/Full Range switches
-- Host/port/appId persistence via `connection_prefs` SharedPreferences
-- Pairing flow: Check pairing → generate PIN → pair → fetch server name
+**Note**: Connection panel (`ConnectionPanelImmersive`) has been removed. Connection management is now handled entirely by `PancakeActivity` (2D panel mode) before launching into immersive VR mode.
 
 #### `createVideoPanelEntity()`
 
-**Purpose**: Create video panel entity and register panel dynamically using `executeOnVrActivity`.
-
-**⚠️ Known Issue**: Entity Creation Redundancy
-
-The current implementation creates entities twice - once by the SDK during panel registration, and again manually after registration. This causes entity duplication and dimension desync issues, particularly in stereoscopic mode. See [Entity Creation Redundancy](#entity-creation-redundancy) section for details.
+**Purpose**: Create video panel entity and register panel dynamically using `executeOnVrActivity` with robust retry logic and fallback mechanisms.
 
 **Key Steps**:
 
 1. Register video panel using `SpatialActivityManager.executeOnVrActivity` (ensures activity is ready)
 2. Configure panel registration (`PanelCreator`, `ReadableVideoSurfacePanelRegistration`, or `VideoSurfacePanelRegistration`) with surface consumer and settings
 3. **SDK creates entity automatically** during registration (provided in callbacks)
-4. **Manual entity creation** (lines 1338-1369) creates a second entity, overwriting/ignoring the SDK-provided one
+4. **Entity verification and retry logic**:
+   - Retry registration with exponential backoff (3 attempts: 100ms, 200ms, 400ms delays)
+   - Poll for entity creation via Query if SDK callback doesn't set it (10 attempts, 50ms delay)
+   - Fallback entity creation if all retries fail
 5. Parent entity to PanelManager
-6. Set initial visibility to `false` (shown when stream ready)
+6. Set initial visibility based on connection state (visible on launch if no pending connection, hidden if connection pending)
 
 **Video Panel Registration**:
 
@@ -343,19 +315,26 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
 
 1. **Stereoscopic Depth Mode** (`PanelCreator`):
    - Uses `PanelCreator` with `PanelConfigOptions` for custom shader support
-   - SDK creates entity in `panelCreator` lambda (line 1190)
-   - Entity stored in `videoPanelEntity` (line 1191)
-   - **Issue**: Manual entity creation (line 1369) overwrites SDK-created entity with wrong dimensions
+   - SDK creates entity in `panelCreator` lambda with correct ultrawide dimensions (5120x1440p for 2560x1440p user resolution)
+   - Entity stored in `videoPanelEntity` and verified
+   - ✅ **Resolved**: SDK-provided entity is used, no manual entity creation overwrites it
 
 2. **Lighting Emission Mode** (`ReadableVideoSurfacePanelRegistration`):
    - Uses `ReadableVideoSurfacePanelRegistration` for texture sampling
-   - SDK provides `panelEntity` in `surfaceConsumer` callback (line 1258)
-   - **Issue**: Entity is logged but ignored, then new entity created manually (line 1369)
+   - SDK provides `panelEntity` in `surfaceConsumer` callback
+   - ✅ **Resolved**: SDK-provided entity is stored and used, no duplicate entity creation
 
 3. **Standard Mode** (`VideoSurfacePanelRegistration`):
    - Uses `VideoSurfacePanelRegistration` for direct-to-surface rendering
-   - SDK provides `panelEntity` in `surfaceConsumer` callback (line 1300)
-   - **Issue**: Entity is logged but ignored, then new entity created manually (line 1369)
+   - SDK provides `panelEntity` in `surfaceConsumer` callback
+   - ✅ **Resolved**: SDK-provided entity is stored and used, no duplicate entity creation
+
+**Retry and Fallback Mechanisms**:
+
+- **Retry Logic**: Up to 3 registration attempts with exponential backoff (100ms, 200ms, 400ms)
+- **Entity Verification**: Polls for entity creation via Query if SDK callback doesn't set it (10 attempts, 50ms delay)
+- **Fallback Entity**: Creates minimal fallback entity if all retries fail, ensuring at least one panel is visible
+- **Visibility Management**: Video panel is visible on launch if no pending connection params exist
 
 #### `onVRPause()` / `onHMDUnmounted()`
 
@@ -1378,77 +1357,37 @@ Step-by-step flow with expected logging and current gaps:
 
 ## ENTITY CREATION REDUNDANCY
 
-### Problem
+### Problem (Resolved)
 
-The video panel entity is created twice - once by the SDK during panel registration, and again manually after registration. This causes:
+The video panel entity was previously created twice - once by the SDK during panel registration, and again manually after registration. This caused entity duplication and dimension desync issues, particularly in stereoscopic mode.
 
-- **Entity Duplication**: Two entities exist for the same panel ID (`R.id.ui_example`)
-- **Dimension Desync**: Panel outline shows wrong size (2560x1440p) while scale handles respect correct size (5120x1440p in stereoscopic mode)
-- **Component Conflicts**: Components added to one entity may not affect the other
-- **Rendering Issues**: Potential conflicts from duplicate entities
+### Solution Implemented
 
-### Root Cause
-
-**All Three Registration Modes**:
+✅ **Resolved**: The implementation now uses SDK-provided entities exclusively:
 
 1. **Stereoscopic Depth Mode** (`PanelCreator`):
-   - SDK creates entity in `panelCreator` lambda (line 1190)
-   - Entity stored in `videoPanelEntity` (line 1191)
-   - Manual entity creation (line 1369) overwrites SDK-created entity
-   - Manual creation uses `computePanelShape()` which returns non-doubled aspect ratio (2560x1440p), causing mismatch
+   - SDK creates entity in `panelCreator` lambda with correct ultrawide dimensions (5120x1440p for 2560x1440p user resolution)
+   - Entity stored in `videoPanelEntity` and used directly
+   - No manual entity creation overwrites the SDK-provided entity
 
 2. **Lighting Emission Mode** (`ReadableVideoSurfacePanelRegistration`):
-   - SDK provides `panelEntity` in `surfaceConsumer` callback (line 1258)
-   - Entity is logged but not stored
-   - Manual entity creation (line 1369) creates duplicate entity
+   - SDK provides `panelEntity` in `surfaceConsumer` callback
+   - Entity stored in `videoPanelEntity` and used directly
+   - No duplicate entity creation
 
 3. **Standard Mode** (`VideoSurfacePanelRegistration`):
-   - SDK provides `panelEntity` in `surfaceConsumer` callback (line 1300)
-   - Entity is logged but not stored
-   - Manual entity creation (line 1369) creates duplicate entity
+   - SDK provides `panelEntity` in `surfaceConsumer` callback
+   - Entity stored in `videoPanelEntity` and used directly
+   - No duplicate entity creation
 
-**Common Issue**: Lines 1338-1369 execute for all modes, creating a second entity regardless of registration type.
+**Implementation Pattern**:
 
-### Impact
+- SDK-provided entity from callbacks is stored in `videoPanelEntity`
+- Additional components are added to the SDK-provided entity (no new entity created)
+- Fallback entity creation only occurs if all SDK registration attempts fail
+- Retry logic ensures SDK callbacks execute and provide entities
 
-- **Stereoscopic Mode**: Panel outline shows 2560x1440p instead of 5120x1440p
-- **All Modes**: Potential rendering conflicts from duplicate entities
-- **Scaling System**: May register wrong entity, causing scaling to affect wrong panel
-- **Component Desync**: Components added to one entity don't affect the other
-
-### Solution Approaches
-
-1. **Use SDK-Provided Entity (Recommended)**:
-   - Store SDK-provided entity from callbacks (`panelEntity` or `entity`)
-   - Add additional components to that entity (don't create new one)
-   - Skip manual entity creation when SDK provides entity
-   - For stereoscopic mode: Use entity from `panelCreator` lambda, add components in callback
-
-2. **Conditional Entity Creation**:
-   - Only create manual entity if SDK doesn't provide one
-   - Check if `videoPanelEntity` is already set before creating new one
-   - Add guard: `if (videoPanelEntity == null) { /* create entity */ }`
-
-3. **Component Addition Pattern**:
-   - Store SDK-provided entity reference
-   - Add required components (`PanelDimensions`, `Scale`, `Grabbable`, `Scalable`, `ScaledParent`, `TransformParent`, `HeroLighting`) to existing entity
-   - Register with scaling system using SDK-provided entity
-
-### Reference Pattern
-
-PremiumMediaSample's `ExoVideoEntity.kt` (line 191):
-
-```kotlin
-entity = Entity.create(Panel(id), Transform(), Visible(false), PanelLayerAlpha(0f))
-```
-
-They create a minimal reference entity after registration, but use the SDK-provided `panelEnt` from callbacks for actual operations (line 164).
-
-### Files Affected
-
-- `ImmersiveActivity.kt` - Lines 1160-1380 (`createVideoPanelEntity()`)
-
-**Status**: ⚠️ Known Issue - Requires refactoring
+**Status**: ✅ Resolved - All three registration modes now use SDK-provided entities correctly
 
 ---
 
@@ -1521,66 +1460,57 @@ They create a minimal reference entity after registration, but use the SDK-provi
 5. **Entity Storage** (Lines 1360, 1446, or 1499): `videoPanelEntity = entity` is set inside callback.
 6. **Component Addition** (Lines 1393, 1448, or 1501): `addVideoPanelComponents()` adds all required components, including `Visible(false)`.
 
-**Key Point**: `videoPanelEntity` is only set when SDK callbacks execute. If callbacks are delayed or don't execute, `videoPanelEntity` remains null.
+**Key Point**: `videoPanelEntity` is set when SDK callbacks execute. Retry logic with exponential backoff ensures callbacks execute, and entity verification/polling provides fallback if callbacks are delayed.
 
 ### Entity Creation Flow
-
-**Connection Panel Entity**:
-
-- **Created By**: SDK automatically when `PanelRegistration` is processed.
-- **Timing**: Async - may not exist when `queryAndHideConnectionPanel()` runs.
-- **Visibility**: Hidden initially via `queryAndHideConnectionPanel()` (Line 1562).
-- **Reference**: Stored in `connectionPanelEntity` if query succeeds (Line 1561).
 
 **Video Panel Entity**:
 
 - **Created By**: SDK automatically when `registerPanel()` is called inside `executeOnVrActivity` callback.
 - **Timing**: Async - depends on `executeOnVrActivity` callback execution and registration callback execution.
-- **Visibility**: Hidden initially via `addVideoPanelComponents()` (Line 642) - `Visible(false)`.
-- **Reference**: Stored in `videoPanelEntity` when registration callback executes (Lines 1360, 1446, or 1499).
-- **Made Visible**: When stream is ready, `onStatusUpdate` callback sets `Visible(true)` (Line 298).
+- **Retry Logic**: Up to 3 registration attempts with exponential backoff (100ms, 200ms, 400ms delays).
+- **Entity Verification**: Polls for entity creation via Query if SDK callback doesn't set it (10 attempts, 50ms delay).
+- **Fallback**: Creates minimal fallback entity if all retries fail, ensuring at least one panel is visible.
+- **Visibility**: Visible on launch if no pending connection params exist, hidden if connection is pending.
+- **Reference**: Stored in `videoPanelEntity` when registration callback executes or via polling/fallback.
 
 **Button Shelf Entity**:
 
-- **Created By**: Manual creation in `createButtonShelfEntity()` (Line 1572).
+- **Created By**: Manual creation in `createButtonShelfEntity()`.
 - **Timing**: Synchronous - created immediately in `onSceneReady()`.
-- **Attachment**: Depends on `videoPanelEntity` existing (Line 1575) - if null, attachment is deferred.
+- **Attachment**: Depends on `videoPanelEntity` existing - if null, attachment is deferred until video panel is ready.
 - **Visibility**: Managed by `ButtonShelfVisibilitySystem` (hover-activated).
 
-### Async Callback Dependencies
+### Async Callback Handling
 
-**Critical Dependencies**:
+**Robust Registration**:
 
-1. **Connection Panel**: `queryAndHideConnectionPanel()` depends on SDK creating entity before query runs.
-2. **Video Panel**: `videoPanelEntity` depends on:
-   - `executeOnVrActivity` callback executing (Line 1337)
-   - Registration callback executing (Lines 1358, 1442, or 1495)
-   - Both callbacks are async with no retry or timeout
-3. **Button Shelf**: `createButtonShelfEntity()` depends on `videoPanelEntity` existing (Line 1575).
+1. **Retry Logic**: Registration attempts retry up to 3 times with exponential backoff if `videoPanelEntity` is not set.
+2. **Entity Verification**: After each registration attempt, polls for entity creation via Query (10 attempts, 50ms delay).
+3. **Fallback Entity**: If all retries and polling fail, creates minimal fallback entity to ensure panel visibility.
+4. **Visibility Management**: Video panel is visible on launch if no pending connection params exist, ensuring user sees something immediately.
 
-**No Synchronization**:
+**Synchronization**:
 
-- No retry logic if callbacks don't execute
-- No timeout if callbacks are delayed
-- No fallback if entities aren't created
-- Code assumes callbacks execute immediately, but they may be delayed or not execute at all
+- ✅ Retry logic handles delayed callbacks
+- ✅ Entity verification provides fallback if callbacks don't set entity
+- ✅ Fallback entity creation ensures panel appears even if SDK registration fails
+- ✅ Visibility logic ensures at least one panel is visible on launch
 
 ### Panel Visibility State
 
-**Initial State** (All Panels Hidden):
+**Initial State**:
 
-- **Connection Panel**: Hidden by `queryAndHideConnectionPanel()` (Line 1562) - `Visible(false)`.
-- **Video Panel**: Hidden by `addVideoPanelComponents()` (Line 642) - `Visible(false)`.
+- **Video Panel**: Visible on launch if no pending connection params exist, hidden if connection is pending.
 - **Button Shelf**: Hidden by default (visibility managed by `ButtonShelfVisibilitySystem`).
 - **Disconnect Dialog**: Not created until menu button is pressed.
 
 **Visibility Transitions**:
 
-- **Connection Panel**: Shown after disconnect (Line 1319) - `Visible(true)`.
-- **Video Panel**: Shown when stream is ready (Line 298) - `Visible(true)`.
+- **Video Panel**: Shown on launch (if no pending connection) or when stream is ready (if connection pending).
 - **Button Shelf**: Shown on video panel hover (managed by `ButtonShelfVisibilitySystem`).
 
-**Key Point**: Even if panels are created, they won't be visible until specific conditions are met. If panels aren't created due to async timing issues, nothing appears.
+**Key Point**: Video panel is now reliably visible on launch due to retry logic, entity verification, and fallback mechanisms. Panels appear even if SDK callbacks are delayed.
 
 ---
 
@@ -1615,10 +1545,6 @@ They create a minimal reference entity after registration, but use the SDK-provi
 
 - Immersive-only (no 2D video display)
 - No analog stick-based scaling (`AnalogScalableSystem`)
-- **Entity Creation Redundancy**: Video panel entity created twice (SDK + manual), causing dimension desync
-  - Panel outline shows wrong size in stereoscopic mode
-  - Potential rendering conflicts from duplicate entities
-  - See [Entity Creation Redundancy](#entity-creation-redundancy) section for details
 - Known SDK issue: Video surface color space initialization (affects PremiumMediaSample too)
   - Colors may be incorrect on first frame
   - Resolves after device sleep/wake cycle (which also triggers video stream recovery)
@@ -1626,68 +1552,7 @@ They create a minimal reference entity after registration, but use the SDK-provi
 
 ### Critical Issues
 
-#### 🚨 CRITICAL: No Panels Appear on Launch
-
-**Problem**: When ImmersiveActivity launches, no panels appear in the scene. This is a critical blocking issue.
-
-**Root Cause**: Async timing issues in panel registration and entity creation:
-
-1. **Connection Panel Query Timing** (Line 410, `queryAndHideConnectionPanel()`):
-   - Queries for SDK-created connection panel entity immediately in `onSceneReady()`
-   - SDK may not have created entity yet when query runs (entity creation is async)
-   - Query fails silently, entity not found, connection panel never appears
-   - **Impact**: Connection panel entity may exist but isn't found, or query runs before entity is created
-
-2. **Video Panel Registration Async Callback** (Line 407, `createVideoPanelEntity()`):
-   - Calls `SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->` (Line 1337)
-   - Callback may not execute immediately (async behavior)
-   - Inside callback, calls `immersiveActivity.registerPanel()` which has its own async callbacks
-   - `videoPanelEntity` is only set when registration callback executes (Lines 1360, 1446, or 1499)
-   - **Impact**: If `executeOnVrActivity` callback doesn't execute, or registration callback is delayed, `videoPanelEntity` remains null
-
-3. **No Fallback or Retry Logic** (Lines 1541-1544):
-   - Code assumes async callbacks execute immediately
-   - No retry logic if callbacks don't execute
-   - No timeout if callbacks are delayed
-   - No fallback if entities aren't created
-   - **Impact**: If callbacks are delayed or don't execute, panels never appear
-
-4. **All Panels Start Hidden**:
-   - Connection panel: Hidden by `queryAndHideConnectionPanel()` (Line 1562) - `Visible(false)`
-   - Video panel: Hidden by `addVideoPanelComponents()` (Line 642) - `Visible(false)`
-   - Button Shelf: Hidden by default (visibility managed by system)
-   - **Impact**: Even if panels are created, they won't be visible until specific conditions are met
-
-5. **Button Shelf Depends on Video Panel** (Line 1575):
-   - `createButtonShelfEntity()` checks if `videoPanelEntity` exists
-   - If null, ButtonShelf is created but not attached
-   - **Impact**: ButtonShelf won't appear if video panel isn't ready
-
-**Expected Flow**:
-
-1. `registerPanels()` → SDK creates connection panel entity (async)
-2. `onSceneReady()` → `queryAndHideConnectionPanel()` finds and hides connection panel
-3. `createVideoPanelEntity()` → `executeOnVrActivity` executes → panel registered → callback sets `videoPanelEntity`
-4. Video panel becomes visible when stream is ready
-
-**Actual Flow**:
-
-1. `registerPanels()` → SDK may not have created entity yet
-2. `onSceneReady()` → `queryAndHideConnectionPanel()` doesn't find entity (timing issue)
-3. `createVideoPanelEntity()` → `executeOnVrActivity` may not execute immediately → `videoPanelEntity` remains null
-4. No panels appear
-
-**Required Fixes**:
-
-1. **Connection Panel Query Retry**: Add retry logic to `queryAndHideConnectionPanel()` with delay and timeout
-2. **Video Panel Registration Verification**: Add verification that `executeOnVrActivity` callback executes and registration succeeds
-3. **Fallback Entity Creation**: Add fallback logic if SDK callbacks don't execute (with proper dimensions)
-4. **Visibility Management**: Review visibility logic to ensure at least one panel is visible on launch
-5. **Async Synchronization**: Add proper synchronization or polling to ensure entities are created before proceeding
-
-**Status**: 🚨 CRITICAL BLOCKER - App is unusable, no panels appear on launch
-
-**Note**: Video stream recovery after sleep/wake cycles is now implemented. If the video stream dies during a long sleep cycle (while audio continues), the stream is automatically re-established on resume via `onVRReady()` / `onHMDMounted()` lifecycle handlers.
+**Status**: ✅ All critical issues resolved. The app now reliably displays panels on launch with robust retry logic and fallback mechanisms.
 
 ### Future Enhancements
 
@@ -1714,7 +1579,6 @@ They create a minimal reference entity after registration, but use the SDK-provi
   - Settings button toggles connection panel
   - Reset Scale button resets panel to 1.0x
   - Disconnect button ends stream and returns to connection panel
-- ⏳ **Future**: `AnalogScalableSystem` for controller thumbstick-based scaling
 
 **Phase 3: Panel Transitions**:
 
@@ -1745,7 +1609,6 @@ They create a minimal reference entity after registration, but use the SDK-provi
 - `MoonlightConnectionManager.kt` - Connection and pairing management
 - `MoonlightPanelRenderer.kt` - Video decoder integration
 - `LegacySurfaceHolderAdapter.kt` - Surface adapter for Moonlight
-- `ConnectionPanelImmersive.kt` - Compose UI for connection management in VR
 - `entities/ButtonShelfEntity.kt` - ButtonShelf entity management
 - `systems/buttonShelfVisibility/ButtonShelfVisibilitySystem.kt` - ButtonShelf visibility management
 - `systems/scaleChildren/ScaleChildrenSystem.kt` - Hierarchical scaling system for child entities
@@ -1785,8 +1648,8 @@ The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 - ✅ Immersive-only architecture launching directly into VR mode
 - ✅ PanelManager for unified panel positioning and management
 - ✅ Dynamic panel registration using `executeOnVrActivity` (lifecycle alignment)
-- ✅ Connection panel in VR mode (Compose UI) for seamless setup
-- ✅ Panel visibility management (connection → video panel transition)
+- ✅ Robust panel registration with retry logic, entity verification, and fallback mechanisms
+- ✅ Panel visibility management (video panel visible on launch if no pending connection)
 - ✅ PIN pairing system for secure first-time connections (client-generated PIN)
 - ✅ Network security configuration for pairing compatibility
 - ✅ Background thread execution prevents ANR
@@ -1806,10 +1669,6 @@ The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 
 **Known Issues**:
 
-- ⚠️ Entity creation redundancy (affects all panel registration modes)
-  - Video panel entity created twice (SDK + manual)
-  - Causes dimension desync in stereoscopic mode
-  - See [Entity Creation Redundancy](#entity-creation-redundancy) section for details
 - ⚠️ Video surface color space initialization issue (affects PremiumMediaSample too)
   - Colors may be incorrect on first frame
   - Resolves after device sleep/wake cycle (which also triggers video stream recovery)
