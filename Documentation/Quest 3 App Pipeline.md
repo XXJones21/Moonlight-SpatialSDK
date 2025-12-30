@@ -102,11 +102,11 @@ Meta Horizon OS has known issues with virtual keyboard positioning in immersive 
 
 ---
 
-### ImmersiveActivity (VR Mode)
+### ImmersiveActivity Lifecycle Methods
 
 **File**: `ImmersiveActivity.kt`
 
-**Purpose**: Immersive VR activity for video streaming
+**Purpose**: Detailed breakdown of ImmersiveActivity lifecycle and panel creation flow
 
 **Key Features**:
 
@@ -910,7 +910,7 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
    - Toggles spatial audio and room mesh visualization
    - When enabled: Audio appears to emanate from video panel position
    - Requires `USE_SCENE` permission for MRUK room detection
-   - See [Spatial Audio](#spatial-audio) section for details
+   - See immersive features section for details
 
 4. **Snap to Wall Button** (SidebarPin icon):
    - Toggles wall-constrained panel movement
@@ -1437,6 +1437,7 @@ The video panel entity is created twice - once by the SDK during panel registrat
 ### Reference Pattern
 
 PremiumMediaSample's `ExoVideoEntity.kt` (line 191):
+
 ```kotlin
 entity = Entity.create(Panel(id), Transform(), Visible(false), PanelLayerAlpha(0f))
 ```
@@ -1448,6 +1449,138 @@ They create a minimal reference entity after registration, but use the SDK-provi
 - `ImmersiveActivity.kt` - Lines 1160-1380 (`createVideoPanelEntity()`)
 
 **Status**: ⚠️ Known Issue - Requires refactoring
+
+---
+
+## IMMERSIVEACTIVITY COMPREHENSIVE BREAKDOWN
+
+### Lifecycle Flow
+
+**1. `onCreate()` (Lines 229-340)**
+
+**Purpose**: Initialize all components, systems, and connection managers before scene is ready.
+
+**Execution Order**:
+
+1. **MediaCodecHelper Initialization** (Lines 238-241): Initializes decoder helper with Quest 3's Adreno 740 GPU identifier. Must be called BEFORE creating decoder renderer.
+2. **Decoder/Audio Renderer Creation** (Lines 245-251): Creates `MoonlightPanelRenderer`, `AndroidAudioRenderer`, and `MoonlightPairingHelper`.
+3. **Component Registration** (Lines 254-265): Registers custom ECS components (`Scalable`, `ScaledParent`, `ScaledChild`, `Anchorable`, `AnchorOnLoad`, `WallSnap`, `HeroLighting`, `ReceiveLighting`).
+4. **System Registration** (Lines 268-286): Registers systems (`HeroLightingSystem`, `WallLightingSystem`, `PointerInfoSystem`, `TouchScalableSystem`, `AnchorSnappingSystem`).
+5. **Connection Manager Creation** (Lines 288-318): Creates `MoonlightConnectionManager` with status update callback that shows video panel when stream is ready.
+6. **Network Asset Loader** (Lines 320-323): Initializes networked asset loading.
+7. **Connection Params** (Lines 325-339): Reads connection params from Intent extras, stores in `pendingConnectionParams` (does NOT connect yet).
+
+**Key Point**: No panel entities are created in `onCreate()`. All panel creation happens in `onSceneReady()` or via SDK registration.
+
+**2. `registerPanels()` (Lines 425-588)**
+
+**Purpose**: Return list of panel registrations to SDK. Called by SDK BEFORE `onSceneReady()`.
+
+**Panels Registered**:
+
+1. **Connection Panel** (`R.id.connection_panel`, Lines 434-468): Compose UI panel for connection management. SDK creates entity automatically when registration is processed.
+2. **Disconnect Dialog Panel** (`R.id.disconnect_dialog_panel`, Lines 470-505): Compose UI dialog for disconnect confirmation. Entity created manually on menu button press.
+3. **Button Shelf Panel** (`R.id.button_shelf`, Lines 507-549): Compose UI panel for video panel controls. Entity created manually in `createButtonShelfEntity()`.
+4. **Stereo Depth Slider Panel** (`R.id.stereo_depth_slider`, Lines 551-586): Compose UI panel for depth control. Entity created manually in `StereoDepthSliderEntity`.
+
+**Key Point**: Video panel (`R.id.ui_example`) is NOT registered here. It's registered dynamically in `createVideoPanelEntity()` using `executeOnVrActivity`.
+
+**3. `onSceneReady()` (Lines 368-421)**
+
+**Purpose**: Configure scene and create panel entities after Spatial SDK is fully initialized.
+
+**Execution Order**:
+
+1. **Scene Configuration** (Lines 374-387): Disable locomotion, enable passthrough, set lighting environment, initialize `LightingPassthroughHandler`.
+2. **Panel Positioning System** (Lines 393-395): Register `PanelPositioningSystem` for panel placement.
+3. **PanelManager Creation** (Lines 401-405): Create `PanelManager` entity (root for all panels) and set on positioning system.
+4. **Video Panel Creation** (Line 407): Call `createVideoPanelEntity()` - **CRITICAL**: This registers panel dynamically using `executeOnVrActivity`.
+5. **Connection Panel Query** (Line 410): Call `queryAndHideConnectionPanel()` - **CRITICAL**: Queries for SDK-created connection panel entity and hides it.
+6. **Button Shelf Creation** (Line 411): Call `createButtonShelfEntity()` - Creates ButtonShelf entity (may not attach if video panel not ready).
+
+**Key Point**: All panel creation happens here, but entities may not be immediately available due to async SDK callbacks.
+
+### Panel Registration Flow
+
+**Connection Panel Registration**:
+
+1. **SDK Registration** (Line 434): `PanelRegistration(R.id.connection_panel)` returned in `registerPanels()`.
+2. **SDK Entity Creation**: SDK creates entity automatically when registration is processed (timing is async).
+3. **Query for Entity** (Line 410, Lines 1552-1567): `queryAndHideConnectionPanel()` queries for entity with `Panel` component and `panelRegistrationId == R.id.connection_panel`.
+4. **Hide Entity** (Line 1562): If found, sets `Visible(false)` to hide it (PancakeActivity handles connection UI).
+
+**Video Panel Registration**:
+
+1. **Dynamic Registration** (Line 407, Lines 1337-1539): `createVideoPanelEntity()` calls `SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->`.
+2. **Registration Callback** (Line 1337): `executeOnVrActivity` callback may execute immediately or be delayed (async).
+3. **Panel Registration** (Lines 1355, 1439, or 1492): Inside callback, calls `immersiveActivity.registerPanel()` with one of:
+   - `PanelCreator` (stereoscopic mode, Line 1355)
+   - `ReadableVideoSurfacePanelRegistration` (lighting emission mode, Line 1439)
+   - `VideoSurfacePanelRegistration` (standard mode, Line 1492)
+4. **Entity Callback** (Lines 1358, 1442, or 1495): SDK calls registration callback (`panelCreator` lambda or `surfaceConsumer`) with entity.
+5. **Entity Storage** (Lines 1360, 1446, or 1499): `videoPanelEntity = entity` is set inside callback.
+6. **Component Addition** (Lines 1393, 1448, or 1501): `addVideoPanelComponents()` adds all required components, including `Visible(false)`.
+
+**Key Point**: `videoPanelEntity` is only set when SDK callbacks execute. If callbacks are delayed or don't execute, `videoPanelEntity` remains null.
+
+### Entity Creation Flow
+
+**Connection Panel Entity**:
+
+- **Created By**: SDK automatically when `PanelRegistration` is processed.
+- **Timing**: Async - may not exist when `queryAndHideConnectionPanel()` runs.
+- **Visibility**: Hidden initially via `queryAndHideConnectionPanel()` (Line 1562).
+- **Reference**: Stored in `connectionPanelEntity` if query succeeds (Line 1561).
+
+**Video Panel Entity**:
+
+- **Created By**: SDK automatically when `registerPanel()` is called inside `executeOnVrActivity` callback.
+- **Timing**: Async - depends on `executeOnVrActivity` callback execution and registration callback execution.
+- **Visibility**: Hidden initially via `addVideoPanelComponents()` (Line 642) - `Visible(false)`.
+- **Reference**: Stored in `videoPanelEntity` when registration callback executes (Lines 1360, 1446, or 1499).
+- **Made Visible**: When stream is ready, `onStatusUpdate` callback sets `Visible(true)` (Line 298).
+
+**Button Shelf Entity**:
+
+- **Created By**: Manual creation in `createButtonShelfEntity()` (Line 1572).
+- **Timing**: Synchronous - created immediately in `onSceneReady()`.
+- **Attachment**: Depends on `videoPanelEntity` existing (Line 1575) - if null, attachment is deferred.
+- **Visibility**: Managed by `ButtonShelfVisibilitySystem` (hover-activated).
+
+### Async Callback Dependencies
+
+**Critical Dependencies**:
+
+1. **Connection Panel**: `queryAndHideConnectionPanel()` depends on SDK creating entity before query runs.
+2. **Video Panel**: `videoPanelEntity` depends on:
+   - `executeOnVrActivity` callback executing (Line 1337)
+   - Registration callback executing (Lines 1358, 1442, or 1495)
+   - Both callbacks are async with no retry or timeout
+3. **Button Shelf**: `createButtonShelfEntity()` depends on `videoPanelEntity` existing (Line 1575).
+
+**No Synchronization**:
+
+- No retry logic if callbacks don't execute
+- No timeout if callbacks are delayed
+- No fallback if entities aren't created
+- Code assumes callbacks execute immediately, but they may be delayed or not execute at all
+
+### Panel Visibility State
+
+**Initial State** (All Panels Hidden):
+
+- **Connection Panel**: Hidden by `queryAndHideConnectionPanel()` (Line 1562) - `Visible(false)`.
+- **Video Panel**: Hidden by `addVideoPanelComponents()` (Line 642) - `Visible(false)`.
+- **Button Shelf**: Hidden by default (visibility managed by `ButtonShelfVisibilitySystem`).
+- **Disconnect Dialog**: Not created until menu button is pressed.
+
+**Visibility Transitions**:
+
+- **Connection Panel**: Shown after disconnect (Line 1319) - `Visible(true)`.
+- **Video Panel**: Shown when stream is ready (Line 298) - `Visible(true)`.
+- **Button Shelf**: Shown on video panel hover (managed by `ButtonShelfVisibilitySystem`).
+
+**Key Point**: Even if panels are created, they won't be visible until specific conditions are met. If panels aren't created due to async timing issues, nothing appears.
 
 ---
 
@@ -1490,6 +1623,69 @@ They create a minimal reference entity after registration, but use the SDK-provi
   - Colors may be incorrect on first frame
   - Resolves after device sleep/wake cycle (which also triggers video stream recovery)
   - See `POST_MORTEM.md` for details
+
+### Critical Issues
+
+#### 🚨 CRITICAL: No Panels Appear on Launch
+
+**Problem**: When ImmersiveActivity launches, no panels appear in the scene. This is a critical blocking issue.
+
+**Root Cause**: Async timing issues in panel registration and entity creation:
+
+1. **Connection Panel Query Timing** (Line 410, `queryAndHideConnectionPanel()`):
+   - Queries for SDK-created connection panel entity immediately in `onSceneReady()`
+   - SDK may not have created entity yet when query runs (entity creation is async)
+   - Query fails silently, entity not found, connection panel never appears
+   - **Impact**: Connection panel entity may exist but isn't found, or query runs before entity is created
+
+2. **Video Panel Registration Async Callback** (Line 407, `createVideoPanelEntity()`):
+   - Calls `SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->` (Line 1337)
+   - Callback may not execute immediately (async behavior)
+   - Inside callback, calls `immersiveActivity.registerPanel()` which has its own async callbacks
+   - `videoPanelEntity` is only set when registration callback executes (Lines 1360, 1446, or 1499)
+   - **Impact**: If `executeOnVrActivity` callback doesn't execute, or registration callback is delayed, `videoPanelEntity` remains null
+
+3. **No Fallback or Retry Logic** (Lines 1541-1544):
+   - Code assumes async callbacks execute immediately
+   - No retry logic if callbacks don't execute
+   - No timeout if callbacks are delayed
+   - No fallback if entities aren't created
+   - **Impact**: If callbacks are delayed or don't execute, panels never appear
+
+4. **All Panels Start Hidden**:
+   - Connection panel: Hidden by `queryAndHideConnectionPanel()` (Line 1562) - `Visible(false)`
+   - Video panel: Hidden by `addVideoPanelComponents()` (Line 642) - `Visible(false)`
+   - Button Shelf: Hidden by default (visibility managed by system)
+   - **Impact**: Even if panels are created, they won't be visible until specific conditions are met
+
+5. **Button Shelf Depends on Video Panel** (Line 1575):
+   - `createButtonShelfEntity()` checks if `videoPanelEntity` exists
+   - If null, ButtonShelf is created but not attached
+   - **Impact**: ButtonShelf won't appear if video panel isn't ready
+
+**Expected Flow**:
+
+1. `registerPanels()` → SDK creates connection panel entity (async)
+2. `onSceneReady()` → `queryAndHideConnectionPanel()` finds and hides connection panel
+3. `createVideoPanelEntity()` → `executeOnVrActivity` executes → panel registered → callback sets `videoPanelEntity`
+4. Video panel becomes visible when stream is ready
+
+**Actual Flow**:
+
+1. `registerPanels()` → SDK may not have created entity yet
+2. `onSceneReady()` → `queryAndHideConnectionPanel()` doesn't find entity (timing issue)
+3. `createVideoPanelEntity()` → `executeOnVrActivity` may not execute immediately → `videoPanelEntity` remains null
+4. No panels appear
+
+**Required Fixes**:
+
+1. **Connection Panel Query Retry**: Add retry logic to `queryAndHideConnectionPanel()` with delay and timeout
+2. **Video Panel Registration Verification**: Add verification that `executeOnVrActivity` callback executes and registration succeeds
+3. **Fallback Entity Creation**: Add fallback logic if SDK callbacks don't execute (with proper dimensions)
+4. **Visibility Management**: Review visibility logic to ensure at least one panel is visible on launch
+5. **Async Synchronization**: Add proper synchronization or polling to ensure entities are created before proceeding
+
+**Status**: 🚨 CRITICAL BLOCKER - App is unusable, no panels appear on launch
 
 **Note**: Video stream recovery after sleep/wake cycles is now implemented. If the video stream dies during a long sleep cycle (while audio continues), the stream is automatically re-established on resume via `onVRReady()` / `onHMDMounted()` lifecycle handlers.
 

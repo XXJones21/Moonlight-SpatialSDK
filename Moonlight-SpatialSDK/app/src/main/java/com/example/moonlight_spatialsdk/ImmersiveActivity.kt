@@ -405,7 +405,9 @@ class ImmersiveActivity : AppSystemActivity() {
     Log.i(TAG, "PanelManager created and set on positioning system")
 
     createVideoPanelEntity()
-    createConnectionPanelEntity()
+    // Connection panel is created by SDK via registerPanels() - query for it and hide it initially
+    // PancakeActivity handles connection UI, so ImmersiveActivity should not show it on launch
+    queryAndHideConnectionPanel()
     createButtonShelfEntity()
     // Don't create disconnect dialog entity upfront - create/destroy on menu button press
     
@@ -600,6 +602,167 @@ class ImmersiveActivity : AppSystemActivity() {
     val panelHeightMeters = basePanelHeightMeters
     val panelWidthMeters = aspect * basePanelHeightMeters
     return QuadShapeOptions(width = panelWidthMeters, height = panelHeightMeters)
+  }
+
+  /**
+   * Adds all required components to the SDK-provided video panel entity.
+   * This function centralizes component addition to avoid duplication across panel registration modes.
+   *
+   * @param entity The SDK-provided entity from panel registration callback
+   * @param panelSize The physical panel dimensions in meters (Vector2)
+   * @param useLightingEmission Whether to add HeroLighting component
+   * @return The entity for chaining
+   */
+  private fun addVideoPanelComponents(entity: Entity, panelSize: Vector2, useLightingEmission: Boolean): Entity {
+    val managerEntity = panelManager?.panelManagerEntity
+    val parentComponent = if (managerEntity != null) {
+      TransformParent(managerEntity)
+    } else {
+      TransformParent(Entity.nullEntity())
+    }
+
+    // Add all required components
+    entity.setComponent(Transform(Pose(Vector3(0f, 0f, 0f))))
+    
+    // Set PanelDimensions - this controls the physical panel size and panel outline
+    // For stereoscopic mode, this should be ultrawide (5120x1440p aspect ratio)
+    // For standard/lighting modes, this should match computePanelShape() (2560x1440p aspect ratio)
+    // Note: For stereoscopic mode, PanelDimensions is set BEFORE PanelSceneObject creation
+    // For other modes, it's set here in the callback
+    val existingDimensions = entity.tryGetComponent<PanelDimensions>()
+    if (existingDimensions == null || existingDimensions.dimensions != panelSize) {
+      entity.setComponent(PanelDimensions(panelSize))
+      Log.i(TAG, "Set PanelDimensions: ${panelSize.x}m x ${panelSize.y}m (aspect ratio: ${panelSize.x / panelSize.y})")
+    } else {
+      Log.i(TAG, "PanelDimensions already set correctly: ${panelSize.x}m x ${panelSize.y}m")
+    }
+    
+    entity.setComponent(Scale(Vector3(1f))) // Initial scale of 1.0
+    entity.setComponent(Grabbable(enabled = true, type = GrabbableType.PIVOT_Y))
+    entity.setComponent(Visible(false)) // Hidden initially, shown when stream is ready
+    entity.setComponent(Scalable()) // Enable corner scaling
+    entity.setComponent(ScaledParent()) // Mark as scalable parent (required for child entities)
+    entity.setComponent(parentComponent) // Parent to PanelManager
+
+    // Add HeroLighting component if lighting emission is enabled
+    if (useLightingEmission) {
+      entity.setComponent(HeroLighting(isEnabled = true))
+      Log.i(TAG, "HeroLighting component added to video panel")
+    }
+
+    // Register with scaling system
+    val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+    if (touchScalableSystem != null) {
+      touchScalableSystem.registerEntity(entity)
+      Log.i(TAG, "Video panel entity registered with TouchScalableSystem")
+    } else {
+      Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
+    }
+
+    Log.i(TAG, "Video panel components added - parented to PanelManager, hidden initially")
+    return entity
+  }
+
+  /**
+   * Attaches child entities (ButtonShelf, StereoDepthSlider, BiasLighting) to the video panel.
+   * This function is called after the video panel entity is ready and all components are added.
+   */
+  private fun attachChildEntitiesToVideoPanel() {
+    videoPanelEntity?.let { entity ->
+      // Load immersive settings if not already loaded
+      val settings = try {
+        ImmersiveSettings.load(this)
+      } catch (e: Exception) {
+        Log.w(TAG, "Failed to load immersive settings: ${e.message}")
+        null
+      }
+      
+      // Attach ButtonShelf to video panel if it was created before video panel
+      buttonShelfEntity?.let { shelf ->
+        shelf.attachToEntity(entity)
+        Log.i(TAG, "ButtonShelf attached to video panel")
+        
+        // Force update children to ensure ButtonShelf is positioned correctly
+        val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+        if (scaleChildrenSystem != null) {
+          scaleChildrenSystem.forceUpdateChildren(entity)
+          Log.i(TAG, "ScaleChildrenSystem force update called for ButtonShelf")
+        }
+        
+        // Create and register visibility system if not already done
+        if (buttonShelfVisibilitySystem == null) {
+          buttonShelfVisibilitySystem = com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem(
+              buttonShelf = shelf,
+              videoPanelEntity = entity
+          )
+          systemManager.registerSystem(buttonShelfVisibilitySystem!!)
+          buttonShelfVisibilitySystem?.startTracking()
+          Log.i(TAG, "ButtonShelfVisibilitySystem registered and started tracking")
+        }
+      }
+      
+      // Create BiasLightingEntity if lighting emission is enabled
+      settings?.let { s ->
+        val useLightingEmission = s.lightingEmissionEnabled || s.reflectionsEnabled
+        if (useLightingEmission && biasLightingEntity == null) {
+          biasLightingEntity = BiasLightingEntity(heroLightingSystem)
+          biasLightingEntity?.attachToPanel(entity)
+          
+          // Register scale listener to update bias lighting when panel scales
+          val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+          scaleChildrenSystem?.addScaleListener(entity) {
+            biasLightingEntity?.updateFromParentScale()
+          }
+          
+          Log.i(TAG, "BiasLightingEntity created and attached to video panel")
+        }
+      }
+      
+      // Initialize stereo video system and attach slider if stereoscopic depth is enabled
+      settings?.let { s ->
+        if (s.stereoscopicDepthEnabled) {
+          if (stereoVideoSystem == null) {
+            stereoVideoSystem = com.example.moonlight_spatialsdk.systems.stereo.StereoVideoSystem(stereoFormat = 0.0f) // 0.0 = side-by-side
+            systemManager.registerSystem(stereoVideoSystem!!)
+            Log.i(TAG, "StereoVideoSystem registered")
+          }
+          
+          // Register video texture with stereo system after panel is ready
+          coroutineScope.launch {
+            delay(100) // Small delay to ensure SceneObject is ready
+            stereoVideoSystem?.registerVideoTexture(entity)
+            Log.i(TAG, "Video texture registered with StereoVideoSystem")
+          }
+          
+          // Create stereo depth slider entity if not already created
+          if (stereoDepthSliderEntity == null) {
+            stereoDepthSliderEntity = com.example.moonlight_spatialsdk.entities.StereoDepthSliderEntity()
+            Log.i(TAG, "StereoDepthSliderEntity created")
+          }
+          
+          // Attach slider to video panel
+          stereoDepthSliderEntity?.let { slider ->
+            slider.attachToEntity(entity)
+            Log.i(TAG, "StereoDepthSliderEntity attached to video panel")
+            
+            // Force update children to ensure slider is positioned correctly
+            val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+            scaleChildrenSystem?.forceUpdateChildren(entity)
+            
+            // Create and register visibility system if not already done
+            if (stereoDepthSliderVisibilitySystem == null) {
+              stereoDepthSliderVisibilitySystem = com.example.moonlight_spatialsdk.systems.stereoDepthSlider.StereoDepthSliderVisibilitySystem(
+                  slider = slider,
+                  videoPanelEntity = entity
+              )
+              systemManager.registerSystem(stereoDepthSliderVisibilitySystem!!)
+              stereoDepthSliderVisibilitySystem?.startTracking()
+              Log.i(TAG, "StereoDepthSliderVisibilitySystem registered and started tracking")
+            }
+          }
+        }
+      }
+    }
   }
 
   override fun onSpatialShutdown() {
@@ -1151,9 +1314,10 @@ class ImmersiveActivity : AppSystemActivity() {
     isPaired = false
     isSurfaceReady = false
     
-    // Recreate connection panel
-    createConnectionPanelEntity()
-    Log.i(TAG, "Connection panel recreated")
+    // Connection panel is managed by SDK via registerPanels() - query for it and show it
+    queryAndHideConnectionPanel()
+    connectionPanelEntity?.setComponent(Visible(true))
+    Log.i(TAG, "Connection panel shown after disconnect")
   }
   
 
@@ -1165,9 +1329,13 @@ class ImmersiveActivity : AppSystemActivity() {
     val useLightingEmission = immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled
     val useStereoscopicDepth = immersiveSettings.stereoscopicDepthEnabled
     
+    Log.i(TAG, "Video panel settings: lightingEmission=$useLightingEmission, stereoscopicDepth=$useStereoscopicDepth")
+    
     // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
     // This matches PremiumMediaSample pattern and ensures panelManager is initialized
+    Log.i(TAG, "Calling executeOnVrActivity to register video panel...")
     SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
+      Log.i(TAG, "executeOnVrActivity callback executed - registering video panel")
       // Use PanelCreator with PanelConfigOptions for stereoscopic depth (allows panelShader to be set directly)
       if (useStereoscopicDepth) {
         Log.i(TAG, "Using PanelCreator with PanelConfigOptions for stereoscopic depth (custom shader support)")
@@ -1188,7 +1356,9 @@ class ImmersiveActivity : AppSystemActivity() {
             PanelCreator(
                 registrationId = R.id.ui_example,
                 panelCreator = { entity ->
+                  Log.i(TAG, "PanelCreator callback executed - entity=$entity")
                   videoPanelEntity = entity
+                  Log.i(TAG, "videoPanelEntity set to $entity")
                   
                   val panelConfigOptions = PanelConfigOptions().apply {
                     // Texture resolution: doubled width for side-by-side stereo
@@ -1206,13 +1376,21 @@ class ImmersiveActivity : AppSystemActivity() {
                     themeResourceId = R.style.PanelAppThemeTransparent
                   }
                   
+                  // CRITICAL: Set PanelDimensions BEFORE PanelSceneObject creation
+                  // PanelSceneObject may use PanelDimensions from entity to determine panel outline
+                  // Setting it before creation ensures the panel is created with correct ultrawide dimensions
+                  val panelSize = Vector2(panelWidth, panelHeight)
+                  entity.setComponent(PanelDimensions(panelSize))
+                  Log.i(TAG, "Set PanelDimensions BEFORE PanelSceneObject: ${panelSize.x}m x ${panelSize.y}m (ultrawide)")
+                  
                   val panelSceneObject = PanelSceneObject(immersiveActivity.scene, entity, panelConfigOptions)
                   
-                  // Set physical panel dimensions on the entity AFTER PanelSceneObject creation
-                  // This ensures PanelDimensions matches PanelConfigOptions and panel outline shows correct size
-                  // PanelDimensions must match PanelConfigOptions.width/height for panel entity and panel creation to be in sync
-                  entity.setComponent(PanelDimensions(Vector2(panelWidth, panelHeight)))
-                  Log.i(TAG, "Set PanelDimensions on entity: ${panelWidth}m x ${panelHeight}m (matches PanelConfigOptions)")
+                  // Check if PanelSceneObject changed PanelDimensions (it shouldn't, but verify)
+                  val panelDimensionsAfterCreation = entity.getComponent<PanelDimensions>()
+                  Log.i(TAG, "PanelDimensions after PanelSceneObject: ${panelDimensionsAfterCreation.dimensions.x}m x ${panelDimensionsAfterCreation.dimensions.y}m (expected: ${panelWidth}m x ${panelHeight}m)")
+                  
+                  // Add remaining components (PanelDimensions already set above)
+                  addVideoPanelComponents(entity, panelSize, useLightingEmission)
                   
                   // Get surface from PanelSceneObject
                   val surface = panelSceneObject.getSurface()
@@ -1245,6 +1423,9 @@ class ImmersiveActivity : AppSystemActivity() {
                       .findSystem<SceneObjectSystem>()
                       ?.addSceneObject(entity, CompletableFuture.completedFuture(panelSceneObject))
                   
+                  // Attach child entities after panel is ready
+                  attachChildEntitiesToVideoPanel()
+                  
                   panelSceneObject
                 }
             )
@@ -1252,11 +1433,19 @@ class ImmersiveActivity : AppSystemActivity() {
       } else if (useLightingEmission) {
         // Use ReadableVideoSurfacePanelRegistration for lighting emission (allows texture sampling)
         Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for lighting emission")
+        val panelShape = computePanelShape()
+        val panelSize = Vector2(panelShape.width, panelShape.height)
+        
         immersiveActivity.registerPanel(
             ReadableVideoSurfacePanelRegistration(
                 R.id.ui_example,
                 surfaceConsumer = { panelEntity, surface ->
-                  Log.i(TAG, "Readable surface attached for panel entity=$panelEntity")
+                  Log.i(TAG, "ReadableVideoSurfacePanelRegistration surfaceConsumer callback executed - entity=$panelEntity")
+                  
+                  // Store SDK-provided entity and add components
+                  videoPanelEntity = panelEntity
+                  Log.i(TAG, "videoPanelEntity set to $panelEntity")
+                  addVideoPanelComponents(panelEntity, panelSize, useLightingEmission)
                   
                   SurfaceUtil.paintBlack(surface)
                   
@@ -1275,6 +1464,9 @@ class ImmersiveActivity : AppSystemActivity() {
                   } else {
                     Log.d(TAG, "Panel surface ready but no pending connection params")
                   }
+                  
+                  // Attach child entities after panel is ready
+                  attachChildEntitiesToVideoPanel()
                 },
                 settingsCreator = {
                   ReadableMediaPanelSettings(
@@ -1294,11 +1486,19 @@ class ImmersiveActivity : AppSystemActivity() {
       } else {
         // Use standard VideoSurfacePanelRegistration for better performance
         Log.i(TAG, "Using VideoSurfacePanelRegistration (standard mode)")
+        val panelShape = computePanelShape()
+        val panelSize = Vector2(panelShape.width, panelShape.height)
+        
         immersiveActivity.registerPanel(
             VideoSurfacePanelRegistration(
                 R.id.ui_example,
                 surfaceConsumer = { panelEntity, surface ->
-                  Log.i(TAG, "Surface attached for panel entity=$panelEntity")
+                  Log.i(TAG, "VideoSurfacePanelRegistration surfaceConsumer callback executed - entity=$panelEntity")
+                  
+                  // Store SDK-provided entity and add components
+                  videoPanelEntity = panelEntity
+                  Log.i(TAG, "videoPanelEntity set to $panelEntity")
+                  addVideoPanelComponents(panelEntity, panelSize, useLightingEmission)
                   
                   SurfaceUtil.paintBlack(surface)
                   
@@ -1317,6 +1517,9 @@ class ImmersiveActivity : AppSystemActivity() {
                   } else {
                     Log.d(TAG, "Panel surface ready but no pending connection params")
                   }
+                  
+                  // Attach child entities after panel is ready
+                  attachChildEntitiesToVideoPanel()
                 },
                 settingsCreator = {
                   MediaPanelSettings(
@@ -1335,163 +1538,32 @@ class ImmersiveActivity : AppSystemActivity() {
       }
     }
     
-    // Create entity after panel registration (panel must be registered before entity creation)
-    // Use computePanelShape() to get correct aspect ratio (maintains original resolution aspect, not doubled)
-    val panelShape = computePanelShape()
-    val panelSize = Vector2(panelShape.width, panelShape.height)
-    
-    val managerEntity = panelManager?.panelManagerEntity
-    val parentComponent = if (managerEntity != null) {
-      TransformParent(managerEntity)
-    } else {
-      TransformParent(Entity.nullEntity())
-    }
-    
-    // Build component list - add HeroLighting if using readable panel for lighting emission
-    val baseComponents = mutableListOf(
-        Panel(R.id.ui_example),
-        Transform(Pose(Vector3(0f, 0f, 0f))),
-        PanelDimensions(panelSize),
-        Scale(Vector3(1f)), // Initial scale of 1.0 - can be adjusted after connection
-        Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
-        Visible(false), // Hidden initially, shown when stream is ready
-        Scalable(), // Enable corner scaling
-        ScaledParent(), // Mark as scalable parent
-        parentComponent
-    )
-    
-    // Add HeroLighting component if lighting emission is enabled (useLightingEmission already defined above)
-    if (useLightingEmission) {
-        baseComponents.add(HeroLighting(isEnabled = true))
-        Log.i(TAG, "HeroLighting component added to video panel")
-    }
-    
-    videoPanelEntity = Entity.create(baseComponents)
-    
-    // Register video panel with scaling system
-    val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
-    if (touchScalableSystem != null) {
-      touchScalableSystem.registerEntity(videoPanelEntity!!)
-      Log.i(TAG, "Video panel entity created and registered with TouchScalableSystem")
-    } else {
-      Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
-    }
-    
-    Log.i(TAG, "Video panel entity created - parented to PanelManager, hidden initially")
-    
-    // Attach ButtonShelf to video panel if it was created before video panel
-    buttonShelfEntity?.let { shelf ->
-      shelf.attachToEntity(videoPanelEntity!!)
-      Log.i(TAG, "ButtonShelf attached to video panel")
-      
-      // Force update children to ensure ButtonShelf is positioned correctly
-      val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
-      if (scaleChildrenSystem != null) {
-        scaleChildrenSystem.forceUpdateChildren(videoPanelEntity!!)
-        Log.i(TAG, "ScaleChildrenSystem force update called for ButtonShelf")
-      }
-      
-      // Create and register visibility system if not already done
-      if (buttonShelfVisibilitySystem == null) {
-        buttonShelfVisibilitySystem = com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem(
-            buttonShelf = shelf,
-            videoPanelEntity = videoPanelEntity!!
-        )
-        systemManager.registerSystem(buttonShelfVisibilitySystem!!)
-        buttonShelfVisibilitySystem?.startTracking()
-        Log.i(TAG, "ButtonShelfVisibilitySystem registered and started tracking")
-      }
-    }
-    
-    // Create BiasLightingEntity if lighting emission is enabled
-    if (useLightingEmission && biasLightingEntity == null) {
-      biasLightingEntity = BiasLightingEntity(heroLightingSystem)
-      biasLightingEntity?.attachToPanel(videoPanelEntity!!)
-      
-      // Register scale listener to update bias lighting when panel scales
-      val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
-      scaleChildrenSystem?.addScaleListener(videoPanelEntity!!) {
-        biasLightingEntity?.updateFromParentScale()
-      }
-      
-      Log.i(TAG, "BiasLightingEntity created and attached to video panel")
-    }
-    
-    // Initialize stereo video system if stereoscopic depth is enabled
-    if (useStereoscopicDepth) {
-      if (stereoVideoSystem == null) {
-        stereoVideoSystem = com.example.moonlight_spatialsdk.systems.stereo.StereoVideoSystem(stereoFormat = 0.0f) // 0.0 = side-by-side
-        systemManager.registerSystem(stereoVideoSystem!!)
-        Log.i(TAG, "StereoVideoSystem registered")
-      }
-      
-      // Register video texture with stereo system after panel is ready
-      videoPanelEntity?.let { entity ->
-        // Delay texture registration slightly to ensure panel is fully initialized
-        coroutineScope.launch {
-          delay(100) // Small delay to ensure SceneObject is ready
-          stereoVideoSystem?.registerVideoTexture(entity)
-          Log.i(TAG, "Video texture registered with StereoVideoSystem")
-        }
-      }
-      
-      // Create stereo depth slider entity if not already created
-      if (stereoDepthSliderEntity == null) {
-        stereoDepthSliderEntity = com.example.moonlight_spatialsdk.entities.StereoDepthSliderEntity()
-        Log.i(TAG, "StereoDepthSliderEntity created")
-      }
-      
-      // Attach slider to video panel
-      videoPanelEntity?.let { entity ->
-        stereoDepthSliderEntity?.attachToEntity(entity)
-        Log.i(TAG, "StereoDepthSliderEntity attached to video panel")
-        
-        // Force update children to ensure slider is positioned correctly
-        val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
-        scaleChildrenSystem?.forceUpdateChildren(entity)
-        
-        // Create and register visibility system if not already done
-        if (stereoDepthSliderVisibilitySystem == null) {
-          stereoDepthSliderVisibilitySystem = com.example.moonlight_spatialsdk.systems.stereoDepthSlider.StereoDepthSliderVisibilitySystem(
-              slider = stereoDepthSliderEntity!!,
-              videoPanelEntity = entity
-          )
-          systemManager.registerSystem(stereoDepthSliderVisibilitySystem!!)
-          stereoDepthSliderVisibilitySystem?.startTracking()
-          Log.i(TAG, "StereoDepthSliderVisibilitySystem registered and started tracking")
-        }
-      }
-    }
+    // Note: videoPanelEntity will be set by the SDK in the panel registration callbacks
+    // (panelCreator lambda for stereoscopic, surfaceConsumer for standard/lighting modes)
+    // Do NOT create a fallback entity here - it would create a panel with wrong dimensions
+    // that cannot be fixed later. The SDK callbacks are async but will execute.
   }
 
-  private fun createConnectionPanelEntity() {
-    Log.i(TAG, "Creating connection panel entity with Panel(R.id.connection_panel)")
-    
-    // Connection panel size - match the registration config to UISetSample "UI Components" panel size
-    // Registration: height = 0.75f * basePanelHeightMeters, width = 0.6f * basePanelHeightMeters
-    val connectionPanelHeight = basePanelHeightMeters * 0.75f  // 0.525m
-    val connectionPanelWidth = basePanelHeightMeters * 0.6f      // 0.42m
-    val panelSize = Vector2(connectionPanelWidth, connectionPanelHeight)
-    
-    val managerEntity = panelManager?.panelManagerEntity
-    val parentComponent = if (managerEntity != null) {
-      TransformParent(managerEntity)
-    } else {
-      TransformParent(Entity.nullEntity()) // Will be updated when PanelManager is ready
+  /**
+   * Query for SDK-created connection panel entity and ensure it's hidden initially.
+   * The entity is created by PanelRegistration in registerPanels(), not manually.
+   * PancakeActivity handles connection UI, so ImmersiveActivity should not show it on launch.
+   */
+  private fun queryAndHideConnectionPanel() {
+    // Query for SDK-created connection panel entity (created by PanelRegistration)
+    val query = Query.where { has(Panel.id) }
+    val entity = query.eval().firstOrNull { entity ->
+      val panel = entity.tryGetComponent<Panel>()
+      panel != null && panel.panelRegistrationId == R.id.connection_panel
     }
     
-    connectionPanelEntity = Entity.create(
-        listOf(
-            Panel(R.id.connection_panel),
-            Transform(Pose(Vector3(0f, 0f, 0f))),
-            PanelDimensions(panelSize),
-            Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
-            Visible(true), // Visible initially, hidden when connect is pressed
-            parentComponent
-        )
-    )
-    
-    Log.i(TAG, "Connection panel entity created - size: ${panelSize.x}m x ${panelSize.y}m, parented to PanelManager")
+    if (entity != null) {
+      connectionPanelEntity = entity
+      entity.setComponent(Visible(false))
+      Log.i(TAG, "Found SDK-created connection panel entity, hiding it initially (PancakeActivity handles connection UI)")
+    } else {
+      Log.d(TAG, "Connection panel entity not found yet - SDK may create it later")
+    }
   }
 
   private fun createButtonShelfEntity() {
@@ -1539,8 +1611,8 @@ class ImmersiveActivity : AppSystemActivity() {
     }
     
     if (existingEntity == null) {
-      Log.i(TAG, "Creating connection panel entity to show OptionsPanel")
-      createConnectionPanelEntity()
+      Log.w(TAG, "Connection panel entity not found - SDK may not have created it yet")
+      return
     } else {
       // Update our reference if we found an existing entity
       if (connectionPanelEntity == null) {
