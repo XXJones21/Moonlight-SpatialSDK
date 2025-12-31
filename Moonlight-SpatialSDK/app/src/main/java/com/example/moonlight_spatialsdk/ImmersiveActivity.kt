@@ -119,6 +119,8 @@ import com.example.moonlight_spatialsdk.systems.anchor.AnchorSnappingSystem
 import com.example.moonlight_spatialsdk.entities.BiasLightingEntity
 import com.meta.spatial.toolkit.Controller
 import com.meta.spatial.toolkit.ControllerType
+import com.meta.spatial.toolkit.Hittable
+import com.meta.spatial.toolkit.MeshCollision
 import java.io.File
 
 class ImmersiveActivity : AppSystemActivity() {
@@ -450,8 +452,8 @@ class ImmersiveActivity : AppSystemActivity() {
     val videoPanelRegistration = PanelRegistration(R.id.ui_example) {
       config {
         fractionOfScreen = 1.0f
-        height = basePanelHeightMeters
-        width = basePanelHeightMeters * (prefs.width.toFloat() / prefs.height.toFloat())
+        height = 1.0f
+        width = 1.0f * (prefs.width.toFloat() / prefs.height.toFloat())
         layoutDpi = 240
         layerConfig = LayerConfig()
         enableTransparent = false
@@ -594,8 +596,8 @@ class ImmersiveActivity : AppSystemActivity() {
         } else {
           16f / 9f
         }
-    val panelHeightMeters = basePanelHeightMeters
-    val panelWidthMeters = aspect * basePanelHeightMeters
+    val panelHeightMeters = 1.0f
+    val panelWidthMeters = aspect * 1.0f
     return QuadShapeOptions(width = panelWidthMeters, height = panelHeightMeters)
   }
 
@@ -1374,113 +1376,106 @@ class ImmersiveActivity : AppSystemActivity() {
     val panelShape = computePanelShape()
     val panelSize = Vector2(panelShape.width, panelShape.height)
     
-    // Panel is registered in registerPanels() - now use registerPanel() with PanelCreator
-    // to spawn the entity through SDK's panel system, then configure it
-    if (useStereoscopicDepth) {
-      Log.i(TAG, "Registering stereoscopic panel with PanelCreator")
+    // Spawn entity inside executeOnVrActivity to ensure activity is ready
+    SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
+      Log.i(TAG, "Spawning video panel entity inside executeOnVrActivity")
       
-      // Texture resolution: doubled width for side-by-side stereo
-      val textureWidth = prefs.width * 2
-      val textureHeight = prefs.height
-      
-      registerPanel(
-          PanelCreator(
-              registrationId = R.id.ui_example,
-              panelCreator = { entity ->
-                Log.i(TAG, "PanelCreator callback executed - entity=$entity")
-                videoPanelEntity = entity
-                
-                // Add components to SDK-created entity
-                entity.setComponent(PanelDimensions(panelSize))
-                entity.setComponent(TransformParent(panelManager?.panelManagerEntity ?: Entity.nullEntity()))
-                addVideoPanelComponents(entity, panelSize, useLightingEmission)
-                
-                // Create PanelSceneObject with PanelConfigOptions for stereoscopic depth
-                val panelConfigOptions = PanelConfigOptions().apply {
-                  width = 1.0f * (panelSize.x / panelSize.y)
-                  height = 1.0f
-                  layoutWidthInPx = textureWidth
-                  layoutHeightInPx = textureHeight
-                  mips = 1
-                  stereoMode = StereoMode.LeftRight
-                  panelShader = "stereo_video"
-                  forceSceneTexture = true
-                  enableTransparent = false
-                  themeResourceId = R.style.PanelAppThemeTransparent
-                }
-                
-                val panelSceneObject = PanelSceneObject(scene, entity, panelConfigOptions)
-                val surface = panelSceneObject.getSurface()
-                
-                SurfaceUtil.paintBlack(surface)
-                moonlightPanelRenderer.attachSurface(surface)
-                moonlightPanelRenderer.preConfigureDecoder()
-                isSurfaceReady = true
-                
-                systemManager
-                    .findSystem<SceneObjectSystem>()
-                    ?.addSceneObject(entity, CompletableFuture.completedFuture(panelSceneObject))
-                
-                pendingConnectionParams?.let { (host, port, appId) ->
-                  connectToHost(host, port, appId)
-                }
-                
-                attachChildEntitiesToVideoPanel()
-                
-                panelSceneObject
-              }
+      // Spawn entity for direct-to-surface rendering with PanelSceneObject
+      // Note: No Panel component needed - PanelSceneObject handles panel rendering directly
+      // All interaction components must be added before PanelSceneObject creation
+      val managerEntity = panelManager?.panelManagerEntity
+      videoPanelEntity = Entity.create(
+          listOf(
+              Transform(Pose(Vector3(0f, 0f, 0f))),
+              Hittable(hittable = MeshCollision.LineTest), // Required for interaction
+              PanelDimensions(panelSize),
+              Scale(Vector3(1f)), // Initial scale of 1.0
+              Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
+              Visible(false), // Hidden initially, shown when stream is ready
+              Scalable(), // Enable corner scaling
+              ScaledParent(), // Mark as scalable parent (required for child entities)
+              TransformParent(managerEntity ?: Entity.nullEntity())
           )
       )
-    } else {
-      Log.i(TAG, "Registering video panel with PanelCreator for ${if (useLightingEmission) "ReadableVideoSurfacePanelRegistration" else "VideoSurfacePanelRegistration"} mode")
       
-      registerPanel(
-          PanelCreator(
-              registrationId = R.id.ui_example,
-              panelCreator = { entity ->
-                Log.i(TAG, "PanelCreator callback executed - entity=$entity")
-                videoPanelEntity = entity
-                
-                // Add components to SDK-created entity
-                entity.setComponent(PanelDimensions(panelSize))
-                entity.setComponent(TransformParent(panelManager?.panelManagerEntity ?: Entity.nullEntity()))
-                addVideoPanelComponents(entity, panelSize, useLightingEmission)
-                
-                // Create PanelSceneObject to get surface
-                val panelConfigOptions = PanelConfigOptions().apply {
-                  width = 1.0f * (panelSize.x / panelSize.y)
-                  height = 1.0f
-                  layoutWidthInPx = prefs.width
-                  layoutHeightInPx = prefs.height
-                  mips = if (useLightingEmission) 4 else 1
-                  stereoMode = StereoMode.None
-                  forceSceneTexture = useLightingEmission
-                  enableTransparent = false
-                  themeResourceId = R.style.PanelAppThemeTransparent
-                }
-                
-                val panelSceneObject = PanelSceneObject(scene, entity, panelConfigOptions)
-                val surface = panelSceneObject.getSurface()
-                
-                SurfaceUtil.paintBlack(surface)
-                moonlightPanelRenderer.attachSurface(surface)
-                moonlightPanelRenderer.preConfigureDecoder()
-                isSurfaceReady = true
-                
-                systemManager
-                    .findSystem<SceneObjectSystem>()
-                    ?.addSceneObject(entity, CompletableFuture.completedFuture(panelSceneObject))
-                
-                pendingConnectionParams?.let { (host, port, appId) ->
-                  connectToHost(host, port, appId)
-                }
-                
-                attachChildEntitiesToVideoPanel()
-                
-                panelSceneObject
-              }
-          )
-      )
+      Log.i(TAG, "Video panel entity spawned: $videoPanelEntity")
+      
+      // Register with scaling system
+      val touchScalableSystem = immersiveActivity.systemManager.findSystem<TouchScalableSystem>()
+      if (touchScalableSystem != null) {
+        touchScalableSystem.registerEntity(videoPanelEntity!!)
+        Log.i(TAG, "Video panel entity registered with TouchScalableSystem")
+      } else {
+        Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
+      }
+      
+      // Add HeroLighting component if lighting emission is enabled
+      if (useLightingEmission) {
+        videoPanelEntity!!.setComponent(HeroLighting(isEnabled = true))
+        Log.i(TAG, "HeroLighting component added to video panel")
+      }
+      
+      // Create PanelSceneObject to get surface
+      // Direct-to-surface rendering requires direct-to-compositor prerequisites:
+      // - mips = 1 (disable mipmapping)
+      // - forceSceneTexture = false (disable scene texture) - except for stereoscopic shader
+      // - enableTransparent = false (disable transparency)
+      val panelConfigOptions = if (useStereoscopicDepth) {
+        // Stereoscopic mode configuration
+        val textureWidth = prefs.width * 2
+        val textureHeight = prefs.height
+        
+        Log.i(TAG, "Creating stereoscopic PanelSceneObject: texture=${textureWidth}x${textureHeight}")
+        
+        PanelConfigOptions().apply {
+          width = 1.0f * (prefs.width.toFloat() / prefs.height.toFloat())
+          height = 1.0f
+          layoutWidthInPx = textureWidth
+          layoutHeightInPx = textureHeight
+          mips = 1 // Direct-to-compositor prerequisite
+          stereoMode = StereoMode.LeftRight
+          panelShader = "stereo_video"
+          forceSceneTexture = true // Required for custom shader support
+          enableTransparent = false // Direct-to-compositor prerequisite
+          themeResourceId = R.style.PanelAppThemeTransparent
+        }
+      } else {
+        // Standard mode configuration - direct-to-surface prerequisites
+        Log.i(TAG, "Creating standard PanelSceneObject: texture=${prefs.width}x${prefs.height}")
+        
+        PanelConfigOptions().apply {
+          width = 1.0f * (prefs.width.toFloat() / prefs.height.toFloat())
+          height = 1.0f
+          layoutWidthInPx = prefs.width
+          layoutHeightInPx = prefs.height
+          mips = 1 // Direct-to-compositor prerequisite (always 1 for direct-to-surface)
+          stereoMode = StereoMode.None
+          forceSceneTexture = false // Direct-to-compositor prerequisite
+          enableTransparent = false // Direct-to-compositor prerequisite
+          themeResourceId = R.style.PanelAppThemeTransparent
+        }
+      }
+      
+      val panelSceneObject = PanelSceneObject(immersiveActivity.scene, videoPanelEntity!!, panelConfigOptions)
+      val surface = panelSceneObject.getSurface()
+      
+      Log.i(TAG, "Panel surface created: ${panelConfigOptions.layoutWidthInPx}x${panelConfigOptions.layoutHeightInPx}")
+      
+      SurfaceUtil.paintBlack(surface)
+      moonlightPanelRenderer.attachSurface(surface)
+      moonlightPanelRenderer.preConfigureDecoder()
+      isSurfaceReady = true
+      
+      immersiveActivity.systemManager
+          .findSystem<SceneObjectSystem>()
+          ?.addSceneObject(videoPanelEntity!!, CompletableFuture.completedFuture(panelSceneObject))
+      
+      pendingConnectionParams?.let { (host, port, appId) ->
+        Log.i(TAG, "Panel surface ready, initiating connection host=$host port=$port appId=$appId")
+        connectToHost(host, port, appId)
+      }
+      
+      attachChildEntitiesToVideoPanel()
     }
   }
 
