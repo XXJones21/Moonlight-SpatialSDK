@@ -186,39 +186,48 @@ When `stereoscopicDepthEnabled` is true in `ImmersiveSettings`:
 
 ```kotlin
 val panelConfigOptions = PanelConfigOptions().apply {
-    layoutWidthInPx = textureWidth  // 5120 for 2560x1440p user resolution
+    layoutWidthInPx = textureWidth  // 5120 for 2560x1440p user resolution (doubled width)
     layoutHeightInPx = textureHeight  // 1440
-    width = panelWidth  // Physical width in meters (ultrawide aspect ratio)
-    height = panelHeight  // Physical height in meters
-    mips = 1  // Disable mipmaps for low latency
-    stereoMode = StereoMode.None  // Custom shader handles stereo
-    panelShader = "stereo_video"  // Custom shader for stereo processing
-    forceSceneTexture = true  // Enable scene texture for shader support
-    enableTransparent = false
+    width = 1.0f * (prefs.width.toFloat() / prefs.height.toFloat())  // Matches video resolution aspect ratio (1.778 for 2560x1440p)
+    height = 1.0f  // Normalized height
+    mips = 1  // Disable mipmaps for low latency (direct-to-compositor prerequisite)
+    stereoMode = StereoMode.LeftRight  // SDK handles stereo splitting
+    panelShader = "stereo_video"  // Custom shader for texture merging
+    forceSceneTexture = true  // Required for custom shader support
+    enableTransparent = false  // Direct-to-compositor prerequisite
     themeResourceId = R.style.PanelAppThemeTransparent
 }
 ```
 
-**3. Entity Setup** (`ImmersiveActivity.kt`, Lines 1455-1469):
+**3. Entity Setup** (`ImmersiveActivity.kt`, Lines 1387-1416):
 
-- Sets `PanelDimensions` BEFORE `PanelSceneObject` creation (critical for correct panel outline)
-- Creates `PanelSceneObject` with configured options
-- Adds all required components via `addVideoPanelComponents()`
+- Creates entity with all required components (Transform, Hittable, PanelDimensions, Scale, Grabbable, Visible, Scalable, ScaledParent, TransformParent)
+- `PanelDimensions` uses physical size from `computePanelShape()`: `1.0f * aspectRatio` (1.778m x 1.0m for 2560x1440p)
+- Registers entity with `TouchScalableSystem` for corner scaling
+- Creates `PanelSceneObject` with configured `PanelConfigOptions`
 - Gets surface from `PanelSceneObject` for video decoder attachment
 
-**4. Surface Attachment** (`ImmersiveActivity.kt`, Lines 1477-1487):
+**4. Surface Attachment** (`ImmersiveActivity.kt`, Lines 1459-1471):
 
 - Paints surface black initially
 - Attaches surface to `MoonlightPanelRenderer`
 - Pre-configures decoder with preferences
 - Marks `isSurfaceReady = true`
+- Adds `PanelSceneObject` to `SceneObjectSystem`
+- Initiates connection if pending connection params exist
 
 ### Panel Dimensions
 
-**Physical Size**: Calculated to match ultrawide aspect ratio:
-- Width: `basePanelHeightMeters * aspectRatio` (e.g., 0.7m * 3.556 = 2.489m)
-- Height: `basePanelHeightMeters` (0.7m)
-- Aspect Ratio: `textureWidth / textureHeight` (5120 / 1440 = 3.556)
+**Physical Size**: Calculated to match video stream aspect ratio:
+- Width: `1.0f * aspectRatio` (e.g., 1.0m * 1.778 = 1.778m for 2560x1440p)
+- Height: `1.0f` (1.0m)
+- Aspect Ratio: `prefs.width / prefs.height` (2560 / 1440 = 1.778 for single-eye view)
+
+**PanelConfigOptions Configuration**:
+- `width = 1.0f * (prefs.width.toFloat() / prefs.height.toFloat())` - Matches single-eye video resolution aspect ratio
+- `height = 1.0f` - Normalized height
+- `layoutWidthInPx = prefs.width * 2` - Doubled width for side-by-side stereo (5120 for 2560x1440p)
+- `layoutHeightInPx = prefs.height` - Single-eye height (1440)
 
 **Texture Resolution**: Doubled width for side-by-side stereo:
 - User Resolution: 2560x1440p (from preferences)
@@ -311,8 +320,9 @@ When debug mode is disabled, shader will:
 - Panel: 5120 / 1440 = 3.556 (32:9 ultrawide)
 
 **Physical Panel Dimensions**:
-- Width: `basePanelHeightMeters * aspectRatio` = 0.7m * 3.556 = 2.489m
-- Height: `basePanelHeightMeters` = 0.7m
+- Width: `1.0f * aspectRatio` = 1.0m * 1.778 = 1.778m (for 2560x1440p stream)
+- Height: `1.0f` = 1.0m
+- Aspect Ratio: Matches single-eye video resolution (16:9 for 2560x1440p)
 
 ### Why This Matches 3DS Pattern
 
@@ -565,7 +575,7 @@ Our implementation mirrors this:
 
 **Previous Working State**:
 
-- Panel physical size: Ultrawide (32:9 aspect ratio, ~2.489m x 0.7m)
+- Panel physical size: Ultrawide (32:9 aspect ratio, ~3.556m x 1.0m)
 - Panel texture: 5120x1440p (ultrawide)
 - `StereoMode`: `None`
 - Shader: Debug mode outputting red/blue split
@@ -573,8 +583,8 @@ Our implementation mirrors this:
 
 **Current State**:
 
-- Panel physical size: Stream options (16:9 aspect ratio, ~1.244m x 0.7m)
-- Panel texture: Still 5120x1440p (ultrawide)
+- Panel physical size: Stream options (16:9 aspect ratio, ~1.778m x 1.0m for 2560x1440p)
+- Panel texture: 5120x1440p (doubled width for side-by-side stereo)
 - `StereoMode`: `LeftRight`
 - Shader: Same debug mode (red/blue split)
 - Result: ❌ Both eyes see both colors (incorrect)

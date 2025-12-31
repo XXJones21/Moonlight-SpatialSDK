@@ -304,20 +304,30 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
 
 **Panel Configuration**:
 
-- **Shape**: Computed from `prefs.width/prefs.height` to match stream aspect ratio (or doubled width for stereoscopic mode)
-- **Display**: `PixelDisplayOptions(width = prefs.width, height = prefs.height)` - supports 4K, 1440p, 1080p (or doubled width for stereoscopic)
-- **Rendering**: Monoscopic (`StereoMode.None`), `zIndex = 0` for rectilinear panels (or `StereoMode.LeftRight`/`UpDown` for stereoscopic)
+- **Physical Size**: Computed from `prefs.width/prefs.height` to match stream aspect ratio
+  - Height: `1.0f` (1.0m base height)
+  - Width: `1.0f * (prefs.width / prefs.height)` (e.g., 1.778m for 2560x1440p stream)
+  - Aspect ratio matches single-eye video resolution (16:9 for 2560x1440p)
+- **PanelConfigOptions** (for direct-to-surface rendering):
+  - `width = 1.0f * (prefs.width.toFloat() / prefs.height.toFloat())` - Matches video resolution aspect ratio
+  - `height = 1.0f` - Normalized height
+  - `layoutWidthInPx = prefs.width * 2` (for stereoscopic) or `prefs.width` (for standard)
+  - `layoutHeightInPx = prefs.height`
+- **Rendering**: Monoscopic (`StereoMode.None`) or stereoscopic (`StereoMode.LeftRight`/`UpDown`)
 - **Scale**: Initial scale of 1.0, adjustable via corner handles or `updateVideoPanelScale()` after connection
 - **Scaling Components**: `Scalable()` and `ScaledParent()` components enable corner-based scaling
 - **Surface handling**: Paint black → attachSurface → preConfigureDecoder → mark surface ready → start pending connection if present
 
 **Registration Modes**:
 
-1. **Stereoscopic Depth Mode** (`PanelCreator`):
-   - Uses `PanelCreator` with `PanelConfigOptions` for custom shader support
-   - SDK creates entity in `panelCreator` lambda with correct ultrawide dimensions (5120x1440p for 2560x1440p user resolution)
-   - Entity stored in `videoPanelEntity` and verified
-   - ✅ **Resolved**: SDK-provided entity is used, no manual entity creation overwrites it
+1. **Stereoscopic Depth Mode** (Direct-to-surface with `PanelSceneObject`):
+   - Uses `PanelSceneObject` with `PanelConfigOptions` for custom shader support
+   - Entity created manually with all required components (Transform, Hittable, PanelDimensions, etc.)
+   - `PanelConfigOptions.width` uses video resolution aspect ratio: `1.0f * (prefs.width / prefs.height)`
+   - `layoutWidthInPx = prefs.width * 2` (5120 for 2560x1440p user resolution)
+   - `layoutHeightInPx = prefs.height` (1440)
+   - Physical panel dimensions: `1.0f * aspectRatio` (1.778m x 1.0m for 2560x1440p)
+   - Entity stored in `videoPanelEntity` and added to SceneObjectSystem
 
 2. **Lighting Emission Mode** (`ReadableVideoSurfacePanelRegistration`):
    - Uses `ReadableVideoSurfacePanelRegistration` for texture sampling
