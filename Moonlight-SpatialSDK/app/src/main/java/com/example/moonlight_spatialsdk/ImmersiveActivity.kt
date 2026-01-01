@@ -442,28 +442,9 @@ class ImmersiveActivity : AppSystemActivity() {
 
   @OptIn(SpatialSDKExperimentalAPI::class)
   override fun registerPanels(): List<PanelRegistration> {
-    // Panel registration creates blueprints - panels are spawned in onSceneReady()
-    // Load immersive settings to determine video panel registration type
-    immersiveSettings = ImmersiveSettings.load(this)
-    val useLightingEmission = immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled
-    val useStereoscopicDepth = immersiveSettings.stereoscopicDepthEnabled
-    
-    // Register video panel blueprint - entity will be spawned in onSceneReady()
-    val videoPanelRegistration = PanelRegistration(R.id.ui_example) {
-      config {
-        fractionOfScreen = 1.0f
-        height = 1.0f
-        width = 1.0f * (prefs.width.toFloat() / prefs.height.toFloat())
-        layoutDpi = 240
-        layerConfig = LayerConfig()
-        enableTransparent = false
-        includeGlass = false
-        themeResourceId = R.style.PanelAppThemeTransparent
-      }
-    }
-    
+    // Video panel is registered dynamically in createVideoPanelEntity() using executeOnVrActivity
+    // to ensure panelManager is initialized before registration (lifecycle alignment)
     return listOf(
-        videoPanelRegistration,
         PanelRegistration(R.id.disconnect_dialog_panel) {
           config {
             fractionOfScreen = 0.4f
@@ -596,8 +577,8 @@ class ImmersiveActivity : AppSystemActivity() {
         } else {
           16f / 9f
         }
-    val panelHeightMeters = 1.0f
-    val panelWidthMeters = aspect * 1.0f
+    val panelHeightMeters = basePanelHeightMeters
+    val panelWidthMeters = aspect * basePanelHeightMeters
     return QuadShapeOptions(width = panelWidthMeters, height = panelHeightMeters)
   }
 
@@ -1362,120 +1343,227 @@ class ImmersiveActivity : AppSystemActivity() {
   }
 
   private fun createVideoPanelEntity() {
-    Log.i(TAG, "Spawning video panel entity with Panel(R.id.ui_example)")
+    Log.i(TAG, "Creating video panel entity with Panel(R.id.ui_example)")
     
     // Load immersive settings to determine panel type
     immersiveSettings = ImmersiveSettings.load(this)
     val useLightingEmission = immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled
     val useStereoscopicDepth = immersiveSettings.stereoscopicDepthEnabled
     
-    Log.i(TAG, "Video panel settings: lightingEmission=$useLightingEmission, stereoscopicDepth=$useStereoscopicDepth")
-    
-    // Panel is already registered in registerPanels() - now spawn the entity
-    // Spawning creates the entity with Panel component that references the registered blueprint
-    val panelShape = computePanelShape()
-    val panelSize = Vector2(panelShape.width, panelShape.height)
-    
-    // Spawn entity inside executeOnVrActivity to ensure activity is ready
+    // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
+    // This matches PremiumMediaSample pattern and ensures panelManager is initialized
     SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
-      Log.i(TAG, "Spawning video panel entity inside executeOnVrActivity")
-      
-      // Spawn entity for direct-to-surface rendering with PanelSceneObject
-      // Note: No Panel component needed - PanelSceneObject handles panel rendering directly
-      // All interaction components must be added before PanelSceneObject creation
-      val managerEntity = panelManager?.panelManagerEntity
-      videoPanelEntity = Entity.create(
-          listOf(
-              Transform(Pose(Vector3(0f, 0f, 0f))),
-              Hittable(hittable = MeshCollision.LineTest), // Required for interaction
-              PanelDimensions(panelSize),
-              Scale(Vector3(1f)), // Initial scale of 1.0
-              Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
-              Visible(false), // Hidden initially, shown when stream is ready
-              Scalable(), // Enable corner scaling
-              ScaledParent(), // Mark as scalable parent (required for child entities)
-              TransformParent(managerEntity ?: Entity.nullEntity())
-          )
-      )
-      
-      Log.i(TAG, "Video panel entity spawned: $videoPanelEntity")
-      
-      // Register with scaling system
-      val touchScalableSystem = immersiveActivity.systemManager.findSystem<TouchScalableSystem>()
-      if (touchScalableSystem != null) {
-        touchScalableSystem.registerEntity(videoPanelEntity!!)
-        Log.i(TAG, "Video panel entity registered with TouchScalableSystem")
+      if (useStereoscopicDepth) {
+        // Use ReadableVideoSurfacePanelRegistration for stereoscopic (supports custom shaders)
+        Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for stereoscopic mode")
+        immersiveActivity.registerPanel(
+            ReadableVideoSurfacePanelRegistration(
+                R.id.ui_example,
+                surfaceConsumer = { panelEntity, surface ->
+                  Log.i(TAG, "Readable surface attached for stereoscopic panel entity=$panelEntity")
+                  
+                  SurfaceUtil.paintBlack(surface)
+                  
+                  // Configure decoder with preferences when panel is created
+                  moonlightPanelRenderer.attachSurface(surface)
+                  moonlightPanelRenderer.preConfigureDecoder()
+                  
+                  isSurfaceReady = true
+                  
+                  // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
+                  val params = pendingConnectionParams
+                  if (params != null) {
+                    val (host, port, appId) = params
+                    Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
+                    connectToHost(host, port, appId)
+                  } else {
+                    Log.d(TAG, "Panel surface ready but no pending connection params")
+                  }
+                },
+                settingsCreator = {
+                  ReadableMediaPanelSettings(
+                      shape = computePanelShape(),
+                      display = PixelDisplayOptions(width = prefs.width * 2, height = prefs.height), // Doubled width for side-by-side stereo
+                      rendering = ReadableMediaPanelRenderOptions(
+                          mips = 1, // Direct-to-compositor prerequisite
+                          stereoMode = StereoMode.LeftRight,
+                          // NOTE: panelShader property not directly available in ReadableMediaPanelRenderOptions
+                          // ReadableVideoSurfacePanelRegistration supports custom shaders per documentation,
+                          // but shader configuration method needs investigation
+                      ),
+                      style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
+                  )
+                },
+            )
+        )
+      } else if (useLightingEmission) {
+        // Use ReadableVideoSurfacePanelRegistration for lighting emission (allows texture sampling)
+        Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for lighting emission")
+        immersiveActivity.registerPanel(
+            ReadableVideoSurfacePanelRegistration(
+                R.id.ui_example,
+                surfaceConsumer = { panelEntity, surface ->
+                  Log.i(TAG, "Readable surface attached for panel entity=$panelEntity")
+                  
+                  SurfaceUtil.paintBlack(surface)
+                  
+                  // Configure decoder with preferences when panel is created
+                  moonlightPanelRenderer.attachSurface(surface)
+                  moonlightPanelRenderer.preConfigureDecoder()
+                  
+                  isSurfaceReady = true
+                  
+                  // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
+                  val params = pendingConnectionParams
+                  if (params != null) {
+                    val (host, port, appId) = params
+                    Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
+                    connectToHost(host, port, appId)
+                  } else {
+                    Log.d(TAG, "Panel surface ready but no pending connection params")
+                  }
+                },
+                settingsCreator = {
+                  ReadableMediaPanelSettings(
+                      shape = computePanelShape(),
+                      display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
+                      rendering = ReadableMediaPanelRenderOptions(
+                          mips = 4, // Mip levels for shader sampling (used for blur in lighting)
+                          stereoMode = StereoMode.None,
+                      ),
+                      style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
+                  )
+                },
+            )
+        )
       } else {
-        Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
+        // Use standard VideoSurfacePanelRegistration for better performance
+        Log.i(TAG, "Using VideoSurfacePanelRegistration (standard mode)")
+        immersiveActivity.registerPanel(
+            VideoSurfacePanelRegistration(
+                R.id.ui_example,
+                surfaceConsumer = { panelEntity, surface ->
+                  Log.i(TAG, "Surface attached for panel entity=$panelEntity")
+                  
+                  SurfaceUtil.paintBlack(surface)
+                  
+                  // Configure decoder with preferences when panel is created
+                  moonlightPanelRenderer.attachSurface(surface)
+                  moonlightPanelRenderer.preConfigureDecoder()
+                  
+                  isSurfaceReady = true
+                  
+                  // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
+                  val params = pendingConnectionParams
+                  if (params != null) {
+                    val (host, port, appId) = params
+                    Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
+                    connectToHost(host, port, appId)
+                  } else {
+                    Log.d(TAG, "Panel surface ready but no pending connection params")
+                  }
+                },
+                settingsCreator = {
+                  MediaPanelSettings(
+                      shape = computePanelShape(),
+                      display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
+                      rendering = MediaPanelRenderOptions(
+                          isDRM = false,
+                          stereoMode = StereoMode.None,
+                          zIndex = 0 // Rectilinear panels use zIndex 0 (Equirect180 uses -1)
+                      ),
+                      style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
+                  )
+                },
+            )
+        )
       }
-      
-      // Add HeroLighting component if lighting emission is enabled
-      if (useLightingEmission) {
-        videoPanelEntity!!.setComponent(HeroLighting(isEnabled = true))
+    }
+    
+    // Create entity after panel registration (panel must be registered before entity creation)
+    val aspect =
+        if (prefs.height != 0) {
+          prefs.width.toFloat() / prefs.height.toFloat()
+        } else {
+          16f / 9f
+        }
+    val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+    
+    val managerEntity = panelManager?.panelManagerEntity
+    val parentComponent = if (managerEntity != null) {
+      TransformParent(managerEntity)
+    } else {
+      TransformParent(Entity.nullEntity())
+    }
+    
+    // Build component list - add HeroLighting if using readable panel for lighting emission
+    val baseComponents = mutableListOf(
+        Panel(R.id.ui_example),
+        Transform(Pose(Vector3(0f, 0f, 0f))),
+        PanelDimensions(panelSize),
+        Scale(Vector3(1f)), // Initial scale of 1.0 - can be adjusted after connection
+        Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
+        Visible(false), // Hidden initially, shown when stream is ready
+        Scalable(), // Enable corner scaling
+        ScaledParent(), // Mark as scalable parent
+        parentComponent
+    )
+    
+    // Add HeroLighting component if lighting emission is enabled (useLightingEmission already defined above)
+    if (useLightingEmission) {
+        baseComponents.add(HeroLighting(isEnabled = true))
         Log.i(TAG, "HeroLighting component added to video panel")
+    }
+    
+    videoPanelEntity = Entity.create(baseComponents)
+    
+    // Register video panel with scaling system
+    val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+    if (touchScalableSystem != null) {
+      touchScalableSystem.registerEntity(videoPanelEntity!!)
+      Log.i(TAG, "Video panel entity created and registered with TouchScalableSystem")
+    } else {
+      Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
+    }
+    
+    Log.i(TAG, "Video panel entity created - parented to PanelManager, hidden initially")
+    
+    // Attach ButtonShelf to video panel if it was created before video panel
+    buttonShelfEntity?.let { shelf ->
+      shelf.attachToEntity(videoPanelEntity!!)
+      Log.i(TAG, "ButtonShelf attached to video panel")
+      
+      // Force update children to ensure ButtonShelf is positioned correctly
+      val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+      if (scaleChildrenSystem != null) {
+        scaleChildrenSystem.forceUpdateChildren(videoPanelEntity!!)
+        Log.i(TAG, "ScaleChildrenSystem force update called for ButtonShelf")
       }
       
-      // Create PanelSceneObject to get surface
-      // Direct-to-surface rendering requires direct-to-compositor prerequisites:
-      // - mips = 1 (disable mipmapping)
-      // - forceSceneTexture = false (disable scene texture) - except for stereoscopic shader
-      // - enableTransparent = false (disable transparency)
-      val panelConfigOptions = if (useStereoscopicDepth) {
-        // Stereoscopic mode configuration
-        val textureWidth = prefs.width * 2
-        val textureHeight = prefs.height
-        
-        Log.i(TAG, "Creating stereoscopic PanelSceneObject: texture=${textureWidth}x${textureHeight}")
-        
-        PanelConfigOptions().apply {
-          width = 1.0f * (prefs.width.toFloat() / prefs.height.toFloat())
-          height = 1.0f
-          layoutWidthInPx = textureWidth
-          layoutHeightInPx = textureHeight
-          mips = 1 // Direct-to-compositor prerequisite
-          stereoMode = StereoMode.LeftRight
-          panelShader = "stereo_video"
-          forceSceneTexture = true // Required for custom shader support
-          enableTransparent = false // Direct-to-compositor prerequisite
-          themeResourceId = R.style.PanelAppThemeTransparent
-        }
-      } else {
-        // Standard mode configuration - direct-to-surface prerequisites
-        Log.i(TAG, "Creating standard PanelSceneObject: texture=${prefs.width}x${prefs.height}")
-        
-        PanelConfigOptions().apply {
-          width = 1.0f * (prefs.width.toFloat() / prefs.height.toFloat())
-          height = 1.0f
-          layoutWidthInPx = prefs.width
-          layoutHeightInPx = prefs.height
-          mips = 1 // Direct-to-compositor prerequisite (always 1 for direct-to-surface)
-          stereoMode = StereoMode.None
-          forceSceneTexture = false // Direct-to-compositor prerequisite
-          enableTransparent = false // Direct-to-compositor prerequisite
-          themeResourceId = R.style.PanelAppThemeTransparent
-        }
+      // Create and register visibility system if not already done
+      if (buttonShelfVisibilitySystem == null) {
+        buttonShelfVisibilitySystem = com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem(
+            buttonShelf = shelf,
+            videoPanelEntity = videoPanelEntity!!
+        )
+        systemManager.registerSystem(buttonShelfVisibilitySystem!!)
+        buttonShelfVisibilitySystem?.startTracking()
+        Log.i(TAG, "ButtonShelfVisibilitySystem registered and started tracking")
+      }
+    }
+    
+    // Create BiasLightingEntity if lighting emission is enabled
+    if (useLightingEmission && biasLightingEntity == null) {
+      biasLightingEntity = BiasLightingEntity(heroLightingSystem)
+      biasLightingEntity?.attachToPanel(videoPanelEntity!!)
+      
+      // Register scale listener to update bias lighting when panel scales
+      val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+      scaleChildrenSystem?.addScaleListener(videoPanelEntity!!) {
+        biasLightingEntity?.updateFromParentScale()
       }
       
-      val panelSceneObject = PanelSceneObject(immersiveActivity.scene, videoPanelEntity!!, panelConfigOptions)
-      val surface = panelSceneObject.getSurface()
-      
-      Log.i(TAG, "Panel surface created: ${panelConfigOptions.layoutWidthInPx}x${panelConfigOptions.layoutHeightInPx}")
-      
-      SurfaceUtil.paintBlack(surface)
-      moonlightPanelRenderer.attachSurface(surface)
-      moonlightPanelRenderer.preConfigureDecoder()
-      isSurfaceReady = true
-      
-      immersiveActivity.systemManager
-          .findSystem<SceneObjectSystem>()
-          ?.addSceneObject(videoPanelEntity!!, CompletableFuture.completedFuture(panelSceneObject))
-      
-      pendingConnectionParams?.let { (host, port, appId) ->
-        Log.i(TAG, "Panel surface ready, initiating connection host=$host port=$port appId=$appId")
-        connectToHost(host, port, appId)
-      }
-      
-      attachChildEntitiesToVideoPanel()
+      Log.i(TAG, "BiasLightingEntity created and attached to video panel")
     }
   }
 
