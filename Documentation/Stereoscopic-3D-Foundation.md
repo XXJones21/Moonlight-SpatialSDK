@@ -4,7 +4,7 @@
 
 This document summarizes the foundational work completed to enable 3DS-style stereoscopic 3D depth control in the Moonlight-SpatialSDK Quest 3 application. The implementation provides a stable foundation for building up to the full 3DS-style depth effect with runtime depth control via a spatial slider.
 
-**Status**: Foundation complete - Panel registration issues resolved, debug shader active, ultrawide panel configured. Ready for 3DS-style depth algorithm implementation.
+**Status**: Foundation complete - Panel registration infrastructure restored. Three distinct panel paths implemented: `VideoSurfacePanelRegistration` (standard), `ReadableVideoSurfacePanelRegistration` (lighting emission and stereoscopic). Custom shader configuration for stereoscopic mode needs investigation.
 
 ---
 
@@ -22,35 +22,35 @@ The Meta Spatial SDK provides `StereoMode` enum for controlling how a single tex
 
 ### Current Implementation
 
-**Panel Configuration** (`ImmersiveActivity.kt`, Line 1448):
+**Panel Configuration** (`ImmersiveActivity.kt`, Lines 1387-1393):
 
 ```kotlin
-stereoMode = StereoMode.None // Currently set to None for debug testing
+ReadableMediaPanelRenderOptions(
+    mips = 1,
+    stereoMode = StereoMode.LeftRight, // SDK handles stereo splitting
+    // NOTE: panelShader property not directly available
+)
 ```
 
-**Why `StereoMode.None`?**:
+**Current Implementation**:
 
-- We're using a custom shader (`stereo_video`) that manually handles stereo splitting
-- `StereoMode.None` ensures both eyes see the full texture (5120x1440p ultrawide)
-- Our shader then performs the stereo splitting and depth control logic
-- This gives us full control over the stereo rendering pipeline
-
-**Alternative Approach** (Future):
-
-- Could use `StereoMode.LeftRight` to let SDK handle initial splitting
-- Then apply depth control in shader on top of pre-split UVs
-- Currently using `StereoMode.None` for maximum control during foundation phase
+- Uses `ReadableVideoSurfacePanelRegistration` for stereoscopic mode (supports custom shaders)
+- `StereoMode.LeftRight` set in `ReadableMediaPanelRenderOptions` - SDK handles stereo splitting
+- Custom shader (`stereo_video`) configuration method needs investigation
+- `ReadableMediaPanelRenderOptions` implements `PanelConfigOptionsModifier` but doesn't expose `panelShader` property directly
 
 ### SDK Stereo Rendering Behavior
 
 When `StereoMode.LeftRight` is set (current):
+
 - SDK automatically splits texture in half horizontally
 - Left eye gets UVs [0.0, 0.5] for X coordinate
 - Right eye gets UVs [0.5, 1.0] for X coordinate
 - SDK handles separate render passes per eye automatically
-- Custom shader should only merge textures, not perform stereo splitting
+- Custom shader configuration: `ReadableVideoSurfacePanelRegistration` supports custom shaders per documentation, but `panelShader` property not directly available in `ReadableMediaPanelRenderOptions` - configuration method needs investigation
 
 When `StereoMode.None` is set:
+
 - Both eyes receive full texture UVs [0.0, 1.0]
 - Custom shader must handle all stereo logic manually
 - Provides maximum flexibility for custom depth algorithms
@@ -66,11 +66,13 @@ The `stereo_video` shader has a **single, focused responsibility**:
 **Create a 5120x1440p single texture by merging two separate textures (left and right eye views) into one side-by-side layout.**
 
 **What the shader SHOULD do:**
+
 - Take two input textures (left eye view and right eye view), each at 2560x1440p resolution
 - Merge them into a single 5120x1440p texture (left half = left eye, right half = right eye)
 - Output the merged texture without any additional processing
 
 **What the shader should NOT do (at this stage):**
+
 - ❌ No stereo splitting logic (SDK handles this via `StereoMode.LeftRight`)
 - ❌ No depth control or 3DS-style depth algorithms
 - ❌ No eye inversion fixes
@@ -89,11 +91,13 @@ The shader's job is purely to **combine two textures into one**. All stereo proc
 
 **Shader Purpose**: Merge two separate textures (left eye + right eye) into a single side-by-side texture.
 
-**Input**: 
+**Input**:
+
 - Two separate textures, each at stream resolution (e.g., 2560x1440p)
 - For debugging: Red texture (left eye) and blue texture (right eye)
 
-**Output**: 
+**Output**:
+
 - Single side-by-side texture at (2*width)xheight (e.g., 5120x1440p)
 - Left half [0.0, 0.5]: Left eye texture (2560x1440p)
 - Right half [0.5, 1.0]: Right eye texture (2560x1440p)
@@ -122,13 +126,15 @@ void main() {
 }
 ```
 
-**Important**: 
+**Important**:
+
 - This shader does NOT perform stereo splitting - that is handled by SDK's `StereoMode.LeftRight`
 - This shader ONLY merges two textures into a side-by-side layout
 - The merged output (5120x1440p) is then applied to the panel
 - SDK's `StereoMode.LeftRight` automatically splits the panel texture for each eye
 
 **Future Implementation**:
+
 - Will sample actual video texture from decoder (via `emissive` sampler)
 - Will duplicate the video texture for left and right eye views
 - Will merge them side-by-side into 5120x1440p output
@@ -176,60 +182,73 @@ Simple pass-through shader that:
 
 ### Panel Registration Flow
 
-**1. Registration Trigger** (`ImmersiveActivity.kt`, Line 1416):
+**1. Registration Trigger** (`ImmersiveActivity.kt`, Line 1356):
 
 When `stereoscopicDepthEnabled` is true in `ImmersiveSettings`:
-- Uses `PanelCreator` registration mode (allows custom shader via `panelShader`)
+
+- Uses `ReadableVideoSurfacePanelRegistration` (supports custom shaders and post-processing)
+- Panel registered dynamically inside `executeOnVrActivity` block
 - Calculates ultrawide dimensions (5120x1440p for 2560x1440p user resolution)
 
-**2. Panel Configuration** (`ImmersiveActivity.kt`, Lines 1439-1453):
+**2. Panel Configuration** (`ImmersiveActivity.kt`, Lines 1383-1396):
 
 ```kotlin
-val panelConfigOptions = PanelConfigOptions().apply {
-    layoutWidthInPx = textureWidth  // 5120 for 2560x1440p user resolution (doubled width)
-    layoutHeightInPx = textureHeight  // 1440
-    width = 1.0f * (prefs.width.toFloat() / prefs.height.toFloat())  // Matches video resolution aspect ratio (1.778 for 2560x1440p)
-    height = 1.0f  // Normalized height
-    mips = 1  // Disable mipmaps for low latency (direct-to-compositor prerequisite)
-    stereoMode = StereoMode.LeftRight  // SDK handles stereo splitting
-    panelShader = "stereo_video"  // Custom shader for texture merging
-    forceSceneTexture = true  // Required for custom shader support
-    enableTransparent = false  // Direct-to-compositor prerequisite
-    themeResourceId = R.style.PanelAppThemeTransparent
-}
+ReadableVideoSurfacePanelRegistration(
+    R.id.ui_example,
+    surfaceConsumer = { panelEntity, surface ->
+        // Surface attachment and decoder configuration
+    },
+    settingsCreator = {
+        ReadableMediaPanelSettings(
+            shape = computePanelShape(),
+            display = PixelDisplayOptions(width = prefs.width * 2, height = prefs.height), // Doubled width for side-by-side stereo
+            rendering = ReadableMediaPanelRenderOptions(
+                mips = 1, // Direct-to-compositor prerequisite
+                stereoMode = StereoMode.LeftRight, // SDK handles stereo splitting
+                // NOTE: panelShader property not directly available in ReadableMediaPanelRenderOptions
+                // ReadableVideoSurfacePanelRegistration supports custom shaders per documentation,
+                // but shader configuration method needs investigation
+            ),
+            style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
+        )
+    },
+)
 ```
 
-**3. Entity Setup** (`ImmersiveActivity.kt`, Lines 1387-1416):
+**3. Entity Setup** (`ImmersiveActivity.kt`, Lines 1483-1518):
 
-- Creates entity with all required components (Transform, Hittable, PanelDimensions, Scale, Grabbable, Visible, Scalable, ScaledParent, TransformParent)
-- `PanelDimensions` uses physical size from `computePanelShape()`: `1.0f * aspectRatio` (1.778m x 1.0m for 2560x1440p)
+- Entity created AFTER panel registration (outside `executeOnVrActivity` block)
+- Entity includes `Panel(R.id.ui_example)` component (required for panel registration)
+- All required components added: `Panel`, `Transform`, `PanelDimensions`, `Scale`, `Grabbable`, `Visible`, `Scalable`, `ScaledParent`, `TransformParent`
+- `PanelDimensions` uses physical size: `basePanelHeightMeters * aspectRatio` (0.7m * 1.778 = 1.245m x 0.7m for 2560x1440p)
 - Registers entity with `TouchScalableSystem` for corner scaling
-- Creates `PanelSceneObject` with configured `PanelConfigOptions`
-- Gets surface from `PanelSceneObject` for video decoder attachment
 
-**4. Surface Attachment** (`ImmersiveActivity.kt`, Lines 1459-1471):
+**4. Surface Attachment** (`ImmersiveActivity.kt`, Lines 1362-1381):
 
+- Surface provided via `surfaceConsumer` callback
 - Paints surface black initially
 - Attaches surface to `MoonlightPanelRenderer`
 - Pre-configures decoder with preferences
 - Marks `isSurfaceReady = true`
-- Adds `PanelSceneObject` to `SceneObjectSystem`
 - Initiates connection if pending connection params exist
 
 ### Panel Dimensions
 
 **Physical Size**: Calculated to match video stream aspect ratio:
-- Width: `1.0f * aspectRatio` (e.g., 1.0m * 1.778 = 1.778m for 2560x1440p)
-- Height: `1.0f` (1.0m)
+
+- Width: `basePanelHeightMeters * aspectRatio` (e.g., 0.7m * 1.778 = 1.245m for 2560x1440p)
+- Height: `basePanelHeightMeters` (0.7m)
 - Aspect Ratio: `prefs.width / prefs.height` (2560 / 1440 = 1.778 for single-eye view)
 
-**PanelConfigOptions Configuration**:
-- `width = 1.0f * (prefs.width.toFloat() / prefs.height.toFloat())` - Matches single-eye video resolution aspect ratio
-- `height = 1.0f` - Normalized height
-- `layoutWidthInPx = prefs.width * 2` - Doubled width for side-by-side stereo (5120 for 2560x1440p)
-- `layoutHeightInPx = prefs.height` - Single-eye height (1440)
+**ReadableMediaPanelSettings Configuration**:
+
+- `shape = computePanelShape()` - Physical panel dimensions (0.7m base height)
+- `display = PixelDisplayOptions(width = prefs.width * 2, height = prefs.height)` - Doubled width for side-by-side stereo (5120x1440p for 2560x1440p stream)
+- `rendering = ReadableMediaPanelRenderOptions(mips = 1, stereoMode = StereoMode.LeftRight)` - Direct-to-compositor prerequisites and stereo mode
+- **NOTE**: Custom shader configuration (`panelShader = "stereo_video"`) not directly available - needs investigation
 
 **Texture Resolution**: Doubled width for side-by-side stereo:
+
 - User Resolution: 2560x1440p (from preferences)
 - Panel Texture: 5120x1440p (doubled width)
 - This ensures full desktop per eye when split
@@ -250,6 +269,7 @@ val panelConfigOptions = PanelConfigOptions().apply {
 ### Current Debug Mode
 
 **Purpose**: Verify that:
+
 1. Custom shader is being applied correctly
 2. Panel is rendering at correct ultrawide size (5120x1440p)
 3. Both eyes are receiving the shader output
@@ -266,11 +286,13 @@ if (inputUV.x < 0.5) {
 ```
 
 **Expected Result**:
+
 - Left eye should see: Red on left half, blue on right half (full ultrawide texture)
 - Right eye should see: Red on left half, blue on right half (full ultrawide texture)
 - Both eyes see the same because `StereoMode.None` is set
 
 **Why This Is Useful**:
+
 - Confirms shader is active and receiving correct UVs
 - Verifies panel is ultrawide (not condensed to 2560x1440p)
 - Provides visual confirmation that foundation is working
@@ -287,6 +309,7 @@ var debugMode: Boolean = true  // Enabled by default for testing
 **Toggle Method**: `setDebugMode(enabled: Boolean)` (Line 123)
 
 When debug mode is disabled, shader will:
+
 - Sample from video texture instead of outputting solid colors
 - Apply stereo splitting logic
 - Implement 3DS-style depth control (once algorithm is implemented)
@@ -298,10 +321,12 @@ When debug mode is disabled, shader will:
 ### The Doubling Requirement
 
 **Problem**: SDK's `StereoMode.LeftRight` splits texture in half automatically:
+
 - If we provide 2560x1440p texture, SDK gives each eye 1280x1440p (half the desktop)
 - We need full 2560x1440p desktop per eye for proper stereoscopic viewing
 
 **Solution**: Double the texture width:
+
 - Provide 5120x1440p texture to SDK
 - SDK splits it: left eye gets [0, 2560], right eye gets [2560, 5120]
 - Each eye receives full 2560x1440p desktop
@@ -311,28 +336,33 @@ When debug mode is disabled, shader will:
 **User Resolution**: 2560x1440p (from preferences)
 
 **Panel Texture Resolution**:
+
 - Width: `prefs.width * 2` = 2560 * 2 = 5120
 - Height: `prefs.height` = 1440
 - Total: 5120x1440p
 
 **Aspect Ratio**:
+
 - User: 2560 / 1440 = 1.778 (16:9)
 - Panel: 5120 / 1440 = 3.556 (32:9 ultrawide)
 
 **Physical Panel Dimensions**:
-- Width: `1.0f * aspectRatio` = 1.0m * 1.778 = 1.778m (for 2560x1440p stream)
-- Height: `1.0f` = 1.0m
+
+- Width: `basePanelHeightMeters * aspectRatio` = 0.7m * 1.778 = 1.245m (for 2560x1440p stream)
+- Height: `basePanelHeightMeters` = 0.7m
 - Aspect Ratio: Matches single-eye video resolution (16:9 for 2560x1440p)
 
 ### Why This Matches 3DS Pattern
 
 The Nintendo 3DS uses a similar approach:
+
 - Top screen: 800x240 resolution
 - Shows two 400x240 images (one per eye) interleaved
 - Parallax barrier directs different columns to each eye
 - Total effective resolution per eye: 400x240
 
 Our implementation mirrors this:
+
 - Panel: 5120x1440p total
 - Each eye gets: 2560x1440p (full desktop)
 - Custom shader handles the splitting and depth control
@@ -352,6 +382,7 @@ Our implementation mirrors this:
 - Support both side-by-side and over-under formats
 
 **Files to Modify**:
+
 - `app/src/shaders/stereo_video.frag` - Implement depth algorithm
 - `app/src/main/java/com/example/moonlight_spatialsdk/systems/stereo/StereoVideoSystem.kt` - Verify uniform passing
 
@@ -575,7 +606,7 @@ Our implementation mirrors this:
 
 **Previous Working State**:
 
-- Panel physical size: Ultrawide (32:9 aspect ratio, ~3.556m x 1.0m)
+- Panel physical size: Ultrawide (32:9 aspect ratio, ~2.489m x 0.7m)
 - Panel texture: 5120x1440p (ultrawide)
 - `StereoMode`: `None`
 - Shader: Debug mode outputting red/blue split
@@ -583,11 +614,12 @@ Our implementation mirrors this:
 
 **Current State**:
 
-- Panel physical size: Stream options (16:9 aspect ratio, ~1.778m x 1.0m for 2560x1440p)
+- Panel physical size: Stream options (16:9 aspect ratio, ~1.245m x 0.7m for 2560x1440p)
 - Panel texture: 5120x1440p (doubled width for side-by-side stereo)
+- Panel registration: `ReadableVideoSurfacePanelRegistration` (supports custom shaders)
 - `StereoMode`: `LeftRight`
-- Shader: Same debug mode (red/blue split)
-- Result: ❌ Both eyes see both colors (incorrect)
+- Shader: Debug mode (red/blue split) - **NOTE**: Shader configuration method needs investigation
+- Result: ❌ Both eyes see both colors (incorrect) - may be related to shader configuration
 
 ### Root Cause Analysis
 
@@ -774,12 +806,14 @@ val settings = MediaPanelSettings(
 **Key Insight from Previous Behavior**:
 
 **When desktop was cut in half (Windows menu split)**:
+
 - This occurred when decoder was outputting at 2560x1440p
 - Surface was likely 2560x1440p (not doubled)
 - `StereoMode.LeftRight` split 2560x1440p → each eye got 1280x1440p
 - **Result**: Desktop appeared cut in half because each eye only saw half the width
 
 **Current Setup**:
+
 - Surface: 5120x1440p (doubled width)
 - Decoder: Outputs at 2560x1440p (from `prefs.width x prefs.height`)
 - **Problem**: Decoder outputs 2560x1440p to 5120x1440p surface
@@ -789,12 +823,14 @@ val settings = MediaPanelSettings(
 **Answer to "Is shader splitting before or after panel placement?"**:
 
 **SDK splits BEFORE shader runs** (when `StereoMode.LeftRight` works correctly):
+
 - SDK modifies UVs at step 3 (before shader)
 - Shader receives pre-split UVs: left eye [0.0, 0.5], right eye [0.5, 1.0]
 - Shader should NOT need to manually split
 - Panel placement happens after shader (step 5)
 
 **But with custom shader, SDK may NOT split**:
+
 - Custom shader may bypass SDK's UV modification
 - Shader receives full UVs [0.0, 1.0] in both eyes
 - Shader's manual splitting logic (`if (inputUV.x < 0.5)`) runs on full UVs
@@ -803,10 +839,12 @@ val settings = MediaPanelSettings(
 **Critical Understanding**:
 
 The shader should NOT be splitting the texture. The SDK's `StereoMode.LeftRight` should split it BEFORE the shader runs. The shader's job is only to:
+
 1. Sample the texture at the provided UVs
 2. Output the color (or apply effects like depth control)
 
 If the shader is receiving full UVs [0.0, 1.0] in both eyes, it means:
+
 - SDK's `StereoMode.LeftRight` is NOT working (custom shader bypasses it)
 - OR custom shader is overriding SDK's stereo mode behavior
 
@@ -823,11 +861,13 @@ If the shader is receiving full UVs [0.0, 1.0] in both eyes, it means:
 **The Critical Question**: How do we get TWO separate 2560x1440p frames (left eye + right eye) into the 5120x1440p surface?
 
 **Current Reality**:
+
 - Decoder outputs ONE frame at 2560x1440p (single view, not stereo)
 - Surface is 5120x1440p (doubled width for side-by-side)
 - **Problem**: We only have ONE texture (decoder output), but need TWO textures (left + right eye views)
 
 **The Shader's Actual Job** (as stated by user):
+
 - Shader should merge TWO separate textures (left eye view + right eye view) into one 5120x1440p texture
 - But decoder only provides ONE texture (2560x1440p)
 - **Question**: Where do the two textures come from?
@@ -866,6 +906,7 @@ If the shader is receiving full UVs [0.0, 1.0] in both eyes, it means:
 **But our shader comment says**: "It only should create the two textures and then merge to one"
 
 **This suggests**:
+
 - We're receiving two separate textures (somehow)
 - Shader needs to merge them side-by-side
 - **But**: Decoder only outputs to one surface, so where do two textures come from?
@@ -873,6 +914,7 @@ If the shader is receiving full UVs [0.0, 1.0] in both eyes, it means:
 **The Real Question**: Is Moonlight configured to output side-by-side stereo at 5120x1440p, or is it outputting a single 2560x1440p frame?
 
 **Answer**: The decoder outputs a SINGLE 2560x1440p frame. We need to:
+
 - Either: Have decoder output side-by-side stereo (left + right) at 5120x1440p
 - Or: Use shader to duplicate/mirror the 2560x1440p frame to fill both halves
 - Or: Use shader to sample the same 2560x1440p frame for both eyes (monoscopic)
