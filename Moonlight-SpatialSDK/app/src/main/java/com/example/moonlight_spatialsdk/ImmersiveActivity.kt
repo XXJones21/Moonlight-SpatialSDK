@@ -121,6 +121,8 @@ import com.meta.spatial.toolkit.Controller
 import com.meta.spatial.toolkit.ControllerType
 import com.meta.spatial.toolkit.Hittable
 import com.meta.spatial.toolkit.MeshCollision
+import com.meta.spatial.toolkit.Mesh
+import android.net.Uri
 import java.io.File
 
 class ImmersiveActivity : AppSystemActivity() {
@@ -202,7 +204,10 @@ class ImmersiveActivity : AppSystemActivity() {
   
   // Stereo depth slider visibility system
   private var stereoDepthSliderVisibilitySystem: com.example.moonlight_spatialsdk.systems.stereoDepthSlider.StereoDepthSliderVisibilitySystem? = null
-  
+
+  // Stereo 3D video panel entity (custom mesh for stereoscopic rendering)
+  private var stereo3DPanelEntity: com.example.moonlight_spatialsdk.entities.Stereo3DVideoPanelEntity? = null
+
   // Cached immersive settings for panel creation decisions
   private var immersiveSettings: ImmersiveSettings = ImmersiveSettings()
   
@@ -1354,48 +1359,14 @@ class ImmersiveActivity : AppSystemActivity() {
     // This matches PremiumMediaSample pattern and ensures panelManager is initialized
     SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
       if (useStereoscopicDepth) {
-        // Use ReadableVideoSurfacePanelRegistration for stereoscopic (supports custom shaders)
-        Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for stereoscopic mode")
-        immersiveActivity.registerPanel(
-            ReadableVideoSurfacePanelRegistration(
-                R.id.ui_example,
-                surfaceConsumer = { panelEntity, surface ->
-                  Log.i(TAG, "Readable surface attached for stereoscopic panel entity=$panelEntity")
-                  
-                  SurfaceUtil.paintBlack(surface)
-                  
-                  // Configure decoder with preferences when panel is created
-                  moonlightPanelRenderer.attachSurface(surface)
-                  moonlightPanelRenderer.preConfigureDecoder()
-                  
-                  isSurfaceReady = true
-                  
-                  // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
-                  val params = pendingConnectionParams
-                  if (params != null) {
-                    val (host, port, appId) = params
-                    Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
-                    connectToHost(host, port, appId)
-                  } else {
-                    Log.d(TAG, "Panel surface ready but no pending connection params")
-                  }
-                },
-                settingsCreator = {
-                  ReadableMediaPanelSettings(
-                      shape = computePanelShape(),
-                      display = PixelDisplayOptions(width = prefs.width * 2, height = prefs.height), // Doubled width for side-by-side stereo
-                      rendering = ReadableMediaPanelRenderOptions(
-                          mips = 1, // Direct-to-compositor prerequisite
-                          stereoMode = StereoMode.LeftRight,
-                          // NOTE: panelShader property not directly available in ReadableMediaPanelRenderOptions
-                          // ReadableVideoSurfacePanelRegistration supports custom shaders per documentation,
-                          // but shader configuration method needs investigation
-                      ),
-                      style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
-                  )
-                },
-            )
-        )
+        // Use custom SceneMesh quad for stereoscopic 3D rendering
+        Log.i(TAG, "Using Stereo3DVideoPanelEntity (custom SceneMesh quad) for stereoscopic mode")
+        
+        // Create and register the stereo 3D panel entity
+        stereo3DPanelEntity = com.example.moonlight_spatialsdk.entities.Stereo3DVideoPanelEntity()
+        stereo3DPanelEntity?.registerMeshAndMaterial(immersiveActivity)
+        
+        Log.i(TAG, "Stereo3DVideoPanelEntity mesh and material registered")
       } else if (useLightingEmission) {
         // Use ReadableVideoSurfacePanelRegistration for lighting emission (allows texture sampling)
         Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for lighting emission")
@@ -1496,18 +1467,37 @@ class ImmersiveActivity : AppSystemActivity() {
       TransformParent(Entity.nullEntity())
     }
     
-    // Build component list - add HeroLighting if using readable panel for lighting emission
-    val baseComponents = mutableListOf(
-        Panel(R.id.ui_example),
+    // Build component list - use Mesh component for stereoscopic mode, Panel component for others
+    val baseComponents = mutableListOf<com.meta.spatial.core.ComponentBase>()
+    
+    if (useStereoscopicDepth) {
+        // For stereoscopic mode, we'll create SceneObject explicitly (no Mesh component needed)
+        // SceneObject will be created after entity creation
+        baseComponents.add(Hittable(MeshCollision.NoCollision)) // Required for mesh rendering
+        Log.i(TAG, "Using SceneObject for stereoscopic 3D video panel (will be created after entity)")
+    } else {
+        // Use Panel component for standard and lighting emission modes
+        baseComponents.add(Panel(R.id.ui_example))
+    }
+    
+    // For stereoscopic mode, make entity visible immediately to test mesh spawning
+    // For other modes, keep hidden initially until stream is ready
+    val initialVisibility = if (useStereoscopicDepth) {
+        Visible(true) // Visible immediately for mesh testing
+    } else {
+        Visible(false) // Hidden initially, shown when stream is ready
+    }
+    
+    baseComponents.addAll(listOf(
         Transform(Pose(Vector3(0f, 0f, 0f))),
         PanelDimensions(panelSize),
         Scale(Vector3(1f)), // Initial scale of 1.0 - can be adjusted after connection
         Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
-        Visible(false), // Hidden initially, shown when stream is ready
+        initialVisibility,
         Scalable(), // Enable corner scaling
         ScaledParent(), // Mark as scalable parent
         parentComponent
-    )
+    ))
     
     // Add HeroLighting component if lighting emission is enabled (useLightingEmission already defined above)
     if (useLightingEmission) {
@@ -1516,6 +1506,23 @@ class ImmersiveActivity : AppSystemActivity() {
     }
     
     videoPanelEntity = Entity.create(baseComponents)
+    
+    // For stereoscopic mesh entity, set initial scale to match panel size and create SceneObject
+    if (useStereoscopicDepth && videoPanelEntity != null && stereo3DPanelEntity != null) {
+        Log.i(TAG, "Setting up stereoscopic mesh entity: entity=$videoPanelEntity, scene=$scene, systemManager=$systemManager")
+        
+        // The quad mesh is 1x1 unit, so scale it to match panel dimensions
+        videoPanelEntity?.setComponent(Scale(Vector3(panelSize.x, panelSize.y, 1f)))
+        Log.i(TAG, "Stereoscopic mesh entity scaled to panel size: ${panelSize.x}x${panelSize.y}")
+        
+        // Entity is already visible (set in baseComponents for stereoscopic mode)
+        // Create SceneObject explicitly to ensure mesh renders (MediaPlayerSample pattern)
+        Log.i(TAG, "Calling createSceneObject for stereoscopic mesh entity")
+        stereo3DPanelEntity?.createSceneObject(videoPanelEntity!!, scene, systemManager)
+        Log.i(TAG, "createSceneObject call completed for stereoscopic mesh entity")
+    } else {
+        Log.w(TAG, "Skipping SceneObject creation: useStereoscopicDepth=$useStereoscopicDepth, videoPanelEntity=$videoPanelEntity, stereo3DPanelEntity=$stereo3DPanelEntity")
+    }
     
     // Register video panel with scaling system
     val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
@@ -1526,7 +1533,16 @@ class ImmersiveActivity : AppSystemActivity() {
       Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
     }
     
-    Log.i(TAG, "Video panel entity created - parented to PanelManager, hidden initially")
+    // Set initial visibility for non-stereoscopic modes
+    // Stereoscopic mode already made visible above
+    if (!useStereoscopicDepth) {
+        if (pendingConnectionParams == null) {
+            videoPanelEntity?.setComponent(Visible(true))
+            Log.i(TAG, "Video panel entity made visible on launch (no pending connection params)")
+        } else {
+            Log.i(TAG, "Video panel entity created - parented to PanelManager, hidden initially (pending connection)")
+        }
+    }
     
     // Attach ButtonShelf to video panel if it was created before video panel
     buttonShelfEntity?.let { shelf ->
