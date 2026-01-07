@@ -556,20 +556,23 @@ class ImmersiveActivity : AppSystemActivity() {
   }
 
   /**
-   * Align panel physical shape with the negotiated video pixel aspect ratio.
-   * Spatial SDK docs recommend matching layout size to the stream to keep
-   * direct-to-surface output pixel-perfect.
+   * Calculate panel physical dimensions in meters.
+   * Single source of truth for panel size - used for both shape parameter and PanelDimensions component.
+   * 
+   * @param force16x9 If true, uses fixed 16:9 aspect ratio. If false, calculates from actual resolution.
+   * @param useDoubledWidth If true, uses doubled width for aspect ratio calculation (for stereoscopic test mode).
    */
-  private fun computePanelShape(): QuadShapeOptions {
+  private fun calculatePanelSize(force16x9: Boolean = false, useDoubledWidth: Boolean = false): Vector2 {
     val aspect =
-        if (prefs.height != 0) {
-          prefs.width.toFloat() / prefs.height.toFloat()
+        if (force16x9) {
+          16f / 9f
+        } else if (prefs.height != 0) {
+          val width = if (useDoubledWidth) prefs.width * 2 else prefs.width
+          width.toFloat() / prefs.height.toFloat()
         } else {
           16f / 9f
         }
-    val panelHeightMeters = basePanelHeightMeters
-    val panelWidthMeters = aspect * basePanelHeightMeters
-    return QuadShapeOptions(width = panelWidthMeters, height = panelHeightMeters)
+    return Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
   }
 
   /**
@@ -1312,7 +1315,11 @@ class ImmersiveActivity : AppSystemActivity() {
             VideoSurfacePanelRegistration(
                 R.id.ui_example,
                 surfaceConsumer = { panelEntity, surface ->
-                  Log.i(TAG, "Stereoscopic surface attached for panel entity=$panelEntity (doubled width surface: ${prefs.width * 2}x${prefs.height} for ${prefs.width}x${prefs.height} stream)")
+                  val expectedWidth = prefs.width * 2
+                  val expectedHeight = prefs.height
+                  Log.i(TAG, "Stereoscopic surface attached for panel entity=$panelEntity")
+                  Log.i(TAG, "Expected PixelDisplayOptions: width=$expectedWidth, height=$expectedHeight (for ${prefs.width}x${prefs.height} stream)")
+                  Log.i(TAG, "StereoMode.LeftRight configured - SDK should split texture: left half [0, $expectedWidth/2] to left eye, right half [$expectedWidth/2, $expectedWidth] to right eye")
                   
                   SurfaceUtil.paintBlack(surface)
                   
@@ -1329,14 +1336,8 @@ class ImmersiveActivity : AppSystemActivity() {
                     videoPanelEntity = panelEntity
                   }
                   
-                  // Calculate panel size for components
-                  val aspect =
-                      if (prefs.height != 0) {
-                        prefs.width.toFloat() / prefs.height.toFloat()
-                      } else {
-                        16f / 9f
-                      }
-                  val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+                  // Calculate panel size - matches shape parameter in settingsCreator
+                  val panelSize = calculatePanelSize(force16x9 = false, useDoubledWidth = true)
                   
                   // Ensure components are added to entity (may already exist from manual creation)
                   // Note: addVideoPanelComponents sets Visible(false), we'll set visibility after
@@ -1372,17 +1373,21 @@ class ImmersiveActivity : AppSystemActivity() {
                   }
                 },
                 settingsCreator = {
+                  val displayWidth = prefs.width * 2
+                  val displayHeight = prefs.height
+                  val panelSize = calculatePanelSize(force16x9 = false, useDoubledWidth = true)
+                  Log.i(TAG, "TEST MODE: PixelDisplayOptions(width=$displayWidth, height=$displayHeight), StereoMode.None - should show full duplicated frame to both eyes")
                   MediaPanelSettings(
-                      shape = computePanelShape(), // Keep aspect ratio matching stream resolution for physical panel
+                      shape = QuadShapeOptions(width = panelSize.x, height = panelSize.y),
                       display = PixelDisplayOptions(
-                          // Double width for side-by-side stereo duplication (e.g., 1920->3840, 2560->5120, 1080->2160)
-                          // Height remains unchanged - decoder will duplicate frames side-by-side to fill doubled width
-                          width = prefs.width * 2,
-                          height = prefs.height
+                          // Double width to match surface size (5120x1440 for 2560x1440 stream)
+                          // This allows us to verify OpenGL duplication is working correctly
+                          width = displayWidth,
+                          height = displayHeight
                       ),
                       rendering = MediaPanelRenderOptions(
                           isDRM = false,
-                          stereoMode = StereoMode.LeftRight, // SDK handles eye splitting automatically
+                          stereoMode = StereoMode.None, // TEST: Show full duplicated frame to both eyes to verify OpenGL duplication
                           zIndex = 0 // Rectilinear panels use zIndex 0
                       ),
                       style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
@@ -1418,8 +1423,9 @@ class ImmersiveActivity : AppSystemActivity() {
                   }
                 },
                 settingsCreator = {
+                  val panelSize = calculatePanelSize(force16x9 = false, useDoubledWidth = false)
                   ReadableMediaPanelSettings(
-                      shape = computePanelShape(),
+                      shape = QuadShapeOptions(width = panelSize.x, height = panelSize.y),
                       display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
                       rendering = ReadableMediaPanelRenderOptions(
                           mips = 4, // Mip levels for shader sampling (used for blur in lighting)
@@ -1458,8 +1464,9 @@ class ImmersiveActivity : AppSystemActivity() {
                   }
                 },
                 settingsCreator = {
+                  val panelSize = calculatePanelSize(force16x9 = false, useDoubledWidth = false)
                   MediaPanelSettings(
-                      shape = computePanelShape(),
+                      shape = QuadShapeOptions(width = panelSize.x, height = panelSize.y),
                       display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
                       rendering = MediaPanelRenderOptions(
                           isDRM = false,
@@ -1475,13 +1482,12 @@ class ImmersiveActivity : AppSystemActivity() {
     }
     
     // Create entity after panel registration (panel must be registered before entity creation)
-    val aspect =
-        if (prefs.height != 0) {
-          prefs.width.toFloat() / prefs.height.toFloat()
-        } else {
-          16f / 9f
-        }
-    val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+    // Calculate panel size based on mode - will be updated in surfaceConsumer to match shape parameter
+    val panelSize = if (useStereoscopicDepth) {
+      calculatePanelSize(force16x9 = false, useDoubledWidth = true)
+    } else {
+      calculatePanelSize(force16x9 = false, useDoubledWidth = false)
+    }
     
     val managerEntity = panelManager?.panelManagerEntity
     val parentComponent = if (managerEntity != null) {
