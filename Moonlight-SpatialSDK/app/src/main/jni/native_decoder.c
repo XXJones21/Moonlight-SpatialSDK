@@ -13,6 +13,10 @@
 #include <time.h>
 #include <stdio.h>
 
+#include <EGL/egl.h>
+#include <GLES3/gl3.h>
+#include <GLES2/gl2ext.h>
+
 #include <Limelight.h>
 
 #define LOG_TAG "NativeDecoder"
@@ -82,6 +86,20 @@ typedef enum {
 static decoder_state_t g_decoderState = DECODER_STATE_UNINITIALIZED;
 static int g_errorRecoveryAttempts = 0;
 static const int MAX_RECOVERY_ATTEMPTS = 3;
+
+// OpenGL/EGL state for frame duplication
+static EGLDisplay g_eglDisplay = EGL_NO_DISPLAY;
+static EGLContext g_eglContext = EGL_NO_CONTEXT;
+static EGLSurface g_eglSurface = EGL_NO_SURFACE;
+static GLuint g_duplicationProgram = 0;
+static GLuint g_duplicationVBO = 0;
+static GLuint g_duplicationVAO = 0;
+static GLuint g_inputTexture = 0;
+static bool g_stereoDuplicationEnabled = false;
+static int g_surfaceWidth = 0;
+static int g_surfaceHeight = 0;
+static jobject g_surfaceTexture = NULL;
+static ANativeWindow* g_panelWindow = NULL;
 
 static const char* mime_from_format(int videoFormat) {
     if ((videoFormat & 0x0F00) != 0) {
@@ -235,6 +253,9 @@ static void stop_output_thread() {
     }
 }
 
+// Forward declaration for EGL cleanup function
+static void cleanup_egl();
+
 // Phase 4: Error recovery functions
 static bool attempt_flush_recovery() {
     if (g_codec == NULL || g_decoderState != DECODER_STATE_STARTED) {
@@ -305,6 +326,11 @@ static void release_codec() {
     g_codec_configured = false;
     g_decoderState = DECODER_STATE_UNINITIALIZED;
     g_errorRecoveryAttempts = 0;
+    
+    if (g_stereoDuplicationEnabled) {
+        cleanup_egl();
+        g_stereoDuplicationEnabled = false;
+    }
 
     if (g_codec != NULL) {
         AMediaCodec_delete(g_codec);
@@ -318,23 +344,356 @@ static void release_codec() {
 }
 
 static void release_window() {
+    if (g_stereoDuplicationEnabled) {
+        cleanup_egl();
+        g_stereoDuplicationEnabled = false;
+    }
     if (g_window != NULL) {
         ANativeWindow_release(g_window);
         g_window = NULL;
     }
+    // Don't release g_panelWindow here - it's managed separately for stereoscopic mode
+    // It will be released in nativeDecoderCleanup or when explicitly cleared
+    g_surfaceWidth = 0;
+    g_surfaceHeight = 0;
+}
+
+// Vertex shader for frame duplication
+static const char* g_vertexShaderSource = 
+    "#version 300 es\n"
+    "in vec2 aPosition;\n"
+    "in vec2 aTexCoord;\n"
+    "out vec2 vTexCoord;\n"
+    "void main() {\n"
+    "    gl_Position = vec4(aPosition, 0.0, 1.0);\n"
+    "    vTexCoord = aTexCoord;\n"
+    "}\n";
+
+// Fragment shader for frame duplication (side-by-side)
+// Renders the input texture twice: left half [0, 0.5] and right half [0.5, 1.0]
+// Uses samplerExternalOES for SurfaceTexture
+// For GLSL ES 3.0, use GL_OES_EGL_image_external_essl3 extension
+static const char* g_fragmentShaderSource = 
+    "#version 300 es\n"
+    "#extension GL_OES_EGL_image_external_essl3 : require\n"
+    "precision mediump float;\n"
+    "in vec2 vTexCoord;\n"
+    "uniform samplerExternalOES uTexture;\n"
+    "out vec4 fragColor;\n"
+    "void main() {\n"
+    "    // Duplicate texture side-by-side: map full texture to each half of output\n"
+    "    vec2 texCoord = vTexCoord;\n"
+    "    if (vTexCoord.x > 0.5) {\n"
+    "        // Right half: map [0.5, 1.0] to [0.0, 1.0] of input texture\n"
+    "        texCoord.x = (vTexCoord.x - 0.5) * 2.0;\n"
+    "    } else {\n"
+    "        // Left half: map [0.0, 0.5] to [0.0, 1.0] of input texture\n"
+    "        texCoord.x = vTexCoord.x * 2.0;\n"
+    "    }\n"
+    "    fragColor = texture(uTexture, texCoord);\n"
+    "}\n";
+
+static GLuint compile_shader(GLenum type, const char* source) {
+    GLuint shader = glCreateShader(type);
+    glShaderSource(shader, 1, &source, NULL);
+    glCompileShader(shader);
+    
+    GLint success;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        char infoLog[512];
+        glGetShaderInfoLog(shader, 512, NULL, infoLog);
+        LOGE("Shader compilation failed: %s", infoLog);
+        glDeleteShader(shader);
+        return 0;
+    }
+    return shader;
+}
+
+static bool init_duplication_program() {
+    GLuint vertexShader = compile_shader(GL_VERTEX_SHADER, g_vertexShaderSource);
+    GLuint fragmentShader = compile_shader(GL_FRAGMENT_SHADER, g_fragmentShaderSource);
+    
+    if (vertexShader == 0 || fragmentShader == 0) {
+        return false;
+    }
+    
+    g_duplicationProgram = glCreateProgram();
+    glAttachShader(g_duplicationProgram, vertexShader);
+    glAttachShader(g_duplicationProgram, fragmentShader);
+    glLinkProgram(g_duplicationProgram);
+    
+    GLint success;
+    glGetProgramiv(g_duplicationProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        char infoLog[512];
+        glGetProgramInfoLog(g_duplicationProgram, 512, NULL, infoLog);
+        LOGE("Program linking failed: %s", infoLog);
+        glDeleteProgram(g_duplicationProgram);
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+        g_duplicationProgram = 0;
+        return false;
+    }
+    
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    
+    // Create quad vertices for full-screen rendering
+    // SurfaceTexture uses bottom-left origin, so flip Y texture coordinates
+    float vertices[] = {
+        // Position      // TexCoord (Y flipped for SurfaceTexture)
+        -1.0f, -1.0f,   0.0f, 1.0f,  // Bottom-left: texCoord Y=1 (was 0)
+         1.0f, -1.0f,   1.0f, 1.0f,  // Bottom-right: texCoord Y=1 (was 0)
+         1.0f,  1.0f,   1.0f, 0.0f,  // Top-right: texCoord Y=0 (was 1)
+        -1.0f,  1.0f,   0.0f, 0.0f   // Top-left: texCoord Y=0 (was 1)
+    };
+    
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+    
+    GLuint EBO;
+    glGenVertexArrays(1, &g_duplicationVAO);
+    glGenBuffers(1, &g_duplicationVBO);
+    glGenBuffers(1, &EBO);
+    
+    glBindVertexArray(g_duplicationVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, g_duplicationVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    
+    GLint posLoc = glGetAttribLocation(g_duplicationProgram, "aPosition");
+    GLint texLoc = glGetAttribLocation(g_duplicationProgram, "aTexCoord");
+    glEnableVertexAttribArray(posLoc);
+    glVertexAttribPointer(posLoc, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(texLoc);
+    glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &EBO);
+    
+    LOGE("Frame duplication program initialized successfully");
+    return true;
+}
+
+static void cleanup_duplication_resources() {
+    if (g_duplicationProgram != 0) {
+        glDeleteProgram(g_duplicationProgram);
+        g_duplicationProgram = 0;
+    }
+    if (g_duplicationVAO != 0) {
+        glDeleteVertexArrays(1, &g_duplicationVAO);
+        g_duplicationVAO = 0;
+    }
+    if (g_duplicationVBO != 0) {
+        glDeleteBuffers(1, &g_duplicationVBO);
+        g_duplicationVBO = 0;
+    }
+}
+
+static bool init_egl_for_duplication() {
+    if (g_panelWindow == NULL) {
+        LOGE("Cannot init EGL: panel window is NULL");
+        return false;
+    }
+    
+    g_eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (g_eglDisplay == EGL_NO_DISPLAY) {
+        LOGE("Failed to get EGL display");
+        return false;
+    }
+    
+    if (eglInitialize(g_eglDisplay, NULL, NULL) == EGL_FALSE) {
+        LOGE("Failed to initialize EGL");
+        return false;
+    }
+    
+    EGLint configAttribs[] = {
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_ALPHA_SIZE, 8,
+        EGL_NONE
+    };
+    
+    EGLConfig config;
+    EGLint numConfigs;
+    if (eglChooseConfig(g_eglDisplay, configAttribs, &config, 1, &numConfigs) == EGL_FALSE) {
+        LOGE("Failed to choose EGL config");
+        eglTerminate(g_eglDisplay);
+        g_eglDisplay = EGL_NO_DISPLAY;
+        return false;
+    }
+    
+    EGLint contextAttribs[] = {
+        EGL_CONTEXT_CLIENT_VERSION, 3,
+        EGL_NONE
+    };
+    
+    g_eglContext = eglCreateContext(g_eglDisplay, config, EGL_NO_CONTEXT, contextAttribs);
+    if (g_eglContext == EGL_NO_CONTEXT) {
+        LOGE("Failed to create EGL context");
+        eglTerminate(g_eglDisplay);
+        g_eglDisplay = EGL_NO_DISPLAY;
+        return false;
+    }
+    
+    g_eglSurface = eglCreateWindowSurface(g_eglDisplay, config, g_panelWindow, NULL);
+    if (g_eglSurface == EGL_NO_SURFACE) {
+        LOGE("Failed to create EGL surface");
+        eglDestroyContext(g_eglDisplay, g_eglContext);
+        eglTerminate(g_eglDisplay);
+        g_eglContext = EGL_NO_CONTEXT;
+        g_eglDisplay = EGL_NO_DISPLAY;
+        return false;
+    }
+    
+    if (eglMakeCurrent(g_eglDisplay, g_eglSurface, g_eglSurface, g_eglContext) == EGL_FALSE) {
+        LOGE("Failed to make EGL context current");
+        eglDestroySurface(g_eglDisplay, g_eglSurface);
+        eglDestroyContext(g_eglDisplay, g_eglContext);
+        eglTerminate(g_eglDisplay);
+        g_eglSurface = EGL_NO_SURFACE;
+        g_eglContext = EGL_NO_CONTEXT;
+        g_eglDisplay = EGL_NO_DISPLAY;
+        return false;
+    }
+    
+    if (!init_duplication_program()) {
+        LOGE("Failed to initialize duplication program");
+        eglMakeCurrent(g_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        eglDestroySurface(g_eglDisplay, g_eglSurface);
+        eglDestroyContext(g_eglDisplay, g_eglContext);
+        eglTerminate(g_eglDisplay);
+        g_eglSurface = EGL_NO_SURFACE;
+        g_eglContext = EGL_NO_CONTEXT;
+        g_eglDisplay = EGL_NO_DISPLAY;
+        return false;
+    }
+    
+    // SurfaceTexture texture ID should already be set via nativeDecoderSetSurfaceTexture
+    // If not set, we'll use the texture ID from SurfaceTexture.getId() in output_loop
+    if (g_inputTexture == 0 && g_surfaceTexture != NULL) {
+        LOGE("WARNING: SurfaceTexture texture ID not set, will get it in output_loop");
+    } else if (g_inputTexture != 0) {
+        // Set texture parameters for SurfaceTexture
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, g_inputTexture);
+        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
+        LOGE("Configured SurfaceTexture texture parameters for texture ID: %u", g_inputTexture);
+    }
+    
+    LOGE("EGL initialized successfully for frame duplication");
+    return true;
+}
+
+static void cleanup_egl() {
+    if (g_eglDisplay != EGL_NO_DISPLAY) {
+        eglMakeCurrent(g_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        if (g_eglSurface != EGL_NO_SURFACE) {
+            eglDestroySurface(g_eglDisplay, g_eglSurface);
+            g_eglSurface = EGL_NO_SURFACE;
+        }
+        if (g_eglContext != EGL_NO_CONTEXT) {
+            eglDestroyContext(g_eglDisplay, g_eglContext);
+            g_eglContext = EGL_NO_CONTEXT;
+        }
+        eglTerminate(g_eglDisplay);
+        g_eglDisplay = EGL_NO_DISPLAY;
+    }
+    cleanup_duplication_resources();
+    g_inputTexture = 0;
 }
 
 static void* output_loop(void* context) {
-    (void)context;
+    JavaVM* vm = (JavaVM*)context;
+    JNIEnv* env = NULL;
+    
+    // Attach thread to JVM for SurfaceTexture operations
+    if (vm != NULL) {
+        (*vm)->AttachCurrentThread(vm, &env, NULL);
+    }
 
     AMediaCodecBufferInfo info;
     while (g_outputRunning) {
         ssize_t idx = AMediaCodec_dequeueOutputBuffer(g_codec, &info, 10000);
         if (idx >= 0) {
-            AMediaCodec_releaseOutputBuffer(g_codec, idx, true);
+            if (g_stereoDuplicationEnabled && g_eglContext != EGL_NO_CONTEXT && g_surfaceTexture != NULL && env != NULL) {
+                // For stereoscopic mode: MediaCodec renders to SurfaceTexture, we duplicate to panel Surface
+                // Release buffer to SurfaceTexture (MediaCodec renders to SurfaceTexture's Surface)
+                AMediaCodec_releaseOutputBuffer(g_codec, idx, true);
+                
+                // Make EGL context current first (required before updating SurfaceTexture)
+                eglMakeCurrent(g_eglDisplay, g_eglSurface, g_eglSurface, g_eglContext);
+                
+                // Ensure texture parameters are set (should be set in init_egl_for_duplication, but set again here for safety)
+                if (g_inputTexture != 0) {
+                    glBindTexture(GL_TEXTURE_EXTERNAL_OES, g_inputTexture);
+                    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                    glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
+                }
+                
+                // Update SurfaceTexture to get latest frame as OpenGL texture
+                jclass stClass = (*env)->GetObjectClass(env, g_surfaceTexture);
+                jmethodID updateTexImageMethod = (*env)->GetMethodID(env, stClass, "updateTexImage", "()V");
+                if (updateTexImageMethod != NULL && g_inputTexture != 0) {
+                    (*env)->CallVoidMethod(env, g_surfaceTexture, updateTexImageMethod);
+                    
+                    // Set viewport to panel surface dimensions
+                    glViewport(0, 0, g_surfaceWidth, g_surfaceHeight);
+                    
+                    // Clear the surface
+                    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                    glClear(GL_COLOR_BUFFER_BIT);
+                    
+                    // Use duplication program
+                    glUseProgram(g_duplicationProgram);
+                    
+                    // Bind input texture from SurfaceTexture
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_EXTERNAL_OES, g_inputTexture);
+                    GLint texLoc = glGetUniformLocation(g_duplicationProgram, "uTexture");
+                    if (texLoc >= 0) {
+                        glUniform1i(texLoc, 0);
+                    }
+                    
+                    // Render quad (duplicates texture side-by-side)
+                    glBindVertexArray(g_duplicationVAO);
+                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+                    glBindVertexArray(0);
+                    
+                    // Swap buffers to display on panel Surface
+                    eglSwapBuffers(g_eglDisplay, g_eglSurface);
+                } else {
+                    if (updateTexImageMethod == NULL) {
+                        LOGE("Failed to find updateTexImage method on SurfaceTexture");
+                    }
+                    if (g_inputTexture == 0) {
+                        LOGE("SurfaceTexture texture ID is 0, cannot render");
+                    }
+                }
+            } else {
+                // Normal mode: MediaCodec renders directly to surface
+                AMediaCodec_releaseOutputBuffer(g_codec, idx, true);
+            }
         } else if (idx == AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED) {
             continue;
         }
+    }
+    
+    // Detach thread from JVM
+    if (vm != NULL && env != NULL) {
+        (*vm)->DetachCurrentThread(vm);
     }
 
     return NULL;
@@ -353,7 +712,15 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetSurface(JNIEnv* env, 
     __android_log_print(ANDROID_LOG_ERROR, "NativeDecoder", "  Surface: %s", surface != NULL ? "provided" : "NULL");
     LOGE("=== nativeDecoderSetSurface called ===");
     LOGE("  Surface: %s", surface != NULL ? "provided" : "NULL");
-    release_window();
+    
+    // In stereoscopic mode, g_window is the SurfaceTexture's Surface (for MediaCodec)
+    // and g_panelWindow is the panel Surface (for OpenGL rendering)
+    // Only release g_window, not g_panelWindow
+    if (g_window != NULL) {
+        ANativeWindow_release(g_window);
+        g_window = NULL;
+    }
+    
     if (surface != NULL) {
         g_window = ANativeWindow_fromSurface(env, surface);
         if (g_window != NULL) {
@@ -371,6 +738,61 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetSurface(JNIEnv* env, 
         }
     }
     LOGE("=== nativeDecoderSetSurface completed ===");
+}
+
+JNIEXPORT void JNICALL
+Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetSurfaceTexture(JNIEnv* env, jclass clazz, jobject surfaceTexture, jint textureId) {
+    (void)clazz;
+    LOGE("=== nativeDecoderSetSurfaceTexture called ===");
+    LOGE("  Texture ID: %d", textureId);
+    
+    // Release previous SurfaceTexture reference if exists
+    if (g_surfaceTexture != NULL) {
+        (*env)->DeleteGlobalRef(env, g_surfaceTexture);
+        g_surfaceTexture = NULL;
+    }
+    
+    if (surfaceTexture != NULL) {
+        // Create global reference to SurfaceTexture
+        g_surfaceTexture = (*env)->NewGlobalRef(env, surfaceTexture);
+        if (g_surfaceTexture == NULL) {
+            LOGE("  ERROR: Failed to create global reference to SurfaceTexture");
+            return;
+        }
+        
+        // Store texture ID (passed from Java where it was created)
+        g_inputTexture = (GLuint)textureId;
+        LOGE("  SurfaceTexture texture ID: %u", g_inputTexture);
+        LOGE("  SurfaceTexture set successfully");
+    } else {
+        LOGE("  SurfaceTexture cleared");
+        g_inputTexture = 0;
+    }
+    LOGE("=== nativeDecoderSetSurfaceTexture completed ===");
+}
+
+JNIEXPORT void JNICALL
+Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetPanelSurface(JNIEnv* env, jclass clazz, jobject surface) {
+    (void)clazz;
+    LOGE("=== nativeDecoderSetPanelSurface called ===");
+    LOGE("  Surface: %s", surface != NULL ? "provided" : "NULL");
+    
+    if (g_panelWindow != NULL) {
+        ANativeWindow_release(g_panelWindow);
+        g_panelWindow = NULL;
+    }
+    
+    if (surface != NULL) {
+        g_panelWindow = ANativeWindow_fromSurface(env, surface);
+        if (g_panelWindow != NULL) {
+            g_surfaceWidth = ANativeWindow_getWidth(g_panelWindow);
+            g_surfaceHeight = ANativeWindow_getHeight(g_panelWindow);
+            LOGE("  Panel surface dimensions: %dx%d", g_surfaceWidth, g_surfaceHeight);
+        } else {
+            LOGE("  ERROR: ANativeWindow_fromSurface returned NULL");
+        }
+    }
+    LOGE("=== nativeDecoderSetPanelSurface completed ===");
 }
 
 JNIEXPORT void JNICALL
@@ -745,12 +1167,43 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetup(JNIEnv* env, jclas
     }
     // #endregion
 
+    // Detect stereoscopic mode: panel surface width should be 2x format width
+    // For stereoscopic mode, MediaCodec renders to SurfaceTexture (g_window), 
+    // and we duplicate frames to panel surface (g_panelWindow)
+    if (g_panelWindow != NULL) {
+        g_surfaceWidth = ANativeWindow_getWidth(g_panelWindow);
+        g_surfaceHeight = ANativeWindow_getHeight(g_panelWindow);
+        g_stereoDuplicationEnabled = (g_surfaceWidth == width * 2 && g_surfaceHeight == height && g_surfaceTexture != NULL);
+        
+        if (g_stereoDuplicationEnabled) {
+            LOGE("Stereoscopic mode detected: format=%dx%d, panel surface=%dx%d, SurfaceTexture available, enabling frame duplication", 
+                 width, height, g_surfaceWidth, g_surfaceHeight);
+            if (!init_egl_for_duplication()) {
+                LOGE("Failed to initialize EGL for frame duplication, falling back to normal rendering");
+                g_stereoDuplicationEnabled = false;
+            }
+        } else {
+            LOGE("Normal mode: format=%dx%d, panel surface=%dx%d, SurfaceTexture=%s", 
+                 width, height, g_surfaceWidth, g_surfaceHeight, 
+                 g_surfaceTexture != NULL ? "available" : "NULL");
+        }
+    } else if (g_window != NULL) {
+        // Fallback: check g_window if g_panelWindow not set (non-stereoscopic mode)
+        g_surfaceWidth = ANativeWindow_getWidth(g_window);
+        g_surfaceHeight = ANativeWindow_getHeight(g_window);
+        LOGE("Normal mode (no panel window): format=%dx%d, surface=%dx%d", width, height, g_surfaceWidth, g_surfaceHeight);
+    }
+    
     media_status_t status = AMediaCodec_configure(g_codec, g_format, g_window, NULL, 0);
     if (status != AMEDIA_OK) {
         LOGE("nativeDecoderSetup failed: AMediaCodec_configure status=%d (decoder: %s, MIME: %s)", 
              status, g_decoderName[0] != '\0' ? g_decoderName : "unknown", mime);
         LOGE("=== NATIVE_DECODER_SETUP_COLOR_DEBUG_END (FAILED) ===");
         g_decoderState = DECODER_STATE_ERROR;
+        if (g_stereoDuplicationEnabled) {
+            cleanup_egl();
+            g_stereoDuplicationEnabled = false;
+        }
         release_codec();
         return -1;
     }
@@ -829,7 +1282,6 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetup(JNIEnv* env, jclas
 
 JNIEXPORT void JNICALL
 Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderStart(JNIEnv* env, jclass clazz) {
-    (void)env;
     (void)clazz;
 
     if (g_codec == NULL || g_started) {
@@ -848,7 +1300,11 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderStart(JNIEnv* env, jclas
     g_outputRunning = true;
     g_decoderState = DECODER_STATE_STARTED;
     LOGE("Decoder started successfully (decoder: %s)", g_decoderName[0] != '\0' ? g_decoderName : "unknown");
-    pthread_create(&g_outputThread, NULL, output_loop, NULL);
+    
+    // Get JavaVM for output_loop thread
+    JavaVM* vm = NULL;
+    (*env)->GetJavaVM(env, &vm);
+    pthread_create(&g_outputThread, NULL, output_loop, (void*)vm);
 }
 
 JNIEXPORT void JNICALL
@@ -866,11 +1322,22 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderStop(JNIEnv* env, jclass
 
 JNIEXPORT void JNICALL
 Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderCleanup(JNIEnv* env, jclass clazz) {
-    (void)env;
     (void)clazz;
 
     release_codec();
     release_window();
+    
+    // Release panel window (for stereoscopic mode)
+    if (g_panelWindow != NULL) {
+        ANativeWindow_release(g_panelWindow);
+        g_panelWindow = NULL;
+    }
+    
+    // Release SurfaceTexture global reference
+    if (g_surfaceTexture != NULL) {
+        (*env)->DeleteGlobalRef(env, g_surfaceTexture);
+        g_surfaceTexture = NULL;
+    }
 }
 
 JNIEXPORT void JNICALL

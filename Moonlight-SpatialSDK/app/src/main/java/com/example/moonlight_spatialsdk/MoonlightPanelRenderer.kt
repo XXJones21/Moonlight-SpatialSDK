@@ -1,6 +1,7 @@
 package com.example.moonlight_spatialsdk
 
 import android.app.Activity
+import android.graphics.SurfaceTexture
 import android.hardware.DataSpace
 import android.media.MediaFormat
 import android.os.Build
@@ -21,6 +22,8 @@ class MoonlightPanelRenderer(
     private val crashListener: CrashListener,
 ) {
   private val decoderRenderer: NativeDecoderRenderer by lazy { NativeDecoderRenderer() }
+  private var surfaceTexture: SurfaceTexture? = null
+  private var panelSurface: Surface? = null
 
   private fun applyDecoderColorConfig() {
     // #region agent log
@@ -74,13 +77,48 @@ class MoonlightPanelRenderer(
     MoonBridge.nativeDecoderSetColorConfig(colorRange, colorStandard, colorTransfer, dataSpace)
   }
 
-  fun attachSurface(surface: Surface) {
+  fun attachSurface(surface: Surface, useStereoscopicDuplication: Boolean = false) {
     System.out.println("=== MOONLIGHT_PANEL_RENDERER_ATTACH_SURFACE_CALLED ===")
-    android.util.Log.e("MoonlightPanelRenderer", "=== MOONLIGHT_PANEL_RENDERER_ATTACH_SURFACE_CALLED ===")
+    android.util.Log.e("MoonlightPanelRenderer", "=== MOONLIGHT_PANEL_RENDERER_ATTACH_SURFACE_CALLED === stereoscopic=$useStereoscopicDuplication")
     android.util.Log.i("MoonlightPanelRenderer", "attachSurface called - setting render target")
     applyDecoderColorConfig()
-    val holder = LegacySurfaceHolderAdapter(surface)
-    decoderRenderer.setRenderTarget(holder)
+    
+    panelSurface = surface
+    
+    if (useStereoscopicDuplication) {
+      // For stereoscopic mode, create SurfaceTexture to get frames as OpenGL textures
+      // MediaCodec will render to SurfaceTexture's Surface, then we duplicate frames to panel Surface
+      // Create texture for SurfaceTexture (will be attached in native code)
+      val textureIds = IntArray(1)
+      android.opengl.GLES20.glGenTextures(1, textureIds, 0)
+      val textureId = textureIds[0]
+      
+      surfaceTexture = SurfaceTexture(textureId).apply {
+        setDefaultBufferSize(prefs.width, prefs.height)
+        setOnFrameAvailableListener {
+          // Frame available - native code will handle duplication in output loop
+        }
+      }
+      val surfaceTextureSurface = Surface(surfaceTexture!!)
+      
+      android.util.Log.i("MoonlightPanelRenderer", "Stereoscopic mode: Created SurfaceTexture with texture ID=$textureId for frame duplication")
+      android.util.Log.i("MoonlightPanelRenderer", "MediaCodec will render to SurfaceTexture, frames will be duplicated to panel Surface")
+      
+      // Set SurfaceTexture in native code for texture access (pass texture ID explicitly)
+      MoonBridge.nativeDecoderSetSurfaceTexture(surfaceTexture, textureId)
+      
+      // Set panel Surface in native code for OpenGL rendering target
+      MoonBridge.nativeDecoderSetPanelSurface(surface)
+      
+      // MediaCodec renders to SurfaceTexture's Surface
+      val holder = LegacySurfaceHolderAdapter(surfaceTextureSurface)
+      decoderRenderer.setRenderTarget(holder)
+    } else {
+      // Normal mode: MediaCodec renders directly to panel Surface
+      val holder = LegacySurfaceHolderAdapter(surface)
+      decoderRenderer.setRenderTarget(holder)
+    }
+    
     System.out.println("=== MOONLIGHT_PANEL_RENDERER_ATTACH_SURFACE_COMPLETED ===")
     android.util.Log.e("MoonlightPanelRenderer", "=== MOONLIGHT_PANEL_RENDERER_ATTACH_SURFACE_COMPLETED ===")
     android.util.Log.i("MoonlightPanelRenderer", "attachSurface completed - render target set")

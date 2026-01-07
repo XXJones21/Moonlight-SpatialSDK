@@ -1317,7 +1317,8 @@ class ImmersiveActivity : AppSystemActivity() {
                   SurfaceUtil.paintBlack(surface)
                   
                   // Configure decoder with preferences when panel is created
-                  moonlightPanelRenderer.attachSurface(surface)
+                  // For stereoscopic mode, enable frame duplication via SurfaceTexture
+                  moonlightPanelRenderer.attachSurface(surface, useStereoscopicDuplication = true)
                   moonlightPanelRenderer.preConfigureDecoder()
                   
                   isSurfaceReady = true

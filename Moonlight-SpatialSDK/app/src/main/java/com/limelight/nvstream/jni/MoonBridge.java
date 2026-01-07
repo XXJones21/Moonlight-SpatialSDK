@@ -439,6 +439,8 @@ public class MoonBridge {
 
     // Native decoder entry points
     public static native void nativeDecoderSetSurface(Surface surface);
+    public static native void nativeDecoderSetSurfaceTexture(android.graphics.SurfaceTexture surfaceTexture, int textureId);
+    public static native void nativeDecoderSetPanelSurface(Surface surface);
     public static native int nativeDecoderSetup(int videoFormat, int width, int height, int redrawRate);
     public static native void nativeDecoderStart();
     public static native void nativeDecoderStop();
