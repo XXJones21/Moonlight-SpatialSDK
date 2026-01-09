@@ -28,12 +28,13 @@ This document provides a comprehensive breakdown of the Moonlight-SpatialSDK Que
 2. [Panel Management](#panel-management)
 3. [Connection Management](#connection-management)
 4. [Video Panel Rendering](#video-panel-rendering)
-5. [Video Panel Scaling](#video-panel-scaling)
-6. [ButtonShelf Controls](#buttonshelf-controls)
-7. [Snap to Wall](#snap-to-wall)
-8. [Pairing System](#pairing-system)
-9. [Communication Flow](#communication-flow)
-10. [Current State & Future Enhancements](#current-state--future-enhancements)
+5. [Bias Lighting](#bias-lighting)
+6. [Video Panel Scaling](#video-panel-scaling)
+7. [ButtonShelf Controls](#buttonshelf-controls)
+8. [Snap to Wall](#snap-to-wall)
+9. [Pairing System](#pairing-system)
+10. [Communication Flow](#communication-flow)
+11. [Current State & Future Enhancements](#current-state--future-enhancements)
 
 ---
 
@@ -1231,6 +1232,299 @@ Step-by-step flow with expected logging and current gaps:
 
 ---
 
+## BIAS LIGHTING
+
+### Overview
+
+**Purpose**: Provides ambient lighting around the video panel that samples colors from the video edges, creating a bias lighting effect similar to high-end home theater displays. The lighting extends beyond the panel edges and dynamically matches the video content colors.
+
+**Implementation**:
+
+- **Entity**: `BiasLightingEntity` - Manages bias lighting entity lifecycle and material setup
+- **System**: `HeroLightingSystem` - Extracts video texture and provides it to bias lighting materials
+- **Shader**: Custom `bias_lighting_9slice` shader that computes a ring-shaped glow around the panel
+- **Material**: Custom `SceneMaterial` with additive blending for emissive lighting effect
+
+**Key Features**:
+
+- **Edge-Based Color Sampling**: Samples colors from video edges (top, bottom, left, right) with distance-based falloff
+- **Dynamic Scaling**: Automatically updates size when video panel is scaled
+- **Configurable Intensity**: Default intensity of 0.8, adjustable via `setIntensity()`
+- **Additive Blending**: Uses additive blend mode for proper emissive lighting appearance
+- **Texture Integration**: Receives video texture from `HeroLightingSystem` for real-time color updates
+
+### HeroLightingSystem Registration
+
+**File**: `ImmersiveActivity.kt`
+
+**Initialization** (in `onCreate()`):
+
+```kotlin
+// Register hero lighting system for lighting emission
+heroLightingSystem = HeroLightingSystem(autoDetectTexture = true, isProcessingShaders = true)
+systemManager.registerSystem(heroLightingSystem!!)
+Log.i(TAG, "HeroLightingSystem registered")
+```
+
+**Configuration**:
+
+- `autoDetectTexture = true`: Automatically detects video panel texture
+- `isProcessingShaders = true`: Enables shader processing for lighting effects
+
+**Purpose**: `HeroLightingSystem` extracts the video texture from the Media Panel and provides it to registered materials (including bias lighting) for real-time color sampling.
+
+### BiasLightingEntity Creation
+
+**File**: `entities/BiasLightingEntity.kt`
+
+**Creation** (in `createVideoPanelEntity()`):
+
+```kotlin
+// Create BiasLightingEntity if lighting emission is enabled
+if (useLightingEmission && biasLightingEntity == null) {
+  biasLightingEntity = BiasLightingEntity(heroLightingSystem)
+  biasLightingEntity?.attachToPanel(videoPanelEntity!!)
+  
+  // Register scale listener to update bias lighting when panel scales
+  val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+  scaleChildrenSystem?.addScaleListener(videoPanelEntity!!) {
+    biasLightingEntity?.updateFromParentScale()
+  }
+  
+  Log.i(TAG, "BiasLightingEntity created and attached to video panel")
+}
+```
+
+**Key Steps**:
+
+1. **Entity Creation**: Creates `BiasLightingEntity` with reference to `HeroLightingSystem`
+2. **Panel Attachment**: Attaches bias lighting to video panel entity
+3. **Scale Listener**: Registers scale listener to update bias lighting size when panel scales
+4. **Material Registration**: Material is registered with `HeroLightingSystem` to receive video texture
+
+**Conditional Creation**: Bias lighting is only created if `useLightingEmission` is enabled (determined by `ImmersiveSettings.lightingEmissionEnabled` or `reflectionsEnabled`).
+
+### Material and Mesh Setup
+
+**Material Registration** (in `BiasLightingEntity.init`):
+
+```kotlin
+private fun registerMeshAndMaterial() {
+    SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { activity ->
+        // Create the material
+        val material = createBiasLightingMaterial(activity)
+        glowMaterial = material
+        
+        // Register quad mesh creator
+        activity.registerMeshCreator(MESH_NAME) {
+            SceneMesh.quad(
+                Vector3(-0.5f, -0.5f, 0f),
+                Vector3(0.5f, 0.5f, 0f),
+                material
+            )
+        }
+        
+        Log.d(TAG, "Bias lighting mesh and material registered")
+    }
+}
+```
+
+**Material Configuration**:
+
+- **Custom Shader**: Uses `bias_lighting_9slice` custom shader
+- **Blend Mode**: `BlendMode.ADDITIVE` for emissive lighting effect
+- **Sort Order**: `SortOrder.TRANSLUCENT` for proper rendering order
+- **Depth Test**: `DepthTest.LESS_OR_EQUAL` to render behind panel
+- **Stereo Mode**: `StereoMode.None` (monoscopic)
+
+**Material Attributes**:
+
+- `emissiveFactor`: Quad size (xy) and panel size (zw)
+- `albedoFactor.x`: Glow padding in meters (default: 0.2m / ~8 inches)
+- `matParams.x`: Intensity (default: 0.8)
+- `stereoParams.y`: Mip level for video sampling (default: 4.0 for smooth blur)
+
+**Texture Registration** (in `registerWithLightingSystem()`):
+
+```kotlin
+fun registerWithLightingSystem() {
+    val material = glowMaterial ?: return
+    heroLightingSystem?.registerMaterial(material, custom = true, textureOnly = true)
+    Log.d(TAG, "Material registered with HeroLightingSystem (texture-only)")
+}
+```
+
+**Key Point**: Uses `textureOnly = true` to prevent `HeroLightingSystem` from overwriting `emissiveFactor` and `albedoFactor` which the bias lighting shader needs for size calculations.
+
+### Glow Entity Setup
+
+**Entity Creation** (in `createGlowEntity()`):
+
+```kotlin
+glowEntity = Entity.create(
+    Mesh(Uri.parse(MESH_NAME)),
+    Transform(Pose(Vector3(0f, 0f, Z_OFFSET))),
+    TransformParent(parent),
+    Hittable(MeshCollision.NoCollision),
+    Scale(Vector3(1f)),
+    Visible(_isVisible)
+)
+```
+
+**Configuration**:
+
+- **Position**: Z offset of 0.01m behind the video panel
+- **Parenting**: Parented to video panel entity via `TransformParent`
+- **Size**: Quad size includes glow padding (panel size + 0.2m padding on each side)
+- **Collision**: `MeshCollision.NoCollision` (non-interactive)
+
+**Size Calculation**:
+
+```kotlin
+val quadWidth = panelSize.x + GLOW_PADDING * 2
+val quadHeight = panelSize.y + GLOW_PADDING * 2
+```
+
+The glow extends 0.2m (~8 inches) beyond the panel edges on all sides.
+
+### Shader Implementation
+
+**Files**: 
+- `shaders/bias_lighting_9slice.vert` - Vertex shader
+- `shaders/bias_lighting_9slice.frag` - Fragment shader
+
+**Fragment Shader Logic**:
+
+1. **Edge Detection**: Determines which edge (top, bottom, left, right) based on UV coordinates
+2. **Video Sampling**: Samples video texture at the appropriate edge with mip level 4.0 for smooth blur
+3. **Distance Falloff**: Computes distance-based falloff from panel edge
+4. **Color Output**: Applies intensity and outputs additive color for emissive lighting
+
+**Edge Sampling**:
+
+- **Top Edge**: Samples top row of video (y=1 in flipped coords)
+- **Bottom Edge**: Samples bottom row (y=0)
+- **Left Edge**: Samples left column (x=0)
+- **Right Edge**: Samples right column (x=1)
+
+### Visibility and Intensity Control
+
+**Visibility Control** (in `enableImmersiveFeatures()` / `disableImmersiveFeatures()`):
+
+```kotlin
+// Enable lighting emission if configured
+if (immersiveSettings.lightingEmissionEnabled) {
+  heroLightingSystem?.lightingAlpha = 0.8f
+  biasLightingEntity?.setVisible(true)
+  biasLightingEntity?.setIntensity(0.8f)
+  Log.i(TAG, "Lighting emission enabled")
+}
+
+// Disable lighting emission
+heroLightingSystem?.lightingAlpha = 0f
+biasLightingEntity?.setVisible(false)
+```
+
+**Intensity Control**:
+
+- **Default Intensity**: 0.8 (80%)
+- **HeroLightingSystem Alpha**: Controls global lighting intensity (0.0 to 1.0)
+- **Material Intensity**: `matParams.x` controls per-material intensity
+
+**Methods**:
+
+- `setVisible(visible: Boolean)`: Shows/hides bias lighting entity
+- `setIntensity(intensity: Float)`: Sets intensity (0.0 to 1.0)
+
+### Dynamic Scaling
+
+**Scale Listener Registration**:
+
+```kotlin
+scaleChildrenSystem?.addScaleListener(videoPanelEntity!!) {
+    biasLightingEntity?.updateFromParentScale()
+}
+```
+
+**Scale Update** (in `updateFromParentScale()`):
+
+```kotlin
+fun updateFromParentScale() {
+    val parent = parentPanel ?: return
+    val dimensions = parent.tryGetComponent<PanelDimensions>() ?: return
+    val scale = parent.tryGetComponent<Scale>()?.scale ?: Vector3(1f)
+    
+    val effectiveSize = Vector2(
+        dimensions.dimensions.x * scale.x,
+        dimensions.dimensions.y * scale.y
+    )
+    
+    updatePanelSize(effectiveSize)
+}
+```
+
+**Behavior**: When the video panel is scaled (via corner handles or programmatic scaling), the bias lighting automatically updates its size to match, maintaining the 0.2m glow padding around the scaled panel.
+
+### Panel Surface Type
+
+**Readable Surface Requirement**:
+
+When bias lighting is enabled, the video panel uses `ReadableVideoSurfacePanelRegistration` instead of `VideoSurfacePanelRegistration`:
+
+```kotlin
+val useLightingEmission = immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled
+
+if (useLightingEmission) {
+    // Use ReadableVideoSurfacePanelRegistration for lighting emission (allows texture sampling)
+    immersiveActivity.registerPanel(
+        ReadableVideoSurfacePanelRegistration(...)
+    )
+}
+```
+
+**Purpose**: `ReadableVideoSurfacePanelRegistration` allows `HeroLightingSystem` to sample the video texture for lighting effects. Standard `VideoSurfacePanelRegistration` does not provide texture access.
+
+### Configuration Constants
+
+**BiasLightingEntity Constants**:
+
+- `GLOW_PADDING = 0.2f`: Glow extends 0.2m (~8 inches) beyond panel edges
+- `Z_OFFSET = 0.01f`: Bias lighting positioned 1cm behind video panel
+- `DEFAULT_MIP_LEVEL = 4.0f`: Mip level for video sampling (smooth blur while preserving edge distinction)
+- `DEBUG_MODE = false`: Debug mode shows falloff shape instead of video colors
+
+### Lifecycle Management
+
+**Creation**: Bias lighting entity is created when video panel is created and `useLightingEmission` is enabled.
+
+**Destruction**: Bias lighting is destroyed when:
+- Video panel is destroyed
+- App shuts down
+- `biasLightingEntity.destroy()` is called
+
+**Cleanup** (in `destroy()`):
+
+```kotlin
+fun destroy() {
+    glowEntity?.destroy()
+    glowEntity = null
+    glowMaterial?.destroy()
+    glowMaterial = null
+    parentPanel = null
+    Log.d(TAG, "Bias lighting destroyed")
+}
+```
+
+### Files
+
+- `entities/BiasLightingEntity.kt` - Bias lighting entity management
+- `systems/heroLighting/HeroLightingSystem.kt` - Video texture extraction and material registration
+- `shaders/bias_lighting_9slice.vert` - Vertex shader for 9-slice bias lighting
+- `shaders/bias_lighting_9slice.frag` - Fragment shader for edge-based color sampling
+- `ImmersiveActivity.kt` - HeroLightingSystem registration and BiasLightingEntity creation
+
+---
+
 ## PAIRING SYSTEM
 
 ### Pairing Flow
@@ -1378,6 +1672,7 @@ Step-by-step flow with expected logging and current gaps:
 - Wall-aware scaling (corner handles respect wall plane when panel is wall-snapped)
 - zIndex configuration for rectilinear panels
 - Sleep/wake cycle video stream recovery (automatic re-establishment after device sleep)
+- Bias lighting system (`BiasLightingEntity`, `HeroLightingSystem`) with edge-based color sampling and dynamic scaling
 
 **⚠️ Limitations**:
 
@@ -1425,7 +1720,10 @@ Step-by-step flow with expected logging and current gaps:
 
 **Phase 4: Advanced Features**:
 
-- Add hero lighting system for video panel
+- ✅ **Completed**: Hero lighting system for video panel (`HeroLightingSystem`, `BiasLightingEntity`)
+  - Edge-based bias lighting with dynamic color sampling
+  - Automatic scaling with video panel
+  - Configurable intensity and visibility
 - Add wall lighting system (MRUK integration)
 - Add cinema state handler (TV/Cinema modes)
 - Add control panel for playback controls
@@ -1453,6 +1751,8 @@ Step-by-step flow with expected logging and current gaps:
 - `systems/anchor/AnchorSnappingSystem.kt` - Wall detection and snap-to-wall constrained movement
 - `panels/buttonShelf/ButtonShelfCompose.kt` - ButtonShelf Compose UI
 - `components/WallSnap.xml` - WallSnap component for wall-constrained movement
+- `entities/BiasLightingEntity.kt` - Bias lighting entity management
+- `systems/heroLighting/HeroLightingSystem.kt` - Video texture extraction and lighting system
 
 ### Configuration Files
 
@@ -1497,6 +1797,7 @@ The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 - ✅ ButtonShelf controls (5 buttons) with hover-activated visibility and hierarchical scaling support
 - ✅ Snap to Wall feature with wall-constrained movement (X/Y sliding, Z locked)
 - ✅ Wall-aware scaling handles that respect wall plane constraint
+- ✅ Bias lighting system with edge-based color sampling and dynamic scaling
 
 **Architecture Alignment**:
 
