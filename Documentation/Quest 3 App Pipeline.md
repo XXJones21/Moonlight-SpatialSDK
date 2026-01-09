@@ -239,25 +239,32 @@ override fun registerPanels(): List<PanelRegistration> {
 ```kotlin
 SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
     if (useStereoscopicDepth) {
-        // Stereoscopic mode: ReadableVideoSurfacePanelRegistration
+        // Stereoscopic mode: VideoSurfacePanelRegistration (supports StereoMode.LeftRight)
         immersiveActivity.registerPanel(
-            ReadableVideoSurfacePanelRegistration(
+            VideoSurfacePanelRegistration(
                 R.id.ui_example,
                 surfaceConsumer = { panelEntity, surface ->
                     SurfaceUtil.paintBlack(surface)
-                    moonlightPanelRenderer.attachSurface(surface)
+                    // Enable OpenGL frame duplication for stereoscopic mode
+                    moonlightPanelRenderer.attachSurface(surface, useStereoscopicDuplication = true)
                     moonlightPanelRenderer.preConfigureDecoder()
                     isSurfaceReady = true
+                    // Calculate panel size - matches shape parameter
+                    val panelSize = calculatePanelSize(force16x9 = false, useDoubledWidth = true)
+                    addVideoPanelComponents(panelEntity, panelSize, useLightingEmission = false)
                     // Initiate connection if pending params exist
                 },
                 settingsCreator = {
-                    ReadableMediaPanelSettings(
-                        shape = computePanelShape(),
-                        display = PixelDisplayOptions(width = prefs.width * 2, height = prefs.height),
-                        rendering = ReadableMediaPanelRenderOptions(
-                            mips = 1,
-                            stereoMode = StereoMode.LeftRight,
-                            // NOTE: panelShader configuration method needs investigation
+                    val displayWidth = prefs.width * 2
+                    val displayHeight = prefs.height
+                    val panelSize = calculatePanelSize(force16x9 = false, useDoubledWidth = true)
+                    MediaPanelSettings(
+                        shape = QuadShapeOptions(width = panelSize.x, height = panelSize.y),
+                        display = PixelDisplayOptions(width = displayWidth, height = displayHeight),
+                        rendering = MediaPanelRenderOptions(
+                            isDRM = false,
+                            stereoMode = StereoMode.None, // TEST: Shows full duplicated frame to both eyes
+                            zIndex = 0
                         ),
                         style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
                     )
@@ -270,14 +277,19 @@ SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivit
             ReadableVideoSurfacePanelRegistration(
                 R.id.ui_example,
                 surfaceConsumer = { panelEntity, surface ->
-                    // Surface attachment and decoder configuration
+                    SurfaceUtil.paintBlack(surface)
+                    moonlightPanelRenderer.attachSurface(surface)
+                    moonlightPanelRenderer.preConfigureDecoder()
+                    isSurfaceReady = true
+                    // Initiate connection if pending params exist
                 },
                 settingsCreator = {
+                    val panelSize = calculatePanelSize(force16x9 = false, useDoubledWidth = false)
                     ReadableMediaPanelSettings(
-                        shape = computePanelShape(),
+                        shape = QuadShapeOptions(width = panelSize.x, height = panelSize.y),
                         display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
                         rendering = ReadableMediaPanelRenderOptions(
-                            mips = 4, // For shader sampling
+                            mips = 4, // For shader sampling (used for blur in lighting)
                             stereoMode = StereoMode.None,
                         ),
                         style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
@@ -291,11 +303,16 @@ SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivit
             VideoSurfacePanelRegistration(
                 R.id.ui_example,
                 surfaceConsumer = { panelEntity, surface ->
-                    // Surface attachment and decoder configuration
+                    SurfaceUtil.paintBlack(surface)
+                    moonlightPanelRenderer.attachSurface(surface)
+                    moonlightPanelRenderer.preConfigureDecoder()
+                    isSurfaceReady = true
+                    // Initiate connection if pending params exist
                 },
                 settingsCreator = {
+                    val panelSize = calculatePanelSize(force16x9 = false, useDoubledWidth = false)
                     MediaPanelSettings(
-                        shape = computePanelShape(),
+                        shape = QuadShapeOptions(width = panelSize.x, height = panelSize.y),
                         display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
                         rendering = MediaPanelRenderOptions(
                             isDRM = false,
@@ -310,8 +327,13 @@ SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivit
     }
 }
 
-// Create entity AFTER panel registration
-val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+// Create entity AFTER panel registration (entity must exist before surfaceConsumer callback fires)
+val panelSize = if (useStereoscopicDepth) {
+    calculatePanelSize(force16x9 = false, useDoubledWidth = true)
+} else {
+    calculatePanelSize(force16x9 = false, useDoubledWidth = false)
+}
+
 videoPanelEntity = Entity.create(
     listOf(
         Panel(R.id.ui_example), // Required for panel registration
@@ -322,7 +344,8 @@ videoPanelEntity = Entity.create(
         Visible(false),
         Scalable(),
         ScaledParent(),
-        TransformParent(panelManagerEntity)
+        TransformParent(panelManagerEntity),
+        // HeroLighting component added if useLightingEmission is true
     )
 )
 
@@ -333,29 +356,31 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
 
 **Panel Configuration**:
 
-- **Physical Size**: Computed from `prefs.width/prefs.height` to match stream aspect ratio
+- **Physical Size**: Calculated using `calculatePanelSize()` helper function (single source of truth)
   - Height: `basePanelHeightMeters` (0.7m base height)
-  - Width: `basePanelHeightMeters * (prefs.width / prefs.height)` (e.g., 0.7m * 1.778 = 1.245m for 2560x1440p stream)
-  - Aspect ratio matches single-eye video resolution (16:9 for 2560x1440p)
+  - Width: `basePanelHeightMeters * aspectRatio` where aspect ratio is calculated from stream resolution
+  - For standard/lighting modes: `aspectRatio = prefs.width / prefs.height` (e.g., 1.778 for 2560x1440p = 1.245m x 0.7m)
+  - For stereoscopic mode: `aspectRatio = (prefs.width * 2) / prefs.height` (e.g., 3.556 for 2560x1440p = 2.489m x 0.7m)
+  - **Single Source of Truth**: `calculatePanelSize()` is used for both `shape` parameter in `MediaPanelSettings` and `PanelDimensions` component, ensuring consistency
 - **Panel Settings** (varies by mode):
-  - **Stereoscopic**: `ReadableMediaPanelSettings` with `ReadableMediaPanelRenderOptions` - doubled width (5120x1440p), `StereoMode.LeftRight`
-  - **Lighting Emission**: `ReadableMediaPanelSettings` with `ReadableMediaPanelRenderOptions` - `mips = 4` for texture sampling
+  - **Stereoscopic**: `MediaPanelSettings` with `MediaPanelRenderOptions` - doubled width (5120x1440p), `StereoMode.None` (for testing OpenGL duplication), OpenGL frame duplication enabled
+  - **Lighting Emission**: `ReadableMediaPanelSettings` with `ReadableMediaPanelRenderOptions` - `mips = 4` for texture sampling, `StereoMode.None`
   - **Standard**: `MediaPanelSettings` with `MediaPanelRenderOptions` - standard resolution, `StereoMode.None`
-- **Rendering**: Monoscopic (`StereoMode.None`) or stereoscopic (`StereoMode.LeftRight`)
+- **Rendering**: Monoscopic (`StereoMode.None`) for all modes currently. Stereoscopic mode uses OpenGL frame duplication in native decoder.
 - **Scale**: Initial scale of 1.0, adjustable via corner handles or `updateVideoPanelScale()` after connection
 - **Scaling Components**: `Scalable()` and `ScaledParent()` components enable corner-based scaling
-- **Surface handling**: Surface provided via `surfaceConsumer` callback → paint black → attachSurface → preConfigureDecoder → mark surface ready → start pending connection if present
+- **Surface handling**: Surface provided via `surfaceConsumer` callback → paint black → attachSurface (with `useStereoscopicDuplication` flag for stereoscopic mode) → preConfigureDecoder → mark surface ready → start pending connection if present
 
 **Registration Modes**:
 
-1. **Stereoscopic Depth Mode** (`ReadableVideoSurfacePanelRegistration`):
-   - Uses `ReadableVideoSurfacePanelRegistration` for custom shader support (supports post-processing)
+1. **Stereoscopic Depth Mode** (`VideoSurfacePanelRegistration`):
+   - Uses `VideoSurfacePanelRegistration` for stereoscopic mode (supports `StereoMode.LeftRight`)
    - Panel registered dynamically in `createVideoPanelEntity()` using `executeOnVrActivity`
-   - `ReadableMediaPanelSettings` with doubled width: `PixelDisplayOptions(width = prefs.width * 2, height = prefs.height)`
-   - `ReadableMediaPanelRenderOptions` with `StereoMode.LeftRight` and `mips = 1`
-   - **NOTE**: `panelShader` property not directly available in `ReadableMediaPanelRenderOptions` - shader configuration method needs investigation
+   - `MediaPanelSettings` with doubled width: `PixelDisplayOptions(width = prefs.width * 2, height = prefs.height)`
+   - `MediaPanelRenderOptions` with `StereoMode.None` (for testing OpenGL duplication) and `zIndex = 0`
+   - OpenGL frame duplication enabled via `attachSurface(surface, useStereoscopicDuplication = true)`
    - Entity created AFTER panel registration with `Panel(R.id.ui_example)` component
-   - Physical panel dimensions: `basePanelHeightMeters * aspectRatio` (0.7m * 1.778 = 1.245m x 0.7m for 2560x1440p)
+   - Physical panel dimensions: `calculatePanelSize(force16x9 = false, useDoubledWidth = true)` - ultra-wide (e.g., 2.489m x 0.7m for 2560x1440p stream)
 
 2. **Lighting Emission Mode** (`ReadableVideoSurfacePanelRegistration`):
    - Uses `ReadableVideoSurfacePanelRegistration` for texture sampling (allows shader access for lighting)
@@ -364,7 +389,7 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
    - `ReadableMediaPanelRenderOptions` with `mips = 4` for shader sampling and `StereoMode.None`
    - Entity created AFTER panel registration with `Panel(R.id.ui_example)` component
    - `HeroLighting` component added to entity for lighting emission
-   - Physical panel dimensions: `basePanelHeightMeters * aspectRatio` (0.7m * 1.778 = 1.245m x 0.7m for 2560x1440p)
+   - Physical panel dimensions: `calculatePanelSize(force16x9 = false, useDoubledWidth = false)` - standard aspect ratio (e.g., 1.245m x 0.7m for 2560x1440p)
 
 3. **Standard Mode** (`VideoSurfacePanelRegistration`):
    - Uses `VideoSurfacePanelRegistration` for direct-to-surface rendering (maximum performance)
@@ -372,15 +397,23 @@ touchScalableSystem?.registerEntity(videoPanelEntity!!)
    - `MediaPanelSettings` with standard resolution: `PixelDisplayOptions(width = prefs.width, height = prefs.height)`
    - `MediaPanelRenderOptions` with `StereoMode.None` and `zIndex = 0`
    - Entity created AFTER panel registration with `Panel(R.id.ui_example)` component
-   - Physical panel dimensions: `basePanelHeightMeters * aspectRatio` (0.7m * 1.778 = 1.245m x 0.7m for 2560x1440p)
+   - Physical panel dimensions: `calculatePanelSize(force16x9 = false, useDoubledWidth = false)` - standard aspect ratio (e.g., 1.245m x 0.7m for 2560x1440p)
 
 **Entity Creation Pattern**:
 
 - **Panel Registration**: All three modes register panel dynamically inside `executeOnVrActivity` block
-- **Entity Creation**: Entity created AFTER panel registration (outside `executeOnVrActivity` block)
-- **Entity Components**: All modes use same entity structure with `Panel(R.id.ui_example)` component
+- **Entity Creation**: Entity created AFTER panel registration (outside `executeOnVrActivity` block) - entity must exist before `surfaceConsumer` callback fires
+- **Entity Components**: All modes use same base entity structure with `Panel(R.id.ui_example)` component
+  - Base components: `Panel`, `Transform`, `PanelDimensions`, `Scale`, `Grabbable`, `Visible(false)`, `Scalable`, `ScaledParent`, `TransformParent`
+  - Additional components: `HeroLighting` added for lighting emission mode
+- **Panel Dimensions**: Calculated using `calculatePanelSize()` helper function (single source of truth)
+  - Used for both `shape` parameter in `MediaPanelSettings` and `PanelDimensions` component
+  - Ensures consistency between physical panel size and pixel display dimensions
 - **Surface Attachment**: Surface provided via `surfaceConsumer` callback for all modes
+  - Stereoscopic mode: `attachSurface(surface, useStereoscopicDuplication = true)` enables OpenGL frame duplication
+  - Other modes: `attachSurface(surface)` standard attachment
 - **Visibility Management**: Video panel starts hidden (`Visible(false)`), shown when stream is ready
+- **Component Updates**: `addVideoPanelComponents()` called in `surfaceConsumer` callback to ensure all components are properly set
 
 #### `onVRPause()` / `onHMDUnmounted()`
 
@@ -1409,31 +1442,41 @@ The video panel entity was previously created twice - once by the SDK during pan
 
 ### Solution Implemented
 
-✅ **Resolved**: The implementation now uses SDK-provided entities exclusively:
+✅ **Resolved**: The implementation now uses consistent entity creation pattern across all modes:
 
-1. **Stereoscopic Depth Mode** (`PanelCreator`):
-   - SDK creates entity in `panelCreator` lambda with correct ultrawide dimensions (5120x1440p for 2560x1440p user resolution)
-   - Entity stored in `videoPanelEntity` and used directly
-   - No manual entity creation overwrites the SDK-provided entity
+1. **Stereoscopic Depth Mode** (`VideoSurfacePanelRegistration`):
+   - Entity created manually AFTER panel registration (outside `executeOnVrActivity` block)
+   - Entity must exist before `surfaceConsumer` callback fires
+   - `surfaceConsumer` callback receives `panelEntity` parameter (SDK-provided entity)
+   - If SDK entity differs from manually created entity, SDK entity is used
+   - Components added via `addVideoPanelComponents()` in `surfaceConsumer` callback
+   - Panel dimensions calculated using `calculatePanelSize(force16x9 = false, useDoubledWidth = true)`
 
 2. **Lighting Emission Mode** (`ReadableVideoSurfacePanelRegistration`):
-   - SDK provides `panelEntity` in `surfaceConsumer` callback
-   - Entity stored in `videoPanelEntity` and used directly
-   - No duplicate entity creation
+   - Entity created manually AFTER panel registration (outside `executeOnVrActivity` block)
+   - Entity must exist before `surfaceConsumer` callback fires
+   - `surfaceConsumer` callback receives `panelEntity` parameter (SDK-provided entity)
+   - Components added via `addVideoPanelComponents()` in `surfaceConsumer` callback
+   - `HeroLighting` component added to entity for lighting emission
+   - Panel dimensions calculated using `calculatePanelSize(force16x9 = false, useDoubledWidth = false)`
 
 3. **Standard Mode** (`VideoSurfacePanelRegistration`):
-   - SDK provides `panelEntity` in `surfaceConsumer` callback
-   - Entity stored in `videoPanelEntity` and used directly
-   - No duplicate entity creation
+   - Entity created manually AFTER panel registration (outside `executeOnVrActivity` block)
+   - Entity must exist before `surfaceConsumer` callback fires
+   - `surfaceConsumer` callback receives `panelEntity` parameter (SDK-provided entity)
+   - Components added via `addVideoPanelComponents()` in `surfaceConsumer` callback
+   - Panel dimensions calculated using `calculatePanelSize(force16x9 = false, useDoubledWidth = false)`
 
 **Implementation Pattern**:
 
-- SDK-provided entity from callbacks is stored in `videoPanelEntity`
-- Additional components are added to the SDK-provided entity (no new entity created)
-- Fallback entity creation only occurs if all SDK registration attempts fail
-- Retry logic ensures SDK callbacks execute and provide entities
+- Entity created manually AFTER panel registration (ensures entity exists before `surfaceConsumer` callback)
+- `surfaceConsumer` callback receives SDK-provided `panelEntity` parameter
+- If SDK entity differs from manually created entity, SDK entity is used (stereoscopic mode only)
+- Components added via `addVideoPanelComponents()` helper function in `surfaceConsumer` callback
+- Panel dimensions use `calculatePanelSize()` helper function (single source of truth)
+- All modes follow consistent pattern for reliable panel creation
 
-**Status**: ✅ Resolved - All three registration modes now use SDK-provided entities correctly
+**Status**: ✅ Resolved - All three registration modes now use consistent entity creation pattern with proper dimension calculation
 
 ---
 
@@ -1456,6 +1499,30 @@ The video panel entity was previously created twice - once by the SDK during pan
 7. **Connection Params** (Lines 325-339): Reads connection params from Intent extras, stores in `pendingConnectionParams` (does NOT connect yet).
 
 **Key Point**: No panel entities are created in `onCreate()`. All panel creation happens in `onSceneReady()` or via SDK registration.
+
+**Panel Dimension Calculation**:
+
+- **Single Source of Truth**: `calculatePanelSize()` helper function (Lines 558-576) serves as the single source of truth for panel dimensions
+- **Parameters**:
+  - `force16x9`: If true, uses fixed 16:9 aspect ratio. If false, calculates from actual resolution.
+  - `useDoubledWidth`: If true, uses doubled width for aspect ratio calculation (for stereoscopic mode).
+- **Usage**: Used for both `shape` parameter in `MediaPanelSettings` and `PanelDimensions` component, ensuring consistency
+- **Implementation**: 
+  ```kotlin
+  private fun calculatePanelSize(force16x9: Boolean = false, useDoubledWidth: Boolean = false): Vector2 {
+      val aspect =
+          if (force16x9) {
+              16f / 9f
+          } else if (prefs.height != 0) {
+              val width = if (useDoubledWidth) prefs.width * 2 else prefs.width
+              width.toFloat() / prefs.height.toFloat()
+          } else {
+              16f / 9f
+          }
+      return Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+  }
+  ```
+- **Benefits**: Eliminates dimension mismatch issues, simplifies configuration logic, ensures `shape` and `PanelDimensions` are always in sync
 
 **2. `registerPanels()` (Lines 443-530)**
 
@@ -1498,29 +1565,33 @@ The video panel entity was previously created twice - once by the SDK during pan
 
 **Video Panel Registration**:
 
-1. **Dynamic Registration** (Line 407, Lines 1337-1539): `createVideoPanelEntity()` calls `SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->`.
-2. **Registration Callback** (Line 1337): `executeOnVrActivity` callback may execute immediately or be delayed (async).
-3. **Panel Registration** (Lines 1355, 1439, or 1492): Inside callback, calls `immersiveActivity.registerPanel()` with one of:
-   - `PanelCreator` (stereoscopic mode, Line 1355)
-   - `ReadableVideoSurfacePanelRegistration` (lighting emission mode, Line 1439)
-   - `VideoSurfacePanelRegistration` (standard mode, Line 1492)
-4. **Entity Callback** (Lines 1358, 1442, or 1495): SDK calls registration callback (`panelCreator` lambda or `surfaceConsumer`) with entity.
-5. **Entity Storage** (Lines 1360, 1446, or 1499): `videoPanelEntity = entity` is set inside callback.
-6. **Component Addition** (Lines 1393, 1448, or 1501): `addVideoPanelComponents()` adds all required components, including `Visible(false)`.
+1. **Dynamic Registration** (Line 1300, Lines 1310-1481): `createVideoPanelEntity()` calls `SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->`.
+2. **Registration Callback** (Line 1310): `executeOnVrActivity` callback may execute immediately or be delayed (async).
+3. **Panel Registration** (Lines 1315, 1402, or 1443): Inside callback, calls `immersiveActivity.registerPanel()` with one of:
+   - `VideoSurfacePanelRegistration` (stereoscopic mode, Line 1315)
+   - `ReadableVideoSurfacePanelRegistration` (lighting emission mode, Line 1402)
+   - `VideoSurfacePanelRegistration` (standard mode, Line 1443)
+4. **Entity Creation** (Lines 1484-1525): Entity created manually AFTER panel registration (outside `executeOnVrActivity` block) to ensure it exists before `surfaceConsumer` callback fires.
+5. **Surface Callback** (Lines 1317, 1404, or 1445): SDK calls `surfaceConsumer` callback with `panelEntity` and `surface` parameters.
+6. **Component Addition** (Line 1344): `addVideoPanelComponents()` called in `surfaceConsumer` callback to add all required components, including `Visible(false)`.
+7. **Entity Synchronization** (Line 1334): For stereoscopic mode, if SDK entity differs from manually created entity, SDK entity is used.
 
-**Key Point**: `videoPanelEntity` is set when SDK callbacks execute. Retry logic with exponential backoff ensures callbacks execute, and entity verification/polling provides fallback if callbacks are delayed.
+**Key Point**: Entity is created manually before `surfaceConsumer` callback fires. `surfaceConsumer` callback receives SDK-provided `panelEntity` parameter. Components are added via `addVideoPanelComponents()` helper function. Panel dimensions use `calculatePanelSize()` helper function (single source of truth).
 
 ### Entity Creation Flow
 
 **Video Panel Entity**:
 
-- **Created By**: SDK automatically when `registerPanel()` is called inside `executeOnVrActivity` callback.
-- **Timing**: Async - depends on `executeOnVrActivity` callback execution and registration callback execution.
-- **Retry Logic**: Up to 3 registration attempts with exponential backoff (100ms, 200ms, 400ms delays).
-- **Entity Verification**: Polls for entity creation via Query if SDK callback doesn't set it (10 attempts, 50ms delay).
-- **Fallback**: Creates minimal fallback entity if all retries fail, ensuring at least one panel is visible.
-- **Visibility**: Visible on launch if no pending connection params exist, hidden if connection is pending.
-- **Reference**: Stored in `videoPanelEntity` when registration callback executes or via polling/fallback.
+- **Created By**: Manually created AFTER panel registration (outside `executeOnVrActivity` block) to ensure entity exists before `surfaceConsumer` callback fires.
+- **Timing**: Synchronous - created immediately after panel registration call completes.
+- **Entity Structure**: Base components include `Panel(R.id.ui_example)`, `Transform`, `PanelDimensions`, `Scale`, `Grabbable`, `Visible(false)`, `Scalable`, `ScaledParent`, `TransformParent`.
+- **Panel Dimensions**: Calculated using `calculatePanelSize()` helper function based on mode:
+  - Stereoscopic: `calculatePanelSize(force16x9 = false, useDoubledWidth = true)` - ultra-wide dimensions
+  - Other modes: `calculatePanelSize(force16x9 = false, useDoubledWidth = false)` - standard aspect ratio
+- **Component Updates**: `addVideoPanelComponents()` called in `surfaceConsumer` callback to ensure all components are properly set.
+- **Entity Synchronization**: For stereoscopic mode, if SDK-provided `panelEntity` differs from manually created entity, SDK entity is used.
+- **Visibility**: Starts hidden (`Visible(false)`), shown when stream is ready via connection status callback.
+- **Reference**: Stored in `videoPanelEntity` when manually created, may be updated in `surfaceConsumer` callback if SDK entity differs.
 
 **Button Shelf Entity**:
 
@@ -1558,7 +1629,7 @@ The video panel entity was previously created twice - once by the SDK during pan
 - **Video Panel**: Shown on launch (if no pending connection) or when stream is ready (if connection pending).
 - **Button Shelf**: Shown on video panel hover (managed by `ButtonShelfVisibilitySystem`).
 
-**Key Point**: Video panel is now reliably visible on launch due to retry logic, entity verification, and fallback mechanisms. Panels appear even if SDK callbacks are delayed.
+**Key Point**: Video panel is now reliably created and visible on launch. Entity is created manually after panel registration to ensure it exists before `surfaceConsumer` callback fires. Panel dimensions use `calculatePanelSize()` helper function (single source of truth) for consistency between `shape` parameter and `PanelDimensions` component. All three panel registration modes (stereoscopic, lighting emission, standard) follow consistent entity creation pattern.
 
 ---
 
@@ -1570,7 +1641,7 @@ The video panel entity was previously created twice - once by the SDK during pan
 
 - Immersive-only architecture (default launcher)
 - Connection panel in VR mode (Compose UI)
-- Video panel in immersive mode
+- Video panel in immersive mode with three distinct registration modes (stereoscopic, lighting emission, standard)
 - PanelManager for unified panel positioning
 - Dynamic panel registration using `executeOnVrActivity` (lifecycle alignment)
 - Panel visibility management (connection panel → video panel transition)
@@ -1588,6 +1659,9 @@ The video panel entity was previously created twice - once by the SDK during pan
 - Wall-aware scaling (corner handles respect wall plane when panel is wall-snapped)
 - zIndex configuration for rectilinear panels
 - Sleep/wake cycle video stream recovery (automatic re-establishment after device sleep)
+- Panel dimension simplification (`calculatePanelSize()` helper function as single source of truth)
+- Consistent entity creation pattern across all panel registration modes
+- OpenGL frame duplication for stereoscopic mode (device-side implementation)
 
 **⚠️ Limitations**:
 
@@ -1696,7 +1770,9 @@ The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 - ✅ Immersive-only architecture launching directly into VR mode
 - ✅ PanelManager for unified panel positioning and management
 - ✅ Dynamic panel registration using `executeOnVrActivity` (lifecycle alignment)
-- ✅ Robust panel registration with retry logic, entity verification, and fallback mechanisms
+- ✅ Three distinct panel registration modes (stereoscopic, lighting emission, standard) all working properly
+- ✅ Consistent entity creation pattern across all panel registration modes
+- ✅ Panel dimension simplification (`calculatePanelSize()` helper function as single source of truth)
 - ✅ Panel visibility management (video panel visible on launch if no pending connection)
 - ✅ PIN pairing system for secure first-time connections (client-generated PIN)
 - ✅ Network security configuration for pairing compatibility
@@ -1707,6 +1783,7 @@ The Moonlight-SpatialSDK Quest 3 app is an immersive-only application that:
 - ✅ ButtonShelf controls (5 buttons) with hover-activated visibility and hierarchical scaling support
 - ✅ Snap to Wall feature with wall-constrained movement (X/Y sliding, Z locked)
 - ✅ Wall-aware scaling handles that respect wall plane constraint
+- ✅ OpenGL frame duplication for stereoscopic mode (device-side implementation)
 
 **Architecture Alignment**:
 

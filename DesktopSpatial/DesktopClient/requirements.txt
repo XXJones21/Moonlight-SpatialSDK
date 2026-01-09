@@ -1,0 +1,27 @@
+# Desktop Stereoscopic Client Dependencies
+
+# Core dependencies
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.24.0,<2.0  # DA3 requires numpy<2
+opencv-python>=4.8.0
+
+# Desktop capture (DXGI)
+dxcam>=0.0.5
+
+# GPU utilities
+nvidia-ml-py>=12.0.0  # For GPU detection (replaces deprecated pynvml)
+
+# Depth Anything 3 (optional - install separately if needed)
+# depth-anything-3  # Install from: https://github.com/ByteDance-Seed/Depth-Anything-3
+
+# Virtual display rendering
+pywin32>=306  # Windows API access
+PyOpenGL>=3.1.6  # OpenGL rendering
+PyOpenGL-accelerate>=3.1.6  # OpenGL acceleration
+
+# Configuration
+pyyaml>=6.0
+
+# Logging
+colorlog>=6.7.0

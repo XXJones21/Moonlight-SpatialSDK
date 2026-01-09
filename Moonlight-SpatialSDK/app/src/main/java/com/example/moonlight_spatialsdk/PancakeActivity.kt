@@ -292,6 +292,7 @@ fun ConnectionPanel2D(
     var capabilityStatus by remember { mutableStateOf<String?>(null) }
     var enableHdr by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_enable_hdr", false)) }
     var enableFullRange by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_full_range", false)) }
+    var enablePcSideStereoscopic by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_pc_side_stereoscopic", false)) }
 
     // App selection dropdown - only show if paired and app list is loaded
     var appList by remember { mutableStateOf<List<com.limelight.nvstream.http.NvApp>>(emptyList()) }
@@ -792,6 +793,44 @@ fun ConnectionPanel2D(
                             )
                         }
 
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "PC-Side Stereoscopic Mode",
+                                    style = LocalTypography.current.body1.copy(
+                                        color = SpatialTheme.colorScheme.primaryAlphaBackground
+                                    )
+                                )
+                                Text(
+                                    text = "Requires desktop client + virtual display (30-50 Mbps)",
+                                    style = LocalTypography.current.body2.copy(
+                                        color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                                    )
+                                )
+                            }
+                            SpatialSwitch(
+                                checked = enablePcSideStereoscopic,
+                                onCheckedChange = { enablePcSideStereoscopic = it }
+                            )
+                        }
+
+                        if (enablePcSideStereoscopic) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "⚠️ Bandwidth Warning: PC-side stereoscopic mode doubles resolution (e.g., 2560x1440 → 5120x1440), requiring 30-50 Mbps network bandwidth. Ensure your network can handle this and that the desktop client is running with virtual display configured.",
+                                style = LocalTypography.current.body2.copy(
+                                    color = Color(0xFFFF9800).copy(alpha = 0.9f)
+                                ),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
                         PrimaryButton(
                             label = "Apply Stream Settings",
                             expanded = true,
@@ -817,8 +856,14 @@ fun ConnectionPanel2D(
                                     .putString("list_audio_config", storedAudio)
                                     .putBoolean("checkbox_enable_hdr", enableHdr)
                                     .putBoolean("checkbox_full_range", enableFullRange)
+                                    .putBoolean("checkbox_pc_side_stereoscopic", enablePcSideStereoscopic)
                                     .apply()
-                                connectionStatus = "Applied stream prefs (res/fps/format/audio/HDR/range)"
+                                val statusMsg = if (enablePcSideStereoscopic) {
+                                    "Applied stream prefs (res/fps/format/audio/HDR/range/stereo) - Resolution will be doubled for SBS"
+                                } else {
+                                    "Applied stream prefs (res/fps/format/audio/HDR/range)"
+                                }
+                                connectionStatus = statusMsg
                             },
                         )
                     }
@@ -1210,27 +1255,6 @@ fun ConnectionPanel2D(
                             checked = immersiveSettings.reflectionsEnabled,
                             onCheckedChange = {
                                 immersiveSettings = immersiveSettings.copy(reflectionsEnabled = it)
-                                ImmersiveSettings.save(context, immersiveSettings)
-                            }
-                        )
-                    }
-
-                    // Stereoscopic 3D Depth Toggle
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Stereoscopic 3D Depth",
-                            style = LocalTypography.current.body1.copy(
-                                color = SpatialTheme.colorScheme.primaryAlphaBackground
-                            )
-                        )
-                        SpatialSwitch(
-                            checked = immersiveSettings.stereoscopicDepthEnabled,
-                            onCheckedChange = {
-                                immersiveSettings = immersiveSettings.copy(stereoscopicDepthEnabled = it)
                                 ImmersiveSettings.save(context, immersiveSettings)
                             }
                         )

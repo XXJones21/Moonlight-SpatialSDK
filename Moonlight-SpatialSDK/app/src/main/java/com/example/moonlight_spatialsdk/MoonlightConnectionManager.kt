@@ -246,9 +246,17 @@ class MoonlightConnectionManager(
                 }
                 Log.i(tag, "startStream: supportedVideoFormats=0x${Integer.toHexString(supportedFormats)} has10Bit=${(supportedFormats and MoonBridge.VIDEO_FORMAT_MASK_10BIT) != 0} enableHdr=${prefs.enableHdr}")
                 
+                // Double width for PC-side stereoscopic mode (SBS format: 5120x1440 for 2560x1440 per eye)
+                val streamWidth = if (prefs.stereoscopicModeEnabled) prefs.width * 2 else prefs.width
+                val streamHeight = prefs.height
+                
+                if (prefs.stereoscopicModeEnabled) {
+                    Log.i(tag, "startStream: PC-side stereoscopic mode enabled - doubling width: ${prefs.width}x${prefs.height} -> ${streamWidth}x${streamHeight}")
+                }
+                
                 val streamConfig = StreamConfiguration.Builder()
                     .setApp(NvApp(if (appId == 0) "Desktop" else "Moonlight", appId, false))
-                    .setResolution(prefs.width, prefs.height)
+                    .setResolution(streamWidth, streamHeight)
                     .setRefreshRate(prefs.fps)
                     .setBitrate(prefs.bitrate)
                     // Disable SOPS to simplify stream setup on device
@@ -260,7 +268,7 @@ class MoonlightConnectionManager(
                     .setColorSpace(colorSpace)
                     .setColorRange(colorRange)
                     .build()
-                Log.i(tag, "startStream: streamConfig created width=${streamConfig.width} height=${streamConfig.height} fps=${streamConfig.refreshRate} bitrate=${streamConfig.bitrate} supportedFormats=0x${Integer.toHexString(streamConfig.getSupportedVideoFormats())}")
+                Log.i(tag, "startStream: streamConfig created width=${streamConfig.getWidth()} height=${streamConfig.getHeight()} fps=${streamConfig.refreshRate} bitrate=${streamConfig.bitrate} supportedFormats=0x${Integer.toHexString(streamConfig.getSupportedVideoFormats())}")
             
                 // CRITICAL: Setup bridge BEFORE creating NvConnection
                 // This ensures videoRenderer is registered when native code calls bridgeDrSetup()

@@ -953,16 +953,315 @@ If the shader is receiving full UVs [0.0, 1.0] in both eyes, it means:
 
 ---
 
+## OpenGL Frame Duplication Implementation (Device-Side)
+
+### Overview
+
+As an alternative to SDK shader-based approach, we implemented OpenGL-based frame duplication directly in the native decoder (`native_decoder.c`). This approach duplicates incoming video frames side-by-side using a custom OpenGL shader before rendering to the panel surface.
+
+### Implementation Details
+
+**Location**: `app/src/main/jni/native_decoder.c`
+
+**Key Components**:
+
+1. **Duplication Shader** (Lines 361-394):
+   - Vertex shader: Simple pass-through for quad rendering
+   - Fragment shader: Duplicates input texture side-by-side
+   - Uses `samplerExternalOES` for SurfaceTexture input
+   - Maps full input texture to each half of output (left [0, 0.5] and right [0.5, 1.0])
+
+2. **EGL Initialization** (Lines 497-595):
+   - Creates separate EGL context for duplication rendering
+   - Sets up OpenGL ES 3.0 context
+   - Initializes duplication shader program
+   - Configures texture parameters (GL_LINEAR filtering)
+
+3. **Frame Processing Loop** (Lines 628-684):
+   - MediaCodec renders to SurfaceTexture
+   - SurfaceTexture provides frames as OpenGL textures
+   - Duplication shader renders frame twice (side-by-side) to panel Surface
+   - Uses `eglSwapBuffers` to display on panel
+
+4. **Detection Logic** (Lines 1173-1189):
+   - Automatically detects stereoscopic mode when surface width = 2x decoder width
+   - Enables duplication when: `surfaceWidth == width * 2 && surfaceHeight == height`
+   - Falls back to normal rendering if EGL initialization fails
+
+**Code Complexity**: ~305 lines of native C code for duplication functionality
+
+### Shader Implementation
+
+**Fragment Shader** (`native_decoder.c`, Lines 372-394):
+
+```glsl
+#version 300 es
+#extension GL_OES_EGL_image_external_essl3 : require
+precision mediump float;
+in vec2 vTexCoord;
+uniform samplerExternalOES uTexture;
+out vec4 fragColor;
+
+void main() {
+    // Duplicate texture side-by-side: map full texture to each half of output
+    vec2 texCoord = vTexCoord;
+    if (vTexCoord.x > 0.5) {
+        // Right half: map [0.5, 1.0] to [0.0, 1.0] of input texture
+        texCoord.x = (vTexCoord.x - 0.5) * 2.0;
+    } else {
+        // Left half: map [0.0, 0.5] to [0.0, 1.0] of input texture
+        texCoord.x = vTexCoord.x * 2.0;
+    }
+    fragColor = texture(uTexture, texCoord);
+}
+```
+
+**Key Characteristics**:
+- Uses `mediump float` precision (may contribute to quality issues)
+- Uses `GL_LINEAR` texture filtering
+- Duplicates single input frame to create side-by-side output
+- Creates monoscopic effect (both eyes see same frame)
+
+### Integration with MoonlightPanelRenderer
+
+**Location**: `app/src/main/java/com/example/moonlight_spatialsdk/MoonlightPanelRenderer.kt`
+
+**Stereoscopic Mode Setup** (Lines 88-115):
+
+```kotlin
+if (useStereoscopicDuplication) {
+    // Create SurfaceTexture to get frames as OpenGL textures
+    val textureIds = IntArray(1)
+    GLES20.glGenTextures(1, textureIds, 0)
+    val textureId = textureIds[0]
+    
+    surfaceTexture = SurfaceTexture(textureId).apply {
+        setDefaultBufferSize(prefs.width, prefs.height)
+    }
+    val surfaceTextureSurface = Surface(surfaceTexture!!)
+    
+    // Set SurfaceTexture in native code for texture access
+    MoonBridge.nativeDecoderSetSurfaceTexture(surfaceTexture, textureId)
+    
+    // Set panel Surface in native code for OpenGL rendering target
+    MoonBridge.nativeDecoderSetPanelSurface(surface)
+    
+    // MediaCodec renders to SurfaceTexture's Surface
+    decoderRenderer.setRenderTarget(LegacySurfaceHolderAdapter(surfaceTextureSurface))
+}
+```
+
+**Flow**:
+1. MediaCodec decoder outputs to SurfaceTexture
+2. SurfaceTexture provides frames as OpenGL textures
+3. Native code duplicates frame side-by-side using OpenGL shader
+4. Duplicated frame rendered to panel Surface (5120x1440p)
+5. SDK's `StereoMode.LeftRight` splits for each eye
+
+### Panel Configuration
+
+**Location**: `ImmersiveActivity.kt`, Lines 1375-1394
+
+**Configuration**:
+- Panel surface: 5120x1440p (doubled width for side-by-side)
+- Physical panel size: Ultra-wide (32:9 aspect ratio)
+- `StereoMode`: `None` (for testing) or `LeftRight` (for production)
+- OpenGL duplication creates side-by-side content before SDK processing
+
+### Testing Results
+
+**Ultra-Wide Mode Test** (`StereoMode.None`):
+
+- **Configuration**: Ultra-wide panel (32:9), `StereoMode.None`, OpenGL duplication enabled
+- **Result**: ✅ Successfully displayed full duplicated frame side-by-side to both eyes
+- **Purpose**: Verified OpenGL duplication was working correctly
+- **Observation**: Panel correctly rendered at ultra-wide dimensions (5120x1440p)
+
+**Quality Issues Discovered**:
+
+1. **Asymmetric Blurriness**:
+   - Left eye: Slightly blurry
+   - Right eye: Very blurry
+   - **Root Cause**: Likely due to:
+     - `mediump float` precision in shader
+     - `GL_LINEAR` texture filtering asymmetry
+     - Texture coordinate mapping precision issues
+
+2. **Performance Overhead**:
+   - Additional OpenGL rendering pass adds 1-2 frames of latency
+   - EGL context switching overhead
+   - SurfaceTexture synchronization delays
+
+3. **Code Complexity**:
+   - ~305 lines of native C code
+   - Complex EGL lifecycle management
+   - SurfaceTexture synchronization challenges
+   - Maintenance burden
+
+### Limitations Identified
+
+1. **Monoscopic Output**: Duplicates same frame to both eyes (no true stereo depth)
+2. **Quality Degradation**: Asymmetric blurriness between eyes
+3. **Performance Impact**: Additional rendering pass adds latency
+4. **Device GPU Constraints**: Quest 3 GPU resources limited for optimization
+5. **Maintenance Complexity**: Native OpenGL code requires careful lifecycle management
+
+### Panel Dimension Simplification
+
+**Issue Discovered**: Dual panel dimension settings (physical size vs pixel display) were overly complicated and caused confusion.
+
+**Solution Implemented**: Single `calculatePanelSize()` helper function serving as single source of truth for panel dimensions.
+
+**Location**: `ImmersiveActivity.kt`, Lines 558-576
+
+```kotlin
+private fun calculatePanelSize(force16x9: Boolean = false, useDoubledWidth: Boolean = false): Vector2 {
+    val aspect =
+        if (force16x9) {
+            16f / 9f
+        } else if (prefs.height != 0) {
+            val width = if (useDoubledWidth) prefs.width * 2 else prefs.width
+            width.toFloat() / prefs.height.toFloat()
+        } else {
+            16f / 9f
+        }
+    return Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+}
+```
+
+**Benefits**:
+- Single source of truth for panel dimensions
+- Consistent calculation for both `shape` parameter and `PanelDimensions` component
+- Simplified configuration logic
+- Eliminates dimension mismatch issues
+
+---
+
+## PC-Side Stereoscopic Processing Investigation
+
+### Investigation Trigger
+
+The quality issues discovered with device-side OpenGL duplication (asymmetric blurriness, performance overhead, code complexity) prompted investigation into alternative approaches. Moving stereoscopic processing to the PC side emerged as a potential solution.
+
+### Investigation Scope
+
+A comprehensive feasibility study was conducted to evaluate moving stereoscopic 3D conversion from Quest 3 device to PC side. See **`Documentation/PC-Side-Stereoscopic-Feasibility-Report.md`** for complete analysis.
+
+### Key Findings
+
+**Feasibility Verdict: CONDITIONAL GO**
+
+**Critical Success Factors**:
+- ✅ Virtual Display Driver supports 5120x1440 resolution (confirmed feasible)
+- ✅ Depth masking can achieve real-time performance on desktop GPU (48-60 FPS achievable)
+- ✅ Moonlight/Sunshine supports custom resolutions including 5120x1440 (confirmed)
+- ✅ Device-side code simplification significant (~464 lines removal, 90% reduction)
+
+**Primary Risks**:
+- ⚠️ Depth masking latency may exceed 20ms target (mitigation: GPU optimization, frame skipping)
+- ⚠️ Network bandwidth doubles with resolution (mitigation: HEVC/AV1 codecs, adaptive bitrate)
+- ⚠️ PC-side processing complexity (mitigation: leverage existing tools, phased implementation)
+
+### Recommended Solution: Depth Anything 3 Streaming
+
+**Primary Recommendation**: Depth Anything 3 (DA3) Streaming module
+
+**Performance Characteristics**:
+- **DA3-Small**: 25-35 FPS @ 1440p on RTX 3060 (recommended for RTX 3060)
+- **DA3-Base**: 30-40 FPS @ 1440p on RTX 3070+ (recommended for RTX 3070+)
+- **Quality**: State-of-the-art (35.7% improvement in pose accuracy over previous methods)
+- **Streaming API**: Dedicated `StreamingInference` API for real-time video processing
+
+**Alternative Solutions**:
+- Stream to 3D: Proven 48 FPS @ 1080p on RTX 3060 (fastest POC option)
+- VisionDepth3D: 25+ depth models, flexible but more complex integration
+
+### Architecture Comparison
+
+| Aspect | Device-Side (OpenGL) | PC-Side (Proposed) |
+|--------|---------------------|-------------------|
+| **Quality** | Asymmetric blur, quality issues | Better (more GPU power) |
+| **Latency** | 40-60ms | 29-70ms (network dependent) |
+| **Frame Rate** | 60 FPS | 48-60 FPS (GPU dependent) |
+| **Code Complexity** | High (~305 lines native C) | Low (device-side simplified) |
+| **GPU Usage (Device)** | High (40-50%) | Low (15-25%) |
+| **GPU Usage (PC)** | N/A | High (70-105%) |
+| **Network Bandwidth** | 15-25 Mbps | 30-50 Mbps (doubled) |
+| **Setup Complexity** | Low | Medium (virtual display) |
+| **Maintenance** | High (OpenGL shaders) | Low (standard pipeline) |
+
+### Implementation Roadmap
+
+**Phase 1: Validation** (2-3 weeks)
+- Virtual display driver setup
+- Sunshine streaming at 5120x1440
+- `StereoMode.LeftRight` validation
+
+**Phase 2: Basic Integration** (2-3 weeks)
+- PC-side processing application
+- Depth masking integration (DA3-Small)
+- End-to-end pipeline testing
+
+**Phase 3: Optimization** (2-3 weeks)
+- Latency optimization
+- Quality tuning
+- Error handling
+
+**Phase 4: Device Simplification** (1 week)
+- Remove OpenGL duplication code (~305 lines)
+- Simplify MoonlightPanelRenderer
+- Update for `StereoMode.LeftRight` usage
+
+**Total Estimated Effort**: 7-10 weeks
+
+### Device-Side Code Simplification
+
+**Current Complexity**:
+- `native_decoder.c`: ~478 lines (duplication shader, EGL setup, frame processing)
+- `MoonlightPanelRenderer.kt`: ~28 lines (stereoscopic setup)
+- `ImmersiveActivity.kt`: ~10 lines (stereoscopic mode logic)
+- **Total: ~516 lines**
+
+**After PC-Side Implementation**:
+- Remove all duplication code from `native_decoder.c`
+- Simplify `MoonlightPanelRenderer.kt` (remove `useStereoscopicDuplication` parameter)
+- Simplify `ImmersiveActivity.kt` (use `StereoMode.LeftRight` directly)
+- **Total Reduction: ~514 lines removed (90% reduction)**
+
+**Remaining**: Standard MediaCodec decoder usage (~50 lines for basic decoder)
+
+### Next Steps
+
+**Decision Point**: Review feasibility report and decide on implementation approach:
+1. **PC-Side Approach**: Proceed with Depth Anything 3 Streaming integration
+2. **Device-Side Optimization**: Improve OpenGL duplication quality (higher precision, better filtering)
+3. **Hybrid Approach**: PC-side depth estimation, device-side SBS generation
+
+**Recommendation**: Proceed with PC-side approach for better quality, simplified codebase, and reduced device GPU usage.
+
+---
+
 ## Summary
 
-The foundational work for 3DS-style stereoscopic 3D depth control is complete. The panel registration issues have been resolved with robust retry logic and fallback mechanisms. The ultrawide 5120x1440p panel is correctly configured, and the debug shader confirms the foundation is working.
+The foundational work for 3DS-style stereoscopic 3D depth control is complete. The panel registration issues have been resolved with robust retry logic and fallback mechanisms. The ultrawide 5120x1440p panel is correctly configured, and both SDK shader and OpenGL duplication approaches have been tested.
 
 **Current State**:
 
 - ✅ Panel registration robust and reliable
 - ✅ Ultrawide dimensions correctly set (5120x1440p)
-- ✅ Custom shader applied and active
-- ✅ Debug mode verifies foundation
-- ⏳ 3DS-style depth algorithm pending implementation
+- ✅ Panel dimension calculation simplified (single source of truth)
+- ✅ SDK shader approach tested (debug mode working)
+- ✅ OpenGL duplication approach tested (working but quality issues)
+- ⚠️ Quality issues identified with device-side OpenGL duplication
+- ✅ PC-side processing feasibility investigated (CONDITIONAL GO)
+- ⏳ Implementation decision pending (PC-side vs device-side optimization)
 
-**Ready For**: Implementation of 3DS-style depth scaling algorithm in `stereo_video.frag` shader.
+**Ready For**: 
+- Decision on implementation approach (PC-side recommended)
+- If PC-side: Begin virtual display driver setup and depth masking integration
+- If device-side: Optimize OpenGL duplication (higher precision, better filtering)
+
+**Related Documentation**:
+- **PC-Side Feasibility Report**: `Documentation/PC-Side-Stereoscopic-Feasibility-Report.md`
+- **3DS-Style Depth Control**: `Documentation/3ds-style-depth-control.md`
+- **App Pipeline**: `Documentation/Quest 3 App Pipeline.md`

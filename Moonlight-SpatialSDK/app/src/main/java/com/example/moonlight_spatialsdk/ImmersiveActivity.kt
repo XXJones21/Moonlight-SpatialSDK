@@ -560,15 +560,13 @@ class ImmersiveActivity : AppSystemActivity() {
    * Single source of truth for panel size - used for both shape parameter and PanelDimensions component.
    * 
    * @param force16x9 If true, uses fixed 16:9 aspect ratio. If false, calculates from actual resolution.
-   * @param useDoubledWidth If true, uses doubled width for aspect ratio calculation (for stereoscopic test mode).
    */
-  private fun calculatePanelSize(force16x9: Boolean = false, useDoubledWidth: Boolean = false): Vector2 {
+  private fun calculatePanelSize(force16x9: Boolean = false): Vector2 {
     val aspect =
         if (force16x9) {
           16f / 9f
         } else if (prefs.height != 0) {
-          val width = if (useDoubledWidth) prefs.width * 2 else prefs.width
-          width.toFloat() / prefs.height.toFloat()
+          prefs.width.toFloat() / prefs.height.toFloat()
         } else {
           16f / 9f
         }
@@ -1303,29 +1301,29 @@ class ImmersiveActivity : AppSystemActivity() {
     // Load immersive settings to determine panel type
     immersiveSettings = ImmersiveSettings.load(this)
     val useLightingEmission = immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled
-    val useStereoscopicDepth = immersiveSettings.stereoscopicDepthEnabled
+    val usePcSideStereoscopic = prefs.stereoscopicModeEnabled
+    Log.i(TAG, "Panel registration: PC-side stereoscopic mode enabled = $usePcSideStereoscopic")
     
     // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
     // This matches PremiumMediaSample pattern and ensures panelManager is initialized
     SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
-      if (useStereoscopicDepth) {
-        // Use VideoSurfacePanelRegistration for stereoscopic mode (supports StereoMode.LeftRight)
-        Log.i(TAG, "Using VideoSurfacePanelRegistration for stereoscopic mode with StereoMode.LeftRight")
+      if (usePcSideStereoscopic) {
+        // Use VideoSurfacePanelRegistration for PC-side stereoscopic mode (SBS stream from desktop)
+        Log.i(TAG, "Using VideoSurfacePanelRegistration for PC-side stereoscopic mode with StereoMode.LeftRight")
         immersiveActivity.registerPanel(
             VideoSurfacePanelRegistration(
                 R.id.ui_example,
                 surfaceConsumer = { panelEntity, surface ->
                   val expectedWidth = prefs.width * 2
                   val expectedHeight = prefs.height
-                  Log.i(TAG, "Stereoscopic surface attached for panel entity=$panelEntity")
+                  Log.i(TAG, "PC-side stereoscopic surface attached for panel entity=$panelEntity")
                   Log.i(TAG, "Expected PixelDisplayOptions: width=$expectedWidth, height=$expectedHeight (for ${prefs.width}x${prefs.height} stream)")
-                  Log.i(TAG, "StereoMode.LeftRight configured - SDK should split texture: left half [0, $expectedWidth/2] to left eye, right half [$expectedWidth/2, $expectedWidth] to right eye")
+                  Log.i(TAG, "PC-side mode: StereoMode.LeftRight configured - SDK should split SBS texture: left half [0, $expectedWidth/2] to left eye, right half [$expectedWidth/2, $expectedWidth] to right eye")
                   
                   SurfaceUtil.paintBlack(surface)
                   
-                  // Configure decoder with preferences when panel is created
-                  // For stereoscopic mode, enable frame duplication via SurfaceTexture
-                  moonlightPanelRenderer.attachSurface(surface, useStereoscopicDuplication = true)
+                  // Configure decoder - no device-side duplication (stream is already SBS)
+                  moonlightPanelRenderer.attachSurface(surface, useStereoscopicDuplication = false)
                   moonlightPanelRenderer.preConfigureDecoder()
                   
                   isSurfaceReady = true
@@ -1337,7 +1335,7 @@ class ImmersiveActivity : AppSystemActivity() {
                   }
                   
                   // Calculate panel size - matches shape parameter in settingsCreator
-                  val panelSize = calculatePanelSize(force16x9 = false, useDoubledWidth = true)
+                  val panelSize = calculatePanelSize(force16x9 = false)
                   
                   // Ensure components are added to entity (may already exist from manual creation)
                   // Note: addVideoPanelComponents sets Visible(false), we'll set visibility after
@@ -1353,14 +1351,11 @@ class ImmersiveActivity : AppSystemActivity() {
                   // Attach child entities now that panel is ready
                   attachChildEntitiesToVideoPanel()
                   
-                  // Make entity visible when surface is ready (for stereoscopic mode)
-                  // Visibility will be managed by connection status callback, but make visible initially if no pending connection
-                  if (pendingConnectionParams == null) {
-                    panelEntity.setComponent(Visible(true))
-                    Log.i(TAG, "Stereoscopic video panel made visible (no pending connection)")
-                  } else {
-                    Log.i(TAG, "Stereoscopic video panel hidden initially (pending connection)")
-                  }
+                  // Make entity visible when surface is ready
+                  // Show panel immediately (will display black screen while connecting)
+                  // Connection status callback will update visibility when stream is ready
+                  panelEntity.setComponent(Visible(true))
+                  Log.i(TAG, "Stereoscopic video panel made visible (surface ready)")
                   
                   // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
                   val params = pendingConnectionParams
@@ -1373,25 +1368,28 @@ class ImmersiveActivity : AppSystemActivity() {
                   }
                 },
                 settingsCreator = {
+                  val panelSize = calculatePanelSize(force16x9 = false)
+                  
                   val displayWidth = prefs.width * 2
                   val displayHeight = prefs.height
-                  val panelSize = calculatePanelSize(force16x9 = false, useDoubledWidth = true)
-                  Log.i(TAG, "TEST MODE: PixelDisplayOptions(width=$displayWidth, height=$displayHeight), StereoMode.None - should show full duplicated frame to both eyes")
-                  MediaPanelSettings(
+                  
+                  val settings = MediaPanelSettings(
                       shape = QuadShapeOptions(width = panelSize.x, height = panelSize.y),
                       display = PixelDisplayOptions(
-                          // Double width to match surface size (5120x1440 for 2560x1440 stream)
-                          // This allows us to verify OpenGL duplication is working correctly
                           width = displayWidth,
                           height = displayHeight
                       ),
                       rendering = MediaPanelRenderOptions(
-                          isDRM = false,
-                          stereoMode = StereoMode.None, // TEST: Show full duplicated frame to both eyes to verify OpenGL duplication
-                          zIndex = 0 // Rectilinear panels use zIndex 0
+                          stereoMode = StereoMode.LeftRight
                       ),
                       style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
                   )
+                  
+                  Log.i(TAG, "Panel settings created: stereoMode=${settings.rendering.stereoMode}, " +
+                           "display=${displayWidth}x${displayHeight}, " +
+                           "shape=${panelSize.x}x${panelSize.y}")
+                  
+                  settings
                 },
             )
         )
@@ -1423,7 +1421,7 @@ class ImmersiveActivity : AppSystemActivity() {
                   }
                 },
                 settingsCreator = {
-                  val panelSize = calculatePanelSize(force16x9 = false, useDoubledWidth = false)
+                  val panelSize = calculatePanelSize(force16x9 = false)
                   ReadableMediaPanelSettings(
                       shape = QuadShapeOptions(width = panelSize.x, height = panelSize.y),
                       display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
@@ -1464,7 +1462,7 @@ class ImmersiveActivity : AppSystemActivity() {
                   }
                 },
                 settingsCreator = {
-                  val panelSize = calculatePanelSize(force16x9 = false, useDoubledWidth = false)
+                  val panelSize = calculatePanelSize(force16x9 = false)
                   MediaPanelSettings(
                       shape = QuadShapeOptions(width = panelSize.x, height = panelSize.y),
                       display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
@@ -1482,12 +1480,8 @@ class ImmersiveActivity : AppSystemActivity() {
     }
     
     // Create entity after panel registration (panel must be registered before entity creation)
-    // Calculate panel size based on mode - will be updated in surfaceConsumer to match shape parameter
-    val panelSize = if (useStereoscopicDepth) {
-      calculatePanelSize(force16x9 = false, useDoubledWidth = true)
-    } else {
-      calculatePanelSize(force16x9 = false, useDoubledWidth = false)
-    }
+    // Calculate panel size - will be updated in surfaceConsumer to match shape parameter
+    val panelSize = calculatePanelSize(force16x9 = false)
     
     val managerEntity = panelManager?.panelManagerEntity
     val parentComponent = if (managerEntity != null) {
@@ -1535,17 +1529,14 @@ class ImmersiveActivity : AppSystemActivity() {
           Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
         }
         
-        // Set initial visibility (for non-stereoscopic modes or when no pending connection)
-        // Stereoscopic mode visibility is managed in surfaceConsumer callback
-        if (!useStereoscopicDepth) {
-            if (pendingConnectionParams == null) {
-                videoPanelEntity?.setComponent(Visible(true))
-                Log.i(TAG, "Video panel entity made visible on launch (no pending connection params)")
-            } else {
-                Log.i(TAG, "Video panel entity created - parented to PanelManager, hidden initially (pending connection)")
-            }
+        // Set initial visibility - show panel immediately (will display black screen while connecting)
+        // Connection status callback will update visibility when stream is ready
+        // For stereoscopic mode, visibility is set in surfaceConsumer callback
+        if (!usePcSideStereoscopic) {
+            videoPanelEntity?.setComponent(Visible(true))
+            Log.i(TAG, "Video panel entity made visible on launch")
         } else {
-            Log.i(TAG, "Stereoscopic video panel entity created - visibility managed in surfaceConsumer callback")
+            Log.i(TAG, "Stereoscopic video panel entity created - visibility set in surfaceConsumer callback")
         }
     }
     
