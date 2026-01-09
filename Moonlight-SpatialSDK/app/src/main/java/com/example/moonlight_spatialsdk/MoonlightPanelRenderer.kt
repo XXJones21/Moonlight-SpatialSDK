@@ -13,6 +13,33 @@ import com.limelight.nvstream.jni.MoonBridge
 import com.limelight.preferences.PreferenceConfiguration
 
 /**
+ * Callback interface for when actual stream resolution is detected.
+ */
+interface OnStreamResolutionDetected {
+    fun onResolutionDetected(actualWidth: Int, actualHeight: Int)
+}
+
+/**
+ * Wrapper around NativeDecoderRenderer that captures actual resolution during setup.
+ */
+private class ResolutionAwareDecoderRenderer(
+    private val onSetupCallback: (Int, Int) -> Unit
+) : NativeDecoderRenderer() {
+    override fun setup(format: Int, width: Int, height: Int, redrawRate: Int): Int {
+        android.util.Log.i("ResolutionAwareDecoderRenderer", "setup intercepted: ${width}x${height} format=0x${Integer.toHexString(format)} fps=$redrawRate")
+        val result = super.setup(format, width, height, redrawRate)
+        if (result == 0) {
+            // Setup successful, notify callback with actual resolution
+            android.util.Log.i("ResolutionAwareDecoderRenderer", "Setup successful, notifying callback with resolution ${width}x${height}")
+            onSetupCallback(width, height)
+        } else {
+            android.util.Log.w("ResolutionAwareDecoderRenderer", "Setup failed with code $result, not notifying callback")
+        }
+        return result
+    }
+}
+
+/**
  * Bridges the Spatial panel Surface to Moonlight's native decoder path.
  * Assumes the Moonlight dependencies (JNI + prefs) are available on the classpath.
  */
@@ -21,9 +48,14 @@ class MoonlightPanelRenderer(
     private val prefs: PreferenceConfiguration,
     private val crashListener: CrashListener,
 ) {
-  private val decoderRenderer: NativeDecoderRenderer by lazy { NativeDecoderRenderer() }
+  private val decoderRenderer: NativeDecoderRenderer by lazy { 
+    ResolutionAwareDecoderRenderer { width, height ->
+      onDecoderSetup(width, height)
+    }
+  }
   private var surfaceTexture: SurfaceTexture? = null
   private var panelSurface: Surface? = null
+  private var onResolutionDetected: OnStreamResolutionDetected? = null
 
   private fun applyDecoderColorConfig() {
     // #region agent log
@@ -135,5 +167,22 @@ class MoonlightPanelRenderer(
   }
 
   fun getDecoder(): VideoDecoderRenderer = decoderRenderer
+
+  /**
+   * Set callback to be notified when actual stream resolution is detected.
+   */
+  fun setOnStreamResolutionDetected(callback: OnStreamResolutionDetected?) {
+    this.onResolutionDetected = callback
+    android.util.Log.i("MoonlightPanelRenderer", "setOnStreamResolutionDetected: callback ${if (callback != null) "set" else "cleared"}")
+  }
+
+  /**
+   * Called when decoder setup completes with actual resolution.
+   * This is called from NativeDecoderRenderer when setup() completes.
+   */
+  fun onDecoderSetup(width: Int, height: Int) {
+    android.util.Log.i("MoonlightPanelRenderer", "onDecoderSetup: actual resolution detected: ${width}x${height}")
+    onResolutionDetected?.onResolutionDetected(width, height)
+  }
 }
 

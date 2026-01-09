@@ -267,6 +267,13 @@ class ImmersiveActivity : AppSystemActivity() {
         prefs = prefs,
         crashListener = CrashListener { _ -> },
     )
+    
+    // Register callback to detect actual stream resolution
+    moonlightPanelRenderer.setOnStreamResolutionDetected(object : OnStreamResolutionDetected {
+      override fun onResolutionDetected(actualWidth: Int, actualHeight: Int) {
+        onStreamResolutionDetected(actualWidth, actualHeight)
+      }
+    })
     audioRenderer = AndroidAudioRenderer(this, prefs.enableAudioFx)
     pairingHelper = MoonlightPairingHelper(this)
     
@@ -571,6 +578,91 @@ class ImmersiveActivity : AppSystemActivity() {
           16f / 9f
         }
     return Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+  }
+
+  /**
+   * Calculate panel physical dimensions from actual stream resolution.
+   * Used when actual stream resolution differs from preferences.
+   * 
+   * @param width Actual stream width in pixels
+   * @param height Actual stream height in pixels
+   * @return Panel dimensions in meters (Vector2)
+   */
+  private fun calculatePanelSizeFromResolution(width: Int, height: Int): Vector2 {
+    val aspectRatio = if (height != 0) {
+      width.toFloat() / height.toFloat()
+    } else {
+      16f / 9f // Fallback to 16:9
+    }
+    return Vector2(aspectRatio * basePanelHeightMeters, basePanelHeightMeters)
+  }
+
+  /**
+   * Called when actual stream resolution is detected from decoder setup.
+   * Updates panel size and preferences to match actual stream resolution.
+   * 
+   * @param actualWidth Actual stream width in pixels
+   * @param actualHeight Actual stream height in pixels
+   */
+  private fun onStreamResolutionDetected(actualWidth: Int, actualHeight: Int) {
+    Log.i(TAG, "Stream resolution detected: ${actualWidth}x${actualHeight}")
+    
+    // Check if resolution matches expected
+    val expectedWidth = if (prefs.stereoscopicModeEnabled) prefs.width * 2 else prefs.width
+    val expectedHeight = prefs.height
+    
+    if (actualWidth != expectedWidth || actualHeight != expectedHeight) {
+      Log.w(TAG, "Resolution mismatch: expected ${expectedWidth}x${expectedHeight}, got ${actualWidth}x${actualHeight}")
+      Log.w(TAG, "Updating panel to match actual stream resolution")
+    } else {
+      Log.i(TAG, "Resolution matches expected: ${actualWidth}x${actualHeight}")
+    }
+    
+    // Update panel dimensions to match actual stream
+    videoPanelEntity?.let { entity ->
+      val newPanelSize = calculatePanelSizeFromResolution(actualWidth, actualHeight)
+      entity.setComponent(PanelDimensions(newPanelSize))
+      Log.i(TAG, "Panel dimensions updated to ${newPanelSize.x}x${newPanelSize.y} for stream ${actualWidth}x${actualHeight}")
+    } ?: Log.w(TAG, "Cannot update panel dimensions: videoPanelEntity is null")
+    
+    // Update preferences to reflect actual resolution
+    updatePreferencesFromActualResolution(actualWidth, actualHeight)
+  }
+
+  /**
+   * Update preferences based on actual stream resolution.
+   * Handles stereoscopic mode by storing single width (per-eye resolution).
+   * 
+   * @param actualWidth Actual stream width in pixels
+   * @param actualHeight Actual stream height in pixels
+   */
+  private fun updatePreferencesFromActualResolution(actualWidth: Int, actualHeight: Int) {
+    // If stereoscopic mode is enabled, actual width is doubled (SBS format)
+    // Store single width in preferences (per-eye resolution)
+    val newWidth = if (prefs.stereoscopicModeEnabled && actualWidth == prefs.width * 2) {
+      // If actual is 5120x1440 and stereoscopic is enabled, store 2560x1440
+      actualWidth / 2
+    } else {
+      actualWidth
+    }
+    val newHeight = actualHeight
+    
+    if (prefs.width != newWidth || prefs.height != newHeight) {
+      Log.i(TAG, "Updating preferences: ${prefs.width}x${prefs.height} -> ${newWidth}x${newHeight}")
+      prefs.width = newWidth
+      prefs.height = newHeight
+      
+      // Persist to SharedPreferences using the same format as PreferenceConfiguration
+      @Suppress("DEPRECATION")
+      val sharedPrefs = android.preference.PreferenceManager.getDefaultSharedPreferences(this)
+      val resolutionString = "${newWidth}x${newHeight}"
+      sharedPrefs.edit()
+        .putString("list_resolution", resolutionString)
+        .apply()
+      Log.i(TAG, "Preferences saved with actual resolution: ${newWidth}x${newHeight} (${resolutionString})")
+    } else {
+      Log.d(TAG, "Preferences already match actual resolution: ${newWidth}x${newHeight}")
+    }
   }
 
   /**
