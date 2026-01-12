@@ -528,6 +528,26 @@ class MoonlightConnectionManager(
     }
 
     /**
+     * Reinitialize ControllerHandler to detect newly connected input devices.
+     * This is called when a Bluetooth controller is turned on mid-session (hot-plug).
+     *
+     * The method destroys the existing ControllerHandler and creates a new one,
+     * which will enumerate all currently connected devices including newly added ones.
+     *
+     * @return true if ControllerHandler was successfully reinitialized, false otherwise
+     */
+    fun reinitializeControllerHandler(): Boolean {
+        Log.i(tag, "reinitializeControllerHandler: Destroying existing ControllerHandler")
+
+        // Stop and destroy existing ControllerHandler
+        controllerHandler?.stop()
+        controllerHandler = null
+
+        // Create new ControllerHandler (this will enumerate all devices including new ones)
+        return initializeControllerHandler()
+    }
+
+    /**
      * Get the ControllerHandler instance for input event forwarding.
      * Returns null if ControllerHandler is not created yet.
      */

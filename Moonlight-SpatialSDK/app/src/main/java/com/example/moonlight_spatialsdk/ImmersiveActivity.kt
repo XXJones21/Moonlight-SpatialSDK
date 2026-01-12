@@ -1,9 +1,11 @@
 package com.example.moonlight_spatialsdk
 
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.input.InputManager
 import android.os.Bundle
 import android.util.Log
 import android.view.InputDevice
@@ -128,6 +130,7 @@ class ImmersiveActivity : AppSystemActivity() {
   private lateinit var moonlightPanelRenderer: MoonlightPanelRenderer
   private lateinit var audioRenderer: AndroidAudioRenderer
   private lateinit var connectionManager: MoonlightConnectionManager
+  private lateinit var inputManager: InputManager
   private val _connectionStatus = MutableStateFlow("Disconnected")
   val connectionStatus: StateFlow<String> = _connectionStatus.asStateFlow()
   
@@ -139,6 +142,7 @@ class ImmersiveActivity : AppSystemActivity() {
   private var isSurfaceReady: Boolean = false
   private var videoPanelEntity: Entity? = null
   private var disconnectDialogPanelEntity: Entity? = null
+  private var reconnectDialogPanelEntity: Entity? = null
   private var buttonShelfEntity: com.example.moonlight_spatialsdk.entities.ButtonShelfEntity? = null
   private var buttonShelfVisibilitySystem: com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem? = null
   private var panelManager: PanelManager? = null
@@ -162,6 +166,14 @@ class ImmersiveActivity : AppSystemActivity() {
   // Dialog state for disconnect confirmation
   private val _showDisconnectDialog = MutableStateFlow(false)
   val showDisconnectDialog: StateFlow<Boolean> = _showDisconnectDialog.asStateFlow()
+
+  // Dialog state for reconnection prompt
+  private val _showReconnectDialog = MutableStateFlow(false)
+  val showReconnectDialog: StateFlow<Boolean> = _showReconnectDialog.asStateFlow()
+
+  // Store last connection parameters for reconnection
+  private var lastConnectionParams: Triple<String, Int, Int>? = null
+  private var lastConnectionHost: String? = null
   
   // MRUK and Spatial Audio features for room meshing and spatialized audio
   private lateinit var mrukFeature: MRUKFeature
@@ -203,7 +215,50 @@ class ImmersiveActivity : AppSystemActivity() {
 
   // Cached immersive settings for panel creation decisions
   private var immersiveSettings: ImmersiveSettings = ImmersiveSettings()
-  
+
+  // Input device listener for hot-plug controller support
+  // Detects when Bluetooth controllers are turned on mid-session and reinitializes ControllerHandler
+  private val inputDeviceListener = object : InputManager.InputDeviceListener {
+    override fun onInputDeviceAdded(deviceId: Int) {
+      val device = inputManager.getInputDevice(deviceId) ?: return
+
+      // Check if this is a gamepad or joystick
+      val isGamepad = (device.sources and InputDevice.SOURCE_GAMEPAD) != 0 ||
+                      (device.sources and InputDevice.SOURCE_JOYSTICK) != 0
+
+      if (isGamepad) {
+        Log.i(TAG, "New input device detected: ${device.name} (id=$deviceId, sources=${device.sources})")
+
+        // Only reinitialize if we're connected and forwarding inputs
+        if (connectionManager.isConnected() && shouldForwardInputs) {
+          coroutineScope.launch {
+            // Brief delay to allow device initialization to complete
+            delay(500)
+
+            val success = connectionManager.reinitializeControllerHandler()
+            if (success) {
+              Log.i(TAG, "ControllerHandler reinitialized for new device: ${device.name}")
+            } else {
+              Log.w(TAG, "Failed to reinitialize ControllerHandler for new device: ${device.name}")
+            }
+          }
+        } else {
+          Log.d(TAG, "Skipping controller reinitialization - not connected or inputs not enabled")
+        }
+      }
+    }
+
+    override fun onInputDeviceRemoved(deviceId: Int) {
+      // ControllerHandler already handles device removal properly via its own listener
+      Log.d(TAG, "Input device removed: id=$deviceId (handled by ControllerHandler)")
+    }
+
+    override fun onInputDeviceChanged(deviceId: Int) {
+      // ControllerHandler already handles device changes properly via its own listener
+      Log.d(TAG, "Input device changed: id=$deviceId (handled by ControllerHandler)")
+    }
+  }
+
   // Permission request codes for MRUK scene access
   companion object {
     private const val PERMISSION_USE_SCENE = "com.oculus.permission.USE_SCENE"
@@ -324,8 +379,8 @@ class ImmersiveActivity : AppSystemActivity() {
           if (connected) {
             videoPanelEntity?.setComponent(Visible(true))
             Log.i(TAG, "Video stream ready (connected=$connected, status=$status), showing video panel")
-            
-            
+
+
             // Initialize ControllerHandler now that video panel is visible and stream is ready
             val handlerInitialized = connectionManager.initializeControllerHandler()
             if (handlerInitialized) {
@@ -343,7 +398,12 @@ class ImmersiveActivity : AppSystemActivity() {
           }
         }
     )
-    
+
+    // Initialize InputManager and register listener for hot-plug controller support
+    inputManager = getSystemService(Context.INPUT_SERVICE) as InputManager
+    inputManager.registerInputDeviceListener(inputDeviceListener, null)
+    Log.i(TAG, "InputDeviceListener registered for hot-plug controller support")
+
     NetworkedAssetLoader.init(
         File(applicationContext.getCacheDir().canonicalPath),
         OkHttpAssetFetcher(),
@@ -487,6 +547,43 @@ class ImmersiveActivity : AppSystemActivity() {
           }
           }
         },
+        PanelRegistration(R.id.reconnect_dialog_panel) {
+          config {
+            fractionOfScreen = 0.5f
+            height = basePanelHeightMeters * 0.5f
+            width = basePanelHeightMeters * 0.7f
+            layoutDpi = 240
+            layerConfig = LayerConfig()
+            enableTransparent = true
+            includeGlass = false
+            themeResourceId = R.style.PanelAppThemeTransparent
+          }
+          composePanel { setContent {
+            ReconnectDialog(
+              showDialog = showReconnectDialog,
+              lastHost = lastConnectionHost,
+              onReconnect = {
+                Log.i(TAG, "User clicked Reconnect")
+                reconnect()
+              },
+              onReturnToHome = {
+                Log.i(TAG, "User clicked Return to Home")
+                _showReconnectDialog.value = false
+                destroyReconnectDialogPanelEntity()
+                launchPanelModeInHome()
+                // Finish the activity so it can be relaunched fresh from PancakeActivity
+                finish()
+                Log.i(TAG, "ImmersiveActivity finished to allow fresh relaunch")
+              },
+              onCancel = {
+                Log.i(TAG, "User cancelled reconnect dialog")
+                _showReconnectDialog.value = false
+                destroyReconnectDialogPanelEntity()
+              }
+            )
+          }
+          }
+        },
         PanelRegistration(R.id.button_shelf) {
           config {
             fractionOfScreen = 0.3f
@@ -523,9 +620,8 @@ class ImmersiveActivity : AppSystemActivity() {
                   toggleSnapToWall()
                 },
                 onDisconnectClick = {
-                  Log.i(TAG, "ButtonShelf Disconnect clicked - ending stream and returning to 2D panel")
-                  disconnect()
-                  launchPanelModeInHome()
+                  Log.i(TAG, "ButtonShelf Disconnect clicked - showing reconnection dialog")
+                  disconnect(showReconnection = true)
                 }
             )
           }
@@ -736,30 +832,47 @@ class ImmersiveActivity : AppSystemActivity() {
         Log.w(TAG, "Failed to load immersive settings: ${e.message}")
         null
       }
-      
-      // Attach ButtonShelf to video panel if it was created before video panel
+
+      // Create ButtonShelf if it doesn't exist (first connection)
+      // On reconnect, the entity persists and we just reattach it
+      if (buttonShelfEntity == null) {
+        Log.i(TAG, "ButtonShelf doesn't exist, creating for first connection")
+        buttonShelfEntity = com.example.moonlight_spatialsdk.entities.ButtonShelfEntity()
+        Log.i(TAG, "New ButtonShelfEntity created: ${buttonShelfEntity?.entity}")
+      } else {
+        Log.i(TAG, "ButtonShelf already exists (reconnection), will reattach to new video panel")
+      }
+
+      // Attach ButtonShelf to video panel (works for both new connections and reconnections)
       buttonShelfEntity?.let { shelf ->
+        Log.i(TAG, "Attaching ButtonShelf entity ${shelf.entity} to video panel $entity")
         shelf.attachToEntity(entity)
         Log.i(TAG, "ButtonShelf attached to video panel")
-        
+
         // Force update children to ensure ButtonShelf is positioned correctly
         val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
         if (scaleChildrenSystem != null) {
           scaleChildrenSystem.forceUpdateChildren(entity)
           Log.i(TAG, "ScaleChildrenSystem force update called for ButtonShelf")
         }
-        
+
         // Create and register visibility system if not already done
+        // On reconnect, this will be null (cleaned up during disconnect), so we recreate it
         if (buttonShelfVisibilitySystem == null) {
+          Log.i(TAG, "Creating new ButtonShelfVisibilitySystem (first connection or reconnection)")
           buttonShelfVisibilitySystem = com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem(
               buttonShelf = shelf,
               videoPanelEntity = entity
           )
           systemManager.registerSystem(buttonShelfVisibilitySystem!!)
           buttonShelfVisibilitySystem?.startTracking()
-          Log.i(TAG, "ButtonShelfVisibilitySystem registered and started tracking")
+          Log.i(TAG, "ButtonShelfVisibilitySystem registered and started tracking - shelf should now be visible")
+        } else {
+          Log.w(TAG, "ButtonShelfVisibilitySystem already exists - unexpected state!")
+          // Still try to start tracking in case it was stopped
+          buttonShelfVisibilitySystem?.startTracking()
         }
-      }
+      } ?: Log.e(TAG, "ButtonShelfEntity is null - cannot attach to video panel (should not happen)")
       
       // Create BiasLightingEntity if lighting emission is enabled
       settings?.let { s ->
@@ -815,6 +928,10 @@ class ImmersiveActivity : AppSystemActivity() {
   }
 
   override fun onSpatialShutdown() {
+    // Unregister input device listener
+    inputManager.unregisterInputDeviceListener(inputDeviceListener)
+    Log.i(TAG, "InputDeviceListener unregistered on shutdown")
+
     // Unregister video panel from scaling system before shutdown
     videoPanelEntity?.let { entity ->
       val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
@@ -823,13 +940,13 @@ class ImmersiveActivity : AppSystemActivity() {
         Log.i(TAG, "Video panel unregistered from TouchScalableSystem on shutdown")
       }
     }
-    
+
     // Clean up MRUK RoomMeshManager and SpatialAudioManager
     roomMeshManager?.destroy()
     roomMeshManager = null
     spatialAudioManager?.destroy()
     spatialAudioManager = null
-    
+
     super.onSpatialShutdown()
     disconnect()
   }
@@ -1227,6 +1344,10 @@ class ImmersiveActivity : AppSystemActivity() {
     if (videoPanelEntity == null) {
       Log.i(TAG, "Video panel entity doesn't exist, recreating for reconnection")
       createVideoPanelEntity()
+
+      // Also recreate ButtonShelf after video panel is recreated
+      // Note: createVideoPanelEntity() is async (surfaceConsumer callback), so we need to wait for videoPanelEntity
+      // The ButtonShelf will be created in the surfaceConsumer callback via createButtonShelfAfterVideoPanel()
     } else {
       // Video panel exists but may be hidden from previous disconnect
       // Surface should still be attached if entity exists (surfaceConsumer was called during initial registration)
@@ -1285,9 +1406,18 @@ class ImmersiveActivity : AppSystemActivity() {
     }
   }
 
-  private fun disconnect() {
-    Log.i(TAG, "disconnect invoked")
-    
+  /**
+   * Disconnect with option to show reconnection dialog or exit to Home.
+   * @param showReconnection If true, shows reconnection dialog. If false, exits to Home.
+   */
+  private fun disconnect(showReconnection: Boolean = false) {
+    Log.i(TAG, "disconnect invoked (showReconnection=$showReconnection)")
+
+    // Store connection parameters before disconnect for potential reconnection
+    lastConnectionParams = connectionManager.getCurrentConnectionParams()
+    lastConnectionHost = lastConnectionParams?.first
+    Log.i(TAG, "Stored connection params for reconnection: $lastConnectionParams")
+
     // Disable input forwarding immediately on disconnect
     shouldForwardInputs = false
     Log.i(TAG, "Input forwarding disabled - disconnect initiated")
@@ -1301,19 +1431,33 @@ class ImmersiveActivity : AppSystemActivity() {
       }
     }
     
+    // Clean up ButtonShelf visibility system
+    buttonShelfVisibilitySystem?.stopTracking()
+    if (buttonShelfVisibilitySystem != null) {
+      systemManager.unregisterSystem<com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem>()
+    }
+    buttonShelfVisibilitySystem = null
+
+    // Clean up ButtonShelf entity (it's a child of video panel, but cleanup explicitly)
+    // NOTE: We detach but do NOT destroy the entity, allowing it to be reattached on reconnect
+    // Panel registrations are managed by registerPanels() and persist across connections
+    buttonShelfEntity?.detachFromEntity()
+    buttonShelfEntity?.setVisible(false)
+    Log.i(TAG, "ButtonShelf entity detached and hidden (panel registration remains active)")
+
     // Clean up stereo depth slider visibility system
     stereoDepthSliderVisibilitySystem?.stopTracking()
     stereoDepthSliderVisibilitySystem = null
-    
+
     // Clean up stereo depth slider entity
     stereoDepthSliderEntity?.detachFromEntity()
     stereoDepthSliderEntity?.destroy()
     stereoDepthSliderEntity = null
-    
+
     // Clean up stereo video system (not used with VideoSurfacePanelRegistration, but kept for potential future use)
     // stereoVideoSystem?.cleanup()
     // stereoVideoSystem = null
-    
+
     // Destroy video panel entity completely on disconnect
     // The surface becomes invalid after stream stops, so we need a fresh panel for reconnection
     videoPanelEntity?.let { entity ->
@@ -1352,10 +1496,37 @@ class ImmersiveActivity : AppSystemActivity() {
     pendingConnectionParams = null
     isPaired = false
     isSurfaceReady = false
-    
-    Log.i(TAG, "Disconnected - returning to 2D panel mode")
+
+    // Show reconnection dialog or exit to Home based on parameter
+    if (showReconnection && lastConnectionParams != null) {
+      Log.i(TAG, "Disconnected - showing reconnection dialog")
+      _showReconnectDialog.value = true
+      createReconnectDialogPanelEntity()
+    } else {
+      Log.i(TAG, "Disconnected - returning to 2D panel mode")
+    }
   }
-  
+
+  /**
+   * Reconnect to the last connected host.
+   * Uses stored connection parameters from before disconnect.
+   */
+  private fun reconnect() {
+    val params = lastConnectionParams
+    if (params == null) {
+      Log.w(TAG, "Cannot reconnect: no stored connection parameters")
+      _connectionStatus.value = "Error: No connection to reconnect to"
+      return
+    }
+
+    Log.i(TAG, "Reconnecting to ${params.first}:${params.second} appId=${params.third}")
+    _showReconnectDialog.value = false
+    destroyReconnectDialogPanelEntity()
+
+    // Reconnect using stored parameters
+    val (host, port, appId) = params
+    connectToHost(host, port, appId)
+  }
 
   /**
    * Poll for video panel entity creation via Query if SDK callback didn't set it.
@@ -1797,6 +1968,62 @@ class ImmersiveActivity : AppSystemActivity() {
   }
 
   /**
+   * Create reconnect dialog panel entity.
+   * Called after disconnect to show reconnection options.
+   */
+  private fun createReconnectDialogPanelEntity() {
+    // Don't create if already exists
+    if (reconnectDialogPanelEntity != null) {
+      Log.w(TAG, "Reconnect dialog entity already exists, skipping creation")
+      return
+    }
+
+    Log.i(TAG, "Creating reconnect dialog panel entity with Panel(R.id.reconnect_dialog_panel)")
+
+    // Reconnect dialog panel size - slightly larger than disconnect dialog
+    val dialogPanelHeight = basePanelHeightMeters * 0.5f  // 0.35m
+    val dialogPanelWidth = basePanelHeightMeters * 0.7f   // 0.49m
+    val panelSize = Vector2(dialogPanelWidth, dialogPanelHeight)
+
+    val managerEntity = panelManager?.panelManagerEntity
+    if (managerEntity == null) {
+      Log.e(TAG, "Cannot create reconnect dialog - PanelManager entity is null")
+      return
+    }
+
+    val parentComponent = TransformParent(managerEntity)
+
+    reconnectDialogPanelEntity = Entity.create(
+        listOf(
+            Panel(R.id.reconnect_dialog_panel),
+            Transform(Pose(Vector3(0f, 0f, -0.5f))), // Position in front of user
+            PanelDimensions(panelSize),
+            Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
+            Visible(true), // Visible when created
+            parentComponent
+        )
+    )
+
+    Log.i(TAG, "Reconnect dialog panel entity created - size: ${panelSize.x}m x ${panelSize.y}m, parented to PanelManager")
+  }
+
+  /**
+   * Destroy reconnect dialog panel entity.
+   */
+  private fun destroyReconnectDialogPanelEntity() {
+    val entity = reconnectDialogPanelEntity
+    if (entity == null) {
+      Log.w(TAG, "Reconnect dialog entity is null, cannot destroy")
+      return
+    }
+
+    Log.i(TAG, "Destroying reconnect dialog panel entity")
+    entity.destroy()
+    reconnectDialogPanelEntity = null
+    Log.i(TAG, "Reconnect dialog panel entity destroyed")
+  }
+
+  /**
    * Updates the scale of the video panel after connection is established.
    * Scale is applied uniformly to all dimensions (x, y, z).
    * 
@@ -2016,6 +2243,89 @@ private fun DisconnectDialog(
                 
                 Spacer(Modifier.height(8.dp))
                 
+                SecondaryButton(
+                    label = "Cancel",
+                    expanded = true,
+                    onClick = {
+                        onCancel()
+                    }
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Reconnect dialog composable for in-session reconnection.
+ * Shows after user disconnects, offering to reconnect or return to Home.
+ */
+@Composable
+private fun ReconnectDialog(
+    showDialog: StateFlow<Boolean>,
+    lastHost: String?,
+    onReconnect: () -> Unit,
+    onReturnToHome: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    val show by showDialog.collectAsState()
+
+    if (show) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.3f)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .clip(SpatialTheme.shapes.large)
+                    .background(brush = LocalColorScheme.current.panel)
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Disconnected",
+                    style = LocalTypography.current.headline2Strong.copy(
+                        color = SpatialTheme.colorScheme.primaryAlphaBackground
+                    )
+                )
+
+                if (!lastHost.isNullOrBlank()) {
+                    Text(
+                        text = "Connection to $lastHost ended",
+                        style = LocalTypography.current.body1.copy(
+                            color = SpatialTheme.colorScheme.secondaryAlphaBackground
+                        )
+                    )
+                }
+
+                // Vertically stacked buttons
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    com.meta.spatial.uiset.button.PrimaryButton(
+                        label = "Reconnect",
+                        expanded = true,
+                        onClick = {
+                            onReconnect()
+                        }
+                    )
+                    Spacer(Modifier.size(28.dp))
+                    SecondaryButton(
+                        label = "Return to Home",
+                        expanded = true,
+                        onClick = {
+                            onReturnToHome()
+                        }
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+
                 SecondaryButton(
                     label = "Cancel",
                     expanded = true,
