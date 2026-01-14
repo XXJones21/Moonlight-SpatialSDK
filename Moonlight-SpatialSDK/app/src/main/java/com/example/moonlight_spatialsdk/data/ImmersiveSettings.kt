@@ -20,9 +20,10 @@ data class ImmersiveSettings(
     /** Enable emissive lighting effect from the video panel */
     val lightingEmissionEnabled: Boolean = false,
     /** Enable video reflections on MRUK room surfaces (walls, floor, ceiling) */
-    val reflectionsEnabled: Boolean = false,
-    /** Enable stereoscopic 3D depth effect with runtime depth control */
-    val stereoscopicDepthEnabled: Boolean = false
+    val reflectionsEnabled: Boolean = false
+    // REMOVED: 3D Desktop Client - Stereoscopic depth removed
+    // /** Enable stereoscopic 3D depth effect with runtime depth control */
+    // val stereoscopicDepthEnabled: Boolean = false
 ) {
     companion object {
         private const val PREFS_NAME = "immersive_settings"
@@ -30,7 +31,8 @@ data class ImmersiveSettings(
         private const val KEY_ROOM_DIMMING = "room_dimming_enabled"
         private const val KEY_LIGHTING_EMISSION = "lighting_emission_enabled"
         private const val KEY_REFLECTIONS = "reflections_enabled"
-        private const val KEY_STEREOSCOPIC_DEPTH = "stereoscopic_depth_enabled"
+        // REMOVED: 3D Desktop Client - Stereoscopic depth removed
+        // private const val KEY_STEREOSCOPIC_DEPTH = "stereoscopic_depth_enabled"
 
         /**
          * Load immersive settings from SharedPreferences.
@@ -45,8 +47,9 @@ data class ImmersiveSettings(
                 spatialAudioEnabled = prefs.getBoolean(KEY_SPATIAL_AUDIO, false),
                 roomDimmingEnabled = prefs.getBoolean(KEY_ROOM_DIMMING, false),
                 lightingEmissionEnabled = prefs.getBoolean(KEY_LIGHTING_EMISSION, false),
-                reflectionsEnabled = prefs.getBoolean(KEY_REFLECTIONS, false),
-                stereoscopicDepthEnabled = prefs.getBoolean(KEY_STEREOSCOPIC_DEPTH, false)
+                reflectionsEnabled = prefs.getBoolean(KEY_REFLECTIONS, false)
+                // REMOVED: 3D Desktop Client - Stereoscopic depth removed
+                // stereoscopicDepthEnabled = prefs.getBoolean(KEY_STEREOSCOPIC_DEPTH, false)
             )
         }
 
@@ -64,7 +67,8 @@ data class ImmersiveSettings(
                 .putBoolean(KEY_ROOM_DIMMING, settings.roomDimmingEnabled)
                 .putBoolean(KEY_LIGHTING_EMISSION, settings.lightingEmissionEnabled)
                 .putBoolean(KEY_REFLECTIONS, settings.reflectionsEnabled)
-                .putBoolean(KEY_STEREOSCOPIC_DEPTH, settings.stereoscopicDepthEnabled)
+                // REMOVED: 3D Desktop Client - Stereoscopic depth removed
+                // .putBoolean(KEY_STEREOSCOPIC_DEPTH, settings.stereoscopicDepthEnabled)
                 .apply()
         }
     }

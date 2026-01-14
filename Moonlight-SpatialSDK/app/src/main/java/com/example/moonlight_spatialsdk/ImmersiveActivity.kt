@@ -204,14 +204,15 @@ class ImmersiveActivity : AppSystemActivity() {
   // Bias lighting entity for edge-based ambient glow effect
   private var biasLightingEntity: BiasLightingEntity? = null
   
+  // REMOVED: 3D Desktop Client - Stereoscopic systems removed
   // Stereo video system for stereoscopic 3D depth control
-  private var stereoVideoSystem: com.example.moonlight_spatialsdk.systems.stereo.StereoVideoSystem? = null
+  // private var stereoVideoSystem: com.example.moonlight_spatialsdk.systems.stereo.StereoVideoSystem? = null
   
   // Stereo depth slider entity for runtime depth control
-  private var stereoDepthSliderEntity: com.example.moonlight_spatialsdk.entities.StereoDepthSliderEntity? = null
+  // private var stereoDepthSliderEntity: com.example.moonlight_spatialsdk.entities.StereoDepthSliderEntity? = null
   
   // Stereo depth slider visibility system
-  private var stereoDepthSliderVisibilitySystem: com.example.moonlight_spatialsdk.systems.stereoDepthSlider.StereoDepthSliderVisibilitySystem? = null
+  // private var stereoDepthSliderVisibilitySystem: com.example.moonlight_spatialsdk.systems.stereoDepthSlider.StereoDepthSliderVisibilitySystem? = null
 
   // Cached immersive settings for panel creation decisions
   private var immersiveSettings: ImmersiveSettings = ImmersiveSettings()
@@ -627,6 +628,8 @@ class ImmersiveActivity : AppSystemActivity() {
           }
           }
         },
+        // REMOVED: 3D Desktop Client - Stereoscopic depth slider panel removed
+        /*
         PanelRegistration(R.id.stereo_depth_slider) {
           config {
             fractionOfScreen = 0.3f
@@ -654,6 +657,7 @@ class ImmersiveActivity : AppSystemActivity() {
             )
           }
           }
+        */
         },
     ).filterNotNull()
   }
@@ -704,7 +708,9 @@ class ImmersiveActivity : AppSystemActivity() {
     Log.i(TAG, "Stream resolution detected: ${actualWidth}x${actualHeight}")
     
     // Check if resolution matches expected
-    val expectedWidth = if (prefs.stereoscopicModeEnabled) prefs.width * 2 else prefs.width
+    // REMOVED: 3D Desktop Client - Stereoscopic mode width doubling removed
+    val expectedWidth = prefs.width
+    // val expectedWidth = if (prefs.stereoscopicModeEnabled) prefs.width * 2 else prefs.width
     val expectedHeight = prefs.height
     
     if (actualWidth != expectedWidth || actualHeight != expectedHeight) {
@@ -727,20 +733,22 @@ class ImmersiveActivity : AppSystemActivity() {
 
   /**
    * Update preferences based on actual stream resolution.
-   * Handles stereoscopic mode by storing single width (per-eye resolution).
+   * REMOVED: 3D Desktop Client - Stereoscopic mode handling removed
    * 
    * @param actualWidth Actual stream width in pixels
    * @param actualHeight Actual stream height in pixels
    */
   private fun updatePreferencesFromActualResolution(actualWidth: Int, actualHeight: Int) {
+    // REMOVED: 3D Desktop Client - Stereoscopic mode width handling removed
     // If stereoscopic mode is enabled, actual width is doubled (SBS format)
     // Store single width in preferences (per-eye resolution)
-    val newWidth = if (prefs.stereoscopicModeEnabled && actualWidth == prefs.width * 2) {
-      // If actual is 5120x1440 and stereoscopic is enabled, store 2560x1440
-      actualWidth / 2
-    } else {
-      actualWidth
-    }
+    val newWidth = actualWidth
+    // val newWidth = if (prefs.stereoscopicModeEnabled && actualWidth == prefs.width * 2) {
+    //   // If actual is 5120x1440 and stereoscopic is enabled, store 2560x1440
+    //   actualWidth / 2
+    // } else {
+    //   actualWidth
+    // }
     val newHeight = actualHeight
     
     if (prefs.width != newWidth || prefs.height != newHeight) {
@@ -891,6 +899,8 @@ class ImmersiveActivity : AppSystemActivity() {
         }
       }
       
+      // REMOVED: 3D Desktop Client - Stereoscopic depth slider initialization removed
+      /*
       // Initialize stereo depth slider if stereoscopic depth is enabled
       // Note: StereoVideoSystem is not used with VideoSurfacePanelRegistration (no custom shaders)
       // Depth slider is kept for potential future use with decoder-level depth control
@@ -924,6 +934,7 @@ class ImmersiveActivity : AppSystemActivity() {
           }
         }
       }
+      */
     }
   }
 
@@ -1445,6 +1456,8 @@ class ImmersiveActivity : AppSystemActivity() {
     buttonShelfEntity?.setVisible(false)
     Log.i(TAG, "ButtonShelf entity detached and hidden (panel registration remains active)")
 
+    // REMOVED: 3D Desktop Client - Stereoscopic depth slider cleanup removed
+    /*
     // Clean up stereo depth slider visibility system
     stereoDepthSliderVisibilitySystem?.stopTracking()
     stereoDepthSliderVisibilitySystem = null
@@ -1457,6 +1470,7 @@ class ImmersiveActivity : AppSystemActivity() {
     // Clean up stereo video system (not used with VideoSurfacePanelRegistration, but kept for potential future use)
     // stereoVideoSystem?.cleanup()
     // stereoVideoSystem = null
+    */
 
     // Destroy video panel entity completely on disconnect
     // The surface becomes invalid after stream stops, so we need a fresh panel for reconnection
@@ -1564,12 +1578,15 @@ class ImmersiveActivity : AppSystemActivity() {
     // Load immersive settings to determine panel type
     immersiveSettings = ImmersiveSettings.load(this)
     val useLightingEmission = immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled
-    val usePcSideStereoscopic = prefs.stereoscopicModeEnabled
-    Log.i(TAG, "Panel registration: PC-side stereoscopic mode enabled = $usePcSideStereoscopic")
+    // REMOVED: 3D Desktop Client - Stereoscopic mode removed
+    // val usePcSideStereoscopic = prefs.stereoscopicModeEnabled
+    // Log.i(TAG, "Panel registration: PC-side stereoscopic mode enabled = $usePcSideStereoscopic")
     
     // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
     // This matches PremiumMediaSample pattern and ensures panelManager is initialized
     SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
+      // REMOVED: 3D Desktop Client - Stereoscopic panel registration removed
+      /*
       if (usePcSideStereoscopic) {
         // Use VideoSurfacePanelRegistration for PC-side stereoscopic mode (SBS stream from desktop)
         Log.i(TAG, "Using VideoSurfacePanelRegistration for PC-side stereoscopic mode with StereoMode.LeftRight")
@@ -1656,7 +1673,9 @@ class ImmersiveActivity : AppSystemActivity() {
                 },
             )
         )
-      } else if (useLightingEmission) {
+      */
+      // REMOVED: 3D Desktop Client - Stereoscopic mode removed, now only check for lighting emission
+      if (useLightingEmission) {
         // Use ReadableVideoSurfacePanelRegistration for lighting emission (allows texture sampling)
         Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for lighting emission")
         immersiveActivity.registerPanel(
@@ -1782,7 +1801,7 @@ class ImmersiveActivity : AppSystemActivity() {
     videoPanelEntity = Entity.create(baseComponents)
     
     // Register video panel with scaling system for all modes
-    // For stereoscopic mode, entity is also registered in surfaceConsumer callback (redundant but safe)
+    // REMOVED: 3D Desktop Client - Stereoscopic mode handling removed
     if (videoPanelEntity != null) {
         val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
         if (touchScalableSystem != null) {
@@ -1794,13 +1813,9 @@ class ImmersiveActivity : AppSystemActivity() {
         
         // Set initial visibility - show panel immediately (will display black screen while connecting)
         // Connection status callback will update visibility when stream is ready
-        // For stereoscopic mode, visibility is set in surfaceConsumer callback
-        if (!usePcSideStereoscopic) {
-            videoPanelEntity?.setComponent(Visible(true))
-            Log.i(TAG, "Video panel entity made visible on launch")
-        } else {
-            Log.i(TAG, "Stereoscopic video panel entity created - visibility set in surfaceConsumer callback")
-        }
+        // REMOVED: 3D Desktop Client - Stereoscopic mode visibility handling removed
+        videoPanelEntity?.setComponent(Visible(true))
+        Log.i(TAG, "Video panel entity made visible on launch")
     }
     
     // Attach ButtonShelf to video panel if it was created before video panel

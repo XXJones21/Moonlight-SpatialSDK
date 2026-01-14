@@ -246,13 +246,16 @@ class MoonlightConnectionManager(
                 }
                 Log.i(tag, "startStream: supportedVideoFormats=0x${Integer.toHexString(supportedFormats)} has10Bit=${(supportedFormats and MoonBridge.VIDEO_FORMAT_MASK_10BIT) != 0} enableHdr=${prefs.enableHdr}")
                 
+                // REMOVED: 3D Desktop Client - Stereoscopic mode width doubling removed
                 // Double width for PC-side stereoscopic mode (SBS format: 5120x1440 for 2560x1440 per eye)
-                val streamWidth = if (prefs.stereoscopicModeEnabled) prefs.width * 2 else prefs.width
+                val streamWidth = prefs.width
+                // val streamWidth = if (prefs.stereoscopicModeEnabled) prefs.width * 2 else prefs.width
                 val streamHeight = prefs.height
                 
-                if (prefs.stereoscopicModeEnabled) {
-                    Log.i(tag, "startStream: PC-side stereoscopic mode enabled - doubling width: ${prefs.width}x${prefs.height} -> ${streamWidth}x${streamHeight}")
-                }
+                // REMOVED: 3D Desktop Client - Stereoscopic mode logging removed
+                // if (prefs.stereoscopicModeEnabled) {
+                //     Log.i(tag, "startStream: PC-side stereoscopic mode enabled - doubling width: ${prefs.width}x${prefs.height} -> ${streamWidth}x${streamHeight}")
+                // }
                 
                 val streamConfig = StreamConfiguration.Builder()
                     .setApp(NvApp(if (appId == 0) "Desktop" else "Moonlight", appId, false))

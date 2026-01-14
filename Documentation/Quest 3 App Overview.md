@@ -2,14 +2,14 @@
 
 ## Overview
 
-The Moonlight-SpatialSDK Quest 3 application is a hybrid VR streaming client that brings PC game streaming to Meta Quest 3 using the Moonlight protocol and Meta Spatial SDK. The app launches in 2D panel mode for connection setup and keyboard input, then seamlessly transitions to immersive VR mode for mixed reality streaming with advanced spatial features including stereoscopic 3D, spatial audio, room integration, and interactive controls.
+The Moonlight-SpatialSDK Quest 3 application is a hybrid VR streaming client that brings PC game streaming to Meta Quest 3 using the Moonlight protocol and Meta Spatial SDK. The app launches in 2D panel mode for connection setup and keyboard input, then seamlessly transitions to immersive VR mode for mixed reality streaming with advanced spatial features including spatial audio, room integration, and interactive controls.
 
 ## What You'll Learn
 
 - How the hybrid app architecture leverages both 2D and VR modes
 - The connection flow from pairing to streaming
-- Video panel rendering with multiple modes (standard, stereoscopic, lighting)
-- Advanced VR features: spatial audio, room mesh integration (MRUK), stereoscopic 3D
+- Video panel rendering with multiple modes (standard, lighting)
+- Advanced VR features: spatial audio, room mesh integration (MRUK)
 - User controls: panel scaling, snap-to-wall, and interactive button shelf
 - Input forwarding from Quest controllers to the PC
 - Stream lifecycle management and recovery after sleep/wake cycles
@@ -127,7 +127,7 @@ Meta Horizon OS has known issues with virtual keyboard positioning in immersive 
 
 **Key Features**:
 
-- Video panel with three rendering modes (standard, stereoscopic, lighting)
+- Video panel with two rendering modes (standard, lighting)
 - ButtonShelf controls for quick access to features
 - Corner-based panel scaling with hover-activated handles
 - Snap-to-wall feature for wall-constrained movement
@@ -276,44 +276,7 @@ VideoSurfacePanelRegistration(
 
 **Use Case**: Default mode for standard game streaming
 
-#### 2. Stereoscopic Mode
-
-**Purpose**: PC-side stereoscopic 3D with side-by-side stream from desktop
-
-**Configuration**:
-
-```kotlin
-VideoSurfacePanelRegistration(
-    R.id.ui_example,
-    surfaceConsumer = { panelEntity, surface ->
-        SurfaceUtil.paintBlack(surface)
-        // Enable OpenGL frame duplication for stereoscopic rendering
-        moonlightPanelRenderer.attachSurface(surface, useStereoscopicDuplication = true)
-        moonlightPanelRenderer.preConfigureDecoder()
-    },
-    settingsCreator = {
-        MediaPanelSettings(
-            shape = QuadShapeOptions(width = panelWidth * 2, height = panelHeight),
-            display = PixelDisplayOptions(width = streamWidth * 2, height = streamHeight),
-            rendering = MediaPanelRenderOptions(
-                stereoMode = StereoMode.LeftRight
-            )
-        )
-    }
-)
-```
-
-**Use Case**: PC sends side-by-side stereoscopic stream (e.g., 5120x1440 for dual 2560x1440 views)
-
-**Key Features**:
-
-- PC-side stereoscopic rendering (no device duplication)
-- `StereoMode.LeftRight` for side-by-side layout
-- Ultra-wide panel dimensions (doubled width)
-- Stereo depth slider for runtime 3D adjustment
-- Custom shader support for depth control
-
-#### 3. Lighting Emission Mode
+#### 2. Lighting Emission Mode
 
 **Purpose**: Texture sampling for advanced lighting effects
 
@@ -415,43 +378,15 @@ override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
 
 **Mode Comparison**:
 
-| Feature | Standard | Stereoscopic | Lighting Emission |
-|---------|----------|--------------|-------------------|
-| **Performance** | Highest | High | Medium |
-| **Panel Type** | VideoSurfacePanelRegistration | VideoSurfacePanelRegistration | ReadableVideoSurfacePanelRegistration |
-| **Texture Sampling** | No | No | Yes (mips = 4) |
-| **Stereoscopic 3D** | No | Yes (StereoMode.LeftRight) | No |
-| **Panel Width** | Standard | Doubled | Standard |
-| **Custom Shaders** | No | Yes (depth control) | Yes (lighting) |
-| **Use Cases** | Default streaming | 3D games, 3D movies | Ambilight, reflections |
+| Feature | Standard | Lighting Emission |
+|---------|----------|-------------------|
+| **Performance** | Highest | Medium |
+| **Panel Type** | VideoSurfacePanelRegistration | ReadableVideoSurfacePanelRegistration |
+| **Texture Sampling** | No | Yes (mips = 4) |
+| **Custom Shaders** | No | Yes (lighting) |
+| **Use Cases** | Default streaming | Ambilight, reflections |
 
-### Stereoscopic 3D
-
-**PC-Side Stereoscopic Architecture**:
-
-The app uses PC-side stereoscopic rendering where the desktop PC generates a side-by-side (SBS) stereoscopic stream:
-
-1. **PC Setup**: Configure desktop for SBS output (e.g., NVIDIA 3D Vision, Tridef, VorpX)
-2. **Stream Configuration**: Set resolution to doubled width (e.g., 5120x1440 for dual 2560x1440 views)
-3. **Quest Display**: `StereoMode.LeftRight` separates left/right eye views
-4. **Depth Control**: Runtime adjustment via stereo depth slider
-
-**Stereo Depth Slider**:
-
-```kotlin
-class StereoDepthSliderEntity {
-    // Positioned above video panel
-    // Visible when stereoscopic mode enabled
-    // Controls 3D depth effect in real-time
-}
-```
-
-**Key Features**:
-
-- No device-side frame duplication (all rendering on PC)
-- Custom shader support for depth adjustment
-- Ultra-wide panel dimensions (2x width)
-- Compatible with PC-based 3D rendering solutions
+<!-- REMOVED: 3D Desktop Client - Stereoscopic 3D section removed -->
 
 ### Spatial Audio
 
@@ -702,7 +637,8 @@ class AnchorSnappingSystem : System {
 | `roomDimmingEnabled` | Boolean | false | Dim passthrough during streaming |
 | `lightingEmissionEnabled` | Boolean | false | Emissive lighting from panel |
 | `reflectionsEnabled` | Boolean | false | Video reflections on walls |
-| `stereoscopicDepthEnabled` | Boolean | false | Stereoscopic 3D mode |
+<!-- REMOVED: 3D Desktop Client - Stereoscopic depth removed -->
+<!-- | `stereoscopicDepthEnabled` | Boolean | false | Stereoscopic 3D mode | -->
 
 ## Advanced Implementation
 
@@ -843,7 +779,8 @@ private fun createVideoPanelEntity() {
     // Load settings to determine panel type
     immersiveSettings = ImmersiveSettings.load(this)
     val useLightingEmission = immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled
-    val usePcSideStereoscopic = prefs.stereoscopicModeEnabled
+    // REMOVED: 3D Desktop Client - Stereoscopic mode removed
+    // val usePcSideStereoscopic = prefs.stereoscopicModeEnabled
 
     // Register panel dynamically using executeOnVrActivity
     // This ensures panelManager is initialized before registration
@@ -980,7 +917,7 @@ The app uses a specific pattern for creating video panel entities to avoid dupli
 
 1. **SDK Provides Entity**: When you register a panel, the SDK creates an entity and provides it via callbacks:
    - `surfaceConsumer` callback receives `(panelEntity, surface)`
-   - For stereoscopic mode with `panelCreator`, entity is returned from the lambda
+   - Entity is returned from the lambda
 
 2. **Use SDK-Provided Entity**: The correct pattern is to use the SDK-provided entity and add components to it:
 
@@ -1027,7 +964,7 @@ videoPanelEntity = Entity.create(
 ```
 
 **Problem**: This created TWO entities for the same panel ID:
-- SDK-created entity with correct `PanelDimensions` (e.g., 5120x1440 for stereoscopic)
+- SDK-created entity with correct `PanelDimensions`
 - Manually created entity with wrong dimensions (e.g., 2560x1440)
 
 **Resolution**: Use only the SDK-provided entity from callbacks. Add components to that entity instead of creating a new one.
@@ -1181,7 +1118,7 @@ Server responds with selected format:
 
 bridgeDrSetup() called with negotiated values:
 - format: int (MoonBridge.VIDEO_FORMAT_*)
-- width: int (e.g., 2560 or 5120 for SBS)
+- width: int (e.g., 2560)
 - height: int (e.g., 1440)
 - fps: int (e.g., 90)
 - colorSpace: int (BT709/BT2020)
@@ -1205,7 +1142,7 @@ Panel rendering:
 - MediaCodec outputs to Surface
 - Surface is composited into VR scene
 - SDK handles distortion correction
-- SDK handles stereoscopic rendering (StereoMode.LeftRight)
+- SDK handles standard rendering
 
 ```
 
@@ -1250,11 +1187,7 @@ Meta Horizon OS has known issues with virtual keyboard positioning in immersive 
 
 **Entity Duplication Problem**:
 
-Early implementations created video panel entities manually after panel registration, not realizing the SDK already creates an entity and provides it via the `surfaceConsumer` callback. This caused two entities for the same panel ID with mismatched dimensions. The issue was particularly visible in stereoscopic mode where the SDK-created entity had correct ultra-wide dimensions (5120x1440) but the manually created entity had standard dimensions (2560x1440). The resolution was to use only the SDK-provided entity from callbacks and add components to it.
-
-**Device-Side vs PC-Side Stereoscopic**:
-
-Original stereoscopic implementation used device-side frame duplication via OpenGL, where the Quest would duplicate each frame for left/right eyes. This approach was replaced with PC-side stereoscopic rendering, where the desktop PC generates a side-by-side (SBS) stream (e.g., 5120x1440 for dual 2560x1440 views). The PC-side approach is more efficient and enables use of PC-based 3D rendering solutions like NVIDIA 3D Vision, Tridef, and VorpX.
+Early implementations created video panel entities manually after panel registration, not realizing the SDK already creates an entity and provides it via the `surfaceConsumer` callback. This caused two entities for the same panel ID with mismatched dimensions. The resolution was to use only the SDK-provided entity from callbacks and add components to it.
 
 ### Known Issues and Workarounds
 
@@ -1390,8 +1323,7 @@ Moonlight-SpatialSDK/
 │   │   ├── entities/
 │   │   │   ├── ButtonShelfEntity.kt                # Control buttons
 │   │   │   ├── BiasLightingEntity.kt               # Ambient glow effect
-│   │   │   ├── StereoDepthSliderEntity.kt          # 3D depth control
-│   │   │   └── Stereo3DVideoPanelEntity.kt         # Legacy stereoscopic
+<!-- REMOVED: 3D Desktop Client - Stereoscopic entities removed -->
 │   │   ├── systems/
 │   │   │   ├── buttonShelfVisibility/
 │   │   │   │   └── ButtonShelfVisibilitySystem.kt  # Button shelf auto-hide
@@ -1410,17 +1342,14 @@ Moonlight-SpatialSDK/
 │   │   │   │   └── WallLightingSystem.kt           # Wall reflections
 │   │   │   ├── lighting/
 │   │   │   │   └── LightingPassthroughHandler.kt   # Room dimming
-│   │   │   ├── stereo/
-│   │   │   │   └── StereoVideoSystem.kt            # Stereoscopic depth
-│   │   │   ├── stereoDepthSlider/
-│   │   │   │   └── StereoDepthSliderVisibilitySystem.kt
+<!-- REMOVED: 3D Desktop Client - Stereoscopic systems removed -->
 │   │   │   └── pointerInfo/
 │   │   │       └── PointerInfoSystem.kt            # Hover detection
 │   │   ├── data/
 │   │   │   └── ImmersiveSettings.kt                # Feature flags
 │   │   └── ui/
 │   │       ├── ButtonShelfCompose.kt               # Button shelf UI
-│   │       └── StereoDepthSliderCompose.kt         # Depth slider UI
+<!-- REMOVED: 3D Desktop Client - Stereoscopic UI removed -->
 │   ├── res/
 │   │   ├── layout/
 │   │   │   └── activity_pancake.xml                # 2D UI layout
@@ -1451,23 +1380,21 @@ Moonlight-SpatialSDK/
 | PointerInfoSystem | systems/pointerInfo/PointerInfoSystem.kt | Controller hover detection |
 | HeroLightingSystem | systems/heroLighting/HeroLightingSystem.kt | Panel edge emissive lighting |
 | WallLightingSystem | systems/heroLighting/WallLightingSystem.kt | Video reflections on walls |
-| StereoVideoSystem | systems/stereo/StereoVideoSystem.kt | Stereoscopic depth control |
-| StereoDepthSliderVisibilitySystem | systems/stereoDepthSlider/StereoDepthSliderVisibilitySystem.kt | Depth slider visibility |
+<!-- REMOVED: 3D Desktop Client - Stereoscopic systems removed -->
 | **Entities** | | |
 | ButtonShelfEntity | entities/ButtonShelfEntity.kt | Control button panel (settings, reset, etc.) |
 | BiasLightingEntity | entities/BiasLightingEntity.kt | Ambient glow around panel edges |
-| StereoDepthSliderEntity | entities/StereoDepthSliderEntity.kt | Runtime 3D depth adjustment |
-| Stereo3DVideoPanelEntity | entities/Stereo3DVideoPanelEntity.kt | Legacy stereoscopic panel (deprecated) |
+<!-- REMOVED: 3D Desktop Client - Stereoscopic entities removed -->
 | **Managers** | | |
 | RoomMeshManager | systems/mruk/RoomMeshManager.kt | MRUK scene loading and mesh generation |
 | SpatialAudioManager | systems/audio/SpatialAudioManager.kt | Audio session spatialization |
 | LightingPassthroughHandler | systems/lighting/LightingPassthroughHandler.kt | Passthrough dimming control |
 | **Compose Panels** | | |
 | ButtonShelfCompose | ui/ButtonShelfCompose.kt | Button shelf Compose UI |
-| StereoDepthSliderCompose | ui/StereoDepthSliderCompose.kt | Depth slider Compose UI |
+<!-- REMOVED: 3D Desktop Client - Stereoscopic UI removed -->
 | **Configuration** | | |
 | panel_ids.xml | res/values/panel_ids.xml | Panel registration IDs (ui_example, button_shelf, etc.) |
-| ImmersiveSettings | data/ImmersiveSettings.kt | Feature toggles (spatial audio, lighting, stereoscopic) |
+| ImmersiveSettings | data/ImmersiveSettings.kt | Feature toggles (spatial audio, lighting) |
 
 ### Method Reference with Signatures
 
@@ -1514,7 +1441,7 @@ Moonlight-SpatialSDK/
 | **Panel Dimensions** | | |
 | basePanelHeightMeters | 0.7f | Base panel height in meters |
 | Panel width | Aspect ratio × 0.7m | Calculated from stream resolution |
-| Stereoscopic width | 2 × standard width | Doubled for side-by-side mode |
+<!-- REMOVED: 3D Desktop Client - Stereoscopic width removed -->
 | **Timeout Values** | | |
 | Poll delay | 50ms | Delay between entity polling attempts |
 | Max poll attempts | 10 | Maximum entity polling attempts |
@@ -1557,7 +1484,7 @@ Moonlight-SpatialSDK/
 | videoPanelEntity | Entity? | Main video panel entity (SDK-provided) |
 | buttonShelfEntity | ButtonShelfEntity? | Control button panel |
 | disconnectDialogPanelEntity | Entity? | Disconnect confirmation dialog |
-| stereoDepthSliderEntity | StereoDepthSliderEntity? | Stereoscopic depth slider |
+<!-- REMOVED: 3D Desktop Client - Stereoscopic depth slider removed -->
 | biasLightingEntity | BiasLightingEntity? | Ambient glow effect |
 | **Features** | | |
 | isImmersiveModeEnabled | StateFlow<Boolean> | Spatial audio + room mesh active |
@@ -1579,7 +1506,8 @@ Moonlight-SpatialSDK/
 | `bitrate` | Int | 50000 | Stream bitrate (kbps) |
 | `videoFormat` | VideoFormat | AUTO | Codec (H264/HEVC/AV1) |
 | `audioConfiguration` | AudioConfiguration | STEREO | Audio channels |
-| `stereoscopicModeEnabled` | Boolean | false | Enable SBS stereoscopic |
+<!-- REMOVED: 3D Desktop Client - Stereoscopic mode removed -->
+<!-- | `stereoscopicModeEnabled` | Boolean | false | Enable SBS stereoscopic | -->
 
 **Panel Configuration**:
 
@@ -1603,16 +1531,6 @@ private fun calculatePanelSize(force16x9: Boolean, useDoubledWidth: Boolean): Ve
 
 ### Custom Shaders
 
-**Stereoscopic Depth Control**:
-
-The stereoscopic mode supports custom shaders for runtime depth adjustment:
-
-```kotlin
-// Stereo depth slider controls shader parameter
-// Adjusts inter-axial distance for 3D effect
-// Real-time updates without stream interruption
-```
-
 **Hero Lighting Shader**:
 
 ```kotlin
@@ -1626,8 +1544,7 @@ The stereoscopic mode supports custom shaders for runtime depth adjustment:
 **Video Panel Rendering**:
 
 1. **Standard Mode**: Use for maximum performance (direct-to-surface)
-2. **Stereoscopic Mode**: Moderate overhead for 3D processing
-3. **Lighting Mode**: Highest overhead for texture sampling + shaders
+2. **Lighting Mode**: Highest overhead for texture sampling + shaders
 
 **Decoder Configuration**:
 
@@ -1727,10 +1644,7 @@ All network operations in `MoonlightConnectionManager` run on dedicated executor
 **Issue**: Stereoscopic mode shows flat image
 
 **Solution**:
-- Verify PC is generating SBS stream (doubled width)
-- Check resolution: should be 2x normal width (e.g., 5120x1440)
-- Ensure `StereoMode.LeftRight` in panel settings
-- Verify `stereoscopicModeEnabled = true` in preferences
+<!-- REMOVED: 3D Desktop Client - Stereoscopic troubleshooting removed -->
 
 ## Related Documentation
 
@@ -1750,8 +1664,7 @@ The Moonlight-SpatialSDK Quest 3 app delivers PC game streaming to VR with advan
 **Strengths**:
 
 - Hybrid 2D/VR architecture for reliable text input
-- Three video panel modes (standard, stereoscopic, lighting)
-- PC-side stereoscopic 3D with runtime depth control
+- Two video panel modes (standard, lighting)
 - Spatial audio from panel position
 - MRUK room integration for spatial awareness
 - Interactive controls (scaling, snap-to-wall, button shelf)
@@ -1770,7 +1683,7 @@ The Moonlight-SpatialSDK Quest 3 app delivers PC game streaming to VR with advan
 **Use Cases**:
 
 - **Standard Streaming**: Default mode for 2D game streaming
-- **Stereoscopic 3D**: PC-based 3D games with side-by-side rendering
+<!-- REMOVED: 3D Desktop Client - Stereoscopic use case removed -->
 - **Immersive Theater**: Spatial audio + ambilight for movie watching
 - **Room Integration**: Wall-mounted panels with spatial audio for persistent displays
 

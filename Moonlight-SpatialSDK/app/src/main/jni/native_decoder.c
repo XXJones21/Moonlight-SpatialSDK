@@ -95,7 +95,8 @@ static GLuint g_duplicationProgram = 0;
 static GLuint g_duplicationVBO = 0;
 static GLuint g_duplicationVAO = 0;
 static GLuint g_inputTexture = 0;
-static bool g_stereoDuplicationEnabled = false;
+// REMOVED: 3D Desktop Client - Stereoscopic duplication removed
+// static bool g_stereoDuplicationEnabled = false;
 static int g_surfaceWidth = 0;
 static int g_surfaceHeight = 0;
 static jobject g_surfaceTexture = NULL;
@@ -327,10 +328,13 @@ static void release_codec() {
     g_decoderState = DECODER_STATE_UNINITIALIZED;
     g_errorRecoveryAttempts = 0;
     
+    // REMOVED: 3D Desktop Client - Stereoscopic duplication cleanup removed
+    /*
     if (g_stereoDuplicationEnabled) {
         cleanup_egl();
         g_stereoDuplicationEnabled = false;
     }
+    */
 
     if (g_codec != NULL) {
         AMediaCodec_delete(g_codec);
@@ -344,10 +348,13 @@ static void release_codec() {
 }
 
 static void release_window() {
+    // REMOVED: 3D Desktop Client - Stereoscopic duplication cleanup removed
+    /*
     if (g_stereoDuplicationEnabled) {
         cleanup_egl();
         g_stereoDuplicationEnabled = false;
     }
+    */
     if (g_window != NULL) {
         ANativeWindow_release(g_window);
         g_window = NULL;
@@ -625,6 +632,8 @@ static void* output_loop(void* context) {
     while (g_outputRunning) {
         ssize_t idx = AMediaCodec_dequeueOutputBuffer(g_codec, &info, 10000);
         if (idx >= 0) {
+            // REMOVED: 3D Desktop Client - Stereoscopic frame duplication removed
+            /*
             if (g_stereoDuplicationEnabled && g_eglContext != EGL_NO_CONTEXT && g_surfaceTexture != NULL && env != NULL) {
                 // For stereoscopic mode: MediaCodec renders to SurfaceTexture, we duplicate to panel Surface
                 // Release buffer to SurfaceTexture (MediaCodec renders to SurfaceTexture's Surface)
@@ -682,10 +691,10 @@ static void* output_loop(void* context) {
                         LOGE("SurfaceTexture texture ID is 0, cannot render");
                     }
                 }
-            } else {
-                // Normal mode: MediaCodec renders directly to surface
-                AMediaCodec_releaseOutputBuffer(g_codec, idx, true);
             }
+            */
+            // Normal mode: MediaCodec renders directly to surface
+            AMediaCodec_releaseOutputBuffer(g_codec, idx, true);
         } else if (idx == AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED) {
             continue;
         }
@@ -1167,6 +1176,8 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetup(JNIEnv* env, jclas
     }
     // #endregion
 
+    // REMOVED: 3D Desktop Client - Stereoscopic mode detection removed
+    /*
     // Detect stereoscopic mode: panel surface width should be 2x format width
     // For stereoscopic mode, MediaCodec renders to SurfaceTexture (g_window), 
     // and we duplicate frames to panel surface (g_panelWindow)
@@ -1193,6 +1204,13 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetup(JNIEnv* env, jclas
         g_surfaceHeight = ANativeWindow_getHeight(g_window);
         LOGE("Normal mode (no panel window): format=%dx%d, surface=%dx%d", width, height, g_surfaceWidth, g_surfaceHeight);
     }
+    */
+    // Normal mode: get surface dimensions from g_window
+    if (g_window != NULL) {
+        g_surfaceWidth = ANativeWindow_getWidth(g_window);
+        g_surfaceHeight = ANativeWindow_getHeight(g_window);
+        LOGE("Normal mode: format=%dx%d, surface=%dx%d", width, height, g_surfaceWidth, g_surfaceHeight);
+    }
     
     media_status_t status = AMediaCodec_configure(g_codec, g_format, g_window, NULL, 0);
     if (status != AMEDIA_OK) {
@@ -1200,10 +1218,13 @@ Java_com_limelight_nvstream_jni_MoonBridge_nativeDecoderSetup(JNIEnv* env, jclas
              status, g_decoderName[0] != '\0' ? g_decoderName : "unknown", mime);
         LOGE("=== NATIVE_DECODER_SETUP_COLOR_DEBUG_END (FAILED) ===");
         g_decoderState = DECODER_STATE_ERROR;
+        // REMOVED: 3D Desktop Client - Stereoscopic duplication cleanup removed
+        /*
         if (g_stereoDuplicationEnabled) {
             cleanup_egl();
             g_stereoDuplicationEnabled = false;
         }
+        */
         release_codec();
         return -1;
     }

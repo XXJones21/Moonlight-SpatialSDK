@@ -292,7 +292,8 @@ fun ConnectionPanel2D(
     var capabilityStatus by remember { mutableStateOf<String?>(null) }
     var enableHdr by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_enable_hdr", false)) }
     var enableFullRange by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_full_range", false)) }
-    var enablePcSideStereoscopic by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_pc_side_stereoscopic", false)) }
+    // REMOVED: 3D Desktop Client - Stereoscopic mode removed
+    // var enablePcSideStereoscopic by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_pc_side_stereoscopic", false)) }
 
     // App selection dropdown - only show if paired and app list is loaded
     var appList by remember { mutableStateOf<List<com.limelight.nvstream.http.NvApp>>(emptyList()) }
@@ -795,6 +796,8 @@ fun ConnectionPanel2D(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
+                        // REMOVED: 3D Desktop Client - Stereoscopic mode UI removed
+                        /*
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -830,6 +833,7 @@ fun ConnectionPanel2D(
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
+                        */
 
                         PrimaryButton(
                             label = "Apply Stream Settings",
@@ -856,13 +860,18 @@ fun ConnectionPanel2D(
                                     .putString("list_audio_config", storedAudio)
                                     .putBoolean("checkbox_enable_hdr", enableHdr)
                                     .putBoolean("checkbox_full_range", enableFullRange)
-                                    .putBoolean("checkbox_pc_side_stereoscopic", enablePcSideStereoscopic)
+                                    // REMOVED: 3D Desktop Client - Stereoscopic mode removed
+                                    // .putBoolean("checkbox_pc_side_stereoscopic", enablePcSideStereoscopic)
                                     .apply()
+                                // REMOVED: 3D Desktop Client - Stereoscopic mode status message removed
+                                val statusMsg = "Applied stream prefs (res/fps/format/audio/HDR/range)"
+                                /*
                                 val statusMsg = if (enablePcSideStereoscopic) {
                                     "Applied stream prefs (res/fps/format/audio/HDR/range/stereo) - Resolution will be doubled for SBS"
                                 } else {
                                     "Applied stream prefs (res/fps/format/audio/HDR/range)"
                                 }
+                                */
                                 connectionStatus = statusMsg
                             },
                         )
