@@ -39,6 +39,7 @@ When a user disconnects a session, they cannot reconnect without fully exiting t
 - [ids.xml](Moonlight-SpatialSDK/app/src/main/res/values/ids.xml)
 
 **Testing Steps**:
+
 1. Connect to PC and start streaming
 2. Click Disconnect on ButtonShelf
 3. Verify reconnection dialog appears
@@ -47,135 +48,404 @@ When a user disconnects a session, they cannot reconnect without fully exiting t
 
 ---
 
-## PLANNED: Runtime Input Device Hot-Plug Support
+## IMPLEMENTED: Runtime Input Device Hot-Plug Support
 
 ### Problem Identified During Testing
+
 Users cannot use Bluetooth controllers that are paired after the streaming session has started. When a controller is turned on mid-session, it shows as connected to the Quest but input does not pass through to the host PC.
+
+### Implementation Status: IMPLEMENTED
+
+**What Was Changed**:
+1. Added `InputDeviceListener` to ImmersiveActivity to detect new gamepad/joystick devices
+2. Added `reinitializeControllerHandler()` method to MoonlightConnectionManager
+3. Implemented automatic ControllerHandler reinitialization when new devices detected
+4. Added comprehensive logging for debugging controller hot-plug events
+
+**How It Works**:
+- User connects to PC and starts streaming
+- User turns on Bluetooth controller mid-session
+- InputDeviceListener detects new gamepad device
+- After 500ms delay, ControllerHandler is destroyed and recreated
+- New ControllerHandler enumerates all devices including newly added controller
+- Controller input now forwards to host PC
+
+**Files Modified**:
+- [ImmersiveActivity.kt](Moonlight-SpatialSDK/app/src/main/java/com/example/moonlight_spatialsdk/ImmersiveActivity.kt) - Added InputDeviceListener
+- [MoonlightConnectionManager.kt](Moonlight-SpatialSDK/app/src/main/java/com/example/moonlight_spatialsdk/MoonlightConnectionManager.kt) - Added reinitializeControllerHandler()
+
+**Testing Steps**:
+1. Connect to PC and start streaming
+2. Turn off Bluetooth controller
+3. Turn on controller mid-session
+4. Verify controller input works
+5. Check logcat for "New input device detected" and "ControllerHandler reinitialized"
+
+---
+
+## PLANNED: Panel Edge Lighting Emission - Individual Edge Control
+
+### Problem Identified During Testing
+
+The current bias lighting (ambilight) implementation uses a single quad mesh with a 9-slice shader that correctly samples individual edges without mirroring. However, attempts to modify the system to use separate light entities for each edge (4 individual entities) or to customize individual edge behaviors result in mirroring artifacts where all edges display the same lighting pattern instead of unique edge-specific lighting.
 
 ### Root Cause Analysis
 
-The ControllerHandler from Moonlight-common library has full hot-plugging infrastructure already implemented:
+The lighting emission system is implemented using a shader-based approach with a single mesh entity:
 
-- InputManager.InputDeviceListener is registered during initialization
-- `onInputDeviceRemoved()` callback properly handles device removal
-- `onInputDeviceChanged()` callback handles device capability changes
-- `onInputDeviceAdded()` callback is currently a no-op (does nothing)
+**Current Implementation Architecture**:
 
-The issue occurs because:
+1. **Single Mesh Entity**: BiasLightingEntity creates one quad mesh with `bias_lighting_9slice` shader
+2. **Shader-Based Edge Detection**: Fragment shader determines which panel edge to sample based on UV coordinates
+3. **Explicit Region Checks**: Shader uses conditional logic to map each glow region to its corresponding video edge
 
-1. ControllerHandler is created once when connection is established
-2. It enumerates all currently connected devices at initialization
-3. When a new device is added, `onInputDeviceAdded()` is triggered but does nothing
-4. Input events from the new device create a context dynamically on first use
-5. However, the ControllerHandler may not properly register the new device for streaming
+```glsl
+// Current 9-slice shader approach (bias_lighting_9slice.frag)
+if (uv.x < panelLeft) {
+    // LEFT EDGE: sample from left edge (x=0) of video
+    videoUV = vec2(0.0, 1.0 - edgePosY);
+} else if (uv.x > panelRight) {
+    // RIGHT EDGE: sample from right edge (x=1) of video
+    videoUV = vec2(1.0, 1.0 - edgePosY);
+} else if (uv.y < panelBottom) {
+    // BOTTOM EDGE: sample from bottom edge (y=0) of video
+    videoUV = vec2(edgePosX, 0.0);
+} else if (uv.y > panelTop) {
+    // TOP EDGE: sample from top edge (y=1) of video
+    videoUV = vec2(edgePosX, 1.0);
+}
+```
+
+**Why Separate Entities Cause Mirroring**:
+
+When attempting to create 4 separate BiasLightingEntity instances (one per edge), the mirroring occurs because:
+
+1. **Material Instance Sharing**: All entities register with HeroLightingSystem and receive the same video texture
+2. **UV Space Ambiguity**: Each separate mesh has its own UV space (0-1 on both axes)
+3. **Lack of Edge Context**: Individual meshes don't know which edge they represent without additional parameters
+4. **Shader Parameter Limitation**: The `stereoParams` uniform would need to communicate edge type to each instance
+5. **Texture Sampling Confusion**: Without explicit edge identification, the shader samples the same region for all entities
+
+**Previous 4-Mesh Approach (Legacy)**:
+
+An older implementation (`bias_lighting.frag`) attempted to use 4 separate entities with an `edgeType` parameter:
+
+```glsl
+// Old 4-mesh shader (bias_lighting.frag)
+// stereoParams.y = edgeType (0=top, 1=bottom, 2=left, 3=right)
+
+if(edgeType < 0.5){
+    videoUV = vec2(biasOut.texCoord.x, 1.0);  // Top edge
+} else if(edgeType < 1.5){
+    videoUV = vec2(biasOut.texCoord.x, 0.0);  // Bottom edge
+} else if(edgeType < 2.5){
+    videoUV = vec2(0.0, 1.0 - biasOut.texCoord.x);  // Left edge
+} else {
+    videoUV = vec2(1.0, 1.0 - biasOut.texCoord.x);  // Right edge
+}
+```
+
+This approach was abandoned because:
+- Required creating and managing 4 separate entities
+- Required 4 separate material instances with different `edgeType` parameters
+- Entity positioning and scaling became complex
+- Performance overhead of 4 draw calls vs 1
+- Material synchronization issues when updating intensity or video texture
 
 ### Current State
 
-- ControllerHandler enumerates devices only during initialization
-- Hot-plug listener infrastructure exists but `onInputDeviceAdded()` is not implemented
-- Device contexts are created lazily on first input event
-- No user notification when controllers are detected mid-session
+**What Works**:
+- Single mesh entity with 9-slice shader correctly displays unique lighting per edge
+- No mirroring artifacts with current implementation
+- Efficient single draw call
+- Automatic edge detection based on UV coordinates
 
-### Proposed Solution
+**What Doesn't Work**:
+- Cannot independently control intensity per edge (all edges share one intensity value)
+- Cannot disable individual edges (all edges enabled/disabled together)
+- Cannot apply different blur levels or falloff curves per edge
+- Cannot animate individual edges independently
 
-#### Option 1: Implement onInputDeviceAdded Callback (Preferred)
+**Use Cases Blocked**:
+- Creating asymmetric lighting effects (e.g., only top/bottom glow for ultrawide monitors)
+- Directional ambilight (emphasize certain edges based on room layout)
+- Dynamic edge effects (e.g., pulse individual edges based on content)
+- Accessibility options (disable certain edges to reduce motion sickness)
 
-Modify the Moonlight-common ControllerHandler to implement the `onInputDeviceAdded()` callback:
+### Proposed Solutions
 
-```java
-@Override
-public void onInputDeviceAdded(int deviceId) {
-    InputDevice device = InputDevice.getDevice(deviceId);
-    if (device == null) return;
+#### Option 1: Extend 9-Slice Shader with Per-Edge Parameters
 
-    // Check if this is a gamepad
-    if (hasJoystickAxes(device)) {
-        LimeLog.info("New controller detected: " + device.getName() + " (" + deviceId + ")");
+Modify the existing `bias_lighting_9slice.frag` shader to accept per-edge control parameters:
 
-        // Create context for the new device
-        InputDeviceContext context = createInputDeviceContextForDevice(device);
-        inputDeviceContexts.put(deviceId, context);
-
-        // Notify listeners (if callback exists)
-        notifyControllerAdded(device.getName());
-    }
-}
-```
-
-#### Option 2: Force ControllerHandler Recreation
-
-Add a public method to ControllerHandler to reinitialize device enumeration:
-
-```java
-public void refreshInputDevices() {
-    // Re-enumerate all input devices
-    int[] ids = InputDevice.getDeviceIds();
-    for (int id : ids) {
-        if (!inputDeviceContexts.containsKey(id)) {
-            InputDevice dev = InputDevice.getDevice(id);
-            if (dev != null && hasJoystickAxes(dev)) {
-                InputDeviceContext context = createInputDeviceContextForDevice(dev);
-                inputDeviceContexts.put(id, context);
-                LimeLog.info("Added controller: " + dev.getName());
-            }
-        }
-    }
-}
-```
-
-Then call from ImmersiveActivity when `shouldForwardInputs` becomes true.
-
-#### Option 3: Application-Level InputDeviceListener (Workaround)
-
-Add a listener in ImmersiveActivity that triggers ControllerHandler recreation:
-
+**Material Uniforms to Add**:
 ```kotlin
-private val inputDeviceListener = object : InputManager.InputDeviceListener {
-    override fun onInputDeviceAdded(deviceId: Int) {
-        val device = inputManager.getInputDevice(deviceId) ?: return
+// Add to BiasLightingEntity material creation
+setAttribute("edgeControl", Vector4(
+    topIntensity,     // x: Top edge intensity multiplier (0-1)
+    bottomIntensity,  // y: Bottom edge intensity multiplier (0-1)
+    leftIntensity,    // z: Left edge intensity multiplier (0-1)
+    rightIntensity    // w: Right edge intensity multiplier (0-1)
+))
 
-        // Check if this is a gamepad
-        if ((device.sources and InputDevice.SOURCE_GAMEPAD) != 0 ||
-            (device.sources and InputDevice.SOURCE_JOYSTICK) != 0) {
+setAttribute("edgeFalloff", Vector4(
+    topFalloff,       // x: Top edge falloff exponent (1.0-3.0)
+    bottomFalloff,    // y: Bottom edge falloff exponent
+    leftFalloff,      // z: Left edge falloff exponent
+    rightFalloff      // w: Right edge falloff exponent
+))
+```
 
-            Log.i(TAG, "New input device detected: ${device.name} (id=$deviceId)")
+**Shader Modifications**:
+```glsl
+// In bias_lighting_9slice.frag
+uniform vec4 edgeControl;  // Per-edge intensity
+uniform vec4 edgeFalloff;  // Per-edge falloff exponents
 
-            // Recreate ControllerHandler to pick up new device
-            if (connectionManager.isConnected()) {
-                lifecycleScope.launch {
-                    delay(500) // Brief delay for device initialization
-                    connectionManager.reinitializeControllerHandler()
-                    Log.i(TAG, "ControllerHandler reinitialized for new device")
-                }
-            }
+// After determining which edge we're in
+float edgeIntensity = 1.0;
+float edgeFalloffExp = 1.5;  // Default falloff
+
+if (uv.x < panelLeft) {
+    // Left edge
+    videoUV = vec2(0.0, 1.0 - edgePosY);
+    edgeIntensity = edgeControl.z;
+    edgeFalloffExp = edgeFalloff.z;
+} else if (uv.x > panelRight) {
+    // Right edge
+    videoUV = vec2(1.0, 1.0 - edgePosY);
+    edgeIntensity = edgeControl.w;
+    edgeFalloffExp = edgeFalloff.w;
+} else if (uv.y < panelBottom) {
+    // Bottom edge
+    videoUV = vec2(edgePosX, 0.0);
+    edgeIntensity = edgeControl.y;
+    edgeFalloffExp = edgeFalloff.y;
+} else if (uv.y > panelTop) {
+    // Top edge
+    videoUV = vec2(edgePosX, 1.0);
+    edgeIntensity = edgeControl.x;
+    edgeFalloffExp = edgeFalloff.x;
+}
+
+// Apply per-edge falloff
+float falloff = 1.0 - normDist;
+falloff = pow(falloff, edgeFalloffExp);
+
+// Apply per-edge intensity
+vec4 videoColor = textureLod(emissive, videoUV, mipLevel);
+vec3 finalColor = videoColor.rgb * intensity * edgeIntensity;
+```
+
+**Advantages**:
+- Maintains single mesh entity (performance benefit)
+- Maintains existing edge detection logic
+- Adds per-edge control without mirroring
+- Backward compatible (default all edges to 1.0)
+
+**Disadvantages**:
+- Limited to 4 vec4 parameters worth of per-edge control
+- Cannot do complex per-edge effects (requires more uniforms)
+
+#### Option 2: 4-Entity Approach with Explicit Edge Type Material Instances
+
+Create 4 separate BiasLightingEntity-like entities with a modified shader that takes an explicit `edgeType` parameter:
+
+**Entity Creation**:
+```kotlin
+class EdgeLightingEntity(
+    private val edgeType: EdgeType,  // TOP, BOTTOM, LEFT, RIGHT
+    private val heroLightingSystem: HeroLightingSystem?
+) {
+    enum class EdgeType(val value: Float) {
+        TOP(0.0f),
+        BOTTOM(1.0f),
+        LEFT(2.0f),
+        RIGHT(3.0f)
+    }
+
+    private fun createEdgeMaterial(): SceneMaterial {
+        return SceneMaterial.custom("edge_lighting", ...).apply {
+            // Set edge type in stereoParams.x
+            setAttribute("stereoParams", Vector4(
+                edgeType.value,  // Edge identifier
+                mipLevel,
+                0f,
+                0f
+            ))
         }
     }
+}
 
-    override fun onInputDeviceRemoved(deviceId: Int) {
-        // ControllerHandler already handles this properly
+// In ImmersiveActivity or BiasLightingEntity
+val topEdgeEntity = EdgeLightingEntity(EdgeType.TOP, heroLightingSystem)
+val bottomEdgeEntity = EdgeLightingEntity(EdgeType.BOTTOM, heroLightingSystem)
+val leftEdgeEntity = EdgeLightingEntity(EdgeType.LEFT, heroLightingSystem)
+val rightEdgeEntity = EdgeLightingEntity(EdgeType.RIGHT, heroLightingSystem)
+```
+
+**Shader Implementation** (new `edge_lighting.frag`):
+```glsl
+// Edge-specific lighting shader
+uniform vec4 stereoParams;  // x = edgeType (0=top, 1=bottom, 2=left, 3=right)
+uniform sampler2D emissive;
+uniform float intensity;
+
+void main() {
+    float edgeType = stereoParams.x;
+    float mipLevel = stereoParams.y;
+
+    vec2 videoUV;
+    float edgePos = biasOut.texCoord.x;  // Position along edge (0-1)
+
+    // Determine video sampling based on edge type
+    if (edgeType < 0.5) {
+        // TOP EDGE: sample top row of video
+        videoUV = vec2(edgePos, 1.0);
+    } else if (edgeType < 1.5) {
+        // BOTTOM EDGE: sample bottom row of video
+        videoUV = vec2(edgePos, 0.0);
+    } else if (edgeType < 2.5) {
+        // LEFT EDGE: sample left column of video
+        videoUV = vec2(0.0, 1.0 - edgePos);
+    } else {
+        // RIGHT EDGE: sample right column of video
+        videoUV = vec2(1.0, 1.0 - edgePos);
     }
 
-    override fun onInputDeviceChanged(deviceId: Int) {
-        // ControllerHandler already handles this properly
-    }
+    // Sample video at determined UV
+    vec4 videoColor = textureLod(emissive, videoUV, mipLevel);
+
+    // Apply falloff (distance from panel edge)
+    float dist = biasOut.texCoord.y;  // 0 at panel edge, 1 at glow boundary
+    float falloff = 1.0 - dist;
+    falloff = pow(falloff, 1.5);
+
+    // Final color
+    vec3 finalColor = videoColor.rgb * intensity * falloff;
+    float finalAlpha = falloff;
+
+    fragColor = vec4(finalColor * finalAlpha, finalAlpha);
 }
 ```
+
+**Mesh Geometry**:
+Each edge entity would use a simple quad mesh positioned along its respective edge:
+- Top: positioned above panel, width = panel width + padding, height = glow padding
+- Bottom: positioned below panel, width = panel width + padding, height = glow padding
+- Left: positioned left of panel, height = panel height + padding, width = glow padding
+- Right: positioned right of panel, height = panel height + padding, width = glow padding
+
+**Advantages**:
+- Complete independent control per edge
+- Can enable/disable individual edges (destroy/create entities)
+- Can apply different materials/shaders per edge
+- Can animate edges independently (position, intensity, color)
+
+**Disadvantages**:
+- 4x entity overhead (4 draw calls instead of 1)
+- More complex entity management (positioning, scaling, lifetime)
+- Material instance management (4 materials to update)
+- Requires new shader and mesh assets
+
+#### Option 3: Hybrid Approach - Single Entity with Edge Mask Texture
+
+Use the existing 9-slice approach but add an edge mask texture that controls per-edge visibility:
+
+**Material Addition**:
+```kotlin
+// Add edge mask texture to material
+setAttribute("edgeMask", edgeMaskTexture)  // R=top, G=bottom, B=left, A=right
+```
+
+**Edge Mask Texture**:
+Create a procedural or static texture where:
+- Red channel = top edge mask (1.0 = visible, 0.0 = hidden)
+- Green channel = bottom edge mask
+- Blue channel = left edge mask
+- Alpha channel = right edge mask
+
+**Shader Modification**:
+```glsl
+uniform sampler2D edgeMask;
+
+// After determining edge and videoUV
+float edgeMaskValue = 1.0;
+if (uv.x < panelLeft) {
+    edgeMaskValue = texture(edgeMask, vec2(0.25, 0.5)).b;  // Left (blue channel)
+} else if (uv.x > panelRight) {
+    edgeMaskValue = texture(edgeMask, vec2(0.75, 0.5)).a;  // Right (alpha channel)
+} else if (uv.y < panelBottom) {
+    edgeMaskValue = texture(edgeMask, vec2(0.5, 0.25)).g;  // Bottom (green channel)
+} else if (uv.y > panelTop) {
+    edgeMaskValue = texture(edgeMask, vec2(0.5, 0.75)).r;  // Top (red channel)
+}
+
+// Apply edge mask to final color
+vec3 finalColor = videoColor.rgb * intensity * falloff * edgeMaskValue;
+```
+
+**Advantages**:
+- Maintains single entity (performance benefit)
+- Allows per-edge enable/disable via mask values
+- Can be updated dynamically (update texture)
+- Minimal shader changes
+
+**Disadvantages**:
+- Limited control (only intensity per edge via mask values)
+- Requires texture creation and management
+- Less flexible than separate entities
 
 ### Recommended Approach
 
-Use Option 3 (Application-Level Listener) as a workaround since it requires no changes to the Moonlight-common library. This can be implemented entirely in ImmersiveActivity.
+**Option 1** (Extend 9-Slice Shader with Per-Edge Parameters) is recommended because:
 
-**Files to Modify**:
-
-- `ImmersiveActivity.kt` - Add InputDeviceListener
-- `MoonlightConnectionManager.kt` - Add `reinitializeControllerHandler()` method
+1. **Performance**: Maintains single mesh entity and single draw call
+2. **Simplicity**: Minimal changes to existing working implementation
+3. **Flexibility**: Provides per-edge intensity and falloff control
+4. **Maintainability**: No new entity management logic required
+5. **Backward Compatible**: Existing code continues to work with default parameters
 
 **Implementation Impact**:
 
-- UX Impact: High - Enables mid-session controller pairing
-- Infrastructure Impact: Low - Application-level workaround
-- Testing Required: Verify controller input works after hot-plug
-- No changes to Moonlight-common library required
+- UX Impact: Medium - Enables advanced lighting customization
+- Infrastructure Impact: Low - Shader-only modifications
+- Testing Required: Verify per-edge parameters work correctly
+- No changes to entity lifecycle or management
+
+**Files to Modify**:
+
+- [bias_lighting_9slice.frag](Moonlight-SpatialSDK/app/src/shaders/bias_lighting_9slice.frag) - Add per-edge uniforms and logic
+- [BiasLightingEntity.kt](Moonlight-SpatialSDK/app/src/main/java/com/example/moonlight_spatialsdk/entities/BiasLightingEntity.kt) - Add per-edge control API
+- [ImmersiveActivity.kt](Moonlight-SpatialSDK/app/src/main/java/com/example/moonlight_spatialsdk/ImmersiveActivity.kt) - Optional UI for per-edge control
+
+**API Design Example**:
+```kotlin
+// In BiasLightingEntity
+fun setEdgeIntensity(edge: Edge, intensity: Float) {
+    when (edge) {
+        Edge.TOP -> edgeControl.x = intensity
+        Edge.BOTTOM -> edgeControl.y = intensity
+        Edge.LEFT -> edgeControl.z = intensity
+        Edge.RIGHT -> edgeControl.w = intensity
+    }
+    updateMaterialUniforms()
+}
+
+fun setEdgeFalloff(edge: Edge, falloff: Float) {
+    when (edge) {
+        Edge.TOP -> edgeFalloff.x = falloff
+        Edge.BOTTOM -> edgeFalloff.y = falloff
+        Edge.LEFT -> edgeFalloff.z = falloff
+        Edge.RIGHT -> edgeFalloff.w = falloff
+    }
+    updateMaterialUniforms()
+}
+
+enum class Edge {
+    TOP, BOTTOM, LEFT, RIGHT
+}
+```
 
 ---
 
@@ -213,7 +483,7 @@ Use Option 3 (Application-Level Listener) as a workaround since it requires no c
 
 ---
 
-## 2. Enhanced Connection Status & Quality Feedback in VR
+## PLANNED: Enhanced Connection Status & Quality Feedback in VR
 
 ### Current State
 
