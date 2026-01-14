@@ -42,8 +42,8 @@ class MoonlightConnectionManager(
     )
     private val tag = "MoonlightConnectionMgr"
     private var connection: NvConnection? = null
-    private var isConnected: Boolean = false
-    private var controllerHandler: ControllerHandler? = null
+    @Volatile private var isConnected: Boolean = false
+    @Volatile private var controllerHandler: ControllerHandler? = null
     private var currentPrefs: PreferenceConfiguration? = null
     private var currentConnectionParams: Triple<String, Int, Int>? = null
     private val cryptoProvider: LimelightCryptoProvider = AndroidCryptoProvider(context)
@@ -289,9 +289,41 @@ class MoonlightConnectionManager(
                     cryptoProvider,
                     serverCert // serverCert (null means use default)
                 )
-                Log.i(tag, "startStream: NvConnection created, calling start()")
+                Log.i(tag, "startStream: NvConnection created")
                 currentPrefs = prefs
                 currentConnectionParams = Triple(host, port, appId)
+
+                // Initialize ControllerHandler on MAIN THREAD before starting connection
+                // CRITICAL: ControllerHandler's constructor calls InputManager.registerInputDeviceListener(this, null)
+                // When the Handler parameter is null, Android uses the current thread's Looper.
+                // If created on a background thread without a Looper, the listener registration fails silently.
+                // Creating on main thread ensures proper Looper and memory visibility for dispatchKeyEvent/dispatchGenericMotionEvent.
+                val conn = connection!!
+                mainHandler.post {
+                    try {
+                        controllerHandler = ControllerHandler(activity, conn, null, prefs)
+
+                        // Log detected controllers at startup
+                        val inputManager = activity.getSystemService(Context.INPUT_SERVICE) as android.hardware.input.InputManager
+                        val deviceIds: IntArray = inputManager.inputDeviceIds
+                        val controllers = deviceIds.toList().mapNotNull { deviceId ->
+                            inputManager.getInputDevice(deviceId)?.let { device ->
+                                val isGamepad = (device.sources and android.view.InputDevice.SOURCE_GAMEPAD) != 0 ||
+                                              (device.sources and android.view.InputDevice.SOURCE_JOYSTICK) != 0
+                                if (isGamepad) device.name else null
+                            }
+                        }
+
+                        if (controllers.isNotEmpty()) {
+                            Log.i(tag, "startStream: ControllerHandler initialized on main thread with ${controllers.size} controller(s): ${controllers.joinToString()}")
+                        } else {
+                            Log.i(tag, "startStream: ControllerHandler initialized on main thread (no controllers detected at startup)")
+                        }
+                    } catch (e: Exception) {
+                        Log.e(tag, "startStream: Failed to create ControllerHandler on main thread", e)
+                    }
+                }
+
                 connection?.start(audioRenderer, decoderRenderer, this)
                 Log.i(tag, "NvConnection.start invoked host=$host")
             } catch (e: Exception) {
@@ -421,12 +453,7 @@ class MoonlightConnectionManager(
 
     override fun connectionStarted() {
         isConnected = true
-        Log.i(tag, "connectionStarted")
-        
-        // Try to create ControllerHandler automatically if connection and prefs are available
-        // If not available now, user can call initializeControllerHandler() manually later
-        initializeControllerHandler()
-        
+        Log.i(tag, "connectionStarted - ControllerHandler already initialized in startStream()")
         onStatusUpdate?.let { postToMain { it("Connected", true) } }
     }
 
@@ -501,16 +528,25 @@ class MoonlightConnectionManager(
      * Manually initialize ControllerHandler for input passthrough.
      * Can be called after connection is established, e.g., when a controller is paired.
      * Safe to call multiple times - will only create if not already initialized.
-     * 
+     *
+     * IMPORTANT: Must be called from the main thread. ControllerHandler's constructor
+     * registers an InputDeviceListener which requires the main thread's Looper.
+     *
      * @return true if ControllerHandler was created or already exists, false if creation failed
      */
     fun initializeControllerHandler(): Boolean {
+        // Ensure we're on the main thread for proper InputManager listener registration
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            Log.e(tag, "initializeControllerHandler: Must be called from main thread!")
+            return false
+        }
+
         // If already initialized, return success
         if (controllerHandler != null) {
             Log.d(tag, "initializeControllerHandler: Already initialized")
             return true
         }
-        
+
         // Check if connection and prefs are available
         val conn = connection
         val prefs = currentPrefs
@@ -518,11 +554,11 @@ class MoonlightConnectionManager(
             Log.w(tag, "initializeControllerHandler: Cannot create - connection=${conn != null} prefs=${prefs != null}")
             return false
         }
-        
-        // Create ControllerHandler
+
+        // Create ControllerHandler on main thread
         try {
             controllerHandler = ControllerHandler(activity, conn, null, prefs)
-            Log.i(tag, "initializeControllerHandler: ControllerHandler created successfully")
+            Log.i(tag, "initializeControllerHandler: ControllerHandler created successfully on main thread")
             return true
         } catch (e: Exception) {
             Log.e(tag, "initializeControllerHandler: Failed to create ControllerHandler", e)
@@ -530,25 +566,9 @@ class MoonlightConnectionManager(
         }
     }
 
-    /**
-     * Reinitialize ControllerHandler to detect newly connected input devices.
-     * This is called when a Bluetooth controller is turned on mid-session (hot-plug).
-     *
-     * The method destroys the existing ControllerHandler and creates a new one,
-     * which will enumerate all currently connected devices including newly added ones.
-     *
-     * @return true if ControllerHandler was successfully reinitialized, false otherwise
-     */
-    fun reinitializeControllerHandler(): Boolean {
-        Log.i(tag, "reinitializeControllerHandler: Destroying existing ControllerHandler")
-
-        // Stop and destroy existing ControllerHandler
-        controllerHandler?.stop()
-        controllerHandler = null
-
-        // Create new ControllerHandler (this will enumerate all devices including new ones)
-        return initializeControllerHandler()
-    }
+    // NOTE: reinitializeControllerHandler() removed - ControllerHandler automatically
+    // detects and handles new controllers when they send their first input event.
+    // See getContextForEvent() in ControllerHandler.java which creates contexts on-demand.
 
     /**
      * Get the ControllerHandler instance for input event forwarding.

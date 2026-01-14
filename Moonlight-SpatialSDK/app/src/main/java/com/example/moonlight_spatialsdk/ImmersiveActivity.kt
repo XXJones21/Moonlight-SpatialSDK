@@ -218,7 +218,8 @@ class ImmersiveActivity : AppSystemActivity() {
   private var immersiveSettings: ImmersiveSettings = ImmersiveSettings()
 
   // Input device listener for hot-plug controller support
-  // Detects when Bluetooth controllers are turned on mid-session and reinitializes ControllerHandler
+  // ControllerHandler automatically detects and handles new controllers on first input event
+  // This listener is just for logging purposes
   private val inputDeviceListener = object : InputManager.InputDeviceListener {
     override fun onInputDeviceAdded(deviceId: Int) {
       val device = inputManager.getInputDevice(deviceId) ?: return
@@ -228,34 +229,15 @@ class ImmersiveActivity : AppSystemActivity() {
                       (device.sources and InputDevice.SOURCE_JOYSTICK) != 0
 
       if (isGamepad) {
-        Log.i(TAG, "New input device detected: ${device.name} (id=$deviceId, sources=${device.sources})")
-
-        // Only reinitialize if we're connected and forwarding inputs
-        if (connectionManager.isConnected() && shouldForwardInputs) {
-          coroutineScope.launch {
-            // Brief delay to allow device initialization to complete
-            delay(500)
-
-            val success = connectionManager.reinitializeControllerHandler()
-            if (success) {
-              Log.i(TAG, "ControllerHandler reinitialized for new device: ${device.name}")
-            } else {
-              Log.w(TAG, "Failed to reinitialize ControllerHandler for new device: ${device.name}")
-            }
-          }
-        } else {
-          Log.d(TAG, "Skipping controller reinitialization - not connected or inputs not enabled")
-        }
+        Log.i(TAG, "New gamepad detected: ${device.name} (id=$deviceId) - will be auto-detected on first input")
       }
     }
 
     override fun onInputDeviceRemoved(deviceId: Int) {
-      // ControllerHandler already handles device removal properly via its own listener
       Log.d(TAG, "Input device removed: id=$deviceId (handled by ControllerHandler)")
     }
 
     override fun onInputDeviceChanged(deviceId: Int) {
-      // ControllerHandler already handles device changes properly via its own listener
       Log.d(TAG, "Input device changed: id=$deviceId (handled by ControllerHandler)")
     }
   }
@@ -381,18 +363,10 @@ class ImmersiveActivity : AppSystemActivity() {
             videoPanelEntity?.setComponent(Visible(true))
             Log.i(TAG, "Video stream ready (connected=$connected, status=$status), showing video panel")
 
-
-            // Initialize ControllerHandler now that video panel is visible and stream is ready
-            val handlerInitialized = connectionManager.initializeControllerHandler()
-            if (handlerInitialized) {
-              Log.i(TAG, "ControllerHandler initialized successfully for input passthrough")
-              // Only enable input forwarding after ControllerHandler is ready
-              shouldForwardInputs = true
-              Log.i(TAG, "Input forwarding enabled - connection established and ControllerHandler ready")
-            } else {
-              Log.w(TAG, "ControllerHandler initialization failed - input passthrough may not work")
-              shouldForwardInputs = false
-            }
+            // ControllerHandler is now initialized in startStream() before connection starts
+            // Just enable input forwarding when connection is ready
+            shouldForwardInputs = true
+            Log.i(TAG, "Input forwarding enabled - connection established")
           } else {
             shouldForwardInputs = false
             Log.i(TAG, "Input forwarding disabled - connection lost")
@@ -658,7 +632,6 @@ class ImmersiveActivity : AppSystemActivity() {
           }
           }
         */
-        },
     ).filterNotNull()
   }
 
@@ -2077,64 +2050,42 @@ class ImmersiveActivity : AppSystemActivity() {
    * Only forwards events when connected, and consumes them to prevent UI handling.
    */
   override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-    // Always log key events to diagnose controller input issues
-    Log.i(TAG, "dispatchKeyEvent: action=${event.action}, keyCode=${event.keyCode}, device=${event.device?.name}, source=${event.source}, shouldForward=$shouldForwardInputs")
-    
     // Diagnostic: allow controller input to reach UI for testing
     if (allowControllerUIInput) {
-      // Log to verify all events are reaching this method
-      Log.d(TAG, "dispatchKeyEvent: allowControllerUIInput=true, passing to super")
       return super.dispatchKeyEvent(event)
     }
-    
+
     // Gate input forwarding with explicit flag
     if (!shouldForwardInputs) {
-      Log.d(TAG, "dispatchKeyEvent: Input forwarding disabled, passing to super")
       return super.dispatchKeyEvent(event)
     }
-    
-    // Only forward input when connected (check directly from connection manager for accuracy)
+
+    // Only forward input when connected
     if (!connectionManager.isConnected()) {
-      Log.d(TAG, "dispatchKeyEvent: Not connected, passing to super")
       return super.dispatchKeyEvent(event)
     }
-    
+
     val controllerHandler = connectionManager.getControllerHandler()
     if (controllerHandler == null) {
       Log.w(TAG, "dispatchKeyEvent: Connected but ControllerHandler is null")
       return super.dispatchKeyEvent(event)
     }
-    
+
     // Skip keyboard events (alphabetic keyboards) to avoid consuming UI input
     val device = event.device
     if (device != null && device.keyboardType == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
-      Log.d(TAG, "dispatchKeyEvent: Alphabetic keyboard, passing to super")
       return super.dispatchKeyEvent(event)
     }
-    
+
     // Let ControllerHandler determine if this is a gamepad event
-    // It has sophisticated logic to detect gamepads and will return true if handled
     val handled = when (event.action) {
-      KeyEvent.ACTION_DOWN -> {
-        val result = controllerHandler.handleButtonDown(event)
-        Log.d(TAG, "dispatchKeyEvent: handleButtonDown returned $result")
-        result
-      }
-      KeyEvent.ACTION_UP -> {
-        val result = controllerHandler.handleButtonUp(event)
-        Log.d(TAG, "dispatchKeyEvent: handleButtonUp returned $result")
-        result
-      }
+      KeyEvent.ACTION_DOWN -> controllerHandler.handleButtonDown(event)
+      KeyEvent.ACTION_UP -> controllerHandler.handleButtonUp(event)
       else -> false
     }
-    if (handled) {
-      // Consume the event to prevent UI from handling it
-      Log.d(TAG, "dispatchKeyEvent: ControllerHandler handled event, consuming")
-      return true
-    }
-    
-    Log.d(TAG, "dispatchKeyEvent: ControllerHandler did not handle, passing to super")
-    return super.dispatchKeyEvent(event)
+
+    // Consume the event if handled, otherwise pass to super
+    return if (handled) true else super.dispatchKeyEvent(event)
   }
 
   /**
@@ -2143,55 +2094,41 @@ class ImmersiveActivity : AppSystemActivity() {
    * Only forwards gamepad events when connected, and consumes them to prevent UI handling.
    */
   override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
-    // Check if this is a gamepad/joystick event for logging (reduce noise from other motion events)
+    // Check if this is a gamepad/joystick event
     val isGamepadSource = (event.source and InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK ||
         (event.source and InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD
-    
-    // Always log gamepad motion events to diagnose controller input issues
-    if (isGamepadSource) {
-      Log.i(TAG, "dispatchGenericMotionEvent: action=${event.action}, source=${event.source}, device=${event.device?.name}, shouldForward=$shouldForwardInputs, connected=${connectionManager.isConnected()}")
-    }
-    
+
     // Diagnostic: allow controller input to reach UI for testing
     if (allowControllerUIInput) {
-      if (isGamepadSource) {
-        Log.d(TAG, "dispatchGenericMotionEvent: allowControllerUIInput=true, passing to super")
-      }
       return super.dispatchGenericMotionEvent(event)
     }
-    
+
     // Gate input forwarding with explicit flag
     if (!shouldForwardInputs) {
-      if (isGamepadSource) {
-        Log.d(TAG, "dispatchGenericMotionEvent: Input forwarding disabled, passing to super")
-      }
       return super.dispatchGenericMotionEvent(event)
     }
-    
-    // Only forward input when connected (check directly from connection manager for accuracy)
+
+    // Only forward input when connected
     if (!connectionManager.isConnected()) {
-      if (isGamepadSource) {
-        Log.d(TAG, "dispatchGenericMotionEvent: Not connected, passing to super")
-      }
       return super.dispatchGenericMotionEvent(event)
     }
-    
+
     val controllerHandler = connectionManager.getControllerHandler()
     if (controllerHandler == null) {
-      Log.w(TAG, "dispatchGenericMotionEvent: Connected but ControllerHandler is null")
+      if (isGamepadSource) {
+        Log.w(TAG, "dispatchGenericMotionEvent: Connected but ControllerHandler is null")
+      }
       return super.dispatchGenericMotionEvent(event)
     }
-    
+
     // Forward gamepad/joystick events to ControllerHandler
     if (isGamepadSource) {
       val handled = controllerHandler.handleMotionEvent(event)
-      Log.d(TAG, "dispatchGenericMotionEvent: handleMotionEvent returned $handled")
       if (handled) {
-        // Consume the event to prevent UI from handling it
         return true
       }
     }
-    
+
     return super.dispatchGenericMotionEvent(event)
   }
 

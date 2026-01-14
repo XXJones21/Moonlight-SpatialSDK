@@ -19,6 +19,9 @@ local.properties
 # Cursor IDE - local only
 .cursor
 
+# claude
+.claude
+
 # Log files - contain runtime data and should not be committed
 *.log
 logs/
