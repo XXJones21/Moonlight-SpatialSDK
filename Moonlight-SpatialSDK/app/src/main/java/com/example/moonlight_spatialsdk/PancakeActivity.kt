@@ -48,6 +48,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
+import com.example.moonlight_spatialsdk.data.ImmersiveSettings
 import com.meta.spatial.uiset.button.PrimaryButton
 import com.meta.spatial.uiset.button.SecondaryButton
 import com.meta.spatial.uiset.input.SpatialTextField
@@ -250,6 +251,8 @@ fun ConnectionPanel2D(
     var showPairingDialog by remember { mutableStateOf(false) }
     var showPinDialog by remember { mutableStateOf(false) }
     var showOptionsDialog by remember { mutableStateOf(false) }
+    var showImmersiveOptionsDialog by remember { mutableStateOf(false) }
+    var immersiveSettings by remember { mutableStateOf(ImmersiveSettings.load(context)) }
     var dialogHost by remember { mutableStateOf("") }
     var dialogPort by remember { mutableStateOf("47989") }
     var serverName by remember { mutableStateOf<String?>(null) }
@@ -289,6 +292,8 @@ fun ConnectionPanel2D(
     var capabilityStatus by remember { mutableStateOf<String?>(null) }
     var enableHdr by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_enable_hdr", false)) }
     var enableFullRange by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_full_range", false)) }
+    // REMOVED: 3D Desktop Client - Stereoscopic mode removed
+    // var enablePcSideStereoscopic by remember { mutableStateOf(defaultPrefs.getBoolean("checkbox_pc_side_stereoscopic", false)) }
 
     // App selection dropdown - only show if paired and app list is loaded
     var appList by remember { mutableStateOf<List<com.limelight.nvstream.http.NvApp>>(emptyList()) }
@@ -789,6 +794,47 @@ fun ConnectionPanel2D(
                             )
                         }
 
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // REMOVED: 3D Desktop Client - Stereoscopic mode UI removed
+                        /*
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "PC-Side Stereoscopic Mode",
+                                    style = LocalTypography.current.body1.copy(
+                                        color = SpatialTheme.colorScheme.primaryAlphaBackground
+                                    )
+                                )
+                                Text(
+                                    text = "Requires desktop client + virtual display (30-50 Mbps)",
+                                    style = LocalTypography.current.body2.copy(
+                                        color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                                    )
+                                )
+                            }
+                            SpatialSwitch(
+                                checked = enablePcSideStereoscopic,
+                                onCheckedChange = { enablePcSideStereoscopic = it }
+                            )
+                        }
+
+                        if (enablePcSideStereoscopic) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "⚠️ Bandwidth Warning: PC-side stereoscopic mode doubles resolution (e.g., 2560x1440 → 5120x1440), requiring 30-50 Mbps network bandwidth. Ensure your network can handle this and that the desktop client is running with virtual display configured.",
+                                style = LocalTypography.current.body2.copy(
+                                    color = Color(0xFFFF9800).copy(alpha = 0.9f)
+                                ),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        */
+
                         PrimaryButton(
                             label = "Apply Stream Settings",
                             expanded = true,
@@ -814,8 +860,19 @@ fun ConnectionPanel2D(
                                     .putString("list_audio_config", storedAudio)
                                     .putBoolean("checkbox_enable_hdr", enableHdr)
                                     .putBoolean("checkbox_full_range", enableFullRange)
+                                    // REMOVED: 3D Desktop Client - Stereoscopic mode removed
+                                    // .putBoolean("checkbox_pc_side_stereoscopic", enablePcSideStereoscopic)
                                     .apply()
-                                connectionStatus = "Applied stream prefs (res/fps/format/audio/HDR/range)"
+                                // REMOVED: 3D Desktop Client - Stereoscopic mode status message removed
+                                val statusMsg = "Applied stream prefs (res/fps/format/audio/HDR/range)"
+                                /*
+                                val statusMsg = if (enablePcSideStereoscopic) {
+                                    "Applied stream prefs (res/fps/format/audio/HDR/range/stereo) - Resolution will be doubled for SBS"
+                                } else {
+                                    "Applied stream prefs (res/fps/format/audio/HDR/range)"
+                                }
+                                */
+                                connectionStatus = statusMsg
                             },
                         )
                     }
@@ -1064,12 +1121,171 @@ fun ConnectionPanel2D(
                         }
                     }
 
+                    // Immersive Options
+                    SecondaryCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            showOptionsDialog = false
+                            showImmersiveOptionsDialog = true
+                        }
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp)
+                        ) {
+                            Text(
+                                text = "Immersive Options",
+                                style = LocalTypography.current.body1Strong.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground
+                                )
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = "Enable immersive features",
+                                style = LocalTypography.current.body2.copy(
+                                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.8f)
+                                )
+                            )
+                        }
+                    }
+
                     Spacer(Modifier.height(8.dp))
                     
                     SecondaryButton(
                         label = "Cancel",
                         expanded = true,
                         onClick = { showOptionsDialog = false }
+                    )
+                }
+            }
+        }
+
+        // Immersive Options Dialog
+        if (showImmersiveOptionsDialog) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.3f)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .clip(SpatialTheme.shapes.large)
+                        .background(brush = LocalColorScheme.current.panel)
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = "Immersive Options",
+                        style = LocalTypography.current.headline2Strong.copy(
+                            color = SpatialTheme.colorScheme.primaryAlphaBackground
+                        )
+                    )
+                    Spacer(Modifier.height(8.dp))
+
+                    // Spatial Audio Toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Enable spatial audio",
+                            style = LocalTypography.current.body1.copy(
+                                color = SpatialTheme.colorScheme.primaryAlphaBackground
+                            )
+                        )
+                        SpatialSwitch(
+                            checked = immersiveSettings.spatialAudioEnabled,
+                            onCheckedChange = {
+                                immersiveSettings = immersiveSettings.copy(spatialAudioEnabled = it)
+                                ImmersiveSettings.save(context, immersiveSettings)
+                            }
+                        )
+                    }
+
+                    // Room Dimming Toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Room Dimming",
+                            style = LocalTypography.current.body1.copy(
+                                color = SpatialTheme.colorScheme.primaryAlphaBackground
+                            )
+                        )
+                        SpatialSwitch(
+                            checked = immersiveSettings.roomDimmingEnabled,
+                            onCheckedChange = {
+                                immersiveSettings = immersiveSettings.copy(roomDimmingEnabled = it)
+                                ImmersiveSettings.save(context, immersiveSettings)
+                            }
+                        )
+                    }
+
+                    // Lighting Emission Toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Lighting Emission",
+                            style = LocalTypography.current.body1.copy(
+                                color = SpatialTheme.colorScheme.primaryAlphaBackground
+                            )
+                        )
+                        SpatialSwitch(
+                            checked = immersiveSettings.lightingEmissionEnabled,
+                            onCheckedChange = {
+                                immersiveSettings = immersiveSettings.copy(lightingEmissionEnabled = it)
+                                ImmersiveSettings.save(context, immersiveSettings)
+                            }
+                        )
+                    }
+
+                    // Reflections Toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Reflections",
+                            style = LocalTypography.current.body1.copy(
+                                color = SpatialTheme.colorScheme.primaryAlphaBackground
+                            )
+                        )
+                        SpatialSwitch(
+                            checked = immersiveSettings.reflectionsEnabled,
+                            onCheckedChange = {
+                                immersiveSettings = immersiveSettings.copy(reflectionsEnabled = it)
+                                ImmersiveSettings.save(context, immersiveSettings)
+                            }
+                        )
+                    }
+
+                    // Hint about lighting features requiring immersive mode
+                    if (immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "Lighting features will activate automatically in Immersive Mode",
+                            style = LocalTypography.current.body2.copy(
+                                color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.6f)
+                            )
+                        )
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+
+                    SecondaryButton(
+                        label = "Close",
+                        expanded = true,
+                        onClick = { showImmersiveOptionsDialog = false }
                     )
                 }
             }

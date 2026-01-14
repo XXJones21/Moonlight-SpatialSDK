@@ -45,21 +45,21 @@ private fun Modifier.scaleWithLayout(scaleFactor: Float) = this
 /**
  * Button shelf composable with controls for the video panel.
  * 
- * @param isSpatializeEnabled Whether spatial audio and room mesh are currently enabled
+ * @param isImmersiveModeEnabled Whether immersive mode features are currently enabled
  * @param isSnapEnabled Whether snap-to-wall is currently enabled
  * @param onSettingsClick Callback for settings button press
  * @param onResetScaleClick Callback for reset scale button press
- * @param onSpatializeClick Callback for spatialize toggle button press
+ * @param onImmersiveModeClick Callback for immersive mode toggle button press
  * @param onSnapToWallClick Callback for snap to wall toggle button press
  * @param onDisconnectClick Callback for disconnect button press
  */
 @Composable
 fun ButtonShelfCompose(
-    isSpatializeEnabled: Boolean = false,
+    isImmersiveModeEnabled: Boolean = false,
     isSnapEnabled: Boolean = false,
     onSettingsClick: () -> Unit,
     onResetScaleClick: () -> Unit,
-    onSpatializeClick: () -> Unit = {},
+    onImmersiveModeClick: () -> Unit = {},
     onSnapToWallClick: () -> Unit = {},
     onDisconnectClick: () -> Unit
 ) {
@@ -94,10 +94,10 @@ fun ButtonShelfCompose(
       
       Box(modifier = Modifier.scaleWithLayout(0.5f)) {
         ButtonShelf(
-            icon = { Icon(SpatialIcons.Regular.VolumeOn, contentDescription = "Spatialize") },
-            label = "Spatialize",
-            selected = isSpatializeEnabled,
-            onSelectionChange = { focusManager.clearFocus(); onSpatializeClick() },
+            icon = { Icon(SpatialIcons.Regular.VolumeOn, contentDescription = "Immersive Mode") },
+            label = "Immersive",
+            selected = isImmersiveModeEnabled,
+            onSelectionChange = { focusManager.clearFocus(); onImmersiveModeClick() },
         )
       }
       

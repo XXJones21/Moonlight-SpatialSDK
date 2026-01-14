@@ -131,6 +131,12 @@ val sceneDirectory = projectDir.dir("scenes")
 
 spatial {
   allowUsageDataCollection.set(true)
+  
+  // Compile custom shaders for hero lighting effects
+  shaders {
+    sources.add(project.layout.projectDirectory.dir("src/shaders"))
+  }
+  
   scenes {
     // if you have installed Meta Spatial Editor somewhere else, update the file path.
 

@@ -4,5 +4,8 @@
   <item type="id" name="options_panel" />
   <item type="id" name="connection_panel" />
   <item type="id" name="disconnect_dialog_panel" />
+  <item type="id" name="reconnect_dialog_panel" />
   <item type="id" name="button_shelf" />
+  <!-- REMOVED: 3D Desktop Client - Stereoscopic depth slider removed -->
+  <!-- <item type="id" name="stereo_depth_slider" /> -->
 </resources>

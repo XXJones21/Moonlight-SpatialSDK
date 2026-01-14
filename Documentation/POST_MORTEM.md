@@ -372,15 +372,80 @@ Understanding the Moonlight protocol is essential:
 
 ---
 
+### 7. Entity Creation Redundancy Issue
+
+**Problem**: Video panel entity is created twice - once by the SDK during panel registration, and again manually after registration. This causes entity duplication, dimension desync, and potential rendering issues.
+
+**Root Cause**:
+
+- **Stereoscopic Depth Mode** (`PanelCreator`): SDK creates entity in `panelCreator` lambda (line 1190), stored in `videoPanelEntity` (line 1191), then overwritten by manual entity creation (line 1369)
+- **Lighting Emission Mode** (`ReadableVideoSurfacePanelRegistration`): SDK provides `panelEntity` in `surfaceConsumer` callback (line 1258), but it's logged and ignored, then a new entity is created manually (line 1369)
+- **Standard Mode** (`VideoSurfacePanelRegistration`): SDK provides `panelEntity` in `surfaceConsumer` callback (line 1300), but it's logged and ignored, then a new entity is created manually (line 1369)
+- All three modes execute the manual entity creation code (lines 1338-1369) regardless of which registration type was used
+- Manual entity creation uses `computePanelShape()` which returns non-doubled aspect ratio (2560x1440p), causing dimension mismatch for stereoscopic mode (which needs 5120x1440p)
+
+**Investigation**:
+
+- Panel outline shows 2560x1440p dimensions while scale handles respect 5120x1440p dimensions
+- Scale handles work because they reference the SDK-created entity's `PanelDimensions` (ultrawide)
+- Panel outline shows wrong size because it references the manually created entity (standard size)
+- Two entities exist for the same panel ID (`R.id.ui_example`), causing desync
+- PremiumMediaSample pattern: Creates minimal reference entity after registration, but uses SDK-provided entity from callbacks for actual operations
+
+**Impact**:
+
+- **Stereoscopic Depth Mode**: Panel outline shows incorrect size (2560x1440p instead of 5120x1440p)
+- **All Modes**: Potential rendering conflicts from duplicate entities
+- **Component Desync**: Components added to one entity may not affect the other
+- **Scaling System**: May register wrong entity, causing scaling to affect wrong panel
+
+**Potential Solutions**:
+
+1. **Use SDK-Provided Entity (Recommended)**:
+   - Store SDK-provided entity from callbacks (`panelEntity` or `entity`)
+   - Add additional components to that entity (don't create new one)
+   - Skip manual entity creation when SDK provides entity
+   - For stereoscopic mode: Use entity from `panelCreator` lambda, add components in callback
+
+2. **Conditional Entity Creation**:
+   - Only create manual entity if SDK doesn't provide one
+   - Check if `videoPanelEntity` is already set before creating new one
+   - Add guard: `if (videoPanelEntity == null) { /* create entity */ }`
+
+3. **Unified Entity Management**:
+   - Create single entity creation function that handles all modes
+   - Determine entity source based on registration type
+   - Add components to SDK-provided entity instead of creating new one
+
+4. **Component Addition Pattern**:
+   - Store SDK-provided entity reference
+   - Add required components (`PanelDimensions`, `Scale`, `Grabbable`, `Scalable`, `ScaledParent`, `TransformParent`, `HeroLighting`) to existing entity
+   - Register with scaling system using SDK-provided entity
+
+**Files Affected**:
+
+- `ImmersiveActivity.kt` - Lines 1160-1380 (`createVideoPanelEntity()`)
+- All three panel registration paths create entities, then manual creation overwrites/ignores them
+
+**Status**: ⚠️ Known Issue - Requires refactoring
+
+- Affects all panel registration modes (stereoscopic, lighting emission, standard)
+- Causes dimension desync in stereoscopic mode
+- Potential rendering conflicts from duplicate entities
+- Solution requires refactoring entity creation logic
+
+---
+
 ## Remaining Considerations
 
 ### Potential Future Issues
 
-1. **Surface Reuse**: Ensure proper cleanup before decoder reconfiguration
-2. **Network Conditions**: Handle UDP packet loss and network interruptions
-3. **Decoder Capabilities**: Verify device supports negotiated format/resolution
-4. **Thread Safety**: Ensure all bridge operations are thread-safe
-5. **Color Space Initialization**: Monitor for SDK updates addressing video surface color space issue
+1. **Entity Creation Redundancy**: Refactor entity creation to use SDK-provided entities instead of creating duplicates
+2. **Surface Reuse**: Ensure proper cleanup before decoder reconfiguration
+3. **Network Conditions**: Handle UDP packet loss and network interruptions
+4. **Decoder Capabilities**: Verify device supports negotiated format/resolution
+5. **Thread Safety**: Ensure all bridge operations are thread-safe
+6. **Color Space Initialization**: Monitor for SDK updates addressing video surface color space issue
 
 ### Monitoring Points
 

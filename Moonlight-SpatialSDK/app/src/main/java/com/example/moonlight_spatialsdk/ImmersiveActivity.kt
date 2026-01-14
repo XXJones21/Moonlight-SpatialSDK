@@ -1,9 +1,11 @@
 package com.example.moonlight_spatialsdk
 
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.input.InputManager
 import android.os.Bundle
 import android.util.Log
 import android.view.InputDevice
@@ -17,7 +19,33 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.Composable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import com.meta.spatial.uiset.button.SecondaryButton
+import com.meta.spatial.uiset.button.DestructiveButton
+import com.meta.spatial.uiset.theme.SpatialTheme
+import com.meta.spatial.uiset.theme.LocalColorScheme
+import com.meta.spatial.uiset.theme.LocalTypography
+import androidx.compose.material3.Text
 import com.example.moonlight_spatialsdk.BuildConfig
 import com.limelight.binding.audio.AndroidAudioRenderer
 import com.limelight.binding.video.CrashListener
@@ -60,7 +88,15 @@ import com.meta.spatial.toolkit.PanelStyleOptions
 import com.meta.spatial.toolkit.PixelDisplayOptions
 import com.meta.spatial.toolkit.QuadShapeOptions
 import com.meta.spatial.toolkit.VideoSurfacePanelRegistration
+import com.meta.spatial.toolkit.ReadableVideoSurfacePanelRegistration
+import com.meta.spatial.toolkit.ReadableMediaPanelSettings
+import com.meta.spatial.toolkit.ReadableMediaPanelRenderOptions
 import com.meta.spatial.runtime.StereoMode
+import java.util.concurrent.CompletableFuture
+import com.example.moonlight_spatialsdk.data.ImmersiveSettings
+import com.example.moonlight_spatialsdk.systems.heroLighting.HeroLightingSystem
+import com.example.moonlight_spatialsdk.systems.heroLighting.WallLightingSystem
+import com.example.moonlight_spatialsdk.systems.lighting.LightingPassthroughHandler
 import com.meta.spatial.vr.LocomotionSystem
 import com.meta.spatial.vr.VRFeature
 import com.meta.spatial.mruk.MRUKFeature
@@ -78,8 +114,13 @@ import com.example.moonlight_spatialsdk.systems.scaleChildren.ScaleChildrenSyste
 import com.example.moonlight_spatialsdk.systems.mruk.RoomMeshManager
 import com.example.moonlight_spatialsdk.systems.audio.SpatialAudioManager
 import com.example.moonlight_spatialsdk.systems.anchor.AnchorSnappingSystem
+import com.example.moonlight_spatialsdk.entities.BiasLightingEntity
 import com.meta.spatial.toolkit.Controller
 import com.meta.spatial.toolkit.ControllerType
+import com.meta.spatial.toolkit.Hittable
+import com.meta.spatial.toolkit.MeshCollision
+import com.meta.spatial.toolkit.Mesh
+import android.net.Uri
 import java.io.File
 
 class ImmersiveActivity : AppSystemActivity() {
@@ -89,6 +130,7 @@ class ImmersiveActivity : AppSystemActivity() {
   private lateinit var moonlightPanelRenderer: MoonlightPanelRenderer
   private lateinit var audioRenderer: AndroidAudioRenderer
   private lateinit var connectionManager: MoonlightConnectionManager
+  private lateinit var inputManager: InputManager
   private val _connectionStatus = MutableStateFlow("Disconnected")
   val connectionStatus: StateFlow<String> = _connectionStatus.asStateFlow()
   
@@ -99,8 +141,8 @@ class ImmersiveActivity : AppSystemActivity() {
   private var isPaired: Boolean = false
   private var isSurfaceReady: Boolean = false
   private var videoPanelEntity: Entity? = null
-  private var connectionPanelEntity: Entity? = null
   private var disconnectDialogPanelEntity: Entity? = null
+  private var reconnectDialogPanelEntity: Entity? = null
   private var buttonShelfEntity: com.example.moonlight_spatialsdk.entities.ButtonShelfEntity? = null
   private var buttonShelfVisibilitySystem: com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem? = null
   private var panelManager: PanelManager? = null
@@ -124,14 +166,22 @@ class ImmersiveActivity : AppSystemActivity() {
   // Dialog state for disconnect confirmation
   private val _showDisconnectDialog = MutableStateFlow(false)
   val showDisconnectDialog: StateFlow<Boolean> = _showDisconnectDialog.asStateFlow()
+
+  // Dialog state for reconnection prompt
+  private val _showReconnectDialog = MutableStateFlow(false)
+  val showReconnectDialog: StateFlow<Boolean> = _showReconnectDialog.asStateFlow()
+
+  // Store last connection parameters for reconnection
+  private var lastConnectionParams: Triple<String, Int, Int>? = null
+  private var lastConnectionHost: String? = null
   
   // MRUK and Spatial Audio features for room meshing and spatialized audio
   private lateinit var mrukFeature: MRUKFeature
   private lateinit var spatialAudioFeature: SpatialAudioFeature
   
-  // MRUK spatial features state
-  private val _isSpatializeEnabled = MutableStateFlow(false)
-  val isSpatializeEnabled: StateFlow<Boolean> = _isSpatializeEnabled.asStateFlow()
+  // Immersive mode features state
+  private val _isImmersiveModeEnabled = MutableStateFlow(false)
+  val isImmersiveModeEnabled: StateFlow<Boolean> = _isImmersiveModeEnabled.asStateFlow()
   
   private val _isSnapEnabled = MutableStateFlow(false)
   val isSnapEnabled: StateFlow<Boolean> = _isSnapEnabled.asStateFlow()
@@ -142,6 +192,74 @@ class ImmersiveActivity : AppSystemActivity() {
   // SpatialAudioManager for spatialized audio from the video panel
   private var spatialAudioManager: SpatialAudioManager? = null
   
+  // Hero lighting system for emissive lighting effects
+  private var heroLightingSystem: HeroLightingSystem? = null
+  
+  // Lighting passthrough handler for room dimming
+  private var lightingPassthroughHandler: LightingPassthroughHandler? = null
+  
+  // Wall lighting system for MRUK surface reflections
+  private var wallLightingSystem: WallLightingSystem? = null
+  
+  // Bias lighting entity for edge-based ambient glow effect
+  private var biasLightingEntity: BiasLightingEntity? = null
+  
+  // REMOVED: 3D Desktop Client - Stereoscopic systems removed
+  // Stereo video system for stereoscopic 3D depth control
+  // private var stereoVideoSystem: com.example.moonlight_spatialsdk.systems.stereo.StereoVideoSystem? = null
+  
+  // Stereo depth slider entity for runtime depth control
+  // private var stereoDepthSliderEntity: com.example.moonlight_spatialsdk.entities.StereoDepthSliderEntity? = null
+  
+  // Stereo depth slider visibility system
+  // private var stereoDepthSliderVisibilitySystem: com.example.moonlight_spatialsdk.systems.stereoDepthSlider.StereoDepthSliderVisibilitySystem? = null
+
+  // Cached immersive settings for panel creation decisions
+  private var immersiveSettings: ImmersiveSettings = ImmersiveSettings()
+
+  // Input device listener for hot-plug controller support
+  // Detects when Bluetooth controllers are turned on mid-session and reinitializes ControllerHandler
+  private val inputDeviceListener = object : InputManager.InputDeviceListener {
+    override fun onInputDeviceAdded(deviceId: Int) {
+      val device = inputManager.getInputDevice(deviceId) ?: return
+
+      // Check if this is a gamepad or joystick
+      val isGamepad = (device.sources and InputDevice.SOURCE_GAMEPAD) != 0 ||
+                      (device.sources and InputDevice.SOURCE_JOYSTICK) != 0
+
+      if (isGamepad) {
+        Log.i(TAG, "New input device detected: ${device.name} (id=$deviceId, sources=${device.sources})")
+
+        // Only reinitialize if we're connected and forwarding inputs
+        if (connectionManager.isConnected() && shouldForwardInputs) {
+          coroutineScope.launch {
+            // Brief delay to allow device initialization to complete
+            delay(500)
+
+            val success = connectionManager.reinitializeControllerHandler()
+            if (success) {
+              Log.i(TAG, "ControllerHandler reinitialized for new device: ${device.name}")
+            } else {
+              Log.w(TAG, "Failed to reinitialize ControllerHandler for new device: ${device.name}")
+            }
+          }
+        } else {
+          Log.d(TAG, "Skipping controller reinitialization - not connected or inputs not enabled")
+        }
+      }
+    }
+
+    override fun onInputDeviceRemoved(deviceId: Int) {
+      // ControllerHandler already handles device removal properly via its own listener
+      Log.d(TAG, "Input device removed: id=$deviceId (handled by ControllerHandler)")
+    }
+
+    override fun onInputDeviceChanged(deviceId: Int) {
+      // ControllerHandler already handles device changes properly via its own listener
+      Log.d(TAG, "Input device changed: id=$deviceId (handled by ControllerHandler)")
+    }
+  }
+
   // Permission request codes for MRUK scene access
   companion object {
     private const val PERMISSION_USE_SCENE = "com.oculus.permission.USE_SCENE"
@@ -205,6 +323,13 @@ class ImmersiveActivity : AppSystemActivity() {
         prefs = prefs,
         crashListener = CrashListener { _ -> },
     )
+    
+    // Register callback to detect actual stream resolution
+    moonlightPanelRenderer.setOnStreamResolutionDetected(object : OnStreamResolutionDetected {
+      override fun onResolutionDetected(actualWidth: Int, actualHeight: Int) {
+        onStreamResolutionDetected(actualWidth, actualHeight)
+      }
+    })
     audioRenderer = AndroidAudioRenderer(this, prefs.enableAudioFx)
     pairingHelper = MoonlightPairingHelper(this)
     
@@ -217,6 +342,21 @@ class ImmersiveActivity : AppSystemActivity() {
     componentManager.registerComponent<Anchorable>(Anchorable.Companion)
     componentManager.registerComponent<AnchorOnLoad>(AnchorOnLoad.Companion)
     componentManager.registerComponent<WallSnap>(WallSnap.Companion)
+    
+    // Register hero lighting components for emissive lighting effects
+    componentManager.registerComponent<HeroLighting>(HeroLighting.Companion)
+    componentManager.registerComponent<ReceiveLighting>(ReceiveLighting.Companion)
+    
+    // Register hero lighting system for lighting emission
+    heroLightingSystem = HeroLightingSystem(autoDetectTexture = true, isProcessingShaders = true)
+    systemManager.registerSystem(heroLightingSystem!!)
+    Log.i(TAG, "HeroLightingSystem registered")
+    
+    // Register wall lighting system for MRUK surface reflections
+    // (Registered at startup like PremiumMediaSample - starts hidden, only visible when reflections enabled)
+    wallLightingSystem = WallLightingSystem(_isVisible = false)
+    systemManager.registerSystem(wallLightingSystem!!)
+    Log.i(TAG, "WallLightingSystem registered")
     
     // Register pointer info system (required for hover detection)
     val pointerInfoSystem = PointerInfoSystem()
@@ -240,8 +380,8 @@ class ImmersiveActivity : AppSystemActivity() {
           if (connected) {
             videoPanelEntity?.setComponent(Visible(true))
             Log.i(TAG, "Video stream ready (connected=$connected, status=$status), showing video panel")
-            
-            
+
+
             // Initialize ControllerHandler now that video panel is visible and stream is ready
             val handlerInitialized = connectionManager.initializeControllerHandler()
             if (handlerInitialized) {
@@ -259,7 +399,12 @@ class ImmersiveActivity : AppSystemActivity() {
           }
         }
     )
-    
+
+    // Initialize InputManager and register listener for hot-plug controller support
+    inputManager = getSystemService(Context.INPUT_SERVICE) as InputManager
+    inputManager.registerInputDeviceListener(inputDeviceListener, null)
+    Log.i(TAG, "InputDeviceListener registered for hot-plug controller support")
+
     NetworkedAssetLoader.init(
         File(applicationContext.getCacheDir().canonicalPath),
         OkHttpAssetFetcher(),
@@ -324,6 +469,10 @@ class ImmersiveActivity : AppSystemActivity() {
         environmentIntensity = 0.3f,
     )
     scene.updateIBLEnvironment("environment.env")
+    
+    // Initialize LightingPassthroughHandler for room dimming effects
+    lightingPassthroughHandler = LightingPassthroughHandler(scene)
+    Log.i(TAG, "LightingPassthroughHandler initialized")
 
     // NOTE: Do NOT use scene.setViewOrigin() with rotation - it affects the entire
     // scene coordinate system including MRUK meshes, causing them to appear inverted.
@@ -344,7 +493,6 @@ class ImmersiveActivity : AppSystemActivity() {
     Log.i(TAG, "PanelManager created and set on positioning system")
 
     createVideoPanelEntity()
-    createConnectionPanelEntity()
     createButtonShelfEntity()
     // Don't create disconnect dialog entity upfront - create/destroy on menu button press
     
@@ -360,50 +508,9 @@ class ImmersiveActivity : AppSystemActivity() {
 
   @OptIn(SpatialSDKExperimentalAPI::class)
   override fun registerPanels(): List<PanelRegistration> {
-    val shared = getSharedPreferences("connection_prefs", MODE_PRIVATE)
-    val savedHost = shared.getString("saved_host", "") ?: ""
-    val savedPort = shared.getString("saved_port", "47989") ?: "47989"
-    val savedAppId = shared.getString("saved_appId", "0") ?: "0"
-    
     // Video panel is registered dynamically in createVideoPanelEntity() using executeOnVrActivity
     // to ensure panelManager is initialized before registration (lifecycle alignment)
     return listOf(
-        PanelRegistration(R.id.connection_panel) {
-          config {
-            fractionOfScreen = 0.4f
-            height = basePanelHeightMeters * 0.75f
-            width = basePanelHeightMeters * 0.6f
-            layoutDpi = 240
-            layerConfig = LayerConfig()
-            enableTransparent = true
-            includeGlass = false
-            themeResourceId = R.style.PanelAppThemeTransparent
-          }
-          composePanel { setContent {
-            ConnectionPanelImmersive(
-                  pairingHelper = pairingHelper,
-                  savedHost = savedHost,
-                  savedPort = savedPort,
-                  savedAppId = savedAppId,
-                  onSaveConnection = { h: String, p: String, a: String ->
-                    getSharedPreferences("connection_prefs", MODE_PRIVATE).edit()
-                        .putString("saved_host", h)
-                        .putString("saved_port", p)
-                        .putString("saved_appId", a)
-                        .apply()
-                  },
-                  onClearPairing = {
-                    IdentityStore.clearAll(this@ImmersiveActivity)
-                    Log.i(TAG, "Cleared client pairing state and pinned certificates")
-                  },
-                  onConnect = { host, port, appId ->
-                    Log.i(TAG, "Connection panel connect clicked host=$host port=$port appId=$appId")
-                    connectToHost(host, port, appId)
-                  }
-              )
-            }
-          }
-        },
         PanelRegistration(R.id.disconnect_dialog_panel) {
           config {
             fractionOfScreen = 0.4f
@@ -416,29 +523,66 @@ class ImmersiveActivity : AppSystemActivity() {
             themeResourceId = R.style.PanelAppThemeTransparent
           }
           composePanel { setContent {
-          DisconnectDialog(
-            showDialog = showDisconnectDialog,
-            onResetPanelSize = {
-              _showDisconnectDialog.value = false
-              updateVideoPanelScale(1.0f)
-              Log.i(TAG, "Video panel scale reset to default (1.0)")
-              // Destroy entity to close dialog
-              destroyDisconnectDialogPanelEntity()
-            },
-            onEndStream = {
-              _showDisconnectDialog.value = false
-              // Destroy entity before disconnecting
-              destroyDisconnectDialogPanelEntity()
-              disconnect()
-            },
-            onCancel = {
-              _showDisconnectDialog.value = false
-              Log.i(TAG, "User cancelled disconnect dialog")
-              // Destroy entity to close dialog
-              destroyDisconnectDialogPanelEntity()
-            }
-          )
-            }
+            DisconnectDialog(
+              showDialog = showDisconnectDialog,
+              onResetPanelSize = {
+                _showDisconnectDialog.value = false
+                updateVideoPanelScale(1.0f)
+                Log.i(TAG, "Video panel scale reset to default (1.0)")
+                // Destroy entity to close dialog
+                destroyDisconnectDialogPanelEntity()
+              },
+              onEndStream = {
+                _showDisconnectDialog.value = false
+                // Destroy entity before disconnecting
+                destroyDisconnectDialogPanelEntity()
+                disconnect()
+              },
+              onCancel = {
+                _showDisconnectDialog.value = false
+                Log.i(TAG, "User cancelled disconnect dialog")
+                // Destroy entity to close dialog
+                destroyDisconnectDialogPanelEntity()
+              }
+            )
+          }
+          }
+        },
+        PanelRegistration(R.id.reconnect_dialog_panel) {
+          config {
+            fractionOfScreen = 0.5f
+            height = basePanelHeightMeters * 0.5f
+            width = basePanelHeightMeters * 0.7f
+            layoutDpi = 240
+            layerConfig = LayerConfig()
+            enableTransparent = true
+            includeGlass = false
+            themeResourceId = R.style.PanelAppThemeTransparent
+          }
+          composePanel { setContent {
+            ReconnectDialog(
+              showDialog = showReconnectDialog,
+              lastHost = lastConnectionHost,
+              onReconnect = {
+                Log.i(TAG, "User clicked Reconnect")
+                reconnect()
+              },
+              onReturnToHome = {
+                Log.i(TAG, "User clicked Return to Home")
+                _showReconnectDialog.value = false
+                destroyReconnectDialogPanelEntity()
+                launchPanelModeInHome()
+                // Finish the activity so it can be relaunched fresh from PancakeActivity
+                finish()
+                Log.i(TAG, "ImmersiveActivity finished to allow fresh relaunch")
+              },
+              onCancel = {
+                Log.i(TAG, "User cancelled reconnect dialog")
+                _showReconnectDialog.value = false
+                destroyReconnectDialogPanelEntity()
+              }
+            )
+          }
           }
         },
         PanelRegistration(R.id.button_shelf) {
@@ -454,11 +598,11 @@ class ImmersiveActivity : AppSystemActivity() {
           }
           composePanel { setContent {
             // Collect state flows for button selection states
-            val spatializeEnabled = isSpatializeEnabled.collectAsState()
+            val immersiveModeEnabled = isImmersiveModeEnabled.collectAsState()
             val snapEnabled = isSnapEnabled.collectAsState()
             
             com.example.moonlight_spatialsdk.panels.buttonShelf.ButtonShelfCompose(
-                isSpatializeEnabled = spatializeEnabled.value,
+                isImmersiveModeEnabled = immersiveModeEnabled.value,
                 isSnapEnabled = snapEnabled.value,
                 onSettingsClick = {
                   Log.i(TAG, "ButtonShelf Settings clicked - opening 2D panel overlay for adjustments")
@@ -468,44 +612,337 @@ class ImmersiveActivity : AppSystemActivity() {
                   Log.i(TAG, "ButtonShelf Reset Scale clicked - resetting video panel scale to 1.0")
                   updateVideoPanelScale(1.0f)
                 },
-                onSpatializeClick = {
-                  Log.i(TAG, "ButtonShelf Spatialize clicked - toggling spatial audio and room mesh")
-                  toggleSpatialize()
+                onImmersiveModeClick = {
+                  Log.i(TAG, "ButtonShelf Immersive Mode clicked - toggling immersive features")
+                  toggleImmersiveMode()
                 },
                 onSnapToWallClick = {
                   Log.i(TAG, "ButtonShelf Snap clicked - toggling snap-to-wall behavior")
                   toggleSnapToWall()
                 },
                 onDisconnectClick = {
-                  Log.i(TAG, "ButtonShelf Disconnect clicked - ending stream and returning to 2D panel")
-                  disconnect()
-                  launchPanelModeInHome()
+                  Log.i(TAG, "ButtonShelf Disconnect clicked - showing reconnection dialog")
+                  disconnect(showReconnection = true)
                 }
             )
           }
           }
         },
-    )
+        // REMOVED: 3D Desktop Client - Stereoscopic depth slider panel removed
+        /*
+        PanelRegistration(R.id.stereo_depth_slider) {
+          config {
+            fractionOfScreen = 0.3f
+            height = 0.12f
+            width = 0.9f
+            layoutDpi = 240
+            layerConfig = LayerConfig()
+            enableTransparent = true
+            includeGlass = false
+            themeResourceId = R.style.PanelAppThemeTransparent
+          }
+          composePanel { setContent {
+            // Depth slider for future decoder-level depth control
+            // Currently not connected to any system (VideoSurfacePanelRegistration doesn't support custom shaders)
+            var currentDepthFactor by remember { mutableStateOf(0.5f) }
+            
+            com.example.moonlight_spatialsdk.panels.stereoDepthSlider.StereoDepthSliderCompose(
+              depthFactor = currentDepthFactor,
+              onDepthChange = { newValue ->
+                // TODO: Connect to decoder-level depth control when implemented
+                // stereoVideoSystem?.updateDepthFactor(newValue)
+                currentDepthFactor = newValue
+                newValue
+              }
+            )
+          }
+          }
+        */
+        },
+    ).filterNotNull()
   }
 
   /**
-   * Align panel physical shape with the negotiated video pixel aspect ratio.
-   * Spatial SDK docs recommend matching layout size to the stream to keep
-   * direct-to-surface output pixel-perfect.
+   * Calculate panel physical dimensions in meters.
+   * Single source of truth for panel size - used for both shape parameter and PanelDimensions component.
+   * 
+   * @param force16x9 If true, uses fixed 16:9 aspect ratio. If false, calculates from actual resolution.
    */
-  private fun computePanelShape(): QuadShapeOptions {
+  private fun calculatePanelSize(force16x9: Boolean = false): Vector2 {
     val aspect =
-        if (prefs.height != 0) {
+        if (force16x9) {
+          16f / 9f
+        } else if (prefs.height != 0) {
           prefs.width.toFloat() / prefs.height.toFloat()
         } else {
           16f / 9f
         }
-    val panelHeightMeters = basePanelHeightMeters
-    val panelWidthMeters = aspect * basePanelHeightMeters
-    return QuadShapeOptions(width = panelWidthMeters, height = panelHeightMeters)
+    return Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+  }
+
+  /**
+   * Calculate panel physical dimensions from actual stream resolution.
+   * Used when actual stream resolution differs from preferences.
+   * 
+   * @param width Actual stream width in pixels
+   * @param height Actual stream height in pixels
+   * @return Panel dimensions in meters (Vector2)
+   */
+  private fun calculatePanelSizeFromResolution(width: Int, height: Int): Vector2 {
+    val aspectRatio = if (height != 0) {
+      width.toFloat() / height.toFloat()
+    } else {
+      16f / 9f // Fallback to 16:9
+    }
+    return Vector2(aspectRatio * basePanelHeightMeters, basePanelHeightMeters)
+  }
+
+  /**
+   * Called when actual stream resolution is detected from decoder setup.
+   * Updates panel size and preferences to match actual stream resolution.
+   * 
+   * @param actualWidth Actual stream width in pixels
+   * @param actualHeight Actual stream height in pixels
+   */
+  private fun onStreamResolutionDetected(actualWidth: Int, actualHeight: Int) {
+    Log.i(TAG, "Stream resolution detected: ${actualWidth}x${actualHeight}")
+    
+    // Check if resolution matches expected
+    // REMOVED: 3D Desktop Client - Stereoscopic mode width doubling removed
+    val expectedWidth = prefs.width
+    // val expectedWidth = if (prefs.stereoscopicModeEnabled) prefs.width * 2 else prefs.width
+    val expectedHeight = prefs.height
+    
+    if (actualWidth != expectedWidth || actualHeight != expectedHeight) {
+      Log.w(TAG, "Resolution mismatch: expected ${expectedWidth}x${expectedHeight}, got ${actualWidth}x${actualHeight}")
+      Log.w(TAG, "Updating panel to match actual stream resolution")
+    } else {
+      Log.i(TAG, "Resolution matches expected: ${actualWidth}x${actualHeight}")
+    }
+    
+    // Update panel dimensions to match actual stream
+    videoPanelEntity?.let { entity ->
+      val newPanelSize = calculatePanelSizeFromResolution(actualWidth, actualHeight)
+      entity.setComponent(PanelDimensions(newPanelSize))
+      Log.i(TAG, "Panel dimensions updated to ${newPanelSize.x}x${newPanelSize.y} for stream ${actualWidth}x${actualHeight}")
+    } ?: Log.w(TAG, "Cannot update panel dimensions: videoPanelEntity is null")
+    
+    // Update preferences to reflect actual resolution
+    updatePreferencesFromActualResolution(actualWidth, actualHeight)
+  }
+
+  /**
+   * Update preferences based on actual stream resolution.
+   * REMOVED: 3D Desktop Client - Stereoscopic mode handling removed
+   * 
+   * @param actualWidth Actual stream width in pixels
+   * @param actualHeight Actual stream height in pixels
+   */
+  private fun updatePreferencesFromActualResolution(actualWidth: Int, actualHeight: Int) {
+    // REMOVED: 3D Desktop Client - Stereoscopic mode width handling removed
+    // If stereoscopic mode is enabled, actual width is doubled (SBS format)
+    // Store single width in preferences (per-eye resolution)
+    val newWidth = actualWidth
+    // val newWidth = if (prefs.stereoscopicModeEnabled && actualWidth == prefs.width * 2) {
+    //   // If actual is 5120x1440 and stereoscopic is enabled, store 2560x1440
+    //   actualWidth / 2
+    // } else {
+    //   actualWidth
+    // }
+    val newHeight = actualHeight
+    
+    if (prefs.width != newWidth || prefs.height != newHeight) {
+      Log.i(TAG, "Updating preferences: ${prefs.width}x${prefs.height} -> ${newWidth}x${newHeight}")
+      prefs.width = newWidth
+      prefs.height = newHeight
+      
+      // Persist to SharedPreferences using the same format as PreferenceConfiguration
+      @Suppress("DEPRECATION")
+      val sharedPrefs = android.preference.PreferenceManager.getDefaultSharedPreferences(this)
+      val resolutionString = "${newWidth}x${newHeight}"
+      sharedPrefs.edit()
+        .putString("list_resolution", resolutionString)
+        .apply()
+      Log.i(TAG, "Preferences saved with actual resolution: ${newWidth}x${newHeight} (${resolutionString})")
+    } else {
+      Log.d(TAG, "Preferences already match actual resolution: ${newWidth}x${newHeight}")
+    }
+  }
+
+  /**
+   * Adds all required components to the SDK-provided video panel entity.
+   * This function centralizes component addition to avoid duplication across panel registration modes.
+   *
+   * @param entity The SDK-provided entity from panel registration callback
+   * @param panelSize The physical panel dimensions in meters (Vector2)
+   * @param useLightingEmission Whether to add HeroLighting component (currently unused, kept for consistency)
+   * @return The entity for chaining
+   */
+  private fun addVideoPanelComponents(entity: Entity, panelSize: Vector2, useLightingEmission: Boolean): Entity {
+    val managerEntity = panelManager?.panelManagerEntity
+    val parentComponent = if (managerEntity != null) {
+      TransformParent(managerEntity)
+    } else {
+      TransformParent(Entity.nullEntity())
+    }
+
+    // Add all required components
+    entity.setComponent(Transform(Pose(Vector3(0f, 0f, 0f))))
+    
+    // Set PanelDimensions - this controls the physical panel size and panel outline
+    // For all modes (including stereoscopic), this should match computePanelShape() (stream aspect ratio)
+    // For stereoscopic mode, PanelDimensions is set in the surfaceConsumer callback
+    // For other modes, it's set here in the callback
+    val existingDimensions = entity.tryGetComponent<PanelDimensions>()
+    if (existingDimensions == null || existingDimensions.dimensions != panelSize) {
+      entity.setComponent(PanelDimensions(panelSize))
+      Log.i(TAG, "Set PanelDimensions: ${panelSize.x}m x ${panelSize.y}m (aspect ratio: ${panelSize.x / panelSize.y})")
+    } else {
+      Log.i(TAG, "PanelDimensions already set correctly: ${panelSize.x}m x ${panelSize.y}m")
+    }
+    
+    entity.setComponent(Scale(Vector3(1f))) // Initial scale of 1.0
+    entity.setComponent(Grabbable(enabled = true, type = GrabbableType.PIVOT_Y))
+    entity.setComponent(Visible(false)) // Hidden initially, shown when stream is ready
+    entity.setComponent(Scalable()) // Enable corner scaling
+    entity.setComponent(ScaledParent()) // Mark as scalable parent (required for child entities)
+    entity.setComponent(parentComponent) // Parent to PanelManager
+
+    // Add HeroLighting component if lighting emission is enabled
+    if (useLightingEmission) {
+      entity.setComponent(HeroLighting(isEnabled = true))
+      Log.i(TAG, "HeroLighting component added to video panel")
+    }
+
+    // Register with scaling system
+    val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+    if (touchScalableSystem != null) {
+      touchScalableSystem.registerEntity(entity)
+      Log.i(TAG, "Video panel entity registered with TouchScalableSystem")
+    } else {
+      Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
+    }
+
+    Log.i(TAG, "Video panel components added - parented to PanelManager, hidden initially")
+    return entity
+  }
+
+  /**
+   * Attaches child entities (ButtonShelf, StereoDepthSlider, BiasLighting) to the video panel.
+   * This function is called after the video panel entity is ready and all components are added.
+   */
+  private fun attachChildEntitiesToVideoPanel() {
+    videoPanelEntity?.let { entity ->
+      // Load immersive settings if not already loaded
+      val settings = try {
+        ImmersiveSettings.load(this)
+      } catch (e: Exception) {
+        Log.w(TAG, "Failed to load immersive settings: ${e.message}")
+        null
+      }
+
+      // Create ButtonShelf if it doesn't exist (first connection)
+      // On reconnect, the entity persists and we just reattach it
+      if (buttonShelfEntity == null) {
+        Log.i(TAG, "ButtonShelf doesn't exist, creating for first connection")
+        buttonShelfEntity = com.example.moonlight_spatialsdk.entities.ButtonShelfEntity()
+        Log.i(TAG, "New ButtonShelfEntity created: ${buttonShelfEntity?.entity}")
+      } else {
+        Log.i(TAG, "ButtonShelf already exists (reconnection), will reattach to new video panel")
+      }
+
+      // Attach ButtonShelf to video panel (works for both new connections and reconnections)
+      buttonShelfEntity?.let { shelf ->
+        Log.i(TAG, "Attaching ButtonShelf entity ${shelf.entity} to video panel $entity")
+        shelf.attachToEntity(entity)
+        Log.i(TAG, "ButtonShelf attached to video panel")
+
+        // Force update children to ensure ButtonShelf is positioned correctly
+        val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+        if (scaleChildrenSystem != null) {
+          scaleChildrenSystem.forceUpdateChildren(entity)
+          Log.i(TAG, "ScaleChildrenSystem force update called for ButtonShelf")
+        }
+
+        // Create and register visibility system if not already done
+        // On reconnect, this will be null (cleaned up during disconnect), so we recreate it
+        if (buttonShelfVisibilitySystem == null) {
+          Log.i(TAG, "Creating new ButtonShelfVisibilitySystem (first connection or reconnection)")
+          buttonShelfVisibilitySystem = com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem(
+              buttonShelf = shelf,
+              videoPanelEntity = entity
+          )
+          systemManager.registerSystem(buttonShelfVisibilitySystem!!)
+          buttonShelfVisibilitySystem?.startTracking()
+          Log.i(TAG, "ButtonShelfVisibilitySystem registered and started tracking - shelf should now be visible")
+        } else {
+          Log.w(TAG, "ButtonShelfVisibilitySystem already exists - unexpected state!")
+          // Still try to start tracking in case it was stopped
+          buttonShelfVisibilitySystem?.startTracking()
+        }
+      } ?: Log.e(TAG, "ButtonShelfEntity is null - cannot attach to video panel (should not happen)")
+      
+      // Create BiasLightingEntity if lighting emission is enabled
+      settings?.let { s ->
+        val useLightingEmission = s.lightingEmissionEnabled || s.reflectionsEnabled
+        if (useLightingEmission && biasLightingEntity == null) {
+          biasLightingEntity = BiasLightingEntity(heroLightingSystem)
+          biasLightingEntity?.attachToPanel(entity)
+          
+          // Register scale listener to update bias lighting when panel scales
+          val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+          scaleChildrenSystem?.addScaleListener(entity) {
+            biasLightingEntity?.updateFromParentScale()
+          }
+          
+          Log.i(TAG, "BiasLightingEntity created and attached to video panel")
+        }
+      }
+      
+      // REMOVED: 3D Desktop Client - Stereoscopic depth slider initialization removed
+      /*
+      // Initialize stereo depth slider if stereoscopic depth is enabled
+      // Note: StereoVideoSystem is not used with VideoSurfacePanelRegistration (no custom shaders)
+      // Depth slider is kept for potential future use with decoder-level depth control
+      settings?.let { s ->
+        if (s.stereoscopicDepthEnabled) {
+          // Create stereo depth slider entity if not already created
+          if (stereoDepthSliderEntity == null) {
+            stereoDepthSliderEntity = com.example.moonlight_spatialsdk.entities.StereoDepthSliderEntity()
+            Log.i(TAG, "StereoDepthSliderEntity created")
+          }
+          
+          // Attach slider to video panel
+          stereoDepthSliderEntity?.let { slider ->
+            slider.attachToEntity(entity)
+            Log.i(TAG, "StereoDepthSliderEntity attached to video panel")
+            
+            // Force update children to ensure slider is positioned correctly
+            val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+            scaleChildrenSystem?.forceUpdateChildren(entity)
+            
+            // Create and register visibility system if not already done
+            if (stereoDepthSliderVisibilitySystem == null) {
+              stereoDepthSliderVisibilitySystem = com.example.moonlight_spatialsdk.systems.stereoDepthSlider.StereoDepthSliderVisibilitySystem(
+                  slider = slider,
+                  videoPanelEntity = entity
+              )
+              systemManager.registerSystem(stereoDepthSliderVisibilitySystem!!)
+              stereoDepthSliderVisibilitySystem?.startTracking()
+              Log.i(TAG, "StereoDepthSliderVisibilitySystem registered and started tracking")
+            }
+          }
+        }
+      }
+      */
+    }
   }
 
   override fun onSpatialShutdown() {
+    // Unregister input device listener
+    inputManager.unregisterInputDeviceListener(inputDeviceListener)
+    Log.i(TAG, "InputDeviceListener unregistered on shutdown")
+
     // Unregister video panel from scaling system before shutdown
     videoPanelEntity?.let { entity ->
       val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
@@ -514,13 +951,13 @@ class ImmersiveActivity : AppSystemActivity() {
         Log.i(TAG, "Video panel unregistered from TouchScalableSystem on shutdown")
       }
     }
-    
+
     // Clean up MRUK RoomMeshManager and SpatialAudioManager
     roomMeshManager?.destroy()
     roomMeshManager = null
     spatialAudioManager?.destroy()
     spatialAudioManager = null
-    
+
     super.onSpatialShutdown()
     disconnect()
   }
@@ -540,30 +977,29 @@ class ImmersiveActivity : AppSystemActivity() {
         permissions[0] == PERMISSION_USE_SCENE) {
       val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
       if (granted) {
-        Log.i(TAG, "USE_SCENE permission granted, enabling spatialize features")
-        enableSpatializeFeatures()
+        Log.i(TAG, "USE_SCENE permission granted, enabling immersive features")
+        enableImmersiveFeatures()
       } else {
-        Log.w(TAG, "USE_SCENE permission denied, spatialize features unavailable")
-        _isSpatializeEnabled.value = false
+        Log.w(TAG, "USE_SCENE permission denied, immersive features unavailable")
+        _isImmersiveModeEnabled.value = false
       }
     }
   }
   
   /**
-   * Toggle spatialized audio and room mesh visualization.
+   * Toggle immersive mode features.
    * 
    * When enabled:
    * - Requests USE_SCENE permission if not granted
    * - Loads MRUK scene from device
-   * - Creates room mesh visualization for walls/floor/ceiling
-   * - Enables spatialized audio for the video panel
+   * - Enables features configured in ImmersiveSettings (spatial audio, room dimming, 
+   *   lighting emission, reflections)
    * 
    * When disabled:
-   * - Hides room mesh visualization
-   * - Disables spatialized audio
+   * - Disables all immersive effects immediately
    */
-  fun toggleSpatialize() {
-    val newEnabled = !_isSpatializeEnabled.value
+  fun toggleImmersiveMode() {
+    val newEnabled = !_isImmersiveModeEnabled.value
     
     if (newEnabled) {
       // Check and request USE_SCENE permission if needed
@@ -572,29 +1008,56 @@ class ImmersiveActivity : AppSystemActivity() {
         requestPermissions(arrayOf(PERMISSION_USE_SCENE), REQUEST_CODE_PERMISSION_USE_SCENE)
         return // Will continue in onRequestPermissionsResult
       }
-      enableSpatializeFeatures()
+      enableImmersiveFeatures()
     } else {
-      disableSpatializeFeatures()
+      disableImmersiveFeatures()
     }
   }
   
   /**
-   * Enables spatialize features after permission is granted.
+   * Enables immersive features after permission is granted.
+   * 
+   * Reads ImmersiveSettings to determine which features to enable:
+   * - Spatial Audio: Audio from panel position
+   * - Room Dimming: Dim passthrough when streaming
+   * - Lighting Emission: Panel emits ambient light
+   * - Reflections: Reflect video on room surfaces
    * 
    * Following the Valinor pattern: load scene data first, then create
    * AnchorProceduralMesh AFTER scene loads successfully.
    */
-  private fun enableSpatializeFeatures() {
-    _isSpatializeEnabled.value = true
+  private fun enableImmersiveFeatures() {
+    _isImmersiveModeEnabled.value = true
     
-    // Initialize RoomMeshManager if needed
+    // Load latest immersive settings
+    immersiveSettings = ImmersiveSettings.load(this)
+    Log.i(TAG, "Enabling immersive features with settings: spatialAudio=${immersiveSettings.spatialAudioEnabled}, " +
+        "roomDimming=${immersiveSettings.roomDimmingEnabled}, " +
+        "lightingEmission=${immersiveSettings.lightingEmissionEnabled}, " +
+        "reflections=${immersiveSettings.reflectionsEnabled}")
+    
+    // Initialize RoomMeshManager if needed (for MRUK features)
     if (roomMeshManager == null) {
       roomMeshManager = RoomMeshManager(mrukFeature)
     }
     
-    // Initialize SpatialAudioManager if needed
-    if (spatialAudioManager == null) {
+    // Initialize SpatialAudioManager if spatial audio is enabled
+    if (immersiveSettings.spatialAudioEnabled && spatialAudioManager == null) {
       spatialAudioManager = SpatialAudioManager(spatialAudioFeature)
+    }
+    
+    // Enable room dimming if configured
+    if (immersiveSettings.roomDimmingEnabled) {
+      lightingPassthroughHandler?.enableRoomDimming()
+      Log.i(TAG, "Room dimming enabled")
+    }
+    
+    // Enable lighting emission if configured
+    if (immersiveSettings.lightingEmissionEnabled) {
+      heroLightingSystem?.lightingAlpha = 0.8f
+      biasLightingEntity?.setVisible(true)
+      biasLightingEntity?.setIntensity(0.8f)
+      Log.i(TAG, "Lighting emission enabled")
     }
     
     // Load MRUK scene - AnchorProceduralMesh is created AFTER scene loads (Valinor pattern)
@@ -602,14 +1065,23 @@ class ImmersiveActivity : AppSystemActivity() {
       onSceneLoaded = {
         Log.i(TAG, "MRUK scene loaded - AnchorProceduralMesh created")
         
-        // Enable spatial audio for video panel if connected
-        enableSpatialAudioIfReady()
+        // Enable spatial audio for video panel if configured
+        if (immersiveSettings.spatialAudioEnabled) {
+          enableSpatialAudioIfReady()
+        }
         
-        Log.i(TAG, "Spatialize features enabled")
+        // Enable wall lighting only for reflections (MRUK surface projections)
+        // BiasLightingEntity handles lighting emission separately
+        if (immersiveSettings.reflectionsEnabled) {
+          wallLightingSystem?.transitionInstant(true)
+          Log.i(TAG, "Wall reflections enabled")
+        }
+        
+        Log.i(TAG, "Immersive features enabled")
       },
       onSceneLoadFailed = { result ->
         Log.e(TAG, "Failed to load MRUK scene: $result")
-        _isSpatializeEnabled.value = false
+        _isImmersiveModeEnabled.value = false
       }
     )
   }
@@ -634,13 +1106,28 @@ class ImmersiveActivity : AppSystemActivity() {
   }
   
   /**
-   * Disables spatialize features.
+   * Disables all immersive features immediately.
    */
-  private fun disableSpatializeFeatures() {
-    _isSpatializeEnabled.value = false
+  private fun disableImmersiveFeatures() {
+    _isImmersiveModeEnabled.value = false
+    
+    // Disable room mesh
     roomMeshManager?.hideRoomMesh()
+    
+    // Disable spatial audio
     spatialAudioManager?.disableSpatialAudio()
-    Log.i(TAG, "Spatialize features disabled")
+    
+    // Disable room dimming
+    lightingPassthroughHandler?.disableRoomDimming()
+    
+    // Disable lighting emission
+    heroLightingSystem?.lightingAlpha = 0f
+    biasLightingEntity?.setVisible(false)
+    
+    // Disable wall reflections
+    wallLightingSystem?.transitionInstant(false)
+    
+    Log.i(TAG, "Immersive features disabled")
   }
   
   /**
@@ -864,20 +1351,14 @@ class ImmersiveActivity : AppSystemActivity() {
       return
     }
 
-    // Hide and destroy connection panel entity when connect is pressed to prevent it from receiving input
-    // Following PremiumMediaSample pattern: destroy entity, not just hide it
-    connectionPanelEntity?.let { entity ->
-      entity.setComponent(Visible(false))
-      entity.destroy()
-      Log.i(TAG, "Connection panel entity hidden and destroyed - starting connection")
-    }
-    connectionPanelEntity = null
-    
-
     // Recreate video panel entity if it doesn't exist (for reconnection after disconnect)
     if (videoPanelEntity == null) {
       Log.i(TAG, "Video panel entity doesn't exist, recreating for reconnection")
       createVideoPanelEntity()
+
+      // Also recreate ButtonShelf after video panel is recreated
+      // Note: createVideoPanelEntity() is async (surfaceConsumer callback), so we need to wait for videoPanelEntity
+      // The ButtonShelf will be created in the surfaceConsumer callback via createButtonShelfAfterVideoPanel()
     } else {
       // Video panel exists but may be hidden from previous disconnect
       // Surface should still be attached if entity exists (surfaceConsumer was called during initial registration)
@@ -936,9 +1417,18 @@ class ImmersiveActivity : AppSystemActivity() {
     }
   }
 
-  private fun disconnect() {
-    Log.i(TAG, "disconnect invoked")
-    
+  /**
+   * Disconnect with option to show reconnection dialog or exit to Home.
+   * @param showReconnection If true, shows reconnection dialog. If false, exits to Home.
+   */
+  private fun disconnect(showReconnection: Boolean = false) {
+    Log.i(TAG, "disconnect invoked (showReconnection=$showReconnection)")
+
+    // Store connection parameters before disconnect for potential reconnection
+    lastConnectionParams = connectionManager.getCurrentConnectionParams()
+    lastConnectionHost = lastConnectionParams?.first
+    Log.i(TAG, "Stored connection params for reconnection: $lastConnectionParams")
+
     // Disable input forwarding immediately on disconnect
     shouldForwardInputs = false
     Log.i(TAG, "Input forwarding disabled - disconnect initiated")
@@ -952,6 +1442,36 @@ class ImmersiveActivity : AppSystemActivity() {
       }
     }
     
+    // Clean up ButtonShelf visibility system
+    buttonShelfVisibilitySystem?.stopTracking()
+    if (buttonShelfVisibilitySystem != null) {
+      systemManager.unregisterSystem<com.example.moonlight_spatialsdk.systems.buttonShelfVisibility.ButtonShelfVisibilitySystem>()
+    }
+    buttonShelfVisibilitySystem = null
+
+    // Clean up ButtonShelf entity (it's a child of video panel, but cleanup explicitly)
+    // NOTE: We detach but do NOT destroy the entity, allowing it to be reattached on reconnect
+    // Panel registrations are managed by registerPanels() and persist across connections
+    buttonShelfEntity?.detachFromEntity()
+    buttonShelfEntity?.setVisible(false)
+    Log.i(TAG, "ButtonShelf entity detached and hidden (panel registration remains active)")
+
+    // REMOVED: 3D Desktop Client - Stereoscopic depth slider cleanup removed
+    /*
+    // Clean up stereo depth slider visibility system
+    stereoDepthSliderVisibilitySystem?.stopTracking()
+    stereoDepthSliderVisibilitySystem = null
+
+    // Clean up stereo depth slider entity
+    stereoDepthSliderEntity?.detachFromEntity()
+    stereoDepthSliderEntity?.destroy()
+    stereoDepthSliderEntity = null
+
+    // Clean up stereo video system (not used with VideoSurfacePanelRegistration, but kept for potential future use)
+    // stereoVideoSystem?.cleanup()
+    // stereoVideoSystem = null
+    */
+
     // Destroy video panel entity completely on disconnect
     // The surface becomes invalid after stream stops, so we need a fresh panel for reconnection
     videoPanelEntity?.let { entity ->
@@ -961,73 +1481,289 @@ class ImmersiveActivity : AppSystemActivity() {
     }
     videoPanelEntity = null
     
+    // Unregister panel registration to allow recreation
+    // This is critical for proper cleanup after crashes or improper disconnects
+    SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
+      try {
+        immersiveActivity.unregisterPanel(R.id.ui_example)
+        Log.i(TAG, "Video panel registration unregistered for cleanup")
+      } catch (e: Exception) {
+        Log.w(TAG, "Failed to unregister panel (may already be unregistered)", e)
+      }
+    }
+    
+    // Clean up decoder renderer - detach surface and cleanup
+    try {
+      val decoder = moonlightPanelRenderer.getDecoder()
+      decoder.stop()
+      decoder.cleanup()
+      // Clear the render target (set to null) - this detaches the surface
+      (decoder as? com.limelight.binding.video.NativeDecoderRenderer)?.setRenderTarget(null)
+      Log.i(TAG, "Decoder renderer cleaned up")
+    } catch (e: Exception) {
+      Log.w(TAG, "Error cleaning up decoder renderer", e)
+    }
+    
     connectionManager.stopStream()
     _connectionStatus.value = "Disconnected"
     _isConnected.value = false
     pendingConnectionParams = null
     isPaired = false
     isSurfaceReady = false
-    
-    // Recreate connection panel
-    createConnectionPanelEntity()
-    Log.i(TAG, "Connection panel recreated")
+
+    // Show reconnection dialog or exit to Home based on parameter
+    if (showReconnection && lastConnectionParams != null) {
+      Log.i(TAG, "Disconnected - showing reconnection dialog")
+      _showReconnectDialog.value = true
+      createReconnectDialogPanelEntity()
+    } else {
+      Log.i(TAG, "Disconnected - returning to 2D panel mode")
+    }
   }
-  
+
+  /**
+   * Reconnect to the last connected host.
+   * Uses stored connection parameters from before disconnect.
+   */
+  private fun reconnect() {
+    val params = lastConnectionParams
+    if (params == null) {
+      Log.w(TAG, "Cannot reconnect: no stored connection parameters")
+      _connectionStatus.value = "Error: No connection to reconnect to"
+      return
+    }
+
+    Log.i(TAG, "Reconnecting to ${params.first}:${params.second} appId=${params.third}")
+    _showReconnectDialog.value = false
+    destroyReconnectDialogPanelEntity()
+
+    // Reconnect using stored parameters
+    val (host, port, appId) = params
+    connectToHost(host, port, appId)
+  }
+
+  /**
+   * Poll for video panel entity creation via Query if SDK callback didn't set it.
+   * Maximum 10 attempts with 50ms delay between attempts.
+   */
+  private suspend fun pollForVideoPanelEntity() {
+    var pollAttempts = 0
+    val maxPollAttempts = 10
+    val pollDelayMs = 50L
+    
+    while (pollAttempts < maxPollAttempts && videoPanelEntity == null) {
+      delay(pollDelayMs)
+      val query = Query.where { has(Panel.id) }
+      val entity = query.eval().firstOrNull { entity ->
+        val panel = entity.tryGetComponent<Panel>()
+        panel != null && panel.panelRegistrationId == R.id.ui_example
+      }
+      if (entity != null) {
+        videoPanelEntity = entity
+        Log.i(TAG, "Found video panel entity via Query polling (attempt ${pollAttempts + 1})")
+        return
+      }
+      pollAttempts++
+    }
+    
+    if (videoPanelEntity == null) {
+      Log.w(TAG, "Video panel entity not found after $maxPollAttempts polling attempts")
+    }
+  }
+
 
   private fun createVideoPanelEntity() {
     Log.i(TAG, "Creating video panel entity with Panel(R.id.ui_example)")
     
+    // Load immersive settings to determine panel type
+    immersiveSettings = ImmersiveSettings.load(this)
+    val useLightingEmission = immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled
+    // REMOVED: 3D Desktop Client - Stereoscopic mode removed
+    // val usePcSideStereoscopic = prefs.stereoscopicModeEnabled
+    // Log.i(TAG, "Panel registration: PC-side stereoscopic mode enabled = $usePcSideStereoscopic")
+    
     // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
     // This matches PremiumMediaSample pattern and ensures panelManager is initialized
     SpatialActivityManager.executeOnVrActivity<AppSystemActivity> { immersiveActivity ->
-      immersiveActivity.registerPanel(
-          VideoSurfacePanelRegistration(
-              R.id.ui_example,
-              surfaceConsumer = { panelEntity, surface ->
-                Log.i(TAG, "Surface attached for panel entity=$panelEntity")
-                
-                SurfaceUtil.paintBlack(surface)
-                
-                // Configure decoder with preferences when panel is created
-                moonlightPanelRenderer.attachSurface(surface)
-                moonlightPanelRenderer.preConfigureDecoder()
-                
-                isSurfaceReady = true
-                
-                // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
-                val params = pendingConnectionParams
-                if (params != null) {
-                  val (host, port, appId) = params
-                  Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
-                  connectToHost(host, port, appId)
-                } else {
-                  Log.d(TAG, "Panel surface ready but no pending connection params")
-                }
-              },
-              settingsCreator = {
-                MediaPanelSettings(
-                    shape = computePanelShape(),
-                    display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
-                    rendering = MediaPanelRenderOptions(
-                        isDRM = false,
-                        stereoMode = StereoMode.None,
-                        zIndex = 0 // Rectilinear panels use zIndex 0 (Equirect180 uses -1)
-                    ),
-                    style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
-                )
-              },
-          )
-      )
+      // REMOVED: 3D Desktop Client - Stereoscopic panel registration removed
+      /*
+      if (usePcSideStereoscopic) {
+        // Use VideoSurfacePanelRegistration for PC-side stereoscopic mode (SBS stream from desktop)
+        Log.i(TAG, "Using VideoSurfacePanelRegistration for PC-side stereoscopic mode with StereoMode.LeftRight")
+        immersiveActivity.registerPanel(
+            VideoSurfacePanelRegistration(
+                R.id.ui_example,
+                surfaceConsumer = { panelEntity, surface ->
+                  val expectedWidth = prefs.width * 2
+                  val expectedHeight = prefs.height
+                  Log.i(TAG, "PC-side stereoscopic surface attached for panel entity=$panelEntity")
+                  Log.i(TAG, "Expected PixelDisplayOptions: width=$expectedWidth, height=$expectedHeight (for ${prefs.width}x${prefs.height} stream)")
+                  Log.i(TAG, "PC-side mode: StereoMode.LeftRight configured - SDK should split SBS texture: left half [0, $expectedWidth/2] to left eye, right half [$expectedWidth/2, $expectedWidth] to right eye")
+                  
+                  SurfaceUtil.paintBlack(surface)
+                  
+                  // Configure decoder - no device-side duplication (stream is already SBS)
+                  moonlightPanelRenderer.attachSurface(surface, useStereoscopicDuplication = false)
+                  moonlightPanelRenderer.preConfigureDecoder()
+                  
+                  isSurfaceReady = true
+                  
+                  // Verify entity matches (SDK should provide the entity we created)
+                  if (videoPanelEntity != panelEntity) {
+                    Log.w(TAG, "Stereoscopic: SDK provided different entity ($panelEntity) than created ($videoPanelEntity), using SDK entity")
+                    videoPanelEntity = panelEntity
+                  }
+                  
+                  // Calculate panel size - matches shape parameter in settingsCreator
+                  val panelSize = calculatePanelSize(force16x9 = false)
+                  
+                  // Ensure components are added to entity (may already exist from manual creation)
+                  // Note: addVideoPanelComponents sets Visible(false), we'll set visibility after
+                  addVideoPanelComponents(panelEntity, panelSize, useLightingEmission = false)
+                  
+                  // Register with scaling system (if not already registered)
+                  val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+                  if (touchScalableSystem != null) {
+                    touchScalableSystem.registerEntity(panelEntity)
+                    Log.i(TAG, "Stereoscopic video panel entity registered with TouchScalableSystem")
+                  }
+                  
+                  // Attach child entities now that panel is ready
+                  attachChildEntitiesToVideoPanel()
+                  
+                  // Make entity visible when surface is ready
+                  // Show panel immediately (will display black screen while connecting)
+                  // Connection status callback will update visibility when stream is ready
+                  panelEntity.setComponent(Visible(true))
+                  Log.i(TAG, "Stereoscopic video panel made visible (surface ready)")
+                  
+                  // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
+                  val params = pendingConnectionParams
+                  if (params != null) {
+                    val (host, port, appId) = params
+                    Log.i(TAG, "Stereoscopic panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
+                    connectToHost(host, port, appId)
+                  } else {
+                    Log.d(TAG, "Stereoscopic panel surface ready but no pending connection params")
+                  }
+                },
+                settingsCreator = {
+                  val panelSize = calculatePanelSize(force16x9 = false)
+                  
+                  val displayWidth = prefs.width * 2
+                  val displayHeight = prefs.height
+                  
+                  val settings = MediaPanelSettings(
+                      shape = QuadShapeOptions(width = panelSize.x, height = panelSize.y),
+                      display = PixelDisplayOptions(
+                          width = displayWidth,
+                          height = displayHeight
+                      ),
+                      rendering = MediaPanelRenderOptions(
+                          stereoMode = StereoMode.LeftRight
+                      ),
+                      style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
+                  )
+                  
+                  Log.i(TAG, "Panel settings created: stereoMode=${settings.rendering.stereoMode}, " +
+                           "display=${displayWidth}x${displayHeight}, " +
+                           "shape=${panelSize.x}x${panelSize.y}")
+                  
+                  settings
+                },
+            )
+        )
+      */
+      // REMOVED: 3D Desktop Client - Stereoscopic mode removed, now only check for lighting emission
+      if (useLightingEmission) {
+        // Use ReadableVideoSurfacePanelRegistration for lighting emission (allows texture sampling)
+        Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for lighting emission")
+        immersiveActivity.registerPanel(
+            ReadableVideoSurfacePanelRegistration(
+                R.id.ui_example,
+                surfaceConsumer = { panelEntity, surface ->
+                  Log.i(TAG, "Readable surface attached for panel entity=$panelEntity")
+                  
+                  SurfaceUtil.paintBlack(surface)
+                  
+                  // Configure decoder with preferences when panel is created
+                  moonlightPanelRenderer.attachSurface(surface)
+                  moonlightPanelRenderer.preConfigureDecoder()
+                  
+                  isSurfaceReady = true
+                  
+                  // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
+                  val params = pendingConnectionParams
+                  if (params != null) {
+                    val (host, port, appId) = params
+                    Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
+                    connectToHost(host, port, appId)
+                  } else {
+                    Log.d(TAG, "Panel surface ready but no pending connection params")
+                  }
+                },
+                settingsCreator = {
+                  val panelSize = calculatePanelSize(force16x9 = false)
+                  ReadableMediaPanelSettings(
+                      shape = QuadShapeOptions(width = panelSize.x, height = panelSize.y),
+                      display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
+                      rendering = ReadableMediaPanelRenderOptions(
+                          mips = 4, // Mip levels for shader sampling (used for blur in lighting)
+                          stereoMode = StereoMode.None,
+                      ),
+                      style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
+                  )
+                },
+            )
+        )
+      } else {
+        // Use standard VideoSurfacePanelRegistration for better performance
+        Log.i(TAG, "Using VideoSurfacePanelRegistration (standard mode)")
+        immersiveActivity.registerPanel(
+            VideoSurfacePanelRegistration(
+                R.id.ui_example,
+                surfaceConsumer = { panelEntity, surface ->
+                  Log.i(TAG, "Surface attached for panel entity=$panelEntity")
+                  
+                  SurfaceUtil.paintBlack(surface)
+                  
+                  // Configure decoder with preferences when panel is created
+                  moonlightPanelRenderer.attachSurface(surface)
+                  moonlightPanelRenderer.preConfigureDecoder()
+                  
+                  isSurfaceReady = true
+                  
+                  // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
+                  val params = pendingConnectionParams
+                  if (params != null) {
+                    val (host, port, appId) = params
+                    Log.i(TAG, "Panel surface ready, decoder configured, initiating connection host=$host port=$port appId=$appId")
+                    connectToHost(host, port, appId)
+                  } else {
+                    Log.d(TAG, "Panel surface ready but no pending connection params")
+                  }
+                },
+                settingsCreator = {
+                  val panelSize = calculatePanelSize(force16x9 = false)
+                  MediaPanelSettings(
+                      shape = QuadShapeOptions(width = panelSize.x, height = panelSize.y),
+                      display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
+                      rendering = MediaPanelRenderOptions(
+                          isDRM = false,
+                          stereoMode = StereoMode.None,
+                          zIndex = 0 // Rectilinear panels use zIndex 0 (Equirect180 uses -1)
+                      ),
+                      style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
+                  )
+                },
+            )
+        )
+      }
     }
     
     // Create entity after panel registration (panel must be registered before entity creation)
-    val aspect =
-        if (prefs.height != 0) {
-          prefs.width.toFloat() / prefs.height.toFloat()
-        } else {
-          16f / 9f
-        }
-    val panelSize = Vector2(aspect * basePanelHeightMeters, basePanelHeightMeters)
+    // Calculate panel size - will be updated in surfaceConsumer to match shape parameter
+    val panelSize = calculatePanelSize(force16x9 = false)
     
     val managerEntity = panelManager?.panelManagerEntity
     val parentComponent = if (managerEntity != null) {
@@ -1036,30 +1772,51 @@ class ImmersiveActivity : AppSystemActivity() {
       TransformParent(Entity.nullEntity())
     }
     
-    videoPanelEntity = Entity.create(
-        listOf(
-            Panel(R.id.ui_example),
-            Transform(Pose(Vector3(0f, 0f, 0f))),
-            PanelDimensions(panelSize),
-            Scale(Vector3(1f)), // Initial scale of 1.0 - can be adjusted after connection
-            Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
-            Visible(false), // Hidden initially, shown when stream is ready
-            Scalable(), // Enable corner scaling
-            ScaledParent(), // Mark as scalable parent
-            parentComponent
-        )
-    )
+    // Create entity manually for all modes (matches PremiumMediaSample pattern)
+    // The entity must exist before surfaceConsumer callback fires
+    // Build component list for all modes
+    val baseComponents = mutableListOf<com.meta.spatial.core.ComponentBase>()
     
-    // Register video panel with scaling system
-    val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
-    if (touchScalableSystem != null) {
-      touchScalableSystem.registerEntity(videoPanelEntity!!)
-      Log.i(TAG, "Video panel entity created and registered with TouchScalableSystem")
-    } else {
-      Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
+    // Use Panel component for all modes
+    baseComponents.add(Panel(R.id.ui_example))
+    
+    // Keep hidden initially until stream is ready
+    baseComponents.addAll(listOf(
+        Transform(Pose(Vector3(0f, 0f, 0f))),
+        PanelDimensions(panelSize),
+        Scale(Vector3(1f)), // Initial scale of 1.0 - can be adjusted after connection
+        Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
+        Visible(false), // Hidden initially, shown when stream is ready
+        Scalable(), // Enable corner scaling
+        ScaledParent(), // Mark as scalable parent
+        parentComponent
+    ))
+    
+    // Add HeroLighting component if lighting emission is enabled
+    if (useLightingEmission) {
+        baseComponents.add(HeroLighting(isEnabled = true))
+        Log.i(TAG, "HeroLighting component added to video panel")
     }
     
-    Log.i(TAG, "Video panel entity created - parented to PanelManager, hidden initially")
+    videoPanelEntity = Entity.create(baseComponents)
+    
+    // Register video panel with scaling system for all modes
+    // REMOVED: 3D Desktop Client - Stereoscopic mode handling removed
+    if (videoPanelEntity != null) {
+        val touchScalableSystem = systemManager.findSystem<TouchScalableSystem>()
+        if (touchScalableSystem != null) {
+          touchScalableSystem.registerEntity(videoPanelEntity!!)
+          Log.i(TAG, "Video panel entity created and registered with TouchScalableSystem")
+        } else {
+          Log.w(TAG, "TouchScalableSystem not found - scaling will not work")
+        }
+        
+        // Set initial visibility - show panel immediately (will display black screen while connecting)
+        // Connection status callback will update visibility when stream is ready
+        // REMOVED: 3D Desktop Client - Stereoscopic mode visibility handling removed
+        videoPanelEntity?.setComponent(Visible(true))
+        Log.i(TAG, "Video panel entity made visible on launch")
+    }
     
     // Attach ButtonShelf to video panel if it was created before video panel
     buttonShelfEntity?.let { shelf ->
@@ -1084,37 +1841,22 @@ class ImmersiveActivity : AppSystemActivity() {
         Log.i(TAG, "ButtonShelfVisibilitySystem registered and started tracking")
       }
     }
+    
+    // Create BiasLightingEntity if lighting emission is enabled
+    if (useLightingEmission && biasLightingEntity == null) {
+      biasLightingEntity = BiasLightingEntity(heroLightingSystem)
+      biasLightingEntity?.attachToPanel(videoPanelEntity!!)
+      
+      // Register scale listener to update bias lighting when panel scales
+      val scaleChildrenSystem = systemManager.findSystem<ScaleChildrenSystem>()
+      scaleChildrenSystem?.addScaleListener(videoPanelEntity!!) {
+        biasLightingEntity?.updateFromParentScale()
+      }
+      
+      Log.i(TAG, "BiasLightingEntity created and attached to video panel")
+    }
   }
 
-  private fun createConnectionPanelEntity() {
-    Log.i(TAG, "Creating connection panel entity with Panel(R.id.connection_panel)")
-    
-    // Connection panel size - match the registration config to UISetSample "UI Components" panel size
-    // Registration: height = 0.75f * basePanelHeightMeters, width = 0.6f * basePanelHeightMeters
-    val connectionPanelHeight = basePanelHeightMeters * 0.75f  // 0.525m
-    val connectionPanelWidth = basePanelHeightMeters * 0.6f      // 0.42m
-    val panelSize = Vector2(connectionPanelWidth, connectionPanelHeight)
-    
-    val managerEntity = panelManager?.panelManagerEntity
-    val parentComponent = if (managerEntity != null) {
-      TransformParent(managerEntity)
-    } else {
-      TransformParent(Entity.nullEntity()) // Will be updated when PanelManager is ready
-    }
-    
-    connectionPanelEntity = Entity.create(
-        listOf(
-            Panel(R.id.connection_panel),
-            Transform(Pose(Vector3(0f, 0f, 0f))),
-            PanelDimensions(panelSize),
-            Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
-            Visible(true), // Visible initially, hidden when connect is pressed
-            parentComponent
-        )
-    )
-    
-    Log.i(TAG, "Connection panel entity created - size: ${panelSize.x}m x ${panelSize.y}m, parented to PanelManager")
-  }
 
   private fun createButtonShelfEntity() {
     Log.i(TAG, "Creating ButtonShelf entity")
@@ -1146,40 +1888,6 @@ class ImmersiveActivity : AppSystemActivity() {
     }
   }
 
-  /**
-   * Toggle the OptionsPanel (connection panel) visibility when Settings button is clicked.
-   */
-  fun showOptionsPanel() {
-    // Check if connection panel entity exists (either in our reference or in the scene)
-    val existingEntity = connectionPanelEntity ?: run {
-      // Query for existing connection panel entity in case our reference is null but entity still exists
-      val query = Query.where { has(Panel.id) }
-      query.eval().firstOrNull { entity ->
-        val panel = entity.tryGetComponent<Panel>()
-        panel != null && panel.panelRegistrationId == R.id.connection_panel
-      }
-    }
-    
-    if (existingEntity == null) {
-      Log.i(TAG, "Creating connection panel entity to show OptionsPanel")
-      createConnectionPanelEntity()
-    } else {
-      // Update our reference if we found an existing entity
-      if (connectionPanelEntity == null) {
-        connectionPanelEntity = existingEntity
-        Log.i(TAG, "Found existing connection panel entity, updating reference")
-      }
-      
-      val isVisible = existingEntity.getComponent<Visible>().isVisible
-      if (isVisible) {
-        Log.i(TAG, "Connection panel is visible, hiding it")
-        existingEntity.setComponent(Visible(false))
-      } else {
-        Log.i(TAG, "Connection panel is hidden, making it visible")
-        existingEntity.setComponent(Visible(true))
-      }
-    }
-  }
 
   /**
    * Create disconnect dialog panel entity.
@@ -1272,6 +1980,62 @@ class ImmersiveActivity : AppSystemActivity() {
       }
       Log.i(TAG, "Disconnect dialog toggled OFF - StateFlow set to false, entity destroyed")
     }
+  }
+
+  /**
+   * Create reconnect dialog panel entity.
+   * Called after disconnect to show reconnection options.
+   */
+  private fun createReconnectDialogPanelEntity() {
+    // Don't create if already exists
+    if (reconnectDialogPanelEntity != null) {
+      Log.w(TAG, "Reconnect dialog entity already exists, skipping creation")
+      return
+    }
+
+    Log.i(TAG, "Creating reconnect dialog panel entity with Panel(R.id.reconnect_dialog_panel)")
+
+    // Reconnect dialog panel size - slightly larger than disconnect dialog
+    val dialogPanelHeight = basePanelHeightMeters * 0.5f  // 0.35m
+    val dialogPanelWidth = basePanelHeightMeters * 0.7f   // 0.49m
+    val panelSize = Vector2(dialogPanelWidth, dialogPanelHeight)
+
+    val managerEntity = panelManager?.panelManagerEntity
+    if (managerEntity == null) {
+      Log.e(TAG, "Cannot create reconnect dialog - PanelManager entity is null")
+      return
+    }
+
+    val parentComponent = TransformParent(managerEntity)
+
+    reconnectDialogPanelEntity = Entity.create(
+        listOf(
+            Panel(R.id.reconnect_dialog_panel),
+            Transform(Pose(Vector3(0f, 0f, -0.5f))), // Position in front of user
+            PanelDimensions(panelSize),
+            Grabbable(enabled = true, type = GrabbableType.PIVOT_Y),
+            Visible(true), // Visible when created
+            parentComponent
+        )
+    )
+
+    Log.i(TAG, "Reconnect dialog panel entity created - size: ${panelSize.x}m x ${panelSize.y}m, parented to PanelManager")
+  }
+
+  /**
+   * Destroy reconnect dialog panel entity.
+   */
+  private fun destroyReconnectDialogPanelEntity() {
+    val entity = reconnectDialogPanelEntity
+    if (entity == null) {
+      Log.w(TAG, "Reconnect dialog entity is null, cannot destroy")
+      return
+    }
+
+    Log.i(TAG, "Destroying reconnect dialog panel entity")
+    entity.destroy()
+    reconnectDialogPanelEntity = null
+    Log.i(TAG, "Reconnect dialog panel entity destroyed")
   }
 
   /**
@@ -1431,4 +2195,160 @@ class ImmersiveActivity : AppSystemActivity() {
     return super.dispatchGenericMotionEvent(event)
   }
 
+}
+
+/**
+ * Disconnect dialog composable for stream options.
+ * Provides options to reset panel size or end the stream.
+ */
+@Composable
+private fun DisconnectDialog(
+    showDialog: StateFlow<Boolean>,
+    onResetPanelSize: () -> Unit,
+    onEndStream: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    val show by showDialog.collectAsState()
+    
+    if (show) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.3f)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .clip(SpatialTheme.shapes.large)
+                    .background(brush = LocalColorScheme.current.panel)
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Stream Options",
+                    style = LocalTypography.current.headline2Strong.copy(
+                        color = SpatialTheme.colorScheme.primaryAlphaBackground
+                    )
+                )
+                
+                // Vertically stacked buttons
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    SecondaryButton(
+                        label = "Reset Panel Size",
+                        expanded = true,
+                        onClick = {
+                            onResetPanelSize()
+                        }
+                    )
+                    Spacer(Modifier.size(28.dp))
+                    DestructiveButton(
+                        label = "End Stream",
+                        expanded = true,
+                        onClick = {
+                            onEndStream()
+                        }
+                    )
+                }
+                
+                Spacer(Modifier.height(8.dp))
+                
+                SecondaryButton(
+                    label = "Cancel",
+                    expanded = true,
+                    onClick = {
+                        onCancel()
+                    }
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Reconnect dialog composable for in-session reconnection.
+ * Shows after user disconnects, offering to reconnect or return to Home.
+ */
+@Composable
+private fun ReconnectDialog(
+    showDialog: StateFlow<Boolean>,
+    lastHost: String?,
+    onReconnect: () -> Unit,
+    onReturnToHome: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    val show by showDialog.collectAsState()
+
+    if (show) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.3f)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .clip(SpatialTheme.shapes.large)
+                    .background(brush = LocalColorScheme.current.panel)
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Disconnected",
+                    style = LocalTypography.current.headline2Strong.copy(
+                        color = SpatialTheme.colorScheme.primaryAlphaBackground
+                    )
+                )
+
+                if (!lastHost.isNullOrBlank()) {
+                    Text(
+                        text = "Connection to $lastHost ended",
+                        style = LocalTypography.current.body1.copy(
+                            color = SpatialTheme.colorScheme.secondaryAlphaBackground
+                        )
+                    )
+                }
+
+                // Vertically stacked buttons
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    com.meta.spatial.uiset.button.PrimaryButton(
+                        label = "Reconnect",
+                        expanded = true,
+                        onClick = {
+                            onReconnect()
+                        }
+                    )
+                    Spacer(Modifier.size(28.dp))
+                    SecondaryButton(
+                        label = "Return to Home",
+                        expanded = true,
+                        onClick = {
+                            onReturnToHome()
+                        }
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                SecondaryButton(
+                    label = "Cancel",
+                    expanded = true,
+                    onClick = {
+                        onCancel()
+                    }
+                )
+            }
+        }
+    }
 }
