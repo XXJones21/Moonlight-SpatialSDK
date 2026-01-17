@@ -83,90 +83,196 @@ Users cannot use Bluetooth controllers that are paired after the streaming sessi
 
 ---
 
-## PLANNED: Panel Edge Lighting Emission - Individual Edge Control
+## IN PROGRESS: Panel Edge Lighting Emission - Individual Edge Control
 
 ### Problem Identified During Testing
 
-The current bias lighting (ambilight) implementation uses a single quad mesh with a 9-slice shader that correctly samples individual edges without mirroring. However, attempts to modify the system to use separate light entities for each edge (4 individual entities) or to customize individual edge behaviors result in mirroring artifacts where all edges display the same lighting pattern instead of unique edge-specific lighting.
+The bias lighting (ambilight) implementation exhibits **mirroring artifacts** where opposite edges display identical content instead of unique edge-specific lighting:
+- Top and bottom edges show the same content (e.g., Windows taskbar appears on both)
+- Left and right edges show the same content
+- Moving cursor on top-left creates glow on bottom-left that moves in the opposite direction
+
+### Implementation Architecture
+
+The system uses a single quad mesh with a 9-slice shader:
+
+1. **Video Panel**: `ReadableVideoSurfacePanelRegistration` creates the media panel with `mips = 4` for texture sampling
+2. **Texture Distribution**: `HeroLightingSystem` extracts the video texture and provides it to registered materials
+3. **Bias Lighting Entity**: `BiasLightingEntity` creates a single quad mesh scaled to `panelSize + GLOW_PADDING * 2`
+4. **Shader**: `bias_lighting_9slice.frag` determines which edge to sample based on UV coordinates
+
+**Key Files**:
+
+- [bias_lighting_9slice.frag](../Moonlight-SpatialSDK/app/src/shaders/bias_lighting_9slice.frag) - Fragment shader
+- [bias_lighting_9slice.vert](../Moonlight-SpatialSDK/app/src/shaders/bias_lighting_9slice.vert) - Vertex shader
+- [BiasLightingEntity.kt](../Moonlight-SpatialSDK/app/src/main/java/com/example/moonlight_spatialsdk/entities/BiasLightingEntity.kt) - Entity management
+- [HeroLightingSystem.kt](../Moonlight-SpatialSDK/app/src/main/java/com/example/moonlight_spatialsdk/systems/heroLighting/HeroLightingSystem.kt) - Texture distribution
+- [customBindingFrag.glsl](../Moonlight-SpatialSDK/app/src/shaders/customBindingFrag.glsl) - MaterialUniform block definition
+
+**Legacy Files** (not currently used):
+
+- [bias_lighting.frag](../Moonlight-SpatialSDK/app/src/shaders/bias_lighting.frag) - Old 4-mesh approach shader
+- [bias_lighting.vert](../Moonlight-SpatialSDK/app/src/shaders/bias_lighting.vert) - Old 4-mesh vertex shader
+
+### Investigation & Attempts Summary
+
+#### Attempt 1: Add Per-Edge Control Uniforms
+
+**Goal**: Extend shader with `edgeControl` and `edgeFalloff` uniforms for per-edge intensity control.
+
+**Changes Made**:
+1. Added `edgeControl` and `edgeFalloff` to `MaterialUniform` block in `customBindingFrag.glsl`
+2. Modified shader to use `g_MaterialUniform.edgeControl` and `g_MaterialUniform.edgeFalloff`
+3. Added API methods to `BiasLightingEntity.kt`
+
+**Result**: Vulkan shader compilation error - "non-opaque uniforms outside a block"
+
+**Fix Applied**: Moved uniforms into existing `MaterialUniform` block (Vulkan requires all non-opaque uniforms in blocks)
+
+#### Attempt 2: Fix Upside-Down Left/Right Edges
+
+**Problem**: Left and right edges displayed content upside-down.
+
+**Original Code**:
+```glsl
+videoUV = vec2(0.0, 1.0 - edgePosY);  // Left edge
+videoUV = vec2(1.0, 1.0 - edgePosY);  // Right edge
+```
+
+**Fix Applied**: Removed `1.0 -` flip:
+```glsl
+videoUV = vec2(0.0, edgePosY);  // Left edge
+videoUV = vec2(1.0, edgePosY);  // Right edge
+```
+
+**Result**: Fixed upside-down issue, but duplication persists.
+
+#### Attempt 3: Use Raw UV Coordinates
+
+**Hypothesis**: Panel-relative coordinates (`videoPosY`) cause duplication because left and right edges at the same quad height get the same Y value.
+
+**Change Made**: Use raw `uv.y` instead of calculated `videoPosY`:
+```glsl
+videoUV = vec2(0.0, uv.y);  // Left edge
+videoUV = vec2(1.0, uv.y);  // Right edge
+```
+
+**Result**: **Scale issue** - cursor position no longer matched glow position (1:1 correspondence broken). The glow appeared much higher than the cursor because raw UV covers the entire quad including padding.
+
+#### Attempt 4: Restore Panel-Relative Mapping with Y-Flip
+
+**Hypothesis**: Video textures are Y-flipped in GLSL, confirmed by PremiumMediaSample reference implementation.
+
+**Reference from PremiumMediaSample** (`heroLighting.glsl` line 198):
+```glsl
+surfaceUV.y = clamp01(1 - surfaceUV.y);  // Y-FLIP
+```
+
+**Changes Made**:
+
+1. Add `1.0 -` to left/right edge Y coordinates
+2. Swap top/bottom edge video rows (top samples y=0, bottom samples y=1)
+
+```glsl
+if (uv.x < panelLeft) {
+    float videoY = 1.0 - clamp((uv.y - panelBottom) / (panelTop - panelBottom), 0.0, 1.0);
+    videoUV = vec2(0.0, videoY);
+} else if (uv.x > panelRight) {
+    float videoY = 1.0 - clamp((uv.y - panelBottom) / (panelTop - panelBottom), 0.0, 1.0);
+    videoUV = vec2(1.0, videoY);
+} else if (uv.y < panelBottom) {
+    float videoX = clamp((uv.x - panelLeft) / (panelRight - panelLeft), 0.0, 1.0);
+    videoUV = vec2(videoX, 1.0);  // Swapped
+} else if (uv.y > panelTop) {
+    float videoX = clamp((uv.x - panelLeft) / (panelRight - panelLeft), 0.0, 1.0);
+    videoUV = vec2(videoX, 0.0);  // Swapped
+}
+```
+
+**Result**: No change - mirroring still present.
+
+#### Attempt 5: Correct Top/Bottom Swap Back
+
+**Hypothesis**: The top/bottom swap was wrong based on the old `bias_lighting.frag` which had top edge sampling y=1.0 and bottom edge sampling y=0.0.
+
+**Changes Made**: Reverted top/bottom to match old shader:
+```glsl
+} else if (uv.y < panelBottom) {
+    videoUV = vec2(videoX, 0.0);  // Bottom samples y=0
+} else if (uv.y > panelTop) {
+    videoUV = vec2(videoX, 1.0);  // Top samples y=1
+}
+```
+
+**Result**: Awaiting test - current state of shader.
 
 ### Root Cause Analysis
 
-The lighting emission system is implemented using a shader-based approach with a single mesh entity:
+The mirroring issue remains unresolved. Key observations:
 
-**Current Implementation Architecture**:
+1. **Duplication Pattern**: Opposite edges show identical content
+   - Top/bottom both show taskbar
+   - Left/right show same content
 
-1. **Single Mesh Entity**: BiasLightingEntity creates one quad mesh with `bias_lighting_9slice` shader
-2. **Shader-Based Edge Detection**: Fragment shader determines which panel edge to sample based on UV coordinates
-3. **Explicit Region Checks**: Shader uses conditional logic to map each glow region to its corresponding video edge
+2. **Movement Inversion**: Cursor movement on top-left creates glow on bottom-left moving in opposite direction
+
+3. **Working Reference**: The old 4-mesh `bias_lighting.frag` shader worked correctly with explicit `edgeType` parameter
+
+4. **Texture Source**: `HeroLightingSystem` provides the same video texture to all materials - no manipulation or duplication occurs there
+
+### Hypotheses to Investigate
+
+1. **UV Coordinate System**: The 9-slice quad mesh may have a different UV mapping than expected
+   - Need to verify UV coordinates at each edge region
+   - Consider adding debug output to visualize UV values
+
+2. **Texture Coordinate Origin**: Video textures may have different coordinate systems than expected
+   - OpenGL/Vulkan Y-axis conventions
+   - Texture wrapping or clamping behavior
+
+3. **Quad Mesh Geometry**: The `SceneMesh.quad()` function may generate UV coordinates that cause mirroring
+   - Need to inspect how Meta Spatial SDK generates quad UVs
+
+4. **Panel-Relative Calculation Flaw**: The calculation `(uv.y - panelBottom) / (panelTop - panelBottom)` may produce identical values for opposite edges in ways we haven't identified
+
+### Next Steps
+
+1. **Debug Visualization**: Add shader debug mode to output UV coordinates as colors to visualize the mapping
+2. **Inspect Quad UVs**: Examine how `SceneMesh.quad()` generates UV coordinates
+3. **Compare with Working Implementation**: Study how PremiumMediaSample's `heroLighting.glsl` samples textures for wall reflections
+4. **Consider Alternative Approach**: May need to return to 4-entity approach with explicit edge type parameter if 9-slice cannot be fixed
+
+### Current Shader State
+
+The shader currently has per-edge control uniforms implemented but the core sampling logic still produces mirroring:
 
 ```glsl
-// Current 9-slice shader approach (bias_lighting_9slice.frag)
+// Current bias_lighting_9slice.frag edge detection (simplified)
 if (uv.x < panelLeft) {
-    // LEFT EDGE: sample from left edge (x=0) of video
-    videoUV = vec2(0.0, 1.0 - edgePosY);
+    // LEFT EDGE
+    float videoY = 1.0 - clamp((uv.y - panelBottom) / (panelTop - panelBottom), 0.0, 1.0);
+    videoUV = vec2(0.0, videoY);
+    edgeIntensity = g_MaterialUniform.edgeControl.z;
 } else if (uv.x > panelRight) {
-    // RIGHT EDGE: sample from right edge (x=1) of video
-    videoUV = vec2(1.0, 1.0 - edgePosY);
+    // RIGHT EDGE
+    float videoY = 1.0 - clamp((uv.y - panelBottom) / (panelTop - panelBottom), 0.0, 1.0);
+    videoUV = vec2(1.0, videoY);
+    edgeIntensity = g_MaterialUniform.edgeControl.w;
 } else if (uv.y < panelBottom) {
-    // BOTTOM EDGE: sample from bottom edge (y=0) of video
-    videoUV = vec2(edgePosX, 0.0);
+    // BOTTOM EDGE
+    float videoX = clamp((uv.x - panelLeft) / (panelRight - panelLeft), 0.0, 1.0);
+    videoUV = vec2(videoX, 0.0);
+    edgeIntensity = g_MaterialUniform.edgeControl.y;
 } else if (uv.y > panelTop) {
-    // TOP EDGE: sample from top edge (y=1) of video
-    videoUV = vec2(edgePosX, 1.0);
+    // TOP EDGE
+    float videoX = clamp((uv.x - panelLeft) / (panelRight - panelLeft), 0.0, 1.0);
+    videoUV = vec2(videoX, 1.0);
+    edgeIntensity = g_MaterialUniform.edgeControl.x;
 }
 ```
 
-**Why Separate Entities Cause Mirroring**:
+### Use Cases Blocked by This Issue
 
-When attempting to create 4 separate BiasLightingEntity instances (one per edge), the mirroring occurs because:
-
-1. **Material Instance Sharing**: All entities register with HeroLightingSystem and receive the same video texture
-2. **UV Space Ambiguity**: Each separate mesh has its own UV space (0-1 on both axes)
-3. **Lack of Edge Context**: Individual meshes don't know which edge they represent without additional parameters
-4. **Shader Parameter Limitation**: The `stereoParams` uniform would need to communicate edge type to each instance
-5. **Texture Sampling Confusion**: Without explicit edge identification, the shader samples the same region for all entities
-
-**Previous 4-Mesh Approach (Legacy)**:
-
-An older implementation (`bias_lighting.frag`) attempted to use 4 separate entities with an `edgeType` parameter:
-
-```glsl
-// Old 4-mesh shader (bias_lighting.frag)
-// stereoParams.y = edgeType (0=top, 1=bottom, 2=left, 3=right)
-
-if(edgeType < 0.5){
-    videoUV = vec2(biasOut.texCoord.x, 1.0);  // Top edge
-} else if(edgeType < 1.5){
-    videoUV = vec2(biasOut.texCoord.x, 0.0);  // Bottom edge
-} else if(edgeType < 2.5){
-    videoUV = vec2(0.0, 1.0 - biasOut.texCoord.x);  // Left edge
-} else {
-    videoUV = vec2(1.0, 1.0 - biasOut.texCoord.x);  // Right edge
-}
-```
-
-This approach was abandoned because:
-- Required creating and managing 4 separate entities
-- Required 4 separate material instances with different `edgeType` parameters
-- Entity positioning and scaling became complex
-- Performance overhead of 4 draw calls vs 1
-- Material synchronization issues when updating intensity or video texture
-
-### Current State
-
-**What Works**:
-- Single mesh entity with 9-slice shader correctly displays unique lighting per edge
-- No mirroring artifacts with current implementation
-- Efficient single draw call
-- Automatic edge detection based on UV coordinates
-
-**What Doesn't Work**:
-- Cannot independently control intensity per edge (all edges share one intensity value)
-- Cannot disable individual edges (all edges enabled/disabled together)
-- Cannot apply different blur levels or falloff curves per edge
-- Cannot animate individual edges independently
-
-**Use Cases Blocked**:
 - Creating asymmetric lighting effects (e.g., only top/bottom glow for ultrawide monitors)
 - Directional ambilight (emphasize certain edges based on room layout)
 - Dynamic edge effects (e.g., pulse individual edges based on content)

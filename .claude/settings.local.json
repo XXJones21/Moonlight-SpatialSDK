@@ -3,7 +3,8 @@
     "allow": [
       "Bash(./gradlew clean:*)",
       "Bash(./gradlew :app:compileDebugKotlin:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(ls:*)"
     ]
   }
 }

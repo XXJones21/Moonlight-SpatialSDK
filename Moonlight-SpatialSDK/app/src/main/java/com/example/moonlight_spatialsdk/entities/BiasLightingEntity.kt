@@ -30,10 +30,12 @@ import com.meta.spatial.toolkit.Visible
 
 /**
  * Creates a bias lighting effect around a video panel.
- * 
+ *
  * Uses a single quad mesh behind the panel with a shader that computes
  * a ring shape mathematically. The center (panel area) is transparent,
  * and the outer ring samples video edge colors with distance-based falloff.
+ *
+ * Supports per-edge control of intensity and falloff for advanced lighting effects.
  */
 class BiasLightingEntity(
     private val heroLightingSystem: HeroLightingSystem?
@@ -41,31 +43,47 @@ class BiasLightingEntity(
     companion object {
         private const val TAG = "BiasLightingEntity"
         private const val MESH_NAME = "mesh://BiasLighting_9slice"
-        
+
         // DEBUG: Set to true to show falloff shape instead of video colors
         private const val DEBUG_MODE = false
-        
+
         // How much the glow extends beyond panel edge (in meters)
         // ~8 inches = 0.2m for the falloff ring
         private const val GLOW_PADDING = 0.2f
-        
+
         // Z offset behind the panel
         private const val Z_OFFSET = 0.01f
-        
+
         // Video sampling mip level (higher = more blur)
         private const val DEFAULT_MIP_LEVEL = 4.0f
+    }
+
+    /**
+     * Edge enumeration for per-edge control API.
+     */
+    enum class Edge {
+        TOP,
+        BOTTOM,
+        LEFT,
+        RIGHT
     }
     
     private var parentPanel: Entity? = null
     private var panelSize: Vector2 = Vector2(1f, 1f)
-    
+
     private var glowEntity: Entity? = null
     private var glowMaterial: SceneMaterial? = null
-    
+
     private var _isVisible = false
     val isVisible: Boolean get() = _isVisible
-    
+
     private var _intensity = 0.8f
+
+    // Per-edge control parameters
+    // edgeControl: x=top intensity, y=bottom intensity, z=left intensity, w=right intensity
+    private var edgeControl = Vector4(1.0f, 1.0f, 1.0f, 1.0f)
+    // edgeFalloff: x=top falloff, y=bottom falloff, z=left falloff, w=right falloff
+    private var edgeFalloff = Vector4(1.5f, 1.5f, 1.5f, 1.5f)
     
     init {
         registerMeshAndMaterial()
@@ -108,7 +126,7 @@ class BiasLightingEntity(
         val whiteColor = android.graphics.Color.valueOf(1f, 1f, 1f, 1f, p3)
         val blackTexture = SceneTexture(blackColor)
         val whiteTexture = SceneTexture(whiteColor)
-        
+
         return SceneMaterial.custom(
             "bias_lighting_9slice",
             arrayOf(
@@ -117,6 +135,9 @@ class BiasLightingEntity(
                 SceneMaterialAttribute("albedoFactor", SceneMaterialDataType.Vector4),
                 SceneMaterialAttribute("matParams", SceneMaterialDataType.Vector4),
                 SceneMaterialAttribute("stereoParams", SceneMaterialDataType.Vector4),
+                // Per-edge control uniforms
+                SceneMaterialAttribute("edgeControl", SceneMaterialDataType.Vector4),
+                SceneMaterialAttribute("edgeFalloff", SceneMaterialDataType.Vector4),
                 // Textures (bindings 1-4) - must match customBindingFrag.glsl
                 SceneMaterialAttribute("albedoSampler", SceneMaterialDataType.Texture2D),
                 SceneMaterialAttribute("roughnessMetallicTexture", SceneMaterialDataType.Texture2D),
@@ -128,10 +149,10 @@ class BiasLightingEntity(
             setSortOrder(SortOrder.TRANSLUCENT)
             setDepthTest(DepthTest.LESS_OR_EQUAL)
             setStereoMode(StereoMode.None)
-            
+
             val quadWidth = panelSize.x + GLOW_PADDING * 2
             val quadHeight = panelSize.y + GLOW_PADDING * 2
-            
+
             // emissiveFactor: xy = quad size, zw = panel size
             setAttribute("emissiveFactor", Vector4(
                 quadWidth,
@@ -139,13 +160,13 @@ class BiasLightingEntity(
                 panelSize.x,
                 panelSize.y
             ))
-            
+
             // albedoFactor.x = glow padding in meters
             setAttribute("albedoFactor", Vector4(GLOW_PADDING, 0f, 0f, 0f))
-            
+
             // matParams.x = intensity
             setAttribute("matParams", Vector4(_intensity, 0f, 0f, 0f))
-            
+
             // stereoParams: x = unused, y = mipLevel, z = debugMode
             setAttribute("stereoParams", Vector4(
                 0f,
@@ -153,7 +174,11 @@ class BiasLightingEntity(
                 if (DEBUG_MODE) 1f else 0f,
                 0f
             ))
-            
+
+            // Per-edge control uniforms (default: all edges enabled with standard falloff)
+            setAttribute("edgeControl", edgeControl)
+            setAttribute("edgeFalloff", edgeFalloff)
+
             // Textures
             setTexture("albedoSampler", whiteTexture)
             setTexture("roughnessMetallicTexture", blackTexture)
@@ -262,7 +287,50 @@ class BiasLightingEntity(
         // matParams.x = intensity (HeroLightingSystem also updates this)
         glowMaterial?.setAttribute("matParams", Vector4(intensity, 0f, 0f, 0f))
     }
-    
+
+    /**
+     * Sets the intensity multiplier for a specific edge.
+     * @param edge The edge to control (TOP, BOTTOM, LEFT, RIGHT)
+     * @param intensity Intensity multiplier (0.0 = off, 1.0 = full, range: 0.0-1.0)
+     */
+    fun setEdgeIntensity(edge: Edge, intensity: Float) {
+        val clampedIntensity = intensity.coerceIn(0.0f, 1.0f)
+        when (edge) {
+            Edge.TOP -> edgeControl = Vector4(clampedIntensity, edgeControl.y, edgeControl.z, edgeControl.w)
+            Edge.BOTTOM -> edgeControl = Vector4(edgeControl.x, clampedIntensity, edgeControl.z, edgeControl.w)
+            Edge.LEFT -> edgeControl = Vector4(edgeControl.x, edgeControl.y, clampedIntensity, edgeControl.w)
+            Edge.RIGHT -> edgeControl = Vector4(edgeControl.x, edgeControl.y, edgeControl.z, clampedIntensity)
+        }
+        updateMaterialUniforms()
+        Log.d(TAG, "Edge intensity set: $edge = $clampedIntensity")
+    }
+
+    /**
+     * Sets the falloff exponent for a specific edge.
+     * Higher values create sharper falloff, lower values create softer falloff.
+     * @param edge The edge to control (TOP, BOTTOM, LEFT, RIGHT)
+     * @param falloff Falloff exponent (typical range: 1.0-3.0, default: 1.5)
+     */
+    fun setEdgeFalloff(edge: Edge, falloff: Float) {
+        val clampedFalloff = falloff.coerceIn(1.0f, 3.0f)
+        when (edge) {
+            Edge.TOP -> edgeFalloff = Vector4(clampedFalloff, edgeFalloff.y, edgeFalloff.z, edgeFalloff.w)
+            Edge.BOTTOM -> edgeFalloff = Vector4(edgeFalloff.x, clampedFalloff, edgeFalloff.z, edgeFalloff.w)
+            Edge.LEFT -> edgeFalloff = Vector4(edgeFalloff.x, edgeFalloff.y, clampedFalloff, edgeFalloff.w)
+            Edge.RIGHT -> edgeFalloff = Vector4(edgeFalloff.x, edgeFalloff.y, edgeFalloff.z, clampedFalloff)
+        }
+        updateMaterialUniforms()
+        Log.d(TAG, "Edge falloff set: $edge = $clampedFalloff")
+    }
+
+    /**
+     * Updates the shader material uniforms with current per-edge control values.
+     */
+    private fun updateMaterialUniforms() {
+        glowMaterial?.setAttribute("edgeControl", edgeControl)
+        glowMaterial?.setAttribute("edgeFalloff", edgeFalloff)
+    }
+
     /**
      * Cleans up all entities and resources.
      */

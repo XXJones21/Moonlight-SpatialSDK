@@ -52,67 +52,79 @@ void main() {
     
     // Distance from panel edge (0 = at panel, padX/padY = at outer edge)
     float dist = max(distX, distY);
-    
+
     // Normalize distance (0 = at panel edge, 1 = at outer edge)
     float maxPad = max(padX, padY);
     float normDist = clamp(dist / maxPad, 0.0, 1.0);
     
-    // Falloff: 1.0 at panel edge, 0.0 at outer edge
-    float falloff = 1.0 - normDist;
-    falloff = pow(falloff, 1.5); // Softer falloff curve
-    
-    // Edge-specific sampling: Only sample from the edge we're closest to
-    // This prevents mirroring by ensuring each glow region samples only its corresponding edge
-    // Map position along each edge to video UV coordinates correctly
-    
-    // Calculate position along panel edges (0-1 range)
-    float edgePosX = clamp((uv.x - panelLeft) / (panelRight - panelLeft), 0.0, 1.0);
-    float edgePosY = clamp((uv.y - panelBottom) / (panelTop - panelBottom), 0.0, 1.0);
-    
-    // Determine which edge we're in (use explicit region checks, not distance comparison)
-    // Priority: horizontal edges over vertical for corners
+    // Edge-specific sampling: Map each glow region to its corresponding video edge
+    // Key insight: Each edge must use the UV coordinate that VARIES ALONG that edge
+    // - Left/Right edges: use Y coordinate (varies vertically along edge)
+    // - Top/Bottom edges: use X coordinate (varies horizontally along edge)
+    // We must remap the full quad UV (0-1 including padding) to panel bounds only
+
     vec2 videoUV;
-    
+    float edgeIntensity = 1.0;      // Default intensity multiplier
+    float edgeFalloffExp = 1.5;     // Default falloff exponent
+
     if (uv.x < panelLeft) {
-        // Left glow region: sample from left edge (x=0) of video
-        // edgePosY: 0 = panel bottom, 1 = panel top
-        // Video texture Y may be flipped - use same flip as old 4-mesh shader
-        // Old shader used: vec2(0.0, 1.0 - biasOut.texCoord.x) for left edge
-        // This suggests Y needs to be flipped for left/right edges
-        videoUV = vec2(0.0, 1.0 - edgePosY);
+        // LEFT EDGE: sample from left column (x=0) of video
+        // Map the full quad Y range to panel Y range, inverted for texture coordinates
+        float videoY = 1.0 - clamp((uv.y - panelBottom) / (panelTop - panelBottom), 0.0, 1.0);
+        videoUV = vec2(0.0, videoY);
+        edgeIntensity = g_MaterialUniform.edgeControl.z;
+        edgeFalloffExp = g_MaterialUniform.edgeFalloff.z;
     } else if (uv.x > panelRight) {
-        // Right glow region: sample from right edge (x=1) of video
-        // Apply same Y flip as left edge (matches old 4-mesh shader)
-        videoUV = vec2(1.0, 1.0 - edgePosY);
+        // RIGHT EDGE: sample from right column (x=1) of video
+        // Map the full quad Y range to panel Y range, inverted for texture coordinates
+        float videoY = 1.0 - clamp((uv.y - panelBottom) / (panelTop - panelBottom), 0.0, 1.0);
+        videoUV = vec2(1.0, videoY);
+        edgeIntensity = g_MaterialUniform.edgeControl.w;
+        edgeFalloffExp = g_MaterialUniform.edgeFalloff.w;
     } else if (uv.y < panelBottom) {
-        // Bottom glow region: sample from bottom edge (y=0) of video
-        // edgePosX: 0 = panel left, 1 = panel right
-        videoUV = vec2(edgePosX, 0.0);
+        // BOTTOM EDGE: sample from bottom row (y=0) of video
+        // Map the full quad X range to panel X range for proper video sampling
+        float videoX = clamp((uv.x - panelLeft) / (panelRight - panelLeft), 0.0, 1.0);
+        videoUV = vec2(videoX, 0.0);
+        edgeIntensity = g_MaterialUniform.edgeControl.y;
+        edgeFalloffExp = g_MaterialUniform.edgeFalloff.y;
     } else if (uv.y > panelTop) {
-        // Top glow region: sample from top edge (y=1) of video
-        videoUV = vec2(edgePosX, 1.0);
+        // TOP EDGE: sample from top row (y=1) of video
+        // Map the full quad X range to panel X range for proper video sampling
+        float videoX = clamp((uv.x - panelLeft) / (panelRight - panelLeft), 0.0, 1.0);
+        videoUV = vec2(videoX, 1.0);
+        edgeIntensity = g_MaterialUniform.edgeControl.x;
+        edgeFalloffExp = g_MaterialUniform.edgeFalloff.x;
     } else {
         // Shouldn't happen (we discard inside panel), but fallback
         videoUV = vec2(0.5, 0.5);
     }
-    
+
     // Sample the video texture with blur (mip level)
     vec4 videoColor = textureLod(emissive, videoUV, mipLevel);
-    
+
+    // Apply per-edge falloff using the edge-specific falloff exponent
+    // Falloff: 1.0 at panel edge, 0.0 at outer edge
+    float falloff = 1.0 - normDist;
+    falloff = pow(falloff, edgeFalloffExp);
+
     // Debug mode: show the ring shape
     if (debugMode > 0.5) {
         outColor = vec4(falloff, falloff, falloff, falloff);
         return;
     }
-    
+
+    // Apply per-edge intensity multiplier
+    float finalIntensity = intensity * edgeIntensity;
+
     // Skip if too faint
-    if (intensity <= 0.01 || falloff <= 0.01) {
+    if (finalIntensity <= 0.01 || falloff <= 0.01) {
         discard;
     }
-    
-    // Final output with falloff and intensity
-    vec3 finalColor = videoColor.rgb * intensity * 2.0;
-    float finalAlpha = falloff * intensity;
-    
+
+    // Final output with per-edge falloff and intensity
+    vec3 finalColor = videoColor.rgb * finalIntensity * 2.0;
+    float finalAlpha = falloff * finalIntensity;
+
     outColor = vec4(finalColor * finalAlpha, finalAlpha);
 }

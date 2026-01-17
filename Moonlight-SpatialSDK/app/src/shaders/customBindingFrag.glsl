@@ -3,6 +3,8 @@ layout (std140, set = 3, binding = 0) uniform MaterialUniform {
   vec4 albedoFactor;
   vec4 matParams;
   vec4 stereoParams;
+  vec4 edgeControl;   // Per-edge intensity: x=top, y=bottom, z=left, w=right
+  vec4 edgeFalloff;   // Per-edge falloff: x=top, y=bottom, z=left, w=right
 
 } g_MaterialUniform;
 
