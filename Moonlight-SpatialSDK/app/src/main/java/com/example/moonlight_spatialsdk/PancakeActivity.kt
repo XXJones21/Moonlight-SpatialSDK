@@ -1269,6 +1269,38 @@ fun ConnectionPanel2D(
                         )
                     }
 
+                    // Stereoscopic 3D Toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Stereoscopic 3D (SBS)",
+                            style = LocalTypography.current.body1.copy(
+                                color = SpatialTheme.colorScheme.primaryAlphaBackground
+                            )
+                        )
+                        SpatialSwitch(
+                            checked = immersiveSettings.stereoscopicEnabled,
+                            onCheckedChange = {
+                                immersiveSettings = immersiveSettings.copy(stereoscopicEnabled = it)
+                                ImmersiveSettings.save(context, immersiveSettings)
+                            }
+                        )
+                    }
+
+                    // Hint about stereoscopic mode
+                    if (immersiveSettings.stereoscopicEnabled) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "Enable Side-by-Side 3D input (e.g., ReShade SuperDepth3D). Requires app restart.",
+                            style = LocalTypography.current.body2.copy(
+                                color = SpatialTheme.colorScheme.primaryAlphaBackground.copy(alpha = 0.6f)
+                            )
+                        )
+                    }
+
                     // Hint about lighting features requiring immersive mode
                     if (immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled) {
                         Spacer(Modifier.height(8.dp))

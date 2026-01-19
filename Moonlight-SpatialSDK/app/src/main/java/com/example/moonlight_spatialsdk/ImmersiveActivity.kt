@@ -1551,9 +1551,8 @@ class ImmersiveActivity : AppSystemActivity() {
     // Load immersive settings to determine panel type
     immersiveSettings = ImmersiveSettings.load(this)
     val useLightingEmission = immersiveSettings.lightingEmissionEnabled || immersiveSettings.reflectionsEnabled
-    // REMOVED: 3D Desktop Client - Stereoscopic mode removed
-    // val usePcSideStereoscopic = prefs.stereoscopicModeEnabled
-    // Log.i(TAG, "Panel registration: PC-side stereoscopic mode enabled = $usePcSideStereoscopic")
+    val useStereoscopic = immersiveSettings.stereoscopicEnabled
+    Log.i(TAG, "Panel registration: stereoscopic mode = $useStereoscopic, lighting emission = $useLightingEmission")
     
     // Register panel dynamically using executeOnVrActivity to ensure activity is fully ready
     // This matches PremiumMediaSample pattern and ensures panelManager is initialized
@@ -1647,24 +1646,26 @@ class ImmersiveActivity : AppSystemActivity() {
             )
         )
       */
-      // REMOVED: 3D Desktop Client - Stereoscopic mode removed, now only check for lighting emission
+      // Determine stereo mode based on settings
+      val stereoMode = if (useStereoscopic) StereoMode.LeftRight else StereoMode.None
+
       if (useLightingEmission) {
         // Use ReadableVideoSurfacePanelRegistration for lighting emission (allows texture sampling)
-        Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for lighting emission")
+        Log.i(TAG, "Using ReadableVideoSurfacePanelRegistration for lighting emission, stereoMode=$stereoMode")
         immersiveActivity.registerPanel(
             ReadableVideoSurfacePanelRegistration(
                 R.id.ui_example,
                 surfaceConsumer = { panelEntity, surface ->
                   Log.i(TAG, "Readable surface attached for panel entity=$panelEntity")
-                  
+
                   SurfaceUtil.paintBlack(surface)
-                  
+
                   // Configure decoder with preferences when panel is created
                   moonlightPanelRenderer.attachSurface(surface)
                   moonlightPanelRenderer.preConfigureDecoder()
-                  
+
                   isSurfaceReady = true
-                  
+
                   // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
                   val params = pendingConnectionParams
                   if (params != null) {
@@ -1682,7 +1683,7 @@ class ImmersiveActivity : AppSystemActivity() {
                       display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
                       rendering = ReadableMediaPanelRenderOptions(
                           mips = 4, // Mip levels for shader sampling (used for blur in lighting)
-                          stereoMode = StereoMode.None,
+                          stereoMode = stereoMode,
                       ),
                       style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
                   )
@@ -1691,21 +1692,21 @@ class ImmersiveActivity : AppSystemActivity() {
         )
       } else {
         // Use standard VideoSurfacePanelRegistration for better performance
-        Log.i(TAG, "Using VideoSurfacePanelRegistration (standard mode)")
+        Log.i(TAG, "Using VideoSurfacePanelRegistration (standard mode), stereoMode=$stereoMode")
         immersiveActivity.registerPanel(
             VideoSurfacePanelRegistration(
                 R.id.ui_example,
                 surfaceConsumer = { panelEntity, surface ->
                   Log.i(TAG, "Surface attached for panel entity=$panelEntity")
-                  
+
                   SurfaceUtil.paintBlack(surface)
-                  
+
                   // Configure decoder with preferences when panel is created
                   moonlightPanelRenderer.attachSurface(surface)
                   moonlightPanelRenderer.preConfigureDecoder()
-                  
+
                   isSurfaceReady = true
-                  
+
                   // Now that panel surface is ready and decoder is configured, initiate connection if we have pending params
                   val params = pendingConnectionParams
                   if (params != null) {
@@ -1723,7 +1724,7 @@ class ImmersiveActivity : AppSystemActivity() {
                       display = PixelDisplayOptions(width = prefs.width, height = prefs.height),
                       rendering = MediaPanelRenderOptions(
                           isDRM = false,
-                          stereoMode = StereoMode.None,
+                          stereoMode = stereoMode,
                           zIndex = 0 // Rectilinear panels use zIndex 0 (Equirect180 uses -1)
                       ),
                       style = PanelStyleOptions(themeResourceId = R.style.PanelAppThemeTransparent),
