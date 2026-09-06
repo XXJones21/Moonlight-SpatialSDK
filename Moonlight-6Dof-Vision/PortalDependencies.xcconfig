@@ -4,11 +4,12 @@ SWIFT_OBJC_BRIDGING_HEADER = $(SRCROOT)/Moonlight-6Dof-Vision/Streaming/Portal-B
 GCC_PREFIX_HEADER = $(SRCROOT)/Moonlight-6Dof-Vision/Streaming/Portal-Prefix.pch
 GCC_PRECOMPILE_PREFIX_HEADER = YES
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) HAS_SOCKLEN_T=1
-HEADER_SEARCH_PATHS = $(inherited) "$(SRCROOT)/Moonlight-6Dof-Vision/ThirdParty/Moonlight/Limelight/**" "$(SRCROOT)/Moonlight-6Dof-Vision/Streaming" "$(SRCROOT)/Moonlight-6Dof-Vision/ThirdParty/Moonlight/Common/src" "$(SRCROOT)/Moonlight-6Dof-Vision/ThirdParty/Moonlight/Common/reedsolomon" "$(SRCROOT)/Moonlight-6Dof-Vision/ThirdParty/Moonlight/Common/enet/include" "$(SRCROOT)/Dependencies/Headers" "$(SRCROOT)/Dependencies/opus/include" "$(SDKROOT)/usr/include/libxml2"
+HEADER_SEARCH_PATHS = $(inherited) "$(SRCROOT)/Moonlight-6Dof-Vision/ThirdParty/Moonlight/Limelight/**" "$(SRCROOT)/Moonlight-6Dof-Vision/Streaming" "$(SRCROOT)/Moonlight-6Dof-Vision/ThirdParty/Moonlight/Common/src" "$(SRCROOT)/Moonlight-6Dof-Vision/ThirdParty/Moonlight/Common/reedsolomon" "$(SRCROOT)/Moonlight-6Dof-Vision/ThirdParty/Moonlight/Common/enet/include" "$(SRCROOT)/Dependencies/Headers" "$(SRCROOT)/Dependencies/opus/include" "$(SRCROOT)/Dependencies/opus/include/opus" "$(SDKROOT)/usr/include/libxml2"
 PORTAL_OPENSSL_SLICE[sdk=xros*] = xros-arm64
 PORTAL_OPENSSL_SLICE[sdk=xrsimulator*] = xros-arm64_x86_64-simulator
 PORTAL_OPUS_SLICE[sdk=xros*] = visionOS
 PORTAL_OPUS_SLICE[sdk=xrsimulator*] = visionOS-Sim
+PORTAL_OPENSSL_FRAMEWORK_DIR = $(SRCROOT)/Dependencies/OpenSSL.xcframework/$(PORTAL_OPENSSL_SLICE)
 FRAMEWORK_SEARCH_PATHS = $(inherited) "$(SRCROOT)/Dependencies/OpenSSL.xcframework/$(PORTAL_OPENSSL_SLICE)"
 LIBRARY_SEARCH_PATHS = $(inherited) "$(SRCROOT)/Dependencies/opus/$(PORTAL_OPUS_SLICE)"
-OTHER_LDFLAGS = $(inherited) -lopus -lxml2 -lz -framework OpenSSL -framework CFNetwork -framework Security -framework AudioToolbox -framework AVFoundation -framework VideoToolbox -framework CoreMedia -framework GameController
+OTHER_LDFLAGS = $(inherited) -lopus -lxml2 -lz -framework CFNetwork -framework Security -framework AudioToolbox -framework AVFoundation -framework VideoToolbox -framework CoreMedia -framework GameController

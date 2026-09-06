@@ -9,6 +9,8 @@ import RealityKit
     let session = MoonlightSession()
     let connection = ConnectionViewModel()
     let coordinator: PortalSessionCoordinator
+    private(set) var sixDoFEnabled = UserDefaults.standard.bool(forKey: "portal.sixDoFEnabled")
+    private(set) var changingStreamMode = false
     var immersiveEffectsEnabled = false { didSet { updateLighting(); updateAudio() } }
     var roomDimming = UserDefaults.standard.bool(forKey: "portal.effect.dimming") { didSet { UserDefaults.standard.set(roomDimming, forKey: "portal.effect.dimming") } }
     var lightingEmission = UserDefaults.standard.bool(forKey: "portal.effect.lighting") { didSet { UserDefaults.standard.set(lightingEmission, forKey: "portal.effect.lighting"); updateLighting() } }
@@ -16,13 +18,17 @@ import RealityKit
     var screenColor = SIMD3<Float>(repeating: 0.5)
     var message: String?
     var disconnected = false
-    var canReconnect: Bool { lastConnection != nil && session.state != .stopping && session.state != .connecting }
-    private var lastConnection: (SavedServer, StreamPreferences)?
+    var canReconnect: Bool { !changingStreamMode && lastServer != nil && !connection.hasPendingStreamSettings && session.state != .stopping && session.state != .connecting }
+    private var lastServer: SavedServer?
     private let lighting = PortalLightingSampler()
     private var previewToken = UUID()
     private var audioHead: simd_float4x4?
     init() {
+        PortalDiagnostics.shared().start()
         coordinator = PortalSessionCoordinator(scene: portal, moonlight: session)
+        PortalDiagnostics.shared().record("Loaded stream mode: 6DoF=\(sixDoFEnabled)")
+        // Older installs always enabled metadata. Start in ordinary Moonlight unless explicitly opted in.
+        connection.preferences.metadata = sixDoFEnabled
         let ipd = UserDefaults.standard.double(forKey: "portal.calibration.ipd")
         portal.eyeSeparation = (0.05...0.08).contains(ipd) ? ipd : 0.064
         if let offset = UserDefaults.standard.array(forKey: "portal.calibration.offset") as? [Double], offset.count == 3, offset.allSatisfy({ $0.isFinite && abs($0) <= 0.1 }) {
@@ -59,22 +65,49 @@ import RealityKit
         portal.calibrationChanged()
     }
     func start(server: SavedServer) async {
-        let preferences = connection.preferences
-        lastConnection = (server, preferences); disconnected = false; message = nil; previewToken = UUID()
+        guard !connection.hasPendingStreamSettings else {
+            message = "Wait for the stream settings to save before connecting."
+            return
+        }
+        var preferences = connection.preferences
+        preferences.metadata = sixDoFEnabled
+        lastServer = server; disconnected = false; message = nil; previewToken = UUID()
         await coordinator.start(server: server, preferences: preferences)
     }
     func reconnect() async {
-        guard let (server, preferences) = lastConnection else { return }
-        disconnected = false; message = nil; previewToken = UUID()
-        await coordinator.start(server: server, preferences: preferences)
+        guard let server = lastServer else { return }
+        await start(server: server)
+    }
+    func setSixDoFEnabled(_ enabled: Bool) {
+        guard !changingStreamMode, enabled != sixDoFEnabled else { return }
+        changingStreamMode = true
+        let shouldRestart = !disconnected && session.activeConfiguration != nil
+        PortalDiagnostics.shared().record("6DoF Window changed: \(sixDoFEnabled) -> \(enabled)")
+        sixDoFEnabled = enabled
+        UserDefaults.standard.set(enabled, forKey: "portal.sixDoFEnabled")
+        connection.preferences.metadata = enabled
+        connection.preferences.save()
+        // Publish the binding synchronously, before another Connect action can
+        // read it. Only teardown/restart needs to run asynchronously.
+        Task {
+            defer { changingStreamMode = false }
+            if shouldRestart, let server = lastServer {
+                guard !disconnected else { return }
+                await start(server: server)
+            } else if session.state == .idle {
+                await preview()
+            }
+        }
     }
     func disconnect() {
+        PortalDiagnostics.shared().record("Disconnect requested")
         disconnected = true; portal.revealControls(); previewToken = UUID()
-        message = "Connection to \(lastConnection?.0.name ?? "the host") ended"
+        message = "Connection to \(lastServer?.name ?? "the host") ended"
         Task { await coordinator.stop() }
     }
     func returnHome() async { await coordinator.stop(); disconnected = false; message = nil }
     func spaceDidClose() {
+        PortalDiagnostics.shared().record("Immersive space closed")
         immersiveSpaceState = .closed; portal.stopTracking(); previewToken = UUID()
         Task { await coordinator.stop() }
     }
@@ -82,7 +115,8 @@ import RealityKit
         guard session.state == .idle else { return }
         let token = UUID(); previewToken = token
         do {
-            let texture = try StereoPreview.makeTexture()
+            portal.preparePreviewPanel(sixDoF: sixDoFEnabled)
+            let texture = try StereoPreview.makeTexture(stereo: sixDoFEnabled)
             guard token == previewToken, session.state == .idle else { return }
             try await portal.install(texture: texture, isCurrent: { token == self.previewToken && self.session.state == .idle })
             guard token == previewToken, session.state == .idle else { return }

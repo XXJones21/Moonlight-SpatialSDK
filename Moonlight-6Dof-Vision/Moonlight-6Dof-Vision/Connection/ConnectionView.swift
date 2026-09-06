@@ -3,6 +3,8 @@ import SwiftUI
 struct ConnectionView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.openImmersiveSpace) private var openImmersiveSpace
+    @State private var diagnosticURL: URL?
+    @State private var diagnosticError: String?
     @State private var showServer = false
     @State private var showOptions = false
     @State private var showConfiguration = false
@@ -23,7 +25,7 @@ struct ConnectionView: View {
                             if let server = connection.selected { Text(server.address).font(.caption).foregroundStyle(.secondary) }
                             if connection.paired { Text("Connect").fontWeight(.semibold) }
                         }.frame(maxWidth: .infinity, minHeight: 110)
-                    }.buttonStyle(.bordered).disabled(connection.busy || app.session.state == .connecting || app.session.state == .stopping)
+                    }.buttonStyle(.bordered).disabled(app.changingStreamMode || connection.busy || connection.hasPendingStreamSettings || app.session.state == .connecting || app.session.state == .stopping)
                     Button { showServer = true } label: {
                         VStack(spacing: 8) { Image(systemName: "plus").font(.title); Text(connection.paired ? "Pair New Server" : "Connect to PC") }
                             .frame(maxWidth: .infinity, minHeight: 110)
@@ -34,6 +36,9 @@ struct ConnectionView: View {
                         ForEach(connection.servers) { Text($0.name).tag($0.id) }
                     }.disabled(connection.busy)
                 }
+                StreamModeToggle()
+                Text(app.sixDoFEnabled ? "Selected mode: 6DoF game portal" : "Selected mode: Basic Moonlight desktop")
+                    .font(.caption).foregroundStyle(.secondary)
                 Text(connection.status).frame(maxWidth: .infinity, alignment: .leading).foregroundStyle(.secondary)
                 HStack(alignment: .top, spacing: 24) {
                     VStack(alignment: .leading, spacing: 8) {
@@ -52,8 +57,10 @@ struct ConnectionView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Label(app.session.gamepad.name, systemImage: "gamecontroller")
                         if let config = app.session.activeConfiguration {
-                            Text("Per eye: \(app.session.negotiatedWidth / 2) × \(app.session.negotiatedHeight)")
-                            Text("SBS transport: \(config.encodedWidth) × \(config.encodedHeight)").foregroundStyle(.secondary)
+                            Text(config.metadata ? "Active mode: 6DoF" : "Active mode: Basic Moonlight")
+                            Text("Requested codec: \(StreamCapabilities.label(config.codec))")
+                            Text("\(config.metadata ? "Per eye" : "Desktop"): \(app.session.negotiatedWidth / (config.metadata ? 2 : 1)) × \(app.session.negotiatedHeight)")
+                            Text("\(config.metadata ? "6DoF SBS" : "Stream"): \(config.encodedWidth) × \(config.encodedHeight)").foregroundStyle(.secondary)
                             Text("FPS: \(config.fps) requested")
                             Text("Audio: \(config.audio)")
                             Text(app.session.dynamicRangeDescription)
@@ -69,6 +76,14 @@ struct ConnectionView: View {
                 }
                 if let message = app.message { Text(message).foregroundStyle(.orange).textSelection(.enabled) }
                 Divider().opacity(0.3)
+                HStack {
+                    Button("Prepare Diagnostics") {
+                        do { diagnosticURL = try PortalDiagnostics.shared().exportReport(); diagnosticError = nil }
+                        catch { diagnosticURL = nil; diagnosticError = error.localizedDescription }
+                    }
+                    if let diagnosticURL { ShareLink("Share Diagnostics", item: diagnosticURL) }
+                }
+                if let diagnosticError { Text(diagnosticError).foregroundStyle(.orange) }
                 Button("Launch Immersive Mode (No Connection)") { Task { await openPortal() } }.disabled(app.immersiveSpaceState == .inTransition)
             }.padding(16)
         }.frame(minWidth: 680, minHeight: 450).glassBackgroundEffect(in: .rect(cornerRadius: 16))
@@ -85,11 +100,14 @@ struct ConnectionView: View {
                 Button { showOptions = false; showEffects = true } label: {
                     VStack(alignment: .leading) { Text("Immersive Options"); Text("Enable immersive features").font(.caption).foregroundStyle(.secondary) }.frame(maxWidth: .infinity, alignment: .leading)
                 }
-                DisclosureGroup("Advanced") { Button("Portal Calibration") { showOptions = false; showCalibration = true } }
+                if app.sixDoFEnabled {
+                    DisclosureGroup("Advanced") { Button("Portal Calibration") { showOptions = false; showCalibration = true } }
+                }
                 Button("Cancel", role: .cancel) { showOptions = false }
             }.buttonStyle(.bordered).padding(24)
         }
         .sheet(isPresented: $showEffects) { ImmersiveOptionsView() }
+        .onChange(of: app.sixDoFEnabled) { _, enabled in if !enabled { showCalibration = false } }
         .sheet(isPresented: $showCalibration) { PortalCalibrationView() }
         .task { if connection.paired { connection.loadApplications() } }
     }

@@ -10,6 +10,7 @@ struct ImmersiveView: View {
 
     var body: some View {
         RealityView { content, attachments in
+            PortalDiagnostics.shared().record("Immersive RealityView created")
             content.add(app.portal.root)
             if let controls = attachments.entity(for: "controls") { app.portal.shelf.addChild(controls) }
             if let recovery = attachments.entity(for: "recovery") { app.portal.root.addChild(recovery); recovery.position = [0, 0, 0.03] }
@@ -18,14 +19,21 @@ struct ImmersiveView: View {
             await app.preview()
         } update: { _, attachments in
             attachments.entity(for: "recovery")?.isEnabled = app.disconnected
-            attachments.entity(for: "tracking")?.isEnabled = app.portal.needsRecenter && !app.disconnected
+            if let tracking = attachments.entity(for: "tracking") {
+                // Enabling 6DoF can create this attachment after RealityView.make.
+                if tracking.parent !== app.portal.root {
+                    app.portal.root.addChild(tracking)
+                    tracking.position = [0, 0, 0.035]
+                }
+                tracking.isEnabled = app.sixDoFEnabled && app.portal.needsRecenter && !app.disconnected
+            }
         } attachments: {
             Attachment(id: "controls") {
                 HStack(spacing: 16) {
                     Button("Settings", systemImage: "gearshape") { openWindow(id: "settings", value: "main"); app.portal.keepShelfVisible() }
                     Button("Resize", systemImage: "arrow.up.left.and.arrow.down.right") { app.portal.resetSize(); app.portal.keepShelfVisible() }
                         .help("Reset panel size")
-                    Button("Immersive", systemImage: app.immersiveEffectsEnabled ? "sun.max.fill" : "sun.max") { app.immersiveEffectsEnabled.toggle(); app.portal.keepShelfVisible() }
+                    Button("Effects", systemImage: app.immersiveEffectsEnabled ? "sun.max.fill" : "sun.max") { app.immersiveEffectsEnabled.toggle(); app.portal.keepShelfVisible() }
                         .tint(app.immersiveEffectsEnabled ? .blue : nil)
                     Button("Disconnect", systemImage: "xmark.circle") { app.disconnect() }
                 }
@@ -38,17 +46,20 @@ struct ImmersiveView: View {
                     Text(app.message ?? "The connection ended").frame(maxWidth: 420).multilineTextAlignment(.center)
                     HStack {
                         Button("Reconnect") { Task { await app.reconnect() } }.disabled(!app.canReconnect)
+                            .help("Reconnect to the same app using the latest saved stream settings.")
                         Button("Return to Home") { Task { await app.returnHome(); openWindow(id: "settings", value: "main"); await dismissImmersiveSpace() } }
                         Button("Cancel", role: .cancel) { app.disconnected = false; app.portal.revealControls() }
                     }
                 }.padding(24).glassBackgroundEffect()
             }
-            Attachment(id: "tracking") {
-                VStack(spacing: 12) {
-                    Text(app.portal.trackingMessage).multilineTextAlignment(.center).frame(maxWidth: 360)
-                    Button("Recenter Portal") { app.portal.recenter() }
-                    Button("Settings") { openWindow(id: "settings", value: "main") }
-                }.padding(20).glassBackgroundEffect()
+            if app.sixDoFEnabled {
+                Attachment(id: "tracking") {
+                    VStack(spacing: 12) {
+                        Text(app.portal.trackingMessage).multilineTextAlignment(.center).frame(maxWidth: 360)
+                        Button("Recenter Portal") { app.portal.recenter() }
+                        Button("Settings") { openWindow(id: "settings", value: "main") }
+                    }.padding(20).glassBackgroundEffect()
+                }
             }
         }
         .gesture(DragGesture().targetedToAnyEntity().onChanged { value in
@@ -61,7 +72,8 @@ struct ImmersiveView: View {
         .preferredSurroundingsEffect(app.surroundingsEffect)
         .task { await app.portal.startTracking() }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { Task { await app.portal.startTracking() } }
+            PortalDiagnostics.shared().record("Immersive scene phase: \(String(describing: phase))")
+            if phase == .active { app.coordinator.resume(); Task { await app.portal.startTracking() } }
             else { app.portal.stopTracking(); app.coordinator.suspend() }
         }
         .onDisappear { updateSubscription?.cancel(); updateSubscription = nil; app.spaceDidClose(); openWindow(id: "settings", value: "main") }

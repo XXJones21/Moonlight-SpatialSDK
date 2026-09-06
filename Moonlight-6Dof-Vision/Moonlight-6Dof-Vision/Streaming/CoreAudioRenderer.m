@@ -1,5 +1,7 @@
 #import "CoreAudioRenderer.h"
 #import <os/lock.h>
+#import "PortalAudioFormat.h"
+#import "../Diagnostics/PortalDiagnostics.h"
 
 /// Opus callback -> bounded PCM buffers -> AVAudioEngine. All engine mutations use one queue.
 @implementation CoreAudioRenderer {
@@ -22,6 +24,7 @@ static __weak CoreAudioRenderer *current;
     _channels=config->channelCount; _sampleRate=config->sampleRate;
     if(_channels<1 || _channels>8 || _sampleRate<=0) return nil;
     _lock=OS_UNFAIR_LOCK_INIT;
+    [PortalDiagnostics.shared record:[NSString stringWithFormat:@"Audio init: channels=%d rate=%d", _channels, _sampleRate]];
     _decodeBuffer=[NSMutableData dataWithLength:5760*_channels*sizeof(float)];
     _queue=dispatch_queue_create("portal.audio",DISPATCH_QUEUE_SERIAL);
     _engine=[AVAudioEngine new]; _player=[AVAudioPlayerNode new]; _environment=[AVAudioEnvironmentNode new];
@@ -36,8 +39,9 @@ static __weak CoreAudioRenderer *current;
             strongSelf->_interrupted=began; ++strongSelf->_generation; strongSelf->_queued=0;
             BOOL running=strongSelf->_running;
             os_unfair_lock_unlock(&strongSelf->_lock);
+            [PortalDiagnostics.shared record:began ? @"Audio interruption began" : @"Audio interruption ended"];
             if(began) { [strongSelf->_player stop]; [strongSelf->_engine pause]; }
-            else if(running) { [AVAudioSession.sharedInstance setActive:YES error:nil]; [strongSelf configureGraph]; }
+            else if(running) { [strongSelf activateAndConfigure]; }
         });
     }];
     _routeObserver=[NSNotificationCenter.defaultCenter addObserverForName:AVAudioSessionRouteChangeNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
@@ -47,6 +51,7 @@ static __weak CoreAudioRenderer *current;
             BOOL running=strongSelf->_running && !strongSelf->_interrupted;
             ++strongSelf->_generation; strongSelf->_queued=0;
             os_unfair_lock_unlock(&strongSelf->_lock);
+            [PortalDiagnostics.shared record:@"Audio route changed"];
             if(running) [strongSelf configureGraph];
         });
     }];
@@ -57,8 +62,11 @@ static __weak CoreAudioRenderer *current;
     if(_routeObserver) [NSNotificationCenter.defaultCenter removeObserver:_routeObserver];
 }
 - (void)configureGraph {
+    os_unfair_lock_lock(&_lock); _running=NO; os_unfair_lock_unlock(&_lock);
+    [PortalDiagnostics.shared record:[NSString stringWithFormat:@"Audio graph begin: channels=%d spatial=%d", _channels, _spatial]];
     [_player stop]; [_engine stop]; [_engine disconnectNodeOutput:_player]; [_engine disconnectNodeOutput:_environment];
-    _format=[[AVAudioFormat alloc] initStandardFormatWithSampleRate:_sampleRate channels:_spatial?1:_channels];
+    _format=PortalAudioFormat(_sampleRate, _spatial ? 1 : _channels);
+    if (!_format) { [PortalDiagnostics.shared record:@"Audio graph rejected: invalid PCM format"]; return; }
     if(_spatial) {
         _player.renderingAlgorithm=AVAudio3DMixingRenderingAlgorithmHRTF;
         [_engine connect:_player to:_environment format:_format];
@@ -69,23 +77,36 @@ static __weak CoreAudioRenderer *current;
     NSError *error=nil;
     if(![_engine startAndReturnError:&error]) {
         os_unfair_lock_lock(&_lock); _running=NO; ++_generation; _queued=0; os_unfair_lock_unlock(&_lock);
-        NSLog(@"Portal audio: %@",error.localizedDescription); return;
+        [PortalDiagnostics.shared record:[NSString stringWithFormat:@"Audio engine failed: %@ (%ld)", error.domain, (long)error.code]]; return;
     }
     [_player play];
+    os_unfair_lock_lock(&_lock); _running=YES; os_unfair_lock_unlock(&_lock);
+    [PortalDiagnostics.shared record:@"Audio graph ready"];
+}
+- (void)activateAndConfigure {
+    NSError *error=nil;
+    AVAudioSession *session=AVAudioSession.sharedInstance;
+    if (![session setCategory:AVAudioSessionCategoryPlayback mode:AVAudioSessionModeDefault options:AVAudioSessionCategoryOptionMixWithOthers error:&error] ||
+        ![session setActive:YES error:&error]) {
+        os_unfair_lock_lock(&_lock); _running=NO; ++_generation; _queued=0; os_unfair_lock_unlock(&_lock);
+        [PortalDiagnostics.shared record:[NSString stringWithFormat:@"Audio session activation failed: %@ (%ld)", error.domain, (long)error.code]];
+        return;
+    }
+    [self configureGraph];
 }
 - (void)start {
-    dispatch_sync(_queue, ^{
-        NSError *error=nil;
-        AVAudioSession *session=AVAudioSession.sharedInstance;
-        [session setCategory:AVAudioSessionCategoryPlayback mode:AVAudioSessionModeDefault options:AVAudioSessionCategoryOptionMixWithOthers error:&error];
-        [session setActive:YES error:&error];
-        os_unfair_lock_lock(&self->_lock); self->_running=YES; os_unfair_lock_unlock(&self->_lock);
-        [self configureGraph];
-    });
+    [PortalDiagnostics.shared record:@"Audio start requested"];
+    dispatch_sync(_queue, ^{ [self activateAndConfigure]; });
 }
 - (void)stop {
+    [PortalDiagnostics.shared record:@"Audio stop requested"];
     os_unfair_lock_lock(&_lock); _running=NO; ++_generation; _queued=0; os_unfair_lock_unlock(&_lock);
-    dispatch_sync(_queue, ^{ [self->_player stop]; [self->_engine stop]; });
+    dispatch_sync(_queue, ^{
+        // A graph rebuild already on this queue may have completed after the
+        // early invalidation above. Keep teardown final for queued observers.
+        os_unfair_lock_lock(&self->_lock); self->_running=NO; ++self->_generation; self->_queued=0; os_unfair_lock_unlock(&self->_lock);
+        [self->_player stop]; [self->_engine stop];
+    });
 }
 - (void *)getAudioBuffer:(int *)size { *size=(int)_decodeBuffer.length; return _decodeBuffer.mutableBytes; }
 - (BOOL)submitAudio:(int)bytesWritten opusBytes:(int)opusBytes decodeStartTime:(CFTimeInterval)decodeStartTime {
@@ -97,11 +118,19 @@ static __weak CoreAudioRenderer *current;
     NSData *pcm=[NSData dataWithBytes:_decodeBuffer.bytes length:bytesWritten];
     dispatch_async(_queue, ^{
         os_unfair_lock_lock(&self->_lock);
-        BOOL accepted=self->_running && generation==self->_generation;
+        BOOL accepted=self->_running && !self->_interrupted && generation==self->_generation;
         os_unfair_lock_unlock(&self->_lock);
         if(!accepted) return;
+        if (!self->_format) {
+            os_unfair_lock_lock(&self->_lock); self->_running=NO; ++self->_generation; self->_queued=0; os_unfair_lock_unlock(&self->_lock);
+            [PortalDiagnostics.shared record:@"Audio submission rejected: missing PCM format"]; return;
+        }
         AVAudioFrameCount frames=(AVAudioFrameCount)(pcm.length/(self->_channels*sizeof(float)));
         AVAudioPCMBuffer *buffer=[[AVAudioPCMBuffer alloc] initWithPCMFormat:self->_format frameCapacity:frames];
+        if (!buffer || !buffer.floatChannelData) {
+            os_unfair_lock_lock(&self->_lock); if (self->_queued) --self->_queued; os_unfair_lock_unlock(&self->_lock);
+            [PortalDiagnostics.shared record:@"Audio buffer allocation failed"]; return;
+        }
         buffer.frameLength=frames;
         const float *source=pcm.bytes;
         for(AVAudioFrameCount frame=0;frame<frames;++frame) {

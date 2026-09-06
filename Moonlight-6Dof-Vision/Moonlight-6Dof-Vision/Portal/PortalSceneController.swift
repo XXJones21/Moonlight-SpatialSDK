@@ -5,12 +5,13 @@ import QuartzCore
 
 @MainActor @Observable
 final class PortalSceneController {
-    let root = Entity()
-    let surface = ModelEntity()
-    let shelf = Entity()
-    let backdrop = ModelEntity()
-    private let glow = ModelEntity()
-    private let light = PointLight()
+    private let panelHost = MoonlightPanelHost()
+    var root: Entity { panelHost.root }
+    var surface: ModelEntity { panelHost.panel.surface }
+    var shelf: Entity { panelHost.panel.shelf }
+    var backdrop: ModelEntity { panelHost.panel.backdrop }
+    private var glow: ModelEntity { panelHost.panel.glow }
+    private var light: PointLight { panelHost.panel.light }
     var width: Float = 0.7 * 16 / 9
     var height: Float = 0.7
     var revision: UInt64 = 1
@@ -32,50 +33,32 @@ final class PortalSceneController {
     private var session: ARKitSession?
     private var provider: WorldTrackingProvider?
     private var events: Task<Void, Never>?
-    private var corners: [ModelEntity] = []
+    private var corners: [ModelEntity] { panelHost.panel.corners }
     private var lastHead: simd_float4x4?
     private var shelfUntil: TimeInterval = .infinity
     private var cornersUntil: TimeInterval = .infinity
     private var dragStart: Transform?
     private var sizeStart: SIMD2<Float>?
     private var yawStart: simd_quatf?
+    private var lightingColor = SIMD3<Float>(repeating: 0.5)
+    private var lightingEnabled = false
     private var baseAspect: Float = 16 / 9
-    private var materialToken = UUID()
-    private var stereoMaterial: ShaderGraphMaterial?
 
-    init() {
-        root.name = "PortalRoot"; surface.name = "PortalSurface"
-        root.addChild(surface); root.addChild(shelf)
-        backdrop.name = "PortalBackdrop"
-        backdrop.model = ModelComponent(mesh: Self.mesh(width: width + 0.012, height: height + 0.012), materials: [UnlitMaterial(color: .darkGray)])
-        backdrop.position.z = -0.008
-        backdrop.components.set(InputTargetComponent())
-        backdrop.components.set(HoverEffectComponent())
-        root.addChild(backdrop)
-        glow.model = ModelComponent(mesh: Self.mesh(width: width + 0.08, height: height + 0.08), materials: [UnlitMaterial(color: .black)])
-        glow.position.z = -0.012; glow.isEnabled = false; root.addChild(glow)
-        light.position = [0, 0, 0.1]; light.light.attenuationRadius = 3; light.isEnabled = false; root.addChild(light)
-        surface.components.set(InputTargetComponent())
-        surface.components.set(HoverEffectComponent())
-        for index in 0..<4 {
-            let corner = ModelEntity(mesh: .generateSphere(radius: 0.025), materials: [UnlitMaterial(color: .white)])
-            corner.name = "PortalCorner\(index)"
-            corner.components.set(InputTargetComponent())
-            corner.components.set(HoverEffectComponent())
-            corner.components.set(CollisionComponent(shapes: [.generateBox(size: SIMD3(repeating: 0.10))]))
-            root.addChild(corner); corners.append(corner)
-        }
-        surface.model = ModelComponent(mesh: Self.mesh(width: width, height: height), materials: [UnlitMaterial(color: .darkGray)])
-        updateGeometry()
+    /// Replace the complete panel at stream start, preserving world placement and controls.
+    func spawnPanel(sixDoF: Bool) {
+        dragStart = nil; sizeStart = nil; yawStart = nil; manipulating = false
+        panelHost.spawn(sixDoF: sixDoF)
+        if !sixDoF { needsRecenter = false }
+        updateGeometry(); revealControls()
+        setLightingColor(lightingColor, enabled: lightingEnabled)
     }
 
-    func install(texture: TextureResource, isCurrent: @MainActor () -> Bool = { true }) async throws {
-        let token = UUID(); materialToken = token
-        var material = try await ShaderGraphMaterial(named: "/Root/SBSMaterial", from: "SBSMaterial")
-        try material.setParameter(name: "texture", value: .textureResource(texture))
-        guard token == materialToken, isCurrent() else { return }
-        stereoMaterial = material
-        surface.model?.materials = [material]
+    func preparePreviewPanel(sixDoF: Bool) {
+        if panelHost.sixDoF != sixDoF { spawnPanel(sixDoF: sixDoF) }
+    }
+
+    func install(texture: TextureResource, isCurrent: @escaping @MainActor () -> Bool = { true }) async throws {
+        try await panelHost.install(texture: texture, isCurrent: isCurrent)
     }
 
     func startTracking() async {
@@ -120,7 +103,7 @@ final class PortalSceneController {
         calibration.columns.3 = SIMD4(deviceToHead, 1)
         let head = anchor.originFromAnchorTransform * calibration
         if !placed { place(inFrontOf: head) }
-        else if needsRecenter {
+        else if needsRecenter && panelHost.sixDoF {
             lastHead = head
             trackingMessage = "Tracking recovered. Recenter the portal to resume."
             onSample?(head, false, trackingEpoch, UInt64(now * 1_000_000_000))
@@ -135,7 +118,7 @@ final class PortalSceneController {
     private func loseTracking(_ reason: String) {
         if trackingValid {
             let previous = trackingEpoch; trackingEpoch &+= 1
-            needsRecenter = placed
+            needsRecenter = placed && panelHost.sixDoF
             onEpoch?(previous, trackingEpoch)
         }
         trackingValid = false; trackingMessage = reason
@@ -163,6 +146,7 @@ final class PortalSceneController {
     }
     func calibrationChanged() { changed() }
     func setLightingColor(_ rgb: SIMD3<Float>, enabled: Bool) {
+        lightingColor = rgb; lightingEnabled = enabled
         let color = UIColor(red: CGFloat(rgb.x), green: CGFloat(rgb.y), blue: CGFloat(rgb.z), alpha: 1)
         glow.model?.materials = [UnlitMaterial(color: color)]
         glow.components.set(OpacityComponent(opacity: 0.25))
@@ -205,41 +189,6 @@ final class PortalSceneController {
 
     private func changed() { revision &+= 1; updateGeometry(); onGeometryChanged?() }
     private func updateGeometry() {
-        surface.model?.mesh = Self.mesh(width: width, height: height)
-        surface.components.set(CollisionComponent(shapes: [.generateBox(size: [width, height, 0.015])]))
-        backdrop.model?.mesh = Self.mesh(width: width + 0.012, height: height + 0.012)
-        backdrop.components.set(CollisionComponent(shapes: [.generateBox(size: [width + 0.012, height + 0.012, 0.015])]))
-        glow.model?.mesh = Self.mesh(width: width + 0.08, height: height + 0.08)
-        for (index, corner) in corners.enumerated() {
-            corner.scale = SIMD3(repeating: width / (0.7 * baseAspect))
-            // Retain a 10 cm physical hit target when the visible handle shrinks.
-            corner.components.set(CollisionComponent(shapes: [.generateBox(size: SIMD3(repeating: max(0.10, 0.10 / corner.scale.x)))]))
-            corner.position = [index % 2 == 0 ? -width / 2 : width / 2, index < 2 ? -height / 2 : height / 2, 0.015]
-        }
-        shelf.position = [0, -height / 2 - 0.06, 0.015]
-    }
-
-    private static func mesh(width: Float, height: Float) -> MeshResource {
-        let radius = min(0.025, height * 0.05)
-        var positions: [SIMD3<Float>] = [[0, 0, 0]]
-        var uv: [SIMD2<Float>] = [[0.5, 0.5]]
-        for quadrant in 0..<4 {
-            let cx = quadrant == 0 || quadrant == 3 ? width / 2 - radius : -width / 2 + radius
-            let cy = quadrant < 2 ? height / 2 - radius : -height / 2 + radius
-            for step in 0...8 {
-                let angle = Float(quadrant) * .pi / 2 + Float(step) * .pi / 16
-                let x = cx + radius * cos(angle), y = cy + radius * sin(angle)
-                positions.append([x, y, 0]); uv.append([x / width + 0.5, y / height + 0.5])
-            }
-        }
-        var indices: [UInt32] = []
-        for index in 1..<positions.count { indices += [0, UInt32(index), UInt32(index == positions.count - 1 ? 1 : index + 1)] }
-        var descriptor = MeshDescriptor(name: "PortalRoundedPlane")
-        descriptor.positions = MeshBuffers.Positions(positions)
-        descriptor.normals = MeshBuffers.Normals(Array(repeating: [0, 0, 1], count: positions.count))
-        descriptor.textureCoordinates = MeshBuffers.TextureCoordinates(uv)
-        descriptor.primitives = .triangles(indices)
-        // Descriptor is generated from bounded dimensions and constant topology.
-        return (try? MeshResource.generate(from: [descriptor])) ?? .generatePlane(width: width, height: height)
+        panelHost.panel.updateGeometry(width: width, height: height, aspect: baseAspect)
     }
 }

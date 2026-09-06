@@ -2,14 +2,17 @@ import Foundation
 import RealityKit
 import VideoToolbox
 import Observation
+import OSLog
 
 @MainActor @Observable final class MoonlightSession {
+    private let logger = Logger(subsystem: "com.joshuajones.Moonlight-6Dof-Vision", category: "StreamRequest")
     enum State: Equatable { case idle, connecting, streaming, stopping, failed(String) }
     var state = State.idle
     var stage = "Not streaming"
     var statistics = "Not streaming"
     var activeConfiguration: StreamPreferences?
-    var negotiatedWidth = 0, negotiatedHeight = 0
+    var negotiatedWidth = 0
+    var negotiatedHeight = 0
     var negotiatedHDR: Bool?
     var dynamicRangeDescription: String {
         guard let requested = activeConfiguration else { return "Not streaming" }
@@ -22,8 +25,9 @@ import Observation
     var onEnded: ((String) -> Void)?
     var onStarted: (() -> Void)?
     var onDecodedBuffer: ((CVImageBuffer) -> Bool)?
-    var onPresentedFrame: ((PortalFrameIdentity) -> Void)?
+    var onPresentedFrame: ((PortalFrameIdentity?) -> Void)?
     var sampleLighting: ((CVPixelBuffer) -> Void)?
+    private var receivedPresentedFrame = false
     private var client: MLClient?
     private var decoder: DrawableVideoDecoder?
     private var statsTask: Task<Void, Never>?
@@ -37,9 +41,12 @@ import Observation
         guard operation == request else { return }
         guard let certificate = PortalKeychain.data(for: server.address) else { state = .failed("Pair this server first"); return }
         let generation = UUID(); token = generation
+        receivedPresentedFrame = false
         do {
             let formats = try preferences.videoFormats()
-            let texture = try StereoPreview.makeTexture()
+            logger.notice("Starting stream: codec=\(preferences.codec, privacy: .public), formatMask=\(formats), size=\(preferences.encodedWidth)x\(preferences.encodedHeight), fps=\(preferences.fps), HDR=\(preferences.hdr), 6DoF=\(preferences.metadata)")
+            PortalDiagnostics.shared().record("Stream request: codec=\(preferences.codec), audio=\(preferences.audio), size=\(preferences.encodedWidth)x\(preferences.encodedHeight), HDR=\(preferences.hdr), 6DoF=\(preferences.metadata)")
+            let texture = try StereoPreview.makeTexture(stereo: preferences.metadata)
             let client = MLClient()
             client.event = { [weak self] name, payload in
                 Task { @MainActor in guard let self, self.token == generation else { return }; self.handle(name, payload: payload) }
@@ -53,8 +60,17 @@ import Observation
                     self.negotiatedWidth = width; self.negotiatedHeight = height
                     self.videoTexture = texture; self.onTexture?(texture, width, height)
                 })
-            decoder.acceptDecodedFrame = onDecodedBuffer
-            decoder.didPresentFrame = onPresentedFrame
+            decoder.acceptDecodedFrame = preferences.metadata ? onDecodedBuffer : nil
+            decoder.didPresentFrame = { [weak self] identity in
+                Task { @MainActor in
+                    guard let self, self.token == generation else { return }
+                    if !self.receivedPresentedFrame {
+                        self.receivedPresentedFrame = true
+                        PortalDiagnostics.shared().record("First decoded video frame completed GPU copy")
+                    }
+                    self.onPresentedFrame?(identity)
+                }
+            }
             decoder.sampleLighting = sampleLighting
             decoder.metadataRows = preferences.metadata ? 16 : 0
             let config = StreamConfiguration()
@@ -67,6 +83,10 @@ import Observation
             self.client = client; self.decoder = decoder; self.activeConfiguration = preferences
             negotiatedHDR = nil
             state = .connecting; stage = "Connecting"
+            // Install the chosen material immediately, including when no frame
+            // has decoded yet. The same texture later receives drawable updates.
+            videoTexture = texture
+            onTexture?(texture, preferences.encodedWidth, preferences.eyeHeight)
             client.start(config: config, renderer: decoder)
             statsTask = Task { [weak self] in
                 while !Task.isCancelled {
@@ -86,12 +106,14 @@ import Observation
     private func stopCore() async {
         if let stopping { await stopping.value; return }
         guard let client else { state = .idle; return }
+        PortalDiagnostics.shared().record("Native stream teardown begin")
         token = UUID(); state = .stopping; gamepad.setActive(false)
         statsTask?.cancel(); statsTask = nil
         let stopTask = Task { @MainActor in
             await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in client.stop { continuation.resume() } }
             // Every waiter observes full teardown, including Swift-owned resources. Keeping this
             // inside the shared task prevents a reconnect from racing another waiter's cleanup.
+            PortalDiagnostics.shared().record("Native stream teardown complete")
             self.client = nil; self.decoder = nil; self.videoTexture = nil
             self.activeConfiguration = nil; self.negotiatedWidth = 0; self.negotiatedHeight = 0
             self.negotiatedHDR = nil
@@ -101,8 +123,13 @@ import Observation
         await stopTask.value
     }
     private func handle(_ name: String, payload: [AnyHashable: Any]) {
+        if ["stage", "started", "error", "terminated"].contains(name) {
+            PortalDiagnostics.shared().record("Native event: \(name), code=\(payload["code"] ?? "none")")
+        }
         switch name {
-        case "stage": stage = payload["message"] as? String ?? "Connecting"
+        case "stage":
+            stage = payload["message"] as? String ?? "Connecting"
+            PortalDiagnostics.shared().record("Connection stage: \(stage)")
         case "started": stage = "Connected"; onStarted?()
         case "video": state = .streaming
         case "hdr":

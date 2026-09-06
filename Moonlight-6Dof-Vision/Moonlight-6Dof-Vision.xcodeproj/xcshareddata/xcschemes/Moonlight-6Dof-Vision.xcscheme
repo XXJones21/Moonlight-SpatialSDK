@@ -6,8 +6,9 @@
     </BuildActionEntry></BuildActionEntries>
   </BuildAction>
   <TestAction buildConfiguration="Debug" shouldUseLaunchSchemeArgsEnv="YES"/>
-  <LaunchAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.IDEFoundation.Launcher.LLDB" launchStyle="0" useCustomWorkingDirectory="NO" ignoresPersistentStateOnLaunch="NO" debugDocumentVersioning="YES" allowLocationSimulation="YES">
+  <LaunchAction buildConfiguration="Debug" selectedDebuggerIdentifier="" selectedLauncherIdentifier="Xcode.IDEFoundation.Launcher.PosixSpawn" disableMainThreadChecker="YES" disablePerformanceAntipatternChecker="YES" enableGPUFrameCaptureMode="3" enableGPUValidationMode="1" launchStyle="0" useCustomWorkingDirectory="NO" ignoresPersistentStateOnLaunch="NO" debugDocumentVersioning="YES" allowLocationSimulation="YES">
     <BuildableProductRunnable runnableDebuggingMode="0"><BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="DFBE8F66304D3D27006FF6D3" BuildableName="Moonlight-6Dof-Vision.app" BlueprintName="Moonlight-6Dof-Vision" ReferencedContainer="container:Moonlight-6Dof-Vision.xcodeproj"/></BuildableProductRunnable>
+    <MetalAPIValidationSettings isEnabled="No"/>
   </LaunchAction>
   <ProfileAction buildConfiguration="Release" shouldUseLaunchSchemeArgsEnv="YES" useCustomWorkingDirectory="NO" debugDocumentVersioning="YES"/>
   <AnalyzeAction buildConfiguration="Debug"/>

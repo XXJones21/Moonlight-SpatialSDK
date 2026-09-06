@@ -13,7 +13,7 @@ struct StreamConfigurationView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Configure Stream").font(.headline)
             capabilityFeedback
-            Picker("Resolution per eye", selection: Binding(get: { "\(draft.eyeWidth)x\(draft.eyeHeight)" }, set: { value in
+            Picker(app.sixDoFEnabled ? "Resolution per eye" : "Resolution", selection: Binding(get: { "\(draft.eyeWidth)x\(draft.eyeHeight)" }, set: { value in
                 let parts = value.split(separator: "x").compactMap { Int($0) }; if parts.count == 2 { draft.eyeWidth = parts[0]; draft.eyeHeight = parts[1] }
             })) {
                 ForEach(StreamPreferences.resolutions, id: \.self) { size in
@@ -39,21 +39,39 @@ struct StreamConfigurationView: View {
             if let reason = capabilities.unavailableReason(for: draft), !capabilities.isLoading {
                 Text(reason).font(.caption).foregroundStyle(.orange)
             }
-            HStack {
-                Button("Apply") { apply(draft); savedMessage = true }
-                    .disabled(capabilities.isLoading || capabilities.unavailableReason(for: draft) != nil)
-                if savedMessage { Text("Saved for the next connection").font(.caption).foregroundStyle(.secondary) }
+            if draft == saved || savedMessage {
+                Text("Saved automatically for Connect and Reconnect. An active stream keeps its current settings until reconnected.")
+                    .font(.caption).foregroundStyle(.secondary)
+            } else {
+                Text("Selection not saved yet. Wait for capabilities or resolve the message above before connecting. Closing this configuration discards unsaved changes.")
+                    .font(.caption).foregroundStyle(.orange)
             }
         }.padding(16).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-            .onChange(of: draft) { savedMessage = false }
-            .task(id: app.connection.selected?.address) { capabilities.load(server: app.connection.selected) }
-            .onDisappear { capabilities.cancel() }
+            .onChange(of: draft) { saveIfValid() }
+            .onChange(of: saved) { _, value in if draft != value { draft = value } }
+            .onChange(of: capabilities.state) { saveIfValid() }
+            .onChange(of: app.sixDoFEnabled) { _, enabled in draft.metadata = enabled }
+            .task(id: app.connection.selected?.address) { draft.metadata = app.sixDoFEnabled; capabilities.load(server: app.connection.selected) }
+            .onDisappear { capabilities.cancel(); app.connection.hasPendingStreamSettings = false }
+    }
+
+    private func saveIfValid() {
+        app.connection.hasPendingStreamSettings = draft != saved
+        guard !capabilities.isLoading, capabilities.unavailableReason(for: draft) == nil else {
+            savedMessage = false
+            return
+        }
+        if draft != saved { apply(draft) }
+        app.connection.hasPendingStreamSettings = false
+        savedMessage = true
     }
 
     private var encodedSizeDescription: String {
         let encoded = EncodedStreamSize(draft)
         let metadata = encoded.metadataRows > 0 ? ", including \(encoded.metadataRows) frame-identity rows" : ""
-        return "Stereo uses twice the per-eye width: \(encoded.width) × \(encoded.height) encoded pixels\(metadata)."
+        return draft.metadata
+            ? "6DoF stereo: \(encoded.width) × \(encoded.height) encoded pixels\(metadata)."
+            : "Desktop stream: \(encoded.width) × \(encoded.height), shown in both eyes."
     }
 
     @ViewBuilder private var capabilityFeedback: some View {
@@ -76,7 +94,7 @@ struct StreamConfigurationView: View {
                     Text("Host codec support was not reported and remains unknown.").foregroundStyle(.secondary)
                 }
                 if let modes = capabilities.hostModes {
-                    Text("Filtering against \(modes.count) host-advertised display modes using the full encoded stereo size.")
+                    Text("Filtering against \(modes.count) host-advertised display modes using the requested stream size.")
                         .foregroundStyle(.secondary)
                 } else {
                     Text("The host did not report usable display modes. Resolution and FPS limits are unknown.")
@@ -115,6 +133,10 @@ struct ImmersiveOptionsView: View {
         @Bindable var app = app
         VStack(alignment: .leading, spacing: 16) {
             Text("Immersive Options").font(.title2)
+            StreamModeToggle()
+            Text("Off streams the normal desktop. On uses the supported game's stereo portal output. Changing this restarts an active stream.")
+                .font(.caption).foregroundStyle(.secondary)
+            if app.changingStreamMode { ProgressView("Changing stream mode…") }
             Toggle("Enable spatial audio", isOn: $app.spatialAudio)
             Toggle("Room Dimming", isOn: $app.roomDimming)
             Toggle("Lighting Emission", isOn: $app.lightingEmission)
@@ -122,5 +144,14 @@ struct ImmersiveOptionsView: View {
             Text("Reflections are unavailable in this version.").font(.caption).foregroundStyle(.secondary)
             Button("Close") { dismiss() }
         }.padding(24).frame(width: 440)
+    }
+}
+
+/// The same control is available beside Connect and in Immersive Options.
+struct StreamModeToggle: View {
+    @Environment(AppModel.self) private var app
+    var body: some View {
+        Toggle("6DoF Window", isOn: Binding(get: { app.sixDoFEnabled }, set: app.setSixDoFEnabled))
+            .disabled(app.changingStreamMode || app.session.state == .connecting || app.session.state == .stopping)
     }
 }

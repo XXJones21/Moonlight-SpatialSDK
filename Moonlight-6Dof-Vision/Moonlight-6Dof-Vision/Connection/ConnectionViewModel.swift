@@ -16,6 +16,7 @@ import Observation
     var pin: String?
     var showPIN = false
     var preferences = StreamPreferences.load()
+    var hasPendingStreamSettings = false
     private var request = UUID()
     private var client: MLClient?
     init() {

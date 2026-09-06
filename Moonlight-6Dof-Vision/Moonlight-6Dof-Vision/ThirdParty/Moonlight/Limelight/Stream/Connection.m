@@ -664,6 +664,9 @@ void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t
     renderer = _instanceRenderer;
     _callbacks = _instanceCallbacks;
     
+    NSLog(@"Native stream request: formatMask=0x%04x, size=%dx%d, fps=%d, serverCodecMask=0x%x",
+          _streamConfig.supportedVideoFormats, _streamConfig.width, _streamConfig.height,
+          _streamConfig.fps, _serverInfo.serverCodecModeSupport);
     LiStartConnection(&_serverInfo,
                       &_streamConfig,
                       &_clCallbacks,

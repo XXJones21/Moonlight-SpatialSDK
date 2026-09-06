@@ -22,6 +22,7 @@ import RealityKit
 import SwiftUI
 import VideoToolbox
 import CoreFoundation
+import OSLog
 
 // Add these constants after your existing constants
 let kCVPixelBufferYCbCrMatrixKey = "YCbCrMatrix" as CFString
@@ -69,9 +70,18 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
     // MARK: - Properties
 
     var acceptDecodedFrame: ((CVImageBuffer) -> Bool)?
-    var didPresentFrame: ((PortalFrameIdentity) -> Void)?
+    var didPresentFrame: ((PortalFrameIdentity?) -> Void)?
     var sampleLighting: ((CVPixelBuffer) -> Void)?
     var metadataRows = 16
+    private let diagnosticLock = NSLock()
+    private var diagnosticEvents = Set<String>()
+    private func diagnoseOnce(_ key: String, _ message: String) {
+        diagnosticLock.lock()
+        let first = diagnosticEvents.insert(key).inserted
+        diagnosticLock.unlock()
+        if first { PortalDiagnostics.shared().record(message) }
+    }
+    private let logger = Logger(subsystem: "com.joshuajones.Moonlight-6Dof-Vision", category: "VideoDecoder")
     private var callbacks: ConnectionCallbacks
     private var streamAspectRatio: Float
 
@@ -198,13 +208,20 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
     func decompressionOutputCallback(
         decompressionOutputRefCon _: UnsafeMutableRawPointer?,
         sourceFrameRefCon _: UnsafeMutableRawPointer?,
-        status _: OSStatus,
+        status: OSStatus,
         infoFlags _: VTDecodeInfoFlags,
         imageBuffer: CVImageBuffer?,
         presentationTimeStamp _: CMTime,
         presentationDuration _: CMTime?
     ) {
+        guard status == noErr else {
+            diagnoseOnce("output-failure", "VideoToolbox output failed: \(status)")
+            logger.error("VideoToolbox output failed: \(status)")
+            LiRequestIdrFrame()
+            return
+        }
         guard let imageBuffer = imageBuffer else { return }
+        diagnoseOnce("decoded", "First VideoToolbox decoded image: \(CVPixelBufferGetWidth(imageBuffer))x\(CVPixelBufferGetHeight(imageBuffer))")
         if let acceptDecodedFrame, !acceptDecodedFrame(imageBuffer) { return }
         
         if inflightSemaphore.wait(timeout: .now()) != .success {
@@ -575,9 +592,9 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
             ambDrawable.present()
         }
 
-        let identity = PortalFrameIdentity.read(imageBuffer)
+        let identity = metadataRows > 0 ? PortalFrameIdentity.read(imageBuffer) : nil
         commandBuffer.addCompletedHandler { [weak self] completed in
-            guard completed.status == .completed, let identity else { return }
+            guard completed.status == .completed else { return }
             self?.sampleLighting?(imageBuffer)
             self?.didPresentFrame?(identity)
         }
@@ -686,6 +703,10 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
     }
 
     func start() {
+        if !Thread.isMainThread {
+            DispatchQueue.main.sync { self.start() }
+            return
+        }
         print("DrawableVideoDecoder: start() display link")
         displayLink = CADisplayLink(target: self, selector: #selector(displayLinkCallback(_:)))
         if #available(iOS 15.0, tvOS 15.0, *) {
@@ -698,15 +719,18 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
             displayLink?.preferredFramesPerSecond = Int(frameRate)
         }
 
-        displayLink?.add(to: .main, forMode: .default)
+        displayLink?.add(to: .main, forMode: .common)
     }
 
     func stop() {
         print("DrawableVideoDecoder: stop()")
-        displayLink?.invalidate()
-        displayLink = nil
-        
+        // Join any main-thread frame submission before native teardown can free its queue.
+        let stopDisplayLink = { self.displayLink?.invalidate(); self.displayLink = nil }
+        if Thread.isMainThread { stopDisplayLink() }
+        else { DispatchQueue.main.sync(execute: stopDisplayLink) }
+
         if let session = session {
+            VTDecompressionSessionWaitForAsynchronousFrames(session)
             VTDecompressionSessionInvalidate(session)
             self.session = nil
         }
@@ -766,19 +790,32 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
         bufferType: Int32,
         decode decodeUnit: PDECODE_UNIT!
     ) -> Int32 {
+        // Connection.m transfers malloc-owned picture data; parameter sets are borrowed.
+        defer { if bufferType == BUFFER_TYPE_PICDATA { free(dataPtr) } }
+        guard let dataPtr, let decodeUnit, length > 0 else { return DR_NEED_IDR }
+        if bufferType == BUFFER_TYPE_PICDATA {
+            diagnoseOnce("received-frame", "First assembled video frame reached decoder: bytes=\(length), frame=\(decodeUnit.pointee.frameNumber)")
+        }
         if decodeUnit.pointee.frameType == FRAME_TYPE_IDR {
             if bufferType != BUFFER_TYPE_PICDATA {
                 if bufferType == BUFFER_TYPE_VPS
                     || bufferType == BUFFER_TYPE_SPS
                     || bufferType == BUFFER_TYPE_PPS
                 {
+                    guard length >= 4, dataPtr[0] == 0, dataPtr[1] == 0 else { return DR_NEED_IDR }
                     let startLen = (dataPtr[2] == 0x01) ? 3 : 4
+                    guard length > startLen, dataPtr[startLen - 1] == 1 else { return DR_NEED_IDR }
+                    if bufferType == BUFFER_TYPE_VPS || (bufferType == BUFFER_TYPE_SPS && (videoFormat & VIDEO_FORMAT_MASK_H264) != 0) {
+                        parameterSetBuffers.removeAll(keepingCapacity: true)
+                    }
                     let newData = Data(bytes: dataPtr + startLen, count: Int(length) - startLen)
                     parameterSetBuffers.append([UInt8](newData))
+                    diagnoseOnce("parameter-\(bufferType)", "Decoder parameter set: nativeType=\(bufferType), bytes=\(newData.count), accumulated=\(parameterSetBuffers.count)")
                 }
                 return DR_OK
             }
 
+            diagnoseOnce("idr-sets", "IDR format configuration: codec=\(codecDescription(videoFormat)), parameterSets=\(parameterSetBuffers.count)")
             if let formatDesc = recreateFormatDescriptionForIDR(
                 dataPtr: dataPtr, length: length
             ) {
@@ -802,9 +839,20 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
                     }
                 }
                 
-                VTDecompressionSessionCreate(allocator: kCFAllocatorDefault, formatDescription: formatDesc, decoderSpecification: decoderConfiguration as CFDictionary, imageBufferAttributes: attributes as CFDictionary, outputCallback: &decoderCallback, decompressionSessionOut: &session)
+                if let oldSession = session {
+                    VTDecompressionSessionWaitForAsynchronousFrames(oldSession)
+                    VTDecompressionSessionInvalidate(oldSession)
+                    session = nil
+                }
+                let creationStatus = VTDecompressionSessionCreate(allocator: kCFAllocatorDefault, formatDescription: formatDesc, decoderSpecification: decoderConfiguration as CFDictionary, imageBufferAttributes: attributes as CFDictionary, outputCallback: &decoderCallback, decompressionSessionOut: &session)
 
-                AudioHelpers.fixAudioForSurroundForCurrentWindow()
+                guard creationStatus == noErr, session != nil else {
+                    diagnoseOnce("session-failure", "VideoToolbox session creation failed: \(creationStatus)")
+                    logger.error("VideoToolbox session creation failed: \(creationStatus)")
+                    return DR_NEED_IDR
+                }
+                diagnoseOnce("session-ready", "VideoToolbox session created successfully")
+                // CoreAudioRenderer owns the portal's audio session and spatial positioning.
             } else {
                 return DR_NEED_IDR
             }
@@ -820,7 +868,6 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
             formatDesc: formatDesc,
             decodeUnit: decodeUnit
         ) else {
-            free(dataPtr)
             return DR_NEED_IDR
         }
 
@@ -828,15 +875,11 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
             return DR_NEED_IDR
         }
         
-        VTDecompressionSessionDecodeFrame(activeSession, sampleBuffer: sampleBuffer, flags: [._EnableAsynchronousDecompression], frameRefcon: nil, infoFlagsOut: nil)
-
-        // Only signal first-shown once per connection session.
-        // firstFrameEmitted covers the render-path notification; this covers
-        // the decode-path (IDR arrival) so the UI unblocks even before the
-        // first frame is composited.  Subsequent IDR frames (error recovery)
-        // must NOT re-fire the callback or they flood onChange observers.
-        if decodeUnit.pointee.frameType == FRAME_TYPE_IDR && !firstFrameEmitted {
-            callbacks.videoContentShown()
+        let decodeStatus = VTDecompressionSessionDecodeFrame(activeSession, sampleBuffer: sampleBuffer, flags: [._EnableAsynchronousDecompression], frameRefcon: nil, infoFlagsOut: nil)
+        guard decodeStatus == noErr else {
+            diagnoseOnce("submission-failure", "VideoToolbox submission failed: \(decodeStatus)")
+            logger.error("VideoToolbox submission failed: \(decodeStatus)")
+            return DR_NEED_IDR
         }
 
         return DR_OK
@@ -866,13 +909,10 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
 
     private func createH264FormatDescription() -> CMVideoFormatDescription? {
         let parameterSetCount = parameterSetBuffers.count
-        var paramPtrs: [UnsafePointer<UInt8>] = []
-        var paramSizes: [Int] = []
-
-        for (index, ps) in parameterSetBuffers.enumerated() {
-            paramPtrs.append(UnsafePointer<UInt8>(parameterSetBuffers[index]))
-            paramSizes.append(ps.count)
-        }
+        let storage = parameterSetBuffers.map { NSData(bytes: $0, length: $0.count) }
+        defer { withExtendedLifetime(storage) {} }
+        let paramPtrs = storage.map { $0.bytes.assumingMemoryBound(to: UInt8.self) }
+        let paramSizes = storage.map(\.length)
 
         var fromatDesc: CMFormatDescription?
         let status = CMVideoFormatDescriptionCreateFromH264ParameterSets(
@@ -885,6 +925,7 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
         )
 
         if status != noErr {
+            diagnoseOnce("h264-format-failure", "H264 format description failed: \(status), parameterSets=\(parameterSetCount)")
             print("Failed to create H264 format description: \(status)")
             return nil
         }
@@ -894,13 +935,10 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
 
     private func createHEVCFormatDescription() -> CMVideoFormatDescription? {
         let parameterSetCount = parameterSetBuffers.count
-        var paramPtrs: [UnsafePointer<UInt8>] = []
-        var paramSizes: [Int] = []
-
-        for ps in parameterSetBuffers {
-            paramPtrs.append(UnsafePointer<UInt8>(ps))
-            paramSizes.append(ps.count)
-        }
+        let storage = parameterSetBuffers.map { NSData(bytes: $0, length: $0.count) }
+        defer { withExtendedLifetime(storage) {} }
+        let paramPtrs = storage.map { $0.bytes.assumingMemoryBound(to: UInt8.self) }
+        let paramSizes = storage.map(\.length)
 
         let videoFormatParams = NSMutableDictionary()
 
@@ -923,6 +961,7 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
         )
 
         if status != noErr {
+            diagnoseOnce("hevc-format-failure", "HEVC format description failed: \(status), parameterSets=\(parameterSetCount)")
             print("Failed to create HEVC format description: \(status)")
             return nil
         }
@@ -1027,28 +1066,26 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
         formatDesc: CMVideoFormatDescription,
         decodeUnit: PDECODE_UNIT!
     ) -> CMSampleBuffer? {
-        var frameBlockBuffer: CMBlockBuffer?
-
+        let borrowed = UnsafeBufferPointer(start: dataPtr, count: length)
+        let data: Data
         if (videoFormat & (VIDEO_FORMAT_MASK_H264 | VIDEO_FORMAT_MASK_H265)) != 0 {
-            let nals = UnsafeMutableBufferPointer<UInt8>(start: UnsafeMutablePointer(mutating: dataPtr), count: length)
-            frameBlockBuffer = annexBBufferToCMSampleBuffer(buffer: nals, videoFormat: formatDesc)
+            guard let converted = VideoAnnexB.lengthPrefixed(borrowed) else { return nil }
+            data = converted
         } else {
-            let statusDataBlock = CMBlockBufferCreateWithMemoryBlock(
-                allocator: nil,
-                memoryBlock: dataPtr,
-                blockLength: length,
-                blockAllocator: kCFAllocatorDefault,
-                customBlockSource: nil,
-                offsetToData: 0,
-                dataLength: length,
-                flags: 0,
-                blockBufferOut: &frameBlockBuffer
-            )
-            if statusDataBlock != kCMBlockBufferNoErr {
-                print("CMBlockBufferCreateWithMemoryBlock failed: \(statusDataBlock)")
-                return nil
-            }
+            data = Data(buffer: borrowed)
         }
+        // CoreMedia owns a separate allocation on every path; the caller always frees its input once.
+        var frameBlockBuffer: CMBlockBuffer?
+        let allocationStatus = CMBlockBufferCreateWithMemoryBlock(allocator: kCFAllocatorDefault,
+            memoryBlock: nil, blockLength: data.count, blockAllocator: kCFAllocatorDefault,
+            customBlockSource: nil, offsetToData: 0, dataLength: data.count, flags: 0,
+            blockBufferOut: &frameBlockBuffer)
+        guard allocationStatus == kCMBlockBufferNoErr, let frameBlockBuffer else { return nil }
+        let copyStatus = data.withUnsafeBytes { bytes in
+            CMBlockBufferReplaceDataBytes(with: bytes.baseAddress!, blockBuffer: frameBlockBuffer,
+                                          offsetIntoDestination: 0, dataLength: bytes.count)
+        }
+        guard copyStatus == kCMBlockBufferNoErr else { return nil }
 
         var sampleBuffer: CMSampleBuffer?
         var sampleTiming = CMSampleTimingInfo(
@@ -1073,143 +1110,6 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
         }
 
         return sampleBuffer
-    }
-
-    private func findNaluIndices(bufferBounded: UnsafeMutableBufferPointer<UInt8>) -> ([NaluIndex], Bool) {
-        var elgibleForModifyInPlace = true
-        guard bufferBounded.count >= 3 else {
-            return ([], false)
-        }
-
-        var sequences = [NaluIndex]()
-
-        let end = bufferBounded.count - 3
-        var i = 0
-        let buffer = Data(bytesNoCopy: bufferBounded.baseAddress!, count: bufferBounded.count, deallocator: .none)
-        while i < end {
-            if buffer[i + 2] > 1 {
-                i += 3
-            } else if buffer[i + 2] == 1 {
-                if buffer[i + 1] == 0 && buffer[i] == 0 {
-                    var index = NaluIndex(startOffset: i, payloadStartOffset: i + 3, payloadSize: 0, threeByteHeader: true)
-                    if index.startOffset > 0 && buffer[index.startOffset - 1] == 0 {
-                        index.startOffset -= 1
-                        index.threeByteHeader = false
-                    } else {
-                        elgibleForModifyInPlace = false
-                    }
-
-                    if !sequences.isEmpty {
-                        sequences[sequences.count - 1].payloadSize = index.startOffset - sequences.last!.payloadStartOffset
-                    }
-
-                    sequences.append(index)
-                }
-
-                i += 3
-            } else {
-                i += 1
-            }
-        }
-
-        if !sequences.isEmpty {
-            sequences[sequences.count - 1].payloadSize = bufferBounded.count - sequences.last!.payloadStartOffset
-        }
-
-        return (sequences, elgibleForModifyInPlace)
-    }
-
-    private struct NaluIndex {
-        var startOffset: Int
-        var payloadStartOffset: Int
-        var payloadSize: Int
-        var threeByteHeader: Bool
-    }
-
-    private func annexBBufferToCMSampleBuffer(buffer: UnsafeMutableBufferPointer<UInt8>, videoFormat: CMFormatDescription) -> CMBlockBuffer? {
-        let (naluIndices, elgibleForModifyInPlace) = findNaluIndices(bufferBounded: buffer)
-
-        if elgibleForModifyInPlace {
-            return annexBBufferToCMSampleBufferModifyInPlace(buffer: buffer, videoFormat: videoFormat, naluIndices: naluIndices)
-        } else {
-            return annexBBufferToCMSampleBufferWithCopy(buffer: buffer, videoFormat: videoFormat, naluIndices: naluIndices)
-        }
-    }
-
-    private func annexBBufferToCMSampleBufferWithCopy(buffer: UnsafeMutableBufferPointer<UInt8>, videoFormat _: CMFormatDescription, naluIndices: [NaluIndex]) -> CMBlockBuffer? {
-        var err: OSStatus = 0
-        defer { buffer.deallocate() }
-
-        let blockBufferLength = buffer.count + naluIndices.filter(\.threeByteHeader).count
-        
-        guard let blockBuffer = try? CMBlockBuffer(length: blockBufferLength, flags: .assureMemoryNow) else {
-            print("Failed to allocate CMBlockBuffer (\(blockBufferLength) bytes) - dropping frame due to memory pressure")
-            return nil
-        }
-
-        var contiguousBuffer: CMBlockBuffer!
-        if !CMBlockBufferIsRangeContiguous(blockBuffer, atOffset: 0, length: 0) {
-            err = CMBlockBufferCreateContiguous(allocator: nil, sourceBuffer: blockBuffer, blockAllocator: nil, customBlockSource: nil, offsetToData: 0, dataLength: 0, flags: 0, blockBufferOut: &contiguousBuffer)
-            if err != 0 {
-                print("CMBlockBufferCreateContiguous error")
-                return nil
-            }
-        } else {
-            contiguousBuffer = blockBuffer
-        }
-
-        var blockBufferSize = 0
-        var dataPtr: UnsafeMutablePointer<Int8>!
-        err = CMBlockBufferGetDataPointer(contiguousBuffer, atOffset: 0, lengthAtOffsetOut: nil, totalLengthOut: &blockBufferSize, dataPointerOut: &dataPtr)
-        if err != 0 {
-            print("CMBlockBufferGetDataPointer error")
-            return nil
-        }
-
-        let pointer = UnsafeMutablePointer<UInt8>(OpaquePointer(dataPtr))!
-        var offset = 0
-
-        buffer.withUnsafeBytes { unsafeBytes in
-            let bytes = unsafeBytes.bindMemory(to: UInt8.self).baseAddress!
-
-            for index in naluIndices {
-                pointer.advanced(by: offset).pointee = UInt8((index.payloadSize >> 24) & 0xFF)
-                pointer.advanced(by: offset + 1).pointee = UInt8((index.payloadSize >> 16) & 0xFF)
-                pointer.advanced(by: offset + 2).pointee = UInt8((index.payloadSize >> 8) & 0xFF)
-                pointer.advanced(by: offset + 3).pointee = UInt8((index.payloadSize) & 0xFF)
-                offset += 4
-
-                pointer.advanced(by: offset).update(from: bytes.advanced(by: index.payloadStartOffset), count: blockBufferSize - offset)
-                offset += index.payloadSize
-            }
-        }
-
-        return contiguousBuffer
-    }
-
-    private func annexBBufferToCMSampleBufferModifyInPlace(buffer: UnsafeMutableBufferPointer<UInt8>, videoFormat _: CMFormatDescription, naluIndices: [NaluIndex]) -> CMBlockBuffer? {
-        var offset = 0
-
-        let umrbp = UnsafeMutableRawBufferPointer(start: buffer.baseAddress, count: buffer.count)
-        
-        guard let bb = try? CMBlockBuffer(buffer: umrbp, deallocator: { _, _ in buffer.deallocate() }, flags: .assureMemoryNow) else {
-            print("Failed to create CMBlockBuffer from buffer (\(buffer.count) bytes) - dropping frame due to memory pressure")
-            buffer.deallocate()
-            return nil
-        }
-
-        let pointer = UnsafeMutablePointer<UInt8>(OpaquePointer(buffer.baseAddress!))!
-        for index in naluIndices {
-            pointer.advanced(by: offset + 0).pointee = UInt8((index.payloadSize >> 24) & 0xFF)
-            pointer.advanced(by: offset + 1).pointee = UInt8((index.payloadSize >> 16) & 0xFF)
-            pointer.advanced(by: offset + 2).pointee = UInt8((index.payloadSize >> 8) & 0xFF)
-            pointer.advanced(by: offset + 3).pointee = UInt8((index.payloadSize) & 0xFF)
-            offset += 4
-
-            offset += index.payloadSize
-        }
-
-        return bb
     }
 
     // MARK: - HDR Mode
@@ -1329,22 +1229,5 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
 private let NALU_START_PREFIX_SIZE: Int = 3
 private let NAL_LENGTH_PREFIX_SIZE: Int = 4
 
-let VIDEO_FORMAT_H264: Int32 = 0x0001
-let VIDEO_FORMAT_H265: Int32 = 0x0100
-let VIDEO_FORMAT_H265_MAIN10: Int32 = 0x0200
-let VIDEO_FORMAT_AV1_MAIN8: Int32 = 0x1000
-let VIDEO_FORMAT_AV1_MAIN10: Int32 = 0x2000
-
-let VIDEO_FORMAT_MASK_H264: Int32 = 0x000F
-let VIDEO_FORMAT_MASK_H265: Int32 = 0x0F00
-let VIDEO_FORMAT_MASK_AV1: Int32 = 0xF000
-let VIDEO_FORMAT_MASK_10BIT: Int32 = 0x2200
-
-let FRAME_TYPE_IDR = 0x01
-let BUFFER_TYPE_PICDATA = 0x00
-let BUFFER_TYPE_VPS = 1
-let BUFFER_TYPE_SPS = 2
-let BUFFER_TYPE_PPS = 3
-
-let DR_OK: Int32 = 0
-let DR_NEED_IDR: Int32 = -1
+// Stream/codec/buffer constants come from the bridged Limelight.h.
+// Do not redeclare them here: Swift declarations shadow the native ABI.

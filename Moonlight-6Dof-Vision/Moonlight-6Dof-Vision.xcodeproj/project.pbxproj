@@ -6,8 +6,26 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A00000000000000000000003 /* OpenSSL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A00000000000000000000002 /* OpenSSL.framework */; };
+		A00000000000000000000004 /* OpenSSL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A00000000000000000000002 /* OpenSSL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A00000000000000000000005 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = Frameworks;
+			files = (
+				A00000000000000000000004 /* OpenSSL.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		A00000000000000000000001 /* PortalDependencies.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = PortalDependencies.xcconfig; sourceTree = "<group>"; };
+		A00000000000000000000002 /* OpenSSL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OpenSSL.framework; sourceTree = PORTAL_OPENSSL_FRAMEWORK_DIR; };
 		DFBE8F67304D3D27006FF6D3 /* Moonlight-6Dof-Vision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Moonlight-6Dof-Vision.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -16,10 +34,10 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				"ThirdParty/Moonlight/Common/enet/LICENSE",
-				"ThirdParty/Moonlight/Common/LICENSE.txt",
+				ThirdParty/Moonlight/Common/enet/LICENSE,
+				ThirdParty/Moonlight/Common/LICENSE.txt,
 				"ThirdParty/Moonlight/Import-manifest.json",
-				"ThirdParty/Moonlight/LICENSE.txt",
+				ThirdParty/Moonlight/LICENSE.txt,
 			);
 			target = DFBE8F66304D3D27006FF6D3 /* Moonlight-6Dof-Vision */;
 		};
@@ -43,6 +61,7 @@
 		DFBE8F64304D3D27006FF6D3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				A00000000000000000000003 /* OpenSSL.framework in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -54,6 +73,7 @@
 				DFBE8F69304D3D27006FF6D3 /* Moonlight-6Dof-Vision */,
 				DFBE8F68304D3D27006FF6D3 /* Products */,
 				A00000000000000000000001 /* PortalDependencies.xcconfig */,
+				A00000000000000000000002 /* OpenSSL.framework */,
 			);
 			sourceTree = "<group>";
 		};
@@ -75,6 +95,7 @@
 				DFBE8F63304D3D27006FF6D3 /* Sources */,
 				DFBE8F64304D3D27006FF6D3 /* Frameworks */,
 				DFBE8F65304D3D27006FF6D3 /* Resources */,
+				A00000000000000000000005 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);

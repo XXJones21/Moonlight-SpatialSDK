@@ -11,12 +11,13 @@ struct StreamPreferences: Codable, Equatable {
     var hdr = false
     var fullRange = false
     var bitrateKbps: Int? = nil
-    var metadata = true
-    var encodedWidth: Int { eyeWidth * 2 }
+    // 6DoF requires SBS plus frame identity strips; ordinary Moonlight uses one full image.
+    var metadata = false
+    var encodedWidth: Int { metadata ? eyeWidth * 2 : eyeWidth }
     var encodedHeight: Int { eyeHeight + (metadata ? 16 : 0) }
     var automaticBitrate: Int { min(150_000, max(5_000, Int(Double(encodedWidth * eyeHeight * fps) * 0.12 / 1000))) }
     static let resolutions = [[640,360],[854,480],[1280,720],[1920,1080],[2560,1440],[3840,2160]]
-    static let bench = StreamPreferences(eyeWidth: 1920, eyeHeight: 1080, codec: "hevc", bitrateKbps: 50_000)
+    static let bench = StreamPreferences(eyeWidth: 1920, eyeHeight: 1080, codec: "hevc", bitrateKbps: 50_000, metadata: true)
     static func load() -> Self {
         guard let data = UserDefaults.standard.data(forKey: "portal.stream"), let settings = try? JSONDecoder().decode(Self.self, from: data),
               resolutions.contains([settings.eyeWidth, settings.eyeHeight]), [30,60,90,120].contains(settings.fps),

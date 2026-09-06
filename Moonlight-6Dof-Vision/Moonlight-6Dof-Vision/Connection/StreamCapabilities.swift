@@ -11,7 +11,7 @@ struct EncodedStreamSize: Equatable {
     let metadataRows: Int
 
     init(eyeWidth: Int, eyeHeight: Int, metadata: Bool) {
-        width = eyeWidth * 2
+        width = metadata ? eyeWidth * 2 : eyeWidth
         metadataRows = metadata ? 16 : 0
         height = eyeHeight + metadataRows
     }
@@ -161,7 +161,7 @@ private final class HostModeParser: NSObject, XMLParserDelegate {
         }
         let encoded = EncodedStreamSize(preferences)
         if !supportsMode(encoded, fps: preferences.fps) {
-            return "The host does not advertise \(encoded.width) × \(encoded.height) at \(preferences.fps) FPS. Choose a listed combination or configure that full stereo mode on the host."
+            return "The host does not advertise \(encoded.width) × \(encoded.height) at \(preferences.fps) FPS. Choose a listed combination or configure that stream mode on the host."
         }
         return nil
     }

@@ -22,34 +22,40 @@ import Observation
     private var textureReady = false
     private var textureToken = UUID()
     private var sourceStatusAt = Date.distantPast
+    private var presentedAt = Date.distantPast
+    private var suspended = false
+    private var sixDoFEnabled: Bool { preferences?.metadata == true }
     var onEnded: ((String) -> Void)?
 
     init(scene: PortalSceneController, moonlight: MoonlightSession) {
         self.scene = scene; self.moonlight = moonlight
         scene.onSample = { [weak self] head, valid, epoch, time in self?.sample(head: head, valid: valid, epoch: epoch, time: time) }
         scene.onEpoch = { [weak self] previous, next in
-            guard let self, self.active else { return }
+            guard let self, self.active, self.sixDoFEnabled else { return }
             self.transport.requestReset(session: self.sessionID, previous: previous, next: next)
             self.sourceAvailable = false; self.updateGate(); self.hide(); self.state = .recovering
         }
         scene.onGeometryChanged = { [weak self] in
-            guard let self, self.active else { return }
+            guard let self, self.active, self.sixDoFEnabled else { return }
             self.updateGate(); self.hide(); self.state = .reconfiguring; self.status = "Updating portal view…"
         }
         let gate = self.gate
         moonlight.onDecodedBuffer = { gate.accepts($0) }
         moonlight.onPresentedFrame = { [weak self] identity in
-            Task { @MainActor in
-                guard let self, self.active, self.textureReady, self.sourceAvailable, Date().timeIntervalSince(self.sourceStatusAt) <= 0.3, gate.presented(identity) else { return }
-                self.renderFrameID = identity.frame; self.state = .streaming; self.status = "Streaming"
-                self.scene.surface.components.set(OpacityComponent(opacity: 1))
-                self.moonlight.gamepad.setActive(true)
+            guard let self, self.active, !self.suspended else { return }
+            if self.sixDoFEnabled {
+                guard self.textureReady, self.sourceAvailable,
+                      Date().timeIntervalSince(self.sourceStatusAt) <= 0.3,
+                      let identity, gate.presented(identity) else { return }
+                self.renderFrameID = identity.frame
             }
+            self.presentedAt = Date()
+            self.revealIfReady()
         }
         moonlight.onTexture = { [weak self] texture, width, height in
             guard let self, self.active, let preferences = self.preferences else { return }
             guard width == preferences.encodedWidth, height == preferences.eyeHeight else {
-                self.fail("The host returned \(width) × \(height) content. Expected \(preferences.encodedWidth) × \(preferences.eyeHeight). Match the capture display to the selected SBS resolution."); return
+                self.fail("The host returned \(width) × \(height) content. Expected \(preferences.encodedWidth) × \(preferences.eyeHeight). Match the capture display to the selected stream resolution."); return
             }
             self.hide(); self.textureReady = false
             let sessionToken = self.startToken, textureToken = UUID(); self.textureToken = textureToken
@@ -57,14 +63,14 @@ import Observation
                 let current = { self.active && self.startToken == sessionToken && self.textureToken == textureToken }
                 do {
                     try await self.scene.install(texture: texture, isCurrent: current)
-                    if current() { self.textureReady = true }
-                } catch { if current() { self.fail("Stereo material failed: \(error.localizedDescription)") } }
+                    if current() { self.textureReady = true; self.revealIfReady() }
+                } catch { if current() { self.fail("Video material failed: \(error.localizedDescription)") } }
             }
         }
         moonlight.onEnded = { [weak self] message in self?.fail(message) }
         transport.onStatus = { [weak self] status in Task { @MainActor in self?.receive(status) } }
         transport.onError = { [weak self] error in Task { @MainActor in
-            guard let self, self.active else { return }; self.sourceAvailable = false; self.hide(); self.state = .recovering; self.status = "Pose connection: \(error)"
+            guard let self, self.active, self.sixDoFEnabled else { return }; self.sourceAvailable = false; self.hide(); self.state = .recovering; self.status = "Pose connection: \(error)"
         } }
     }
 
@@ -72,27 +78,30 @@ import Observation
         let token = UUID(); startToken = token
         await tearDown()
         guard startToken == token else { return }
-        var preferences = preferences; preferences.metadata = true
         self.preferences = preferences
         sessionID = UInt64.random(in: 1...UInt64.max); sequence = 0
-        active = true; sourceAvailable = false; state = .connecting; status = "Connecting…"
+        active = true; suspended = false; presentedAt = .distantPast; sourceAvailable = false; state = .connecting; status = "Connecting…"
+        scene.spawnPanel(sixDoF: preferences.metadata)
         scene.setAspect(Float(preferences.eyeWidth) / Float(preferences.eyeHeight))
         updateGate(); hide()
-        transport.connect(host: server.host)
+        if sixDoFEnabled { transport.connect(host: server.host) }
         watchdog = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .milliseconds(50))
                 guard let self, self.active, !Task.isCancelled else { return }
-                if !self.gate.fresh || !self.sourceAvailable || Date().timeIntervalSince(self.sourceStatusAt) > 0.3 {
+                let stale = self.sixDoFEnabled
+                    ? (!self.gate.fresh || !self.sourceAvailable || Date().timeIntervalSince(self.sourceStatusAt) > 0.3)
+                    : Date().timeIntervalSince(self.presentedAt) > 1
+                if stale {
                     self.hide()
-                    if self.state == .streaming { self.state = .recovering; self.status = "Waiting for a current portal frame…" }
+                    if self.state == .streaming { self.state = .recovering; self.status = self.sixDoFEnabled ? "Waiting for a current portal frame…" : "Waiting for video…" }
                 }
             }
         }
         await moonlight.start(server: server, preferences: preferences)
         guard startToken == token, active else { return }
         if case .failed(let message) = moonlight.state { fail(message) }
-        else if state != .streaming { state = .awaitingTracking; status = "Waiting for tracking and portal video…" }
+        else if state != .streaming { state = .awaitingTracking; status = sixDoFEnabled ? "Waiting for tracking and portal video…" : "Waiting for Moonlight video…" }
     }
 
     func stop() async {
@@ -106,16 +115,29 @@ import Observation
         await moonlight.stop()
     }
     func suspend() {
+        suspended = true; presentedAt = .distantPast
         sourceAvailable = false; gate.close(); hide()
         if active { state = .recovering; status = "Tracking paused" }
     }
+    func resume() { suspended = false }
+    private func revealIfReady() {
+        guard active, !suspended, textureReady else { return }
+        if sixDoFEnabled {
+            guard gate.fresh, sourceAvailable, Date().timeIntervalSince(sourceStatusAt) <= 0.3 else { return }
+        } else {
+            guard Date().timeIntervalSince(presentedAt) <= 1 else { return }
+        }
+        state = .streaming; status = sixDoFEnabled ? "Streaming 6DoF portal" : "Streaming Moonlight"
+        scene.surface.components.set(OpacityComponent(opacity: 1))
+        moonlight.gamepad.setActive(true)
+    }
     private func updateGate() {
-        guard let preferences else { return }
+        guard let preferences, sixDoFEnabled else { gate.close(); return }
         gate.configure(session: sessionID, epoch: scene.trackingEpoch, revision: scene.revision, width: preferences.encodedWidth,
                        height: preferences.encodedHeight, tracking: scene.trackingValid)
     }
     private func sample(head: simd_float4x4, valid: Bool, epoch: UInt64, time: UInt64) {
-        guard active else { return }
+        guard active, sixDoFEnabled, !suspended else { return }
         sequence &+= 1; updateGate()
         transport.send(PortalState(sessionID: sessionID, trackingEpoch: epoch, sequence: sequence, geometryRevision: scene.revision,
                                    sampleTimeNs: time, targetTimeNs: time, trackingValid: valid,
@@ -124,7 +146,7 @@ import Observation
         if !valid { hide(); state = .recovering; status = scene.trackingMessage }
     }
     private func receive(_ value: PortalHostStatus) {
-        guard active, UInt64(value.sessionID) == sessionID, UInt64(value.trackingEpoch) == scene.trackingEpoch,
+        guard active, sixDoFEnabled, UInt64(value.sessionID) == sessionID, UInt64(value.trackingEpoch) == scene.trackingEpoch,
               UInt64(value.geometryRevision) == scene.revision,
               let accepted = UInt64(value.acceptedSequence), accepted <= sequence,
               accepted >= (lastHostStatus.flatMap { UInt64($0.acceptedSequence) } ?? 0) else { return }
@@ -137,6 +159,10 @@ import Observation
         guard active else { return }
         active = false; gate.close(); transport.stop(); watchdog?.cancel(); hide()
         state = .failed; status = message; onEnded?(message)
-        Task { await moonlight.stop() }
+        let failedToken = startToken
+        Task {
+            guard startToken == failedToken, !active else { return }
+            await moonlight.stop()
+        }
     }
 }
