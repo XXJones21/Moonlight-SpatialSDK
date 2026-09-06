@@ -54,9 +54,10 @@ final class PortalSceneController {
         updateGeometry()
     }
 
-    func install(texture: TextureResource) async throws {
+    func install(texture: TextureResource, isCurrent: @MainActor () -> Bool = { true }) async throws {
         var material = try await ShaderGraphMaterial(named: "/Root/SBSMaterial", from: "SBSMaterial")
         try material.setParameter(name: "texture", value: .textureResource(texture))
+        guard isCurrent() else { return }
         stereoMaterial = material
         surface.model?.materials = [material]
     }

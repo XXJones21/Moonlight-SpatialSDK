@@ -69,6 +69,9 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
     // MARK: - Properties
 
     var acceptDecodedFrame: ((CVImageBuffer) -> Bool)?
+    var didPresentFrame: ((PortalFrameIdentity) -> Void)?
+    var sampleLighting: ((CVPixelBuffer) -> Void)?
+    var metadataRows = 16
     private var callbacks: ConnectionCallbacks
     private var streamAspectRatio: Float
 
@@ -510,6 +513,8 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
         var enh = ColorEnhancementUniforms(saturation: satConWarm.0, contrast: satConWarm.1, warmth: satConWarm.2, padding1: 0)
         renderEncoder.setFragmentBytes(&enh, length: MemoryLayout<ColorEnhancementUniforms>.size, index: 2)
 
+        var portalVScale = Float(max(1, videoHeight - metadataRows)) / Float(videoHeight)
+        renderEncoder.setVertexBytes(&portalVScale, length: MemoryLayout<Float>.size, index: 7)
         renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
         renderEncoder.endEncoding()
 
@@ -541,6 +546,8 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
                 
                 if let ambRenderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: ambRenderPass) {
                     ambRenderEncoder.setRenderPipelineState(ambPipelineState)
+                    var ambVScale: Float = 1
+                    ambRenderEncoder.setVertexBytes(&ambVScale, length: MemoryLayout<Float>.size, index: 7)
                     
                     var isVolumeInt: Int32 = (self.isVolumeModeProvider?() ?? false) ? 1 : 0
                     ambRenderEncoder.setFragmentBytes(&isVolumeInt, length: MemoryLayout<Int32>.size, index: 1)
@@ -568,6 +575,12 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
             ambDrawable.present()
         }
 
+        let identity = PortalFrameIdentity.read(imageBuffer)
+        commandBuffer.addCompletedHandler { [weak self] completed in
+            guard completed.status == .completed, let identity else { return }
+            self?.sampleLighting?(imageBuffer)
+            self?.didPresentFrame?(identity)
+        }
         commandBuffer.commit()
         drawable.present()
 
@@ -591,7 +604,7 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
                 let descriptor = TextureResource.DrawableQueue.Descriptor(
                     pixelFormat: metalFormat,
                     width: Int(videoWidth),
-                    height: Int(videoHeight),
+                    height: max(1, Int(videoHeight) - metadataRows),
                     usage: [.renderTarget, .shaderRead],
                     mipmapsMode: .allocateAll
                 )
@@ -628,7 +641,7 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
 
             region = MTLRegionMake2D(0, 0, videoWidth, videoHeight)
 
-            self.callbackToRender(self.drawableQueue!, self.ambilightQueue, (videoWidth, videoHeight))
+            self.callbackToRender(self.drawableQueue!, self.ambilightQueue, (videoWidth, max(1, videoHeight - metadataRows)))
         }
     }
 
@@ -782,7 +795,8 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
                     attributes[kCVPixelBufferPixelFormatTypeKey] = kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
                 } else {
                     if (self.videoFormat & VIDEO_FORMAT_MASK_AV1) != 0 {
-                        attributes[kCVPixelBufferPixelFormatTypeKey] = kCVPixelFormatType_Lossless_32BGRA
+                        // Metadata readers require an uncompressed CPU-readable layout.
+                        attributes[kCVPixelBufferPixelFormatTypeKey] = kCVPixelFormatType_32BGRA
                     } else {
                         attributes[kCVPixelBufferPixelFormatTypeKey] = decodingFormat
                     }

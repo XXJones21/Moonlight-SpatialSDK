@@ -16,6 +16,8 @@ import Observation
     var onEnded: ((String) -> Void)?
     var onStarted: (() -> Void)?
     var onDecodedBuffer: ((CVImageBuffer) -> Bool)?
+    var onPresentedFrame: ((PortalFrameIdentity) -> Void)?
+    var sampleLighting: ((CVPixelBuffer) -> Void)?
     private var client: MLClient?
     private var decoder: DrawableVideoDecoder?
     private var statsTask: Task<Void, Never>?
@@ -46,6 +48,9 @@ import Observation
                     self.videoTexture = texture; self.onTexture?(texture, width, height)
                 })
             decoder.acceptDecodedFrame = onDecodedBuffer
+            decoder.didPresentFrame = onPresentedFrame
+            decoder.sampleLighting = sampleLighting
+            decoder.metadataRows = preferences.metadata ? 16 : 0
             let config = StreamConfiguration()
             config.host = server.address; config.appID = server.appID; config.appName = server.name
             config.width = Int32(preferences.encodedWidth); config.height = Int32(preferences.encodedHeight)

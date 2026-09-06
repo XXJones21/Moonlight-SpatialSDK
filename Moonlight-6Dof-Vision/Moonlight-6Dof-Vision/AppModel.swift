@@ -8,21 +8,35 @@ import RealityKit
     let portal = PortalSceneController()
     let session = MoonlightSession()
     let connection = ConnectionViewModel()
+    let coordinator: PortalSessionCoordinator
     var immersiveEffectsEnabled = false
     var roomDimming = false
     var lightingEmission = false
     var spatialAudio = false
     var message: String?
     var disconnected = false
+    private var lastConnection: (SavedServer, StreamPreferences)?
     init() {
-        session.onTexture = { [weak self] texture, width, height in
-            guard let self else { return }
-            self.portal.setAspect(Float(width / 2) / Float(height))
-            Task { do { try await self.portal.install(texture: texture) } catch { self.message = error.localizedDescription } }
-        }
-        session.onStarted = { [weak self] in self?.session.gamepad.setActive(true) }
-        session.onEnded = { [weak self] error in self?.message = error; self?.disconnected = true }
+        coordinator = PortalSessionCoordinator(scene: portal, moonlight: session)
+        coordinator.onEnded = { [weak self] error in self?.message = error; self?.disconnected = true; self?.portal.revealControls() }
     }
-    func start(server: SavedServer) async { disconnected = false; message = nil; await session.start(server: server, preferences: connection.preferences) }
-    func disconnect() { Task { await session.stop(); disconnected = true } }
+    func start(server: SavedServer) async {
+        let preferences = connection.preferences
+        lastConnection = (server, preferences); disconnected = false; message = nil
+        await coordinator.start(server: server, preferences: preferences)
+    }
+    func reconnect() async {
+        guard let (server, preferences) = lastConnection else { return }
+        disconnected = false; message = nil
+        await coordinator.start(server: server, preferences: preferences)
+    }
+    func disconnect() {
+        disconnected = true; portal.revealControls()
+        message = "Connection to \(lastConnection?.0.name ?? "the host") ended"
+        Task { await coordinator.stop() }
+    }
+    func spaceDidClose() {
+        immersiveSpaceState = .closed; portal.stopTracking()
+        Task { await coordinator.stop() }
+    }
 }

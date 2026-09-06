@@ -6,6 +6,7 @@ final class PortalTransport: @unchecked Sendable {
     private let queue = DispatchQueue(label: "portal.pose", qos: .userInteractive)
     private var connection: NWConnection?
     private var pending: Data?
+    private var latestSent: Data?
     private var sending = false
     private var generation: UInt64 = 0
     private var resets: [Data] = []
@@ -15,7 +16,7 @@ final class PortalTransport: @unchecked Sendable {
     func connect(host: String, port: UInt16 = 4243) {
         queue.async { [self] in
             generation &+= 1
-            connection?.cancel(); pending = nil; resets = []; sending = false
+            connection?.cancel(); pending = nil; latestSent = nil; resets = []; sending = false
             guard let port = NWEndpoint.Port(rawValue: port) else { return }
             let socket = NWConnection(host: NWEndpoint.Host(host), port: port, using: .udp)
             let token = generation
@@ -43,11 +44,11 @@ final class PortalTransport: @unchecked Sendable {
         }
     }
     func stop() {
-        queue.async { [self] in generation &+= 1; connection?.cancel(); connection = nil; pending = nil; resets = []; sending = false }
+        queue.async { [self] in generation &+= 1; connection?.cancel(); connection = nil; pending = nil; latestSent = nil; resets = []; sending = false }
     }
     private func flush() {
         guard !sending, let socket = connection, socket.state == .ready, let data = pending else { return }
-        pending = nil; sending = true
+        pending = nil; latestSent = data; sending = true
         let token = generation
         for reset in resets { socket.send(content: reset, completion: .idempotent) }
         socket.send(content: data, completion: .contentProcessed { [weak self] error in
@@ -60,8 +61,11 @@ final class PortalTransport: @unchecked Sendable {
     private func receive(_ socket: NWConnection, token: UInt64) {
         socket.receiveMessage { [weak self] data, _, _, error in
             guard let self, self.generation == token else { return }
-            if let data, data.count <= 1024,
-               let status = try? JSONDecoder().decode(PortalHostStatus.self, from: data), status.version == 1 {
+            if let data, let status = PortalHostStatus.decode(data), let sent = self.latestSent,
+               UInt64(status.sessionID) == sent.integerLE(at: 8, as: UInt64.self),
+               UInt64(status.trackingEpoch) == sent.integerLE(at: 16, as: UInt64.self),
+               UInt64(status.geometryRevision) == sent.integerLE(at: 32, as: UInt64.self),
+               let accepted = UInt64(status.acceptedSequence), accepted <= (sent.integerLE(at: 24, as: UInt64.self) ?? 0) {
                 if let epoch = UInt64(status.trackingEpoch), let session = UInt64(status.sessionID) {
                     self.resets.removeAll { packet in
                         packet.integerLE(at: 8, as: UInt64.self) == session && (packet.integerLE(at: 24, as: UInt64.self) ?? .max) <= epoch

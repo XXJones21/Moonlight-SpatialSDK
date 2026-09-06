@@ -254,11 +254,11 @@ inline float3 pqToneMapLumaDisplayP3(float3 cP3, float knee, float maxEDR) {
 }
 
 // MARK: - Vertex Shader
-vertex CopyVertexOut copyVertexShader(ushort vid [[vertex_id]]) {
+vertex CopyVertexOut copyVertexShader(ushort vid [[vertex_id]], constant float &portalVScale [[buffer(7)]]) {
     CopyVertexOut o;
     float2 uv = float2(float((vid << 1) & 2u), float(vid & 2u) * 0.5);
     o.position = float4((uv * float2(2.0, -2.0)) + float2(-1.0, 1.0), 0.0, 1.0);
-    o.uv = uv;
+    o.uv = float2(uv.x, uv.y * portalVScale);
     return o;
 }
 
