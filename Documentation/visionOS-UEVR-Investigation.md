@@ -161,21 +161,78 @@ compare latency and comfort against.
 - UEVR fork stability: the D3D12 path is described as unvalidated in its own release notes.
 - moonlight-ios-vision is a large, fast-moving fork; forking it means tracking its churn.
 
-## 7. Open questions for the project owner
+## 7. Decisions (2026-09-06)
 
-See the discussion thread. Summary of the decisions needed:
+- Product goal: a playable "3D diorama" window in the real room, not an immersive VR title.
+- Transport: Moonlight. Foveated Streaming stays as a fallback if latency proves unacceptable.
+- PC: RTX 4080. Private fork of UEVR-6DOF-Window is acceptable.
+- Input: Bluetooth gamepad over Moonlight's input channel. No motion controllers.
+- Surround: real room (mixed-immersion `ImmersiveSpace`, passthrough on).
+- Client base: `moonlight-ios-vision`, RealityKit mode, Metal acceptable where needed.
+- No curved window in the first version.
 
-1. Is Moonlight the transport requirement, or is "UEVR 6DOF window on Vision Pro with RealityKit"
-   the actual goal and Moonlight was the assumed means?
-2. Minimum visionOS version and GPU vendor constraints (visionOS 26.4 + NVIDIA RTX 40/50 unlocks A).
-3. Are changes to the UEVR fork on the table (needed for C, optional for A)?
-4. Input priority: gamepad only, or PS VR2 Sense motion controls?
-5. Passthrough outside the window versus an opaque surround.
-6. Start from moonlight-ios-vision (GPL, Swift/ObjC, RealityKit already) or a clean Swift app over
-   moonlight-common-c?
-7. Curved window support needed at launch?
-8. Target latency / comfort bar, and whether a Metal (CompositorServices) video layer is acceptable if
-   RealityKit cannot hit it.
+Head pose on visionOS requires an open `ImmersiveSpace`; that is fine because the RealityKit stream
+view already lives in one, passthrough stays on, and SwiftUI windows can coexist with it.
+
+## 8. Chosen design: option C, the portal projection
+
+The one correction to the original idea: sending head pose to the fork as it exists today is not
+enough, because its Window Mode renders full-FOV eye images and masks them. Displaying those on a
+quad gives a double projection. The fork must instead render each eye through the window rectangle
+(generalized off-axis perspective). UEVR already builds per-eye projections from four FOV tangents
+refreshed every frame (`raw_projections` -> `projections[eye]` in `update_matrices`), and it handles
+asymmetric frusta natively, so the change is:
+
+1. Keep the fork's anchored rectangle (origin, right, up, back, width, height, distance).
+2. Per frame, per eye: eye position `E` from the runtime; window plane at distance `d` along
+   `anchor_back`. Tangents relative to the window's basis:
+   `tanL = (winLeft - E.x) / (d_e)`, `tanR = (winRight - E.x) / d_e`, likewise up/down, where `d_e` is
+   the eye's perpendicular distance to the window plane and coordinates are in the window frame.
+3. Override the runtime view rotation with the window's orientation (the eye looks perpendicular to
+   the window, not along the head's forward), and override the four tangents. UEVR's existing
+   projection builder does the rest. Clamp tangents when the eye approaches the plane.
+4. The mask pass becomes optional (feather only). The full submitted eye image is the window
+   content, so VRto3D's side-by-side output is exactly what the Vision Pro quad should show.
+
+PC pipeline:
+
+```
+Vision Pro head pose --UDP OpenTrack (port 4242)--> VRto3D (SteamVR HMD driver, SBS output)
+                                                       |
+                            UEVR fork (OpenVR runtime, portal projection per eye)
+                                                       |
+                     Sunshine captures the SBS display --> Moonlight video + audio + gamepad input
+Vision Pro recenter/window size --UDP control msg--> UEVR fork WindowMode (request_recenter, W/H/d)
+```
+
+Vision Pro pipeline (fork of moonlight-ios-vision):
+
+- Mixed `ImmersiveSpace` with the existing RealityKit stream view in SBS mode
+  (`SBSMaterial.usda`, Camera Index Switch). Quad physical size = window W x H.
+- `ARKitSession` + `WorldTrackingProvider.queryDeviceAnchor` at display rate. Convert to OpenTrack
+  (x, y, z in cm, yaw, pitch, roll in degrees) and send over UDP to the PC.
+- Recenter: capture the device anchor, place the quad at head + forward * d with size W x H, send a
+  recenter command to the UEVR fork so both sides anchor from the same pose. Because VRto3D's
+  tracking space is fed only by Vision Pro poses, the two spaces stay aligned by construction.
+- Everything else (pairing, decode via VideoToolbox into `DrawableQueue`, gamepad input, audio) is
+  already in the fork.
+
+Known parameters to expose: window width/height/distance, IPD (VRto3D config, visionOS has no IPD
+API), OpenTrack port, PC address, tracking filter off on the VRto3D side (pose is already clean).
+
+VRto3D settings that matter: `async_enable` off, motion smoothing is already disabled by the driver,
+`display_index` set to the virtual or real display Sunshine captures, `render_width/height` per eye.
+
+## 9. Phases
+
+1. PC only: VRto3D + UEVR fork + Sunshine producing a side-by-side stream; verify with any Moonlight
+   client and a fixed OpenTrack sender (a Python script) that the window responds to pose.
+2. UEVR fork: portal projection override plus the UDP control socket for recenter and window size.
+   Validate with the OpenTrack script sweeping the eye position: window edges must stay fixed.
+3. visionOS: fork moonlight-ios-vision, add the pose sender and recenter flow, size the SBS quad
+   from W x H, confirm eye assignment on device (Camera Index Switch is mono in the simulator).
+4. Latency and comfort pass: measure end to end, tune Sunshine bitrate/codec (HEVC or AV1, 90 Hz),
+   decide whether the Foveated Streaming fallback is needed.
 
 ## Sources
 
