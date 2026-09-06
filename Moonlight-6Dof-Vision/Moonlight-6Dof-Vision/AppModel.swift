@@ -109,7 +109,10 @@ import RealityKit
     func spaceDidClose() {
         PortalDiagnostics.shared().record("Immersive space closed")
         immersiveSpaceState = .closed; portal.stopTracking(); previewToken = UUID()
-        Task { await coordinator.stop() }
+        Task {
+            await coordinator.stop()
+            if immersiveSpaceState == .closed { portal.bindAudioScene(nil) }
+        }
     }
     func preview() async {
         guard session.state == .idle else { return }

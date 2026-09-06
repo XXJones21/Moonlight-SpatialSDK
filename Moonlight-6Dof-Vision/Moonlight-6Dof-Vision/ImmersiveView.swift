@@ -38,6 +38,7 @@ struct ImmersiveView: View {
                     Button("Disconnect", systemImage: "xmark.circle") { app.disconnect() }
                 }
                 .labelStyle(.titleAndIcon).padding(12).glassBackgroundEffect()
+                .streamControllerEvents()
                 .onHover { app.portal.shelfHover($0) }
             }
             Attachment(id: "recovery") {
@@ -50,7 +51,7 @@ struct ImmersiveView: View {
                         Button("Return to Home") { Task { await app.returnHome(); openWindow(id: "settings", value: "main"); await dismissImmersiveSpace() } }
                         Button("Cancel", role: .cancel) { app.disconnected = false; app.portal.revealControls() }
                     }
-                }.padding(24).glassBackgroundEffect()
+                }.padding(24).glassBackgroundEffect().streamControllerEvents()
             }
             if app.sixDoFEnabled {
                 Attachment(id: "tracking") {
@@ -58,7 +59,7 @@ struct ImmersiveView: View {
                         Text(app.portal.trackingMessage).multilineTextAlignment(.center).frame(maxWidth: 360)
                         Button("Recenter Portal") { app.portal.recenter() }
                         Button("Settings") { openWindow(id: "settings", value: "main") }
-                    }.padding(20).glassBackgroundEffect()
+                    }.padding(20).glassBackgroundEffect().streamControllerEvents()
                 }
             }
         }
@@ -69,12 +70,14 @@ struct ImmersiveView: View {
             if value.entity.name.hasPrefix("Portal") { app.portal.rotate(value) }
         }.onEnded { _ in app.portal.endRotate() })
         .simultaneousGesture(SpatialTapGesture().targetedToAnyEntity().onEnded { _ in app.portal.revealControls() })
+        .streamControllerEvents()
+        .background(ImmersiveAudioSceneReader { app.portal.bindAudioScene($0) }.frame(width: 0, height: 0))
         .preferredSurroundingsEffect(app.surroundingsEffect)
         .task { await app.portal.startTracking() }
         .onChange(of: scenePhase) { _, phase in
             PortalDiagnostics.shared().record("Immersive scene phase: \(String(describing: phase))")
             if phase == .active { app.coordinator.resume(); Task { await app.portal.startTracking() } }
-            else { app.portal.stopTracking(); app.coordinator.suspend() }
+            else if phase == .background { app.portal.stopTracking(); app.coordinator.suspend() }
         }
         .onDisappear { updateSubscription?.cancel(); updateSubscription = nil; app.spaceDidClose(); openWindow(id: "settings", value: "main") }
     }

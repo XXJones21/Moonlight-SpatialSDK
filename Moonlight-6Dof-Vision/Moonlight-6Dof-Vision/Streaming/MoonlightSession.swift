@@ -92,7 +92,7 @@ import OSLog
                 while !Task.isCancelled {
                     try? await Task.sleep(for: .seconds(1))
                     guard let self, self.token == generation, !Task.isCancelled else { return }
-                    self.statistics = client.statistics()
+                    self.statistics = client.statistics() + "\n" + CoreAudioRenderer.currentStats()
                 }
             }
         } catch { state = .failed(error.localizedDescription); onEnded?(error.localizedDescription) }

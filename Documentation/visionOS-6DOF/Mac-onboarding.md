@@ -457,3 +457,66 @@ constant mismatch. The later SixDoFPanel/no-video run was confirmed to have the
 6DoF toggle enabled accidentally. The latest mode-clarity build compiled
 successfully; its UI changes still await device confirmation. This checkpoint
 establishes basic streaming, not validated 6DoF gameplay or surround playback.
+
+### Panel hover and audio-quality follow-up
+
+Video surface/backdrop retain input targeting and collision shapes for gestures,
+but no `HoverEffectComponent`; this removes the gaze tint without removing panel
+interaction. Handle hover feedback and the shelf remain, with the original idle
+visibility timers.
+
+The user reported static audio despite good video statistics. A native format
+comparison confirms explicit stereo layout is equal to the original 48 kHz,
+deinterleaved Float32 format. The audio queue previously released its six slots
+at `DataPlayedBack`, which includes output-device latency; it now releases them
+at `DataConsumed`, matching pending input-buffer ownership. This removes a
+possible source of packet drops when output latency exceeds those six buffers'
+duration. Device audio quality remains to be confirmed; video frame-loss/latency
+statistics do not measure audio queue health.
+
+Connection Details now includes queued buffers, cumulative queue drops, Opus
+decode errors and cumulative accepted PCM peak. Teardown writes these counts to
+the diagnostic export. The peak is diagnostic only; no audio normalization or
+clipping has been applied. If static persists, inspect these counters to separate
+local queue starvation from decoded-sample corruption or upstream clipping.
+
+### Controller routing and Settings-independent audio
+
+The user confirmed the queue change resolved static. Subsequent testing found
+controller actions used as UI interactions when gazing at Settings, and audio
+interrupted when Settings closed. visionOS defaults to translating controller
+input into gaze-targeted UI pinch events. `StreamControllerEvents` now requests
+`.gamepad` events exclusively through GameController (`receivesEventsInView=false`)
+while a stream configuration is active. It is applied to Settings, each sheet,
+the immersive view and its attachments; normal UI gamepad routing returns after
+stream teardown. Native LiSendMultiControllerEvent forwarding is unchanged.
+
+`PanelAudioComponent` stores the immersive UIScene identifier on the selected
+panel, transfers it across panel replacement, and clears it after immersive-space
+teardown. A UIKit scene reader inside the immersive view resolves that identifier.
+CoreAudioRenderer explicitly associates both AVAudioSession and its engine output
+with that scene instead of leaving scene choice automatic. It waits for a scene
+if necessary and resumes pending startup after interruptions. This is a scene
+association component: PCM playback still uses the existing stream-owned
+AVAudioEngine, not RealityKit's AudioGeneratorController. Settings neither owns
+nor stops the renderer. Actual world-positioned audio still uses the existing
+optional spatial-audio implementation; true spatial 7.1 remains separate work.
+
+Transient immersive scene inactivity no longer closes the tracking/input gate;
+actual backgrounding and dismissal still suspend/stop appropriately. The device
+log's interruption-before-teardown pattern motivated the explicit audio scene
+association; runtime confirmation of Settings-close playback remains required.
+Validation: build, real RealityKit component transfer/clear tests, then on device
+look at Settings and each attachment while controlling the desktop, close and
+reopen Settings while audio plays, and disconnect/reconnect. Look for `Audio scene
+resolved` (immersive role) and `Audio associated with immersive panel scene`.
+
+References: [GCEventInteraction](https://developer.apple.com/documentation/gamecontroller/gceventinteraction)
+and [anchoring audio to a scene](https://developer.apple.com/documentation/audiotoolbox/spatializing-sound-from-a-uiscene).
+
+**Device follow-up / known issue at this checkpoint:** The user confirmed the
+static-audio fix, but closing the Settings window after establishing a connection
+still stops audio even with the explicit immersive-scene association. That
+association has not resolved the Settings-close bug. Preserve this as an open
+lifecycle issue for the next investigation; do not describe this checkpoint as
+fixing audio continuity across Settings closure.

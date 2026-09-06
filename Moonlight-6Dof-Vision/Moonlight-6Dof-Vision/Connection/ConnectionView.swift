@@ -87,8 +87,8 @@ struct ConnectionView: View {
                 Button("Launch Immersive Mode (No Connection)") { Task { await openPortal() } }.disabled(app.immersiveSpaceState == .inTransition)
             }.padding(16)
         }.frame(minWidth: 680, minHeight: 450).glassBackgroundEffect(in: .rect(cornerRadius: 16))
-        .sheet(isPresented: $showServer) { ServerPairingSheet() }
-        .sheet(isPresented: $connection.showPIN) { PINSheet(pin: connection.pin ?? "") }
+        .sheet(isPresented: $showServer) { ServerPairingSheet().streamControllerEvents() }
+        .sheet(isPresented: $connection.showPIN) { PINSheet(pin: connection.pin ?? "").streamControllerEvents() }
         .sheet(isPresented: $showOptions) {
             VStack(spacing: 12) {
                 Button { showConfiguration.toggle(); showOptions = false } label: {
@@ -104,11 +104,11 @@ struct ConnectionView: View {
                     DisclosureGroup("Advanced") { Button("Portal Calibration") { showOptions = false; showCalibration = true } }
                 }
                 Button("Cancel", role: .cancel) { showOptions = false }
-            }.buttonStyle(.bordered).padding(24)
+            }.buttonStyle(.bordered).padding(24).streamControllerEvents()
         }
-        .sheet(isPresented: $showEffects) { ImmersiveOptionsView() }
+        .sheet(isPresented: $showEffects) { ImmersiveOptionsView().streamControllerEvents() }
         .onChange(of: app.sixDoFEnabled) { _, enabled in if !enabled { showCalibration = false } }
-        .sheet(isPresented: $showCalibration) { PortalCalibrationView() }
+        .sheet(isPresented: $showCalibration) { PortalCalibrationView().streamControllerEvents() }
         .task { if connection.paired { connection.loadApplications() } }
     }
     private func launch() {

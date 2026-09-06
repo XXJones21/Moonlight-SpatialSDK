@@ -1,5 +1,5 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View { ConnectionView() }
+    var body: some View { ConnectionView().streamControllerEvents() }
 }

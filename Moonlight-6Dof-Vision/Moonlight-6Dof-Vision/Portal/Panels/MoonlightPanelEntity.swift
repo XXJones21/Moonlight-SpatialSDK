@@ -18,15 +18,14 @@ class MoonlightPanelEntity: Entity {
         addChild(surface); addChild(shelf)
         backdrop.name = "PortalBackdrop"
         backdrop.model = ModelComponent(mesh: Self.mesh(width: width + 0.012, height: height + 0.012), materials: [UnlitMaterial(color: .darkGray)])
-        backdrop.position.z = -0.008
+        // Keep panel gestures available without a gaze-hover tint over video.
+        surface.components.set(InputTargetComponent())
         backdrop.components.set(InputTargetComponent())
-        backdrop.components.set(HoverEffectComponent())
+        backdrop.position.z = -0.008
         addChild(backdrop)
         glow.model = ModelComponent(mesh: Self.mesh(width: width + 0.08, height: height + 0.08), materials: [UnlitMaterial(color: .black)])
         glow.position.z = -0.012; glow.isEnabled = false; addChild(glow)
         light.position = [0, 0, 0.1]; light.light.attenuationRadius = 3; light.isEnabled = false; addChild(light)
-        surface.components.set(InputTargetComponent())
-        surface.components.set(HoverEffectComponent())
         for index in 0..<4 {
             let corner = ModelEntity(mesh: .generateSphere(radius: 0.025), materials: [UnlitMaterial(color: .white)])
             corner.name = "PortalCorner\(index)"

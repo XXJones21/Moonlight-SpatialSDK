@@ -11,6 +11,7 @@ enum PortalDiagnostics {
 @main struct PanelEntityTests {
     @MainActor static func main() async throws {
         let host = MoonlightPanelHost()
+        host.bindAudioScene("immersive-test-scene")
         let first = host.panel
         precondition(first is BasicMoonlightPanel)
         precondition(host.root.children.count == 1)
@@ -20,12 +21,14 @@ enum PortalDiagnostics {
         host.spawn(sixDoF: true)
         let stereo = host.panel
         precondition(stereo is SixDoFPanel)
+        precondition(stereo.components[PanelAudioComponent.self]?.sceneIdentifier == "immersive-test-scene")
         precondition(first.parent == nil)
         precondition(stereo.surface !== first.surface)
         precondition(controls.parent === stereo.shelf)
         host.spawn(sixDoF: false)
         let basic = host.panel
         precondition(basic is BasicMoonlightPanel)
+        precondition(basic.components[PanelAudioComponent.self]?.sceneIdentifier == "immersive-test-scene")
         precondition(stereo.parent == nil)
         precondition(basic.surface !== stereo.surface)
         precondition(basic.corners.count == 4 && stereo.corners.count == 4)
@@ -46,6 +49,9 @@ enum PortalDiagnostics {
         host.spawn(sixDoF: false)
         precondition(host.panel !== old, "Each stream needs a fresh panel hierarchy")
         precondition(old.parent == nil && controls.parent === host.panel.shelf)
+        host.bindAudioScene(nil)
+        host.spawn(sixDoF: false)
+        precondition(host.panel.components[PanelAudioComponent.self] == nil, "Closed scene must not survive restart")
         print("Panel isolation, replacement, controls and placement checks passed")
     }
 }

@@ -384,6 +384,8 @@ void ArDecodeAndPlaySample(char* sampleData, int sampleLength)
         if (![audioRenderer submitAudio:bytesWritten opusBytes:sampleLength decodeStartTime:decodeStartTime]) {
             // Also drop the sample
         }
+    } else if (decodeRet < 0) {
+        [audioRenderer recordDecodeFailure:decodeRet];
     }
 #else
     // Don't queue if there's already more than 30 ms of audio data waiting

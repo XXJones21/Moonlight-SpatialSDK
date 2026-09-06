@@ -53,6 +53,11 @@ final class PortalSceneController {
         setLightingColor(lightingColor, enabled: lightingEnabled)
     }
 
+    func bindAudioScene(_ identifier: String?) {
+        panelHost.bindAudioScene(identifier)
+        CoreAudioRenderer.setSceneIdentifier(identifier)
+    }
+
     func preparePreviewPanel(sixDoF: Bool) {
         if panelHost.sixDoF != sixDoF { spawnPanel(sixDoF: sixDoF) }
     }

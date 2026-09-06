@@ -15,10 +15,16 @@ final class MoonlightPanelHost {
         root.addChild(panel)
     }
 
+    func bindAudioScene(_ identifier: String?) {
+        if let identifier { panel.components.set(PanelAudioComponent(sceneIdentifier: identifier)) }
+        else { panel.components.remove(PanelAudioComponent.self) }
+    }
+
     func spawn(sixDoF: Bool) {
         installation = UUID()
         let old = panel
         let next: MoonlightPanelEntity = sixDoF ? SixDoFPanel() : BasicMoonlightPanel()
+        if let audio = old.components[PanelAudioComponent.self] { next.components.set(audio) }
         for attachment in Array(old.shelf.children) { next.shelf.addChild(attachment) }
         old.removeFromParent()
         panel = next
