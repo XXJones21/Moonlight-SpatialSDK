@@ -15,11 +15,13 @@ This document outlines quality of life improvements for the Moonlight-SpatialSDK
 ## IMPLEMENTED: In-Session Reconnection Without App Restart
 
 ### Problem Identified During Testing
+
 When a user disconnects a session, they cannot reconnect without fully exiting the app and manually closing out of the immersive space.
 
 ### Implementation Status: IMPLEMENTED
 
 **What Was Changed**:
+
 1. Modified `disconnect()` function to store connection parameters and show reconnection dialog
 2. Added `ReconnectDialog` Composable UI with three options:
    - Reconnect (Primary button) - Reconnects immediately
@@ -29,12 +31,14 @@ When a user disconnects a session, they cannot reconnect without fully exiting t
 4. Updated ButtonShelf disconnect button to trigger reconnection dialog
 
 **How It Works**:
+
 - User clicks Disconnect → Dialog appears in VR
 - User clicks Reconnect → Video panel recreated, stream reconnects
 - Immersive space preserved throughout entire process
 - No need to exit to Home or manually restart
 
 **Files Modified**:
+
 - [ImmersiveActivity.kt](Moonlight-SpatialSDK/app/src/main/java/com/example/moonlight_spatialsdk/ImmersiveActivity.kt)
 - [ids.xml](Moonlight-SpatialSDK/app/src/main/res/values/ids.xml)
 
@@ -57,12 +61,14 @@ Users cannot use Bluetooth controllers that are paired after the streaming sessi
 ### Implementation Status: IMPLEMENTED
 
 **What Was Changed**:
+
 1. Added `InputDeviceListener` to ImmersiveActivity to detect new gamepad/joystick devices
 2. Added `reinitializeControllerHandler()` method to MoonlightConnectionManager
 3. Implemented automatic ControllerHandler reinitialization when new devices detected
 4. Added comprehensive logging for debugging controller hot-plug events
 
 **How It Works**:
+
 - User connects to PC and starts streaming
 - User turns on Bluetooth controller mid-session
 - InputDeviceListener detects new gamepad device
@@ -71,10 +77,12 @@ Users cannot use Bluetooth controllers that are paired after the streaming sessi
 - Controller input now forwards to host PC
 
 **Files Modified**:
+
 - [ImmersiveActivity.kt](Moonlight-SpatialSDK/app/src/main/java/com/example/moonlight_spatialsdk/ImmersiveActivity.kt) - Added InputDeviceListener
 - [MoonlightConnectionManager.kt](Moonlight-SpatialSDK/app/src/main/java/com/example/moonlight_spatialsdk/MoonlightConnectionManager.kt) - Added reinitializeControllerHandler()
 
 **Testing Steps**:
+
 1. Connect to PC and start streaming
 2. Turn off Bluetooth controller
 3. Turn on controller mid-session
@@ -88,6 +96,7 @@ Users cannot use Bluetooth controllers that are paired after the streaming sessi
 ### Problem Identified During Testing
 
 The bias lighting (ambilight) implementation exhibits **mirroring artifacts** where opposite edges display identical content instead of unique edge-specific lighting:
+
 - Top and bottom edges show the same content (e.g., Windows taskbar appears on both)
 - Left and right edges show the same content
 - Moving cursor on top-left creates glow on bottom-left that moves in the opposite direction
@@ -121,6 +130,7 @@ The system uses a single quad mesh with a 9-slice shader:
 **Goal**: Extend shader with `edgeControl` and `edgeFalloff` uniforms for per-edge intensity control.
 
 **Changes Made**:
+
 1. Added `edgeControl` and `edgeFalloff` to `MaterialUniform` block in `customBindingFrag.glsl`
 2. Modified shader to use `g_MaterialUniform.edgeControl` and `g_MaterialUniform.edgeFalloff`
 3. Added API methods to `BiasLightingEntity.kt`
@@ -134,12 +144,14 @@ The system uses a single quad mesh with a 9-slice shader:
 **Problem**: Left and right edges displayed content upside-down.
 
 **Original Code**:
+
 ```glsl
 videoUV = vec2(0.0, 1.0 - edgePosY);  // Left edge
 videoUV = vec2(1.0, 1.0 - edgePosY);  // Right edge
 ```
 
 **Fix Applied**: Removed `1.0 -` flip:
+
 ```glsl
 videoUV = vec2(0.0, edgePosY);  // Left edge
 videoUV = vec2(1.0, edgePosY);  // Right edge
@@ -152,6 +164,7 @@ videoUV = vec2(1.0, edgePosY);  // Right edge
 **Hypothesis**: Panel-relative coordinates (`videoPosY`) cause duplication because left and right edges at the same quad height get the same Y value.
 
 **Change Made**: Use raw `uv.y` instead of calculated `videoPosY`:
+
 ```glsl
 videoUV = vec2(0.0, uv.y);  // Left edge
 videoUV = vec2(1.0, uv.y);  // Right edge
@@ -164,6 +177,7 @@ videoUV = vec2(1.0, uv.y);  // Right edge
 **Hypothesis**: Video textures are Y-flipped in GLSL, confirmed by PremiumMediaSample reference implementation.
 
 **Reference from PremiumMediaSample** (`heroLighting.glsl` line 198):
+
 ```glsl
 surfaceUV.y = clamp01(1 - surfaceUV.y);  // Y-FLIP
 ```
@@ -196,6 +210,7 @@ if (uv.x < panelLeft) {
 **Hypothesis**: The top/bottom swap was wrong based on the old `bias_lighting.frag` which had top edge sampling y=1.0 and bottom edge sampling y=0.0.
 
 **Changes Made**: Reverted top/bottom to match old shader:
+
 ```glsl
 } else if (uv.y < panelBottom) {
     videoUV = vec2(videoX, 0.0);  // Bottom samples y=0
@@ -285,6 +300,7 @@ if (uv.x < panelLeft) {
 Modify the existing `bias_lighting_9slice.frag` shader to accept per-edge control parameters:
 
 **Material Uniforms to Add**:
+
 ```kotlin
 // Add to BiasLightingEntity material creation
 setAttribute("edgeControl", Vector4(
@@ -303,6 +319,7 @@ setAttribute("edgeFalloff", Vector4(
 ```
 
 **Shader Modifications**:
+
 ```glsl
 // In bias_lighting_9slice.frag
 uniform vec4 edgeControl;  // Per-edge intensity
@@ -344,12 +361,14 @@ vec3 finalColor = videoColor.rgb * intensity * edgeIntensity;
 ```
 
 **Advantages**:
+
 - Maintains single mesh entity (performance benefit)
 - Maintains existing edge detection logic
 - Adds per-edge control without mirroring
 - Backward compatible (default all edges to 1.0)
 
 **Disadvantages**:
+
 - Limited to 4 vec4 parameters worth of per-edge control
 - Cannot do complex per-edge effects (requires more uniforms)
 
@@ -358,6 +377,7 @@ vec3 finalColor = videoColor.rgb * intensity * edgeIntensity;
 Create 4 separate BiasLightingEntity-like entities with a modified shader that takes an explicit `edgeType` parameter:
 
 **Entity Creation**:
+
 ```kotlin
 class EdgeLightingEntity(
     private val edgeType: EdgeType,  // TOP, BOTTOM, LEFT, RIGHT
@@ -391,6 +411,7 @@ val rightEdgeEntity = EdgeLightingEntity(EdgeType.RIGHT, heroLightingSystem)
 ```
 
 **Shader Implementation** (new `edge_lighting.frag`):
+
 ```glsl
 // Edge-specific lighting shader
 uniform vec4 stereoParams;  // x = edgeType (0=top, 1=bottom, 2=left, 3=right)
@@ -436,19 +457,23 @@ void main() {
 ```
 
 **Mesh Geometry**:
+
 Each edge entity would use a simple quad mesh positioned along its respective edge:
+
 - Top: positioned above panel, width = panel width + padding, height = glow padding
 - Bottom: positioned below panel, width = panel width + padding, height = glow padding
 - Left: positioned left of panel, height = panel height + padding, width = glow padding
 - Right: positioned right of panel, height = panel height + padding, width = glow padding
 
 **Advantages**:
+
 - Complete independent control per edge
 - Can enable/disable individual edges (destroy/create entities)
 - Can apply different materials/shaders per edge
 - Can animate edges independently (position, intensity, color)
 
 **Disadvantages**:
+
 - 4x entity overhead (4 draw calls instead of 1)
 - More complex entity management (positioning, scaling, lifetime)
 - Material instance management (4 materials to update)
@@ -459,12 +484,14 @@ Each edge entity would use a simple quad mesh positioned along its respective ed
 Use the existing 9-slice approach but add an edge mask texture that controls per-edge visibility:
 
 **Material Addition**:
+
 ```kotlin
 // Add edge mask texture to material
 setAttribute("edgeMask", edgeMaskTexture)  // R=top, G=bottom, B=left, A=right
 ```
 
 **Edge Mask Texture**:
+
 Create a procedural or static texture where:
 - Red channel = top edge mask (1.0 = visible, 0.0 = hidden)
 - Green channel = bottom edge mask
@@ -472,6 +499,7 @@ Create a procedural or static texture where:
 - Alpha channel = right edge mask
 
 **Shader Modification**:
+
 ```glsl
 uniform sampler2D edgeMask;
 
@@ -492,12 +520,14 @@ vec3 finalColor = videoColor.rgb * intensity * falloff * edgeMaskValue;
 ```
 
 **Advantages**:
+
 - Maintains single entity (performance benefit)
 - Allows per-edge enable/disable via mask values
 - Can be updated dynamically (update texture)
 - Minimal shader changes
 
 **Disadvantages**:
+
 - Limited control (only intensity per edge via mask values)
 - Requires texture creation and management
 - Less flexible than separate entities
@@ -526,6 +556,7 @@ vec3 finalColor = videoColor.rgb * intensity * falloff * edgeMaskValue;
 - [ImmersiveActivity.kt](Moonlight-SpatialSDK/app/src/main/java/com/example/moonlight_spatialsdk/ImmersiveActivity.kt) - Optional UI for per-edge control
 
 **API Design Example**:
+
 ```kotlin
 // In BiasLightingEntity
 fun setEdgeIntensity(edge: Edge, intensity: Float) {
