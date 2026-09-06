@@ -1,0 +1,14 @@
+[
+  {
+    "IPAddress": "10.1.95.5",
+    "InterfaceAlias": "Ethernet",
+    "DestinationPrefix": null,
+    "NextHop": null
+  },
+  {
+    "IPAddress": null,
+    "InterfaceAlias": "Ethernet",
+    "DestinationPrefix": "0.0.0.0/0",
+    "NextHop": "10.1.95.1"
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "startedAt": "2026-09-06T14:14:54.6131188-07:00",
+  "pid": 46808,
+  "peer": "10.1.95.13",
+  "listenPort": 4243,
+  "syntheticSenderStarted": false,
+  "firewallRuleApplied": true
+}

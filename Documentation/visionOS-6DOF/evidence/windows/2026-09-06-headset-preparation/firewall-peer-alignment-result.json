@@ -1,0 +1,8 @@
+{
+    "success":  true,
+    "timestamp":  "2026-09-06T14:14:20.2446871-07:00",
+    "name":  "MoonlightPortal-VisionPro-1921680182-4243",
+    "previousPeer":  "192.168.0.182",
+    "observedPeer":  "10.1.95.13",
+    "rollbackCommand":  "Set-NetFirewallRule -Name \u0027MoonlightPortal-VisionPro-1921680182-4243\u0027 -RemoteAddress \u0027192.168.0.182\u0027"
+}

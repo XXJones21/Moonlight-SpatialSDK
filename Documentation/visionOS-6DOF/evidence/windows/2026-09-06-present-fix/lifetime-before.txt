@@ -1,0 +1,12 @@
+output_lifetime.cpp
+FAIL: eight rotating-buffer frames display with stable device identity
+FAIL: stable identity retains exactly one fence and swapchain
+FAIL: fence and serial advance together
+FAIL: stable identity never stalls recreation or reuse
+  observed gpu_busy
+  observed gpu_recreation_pending
+  observed gpu_recreation_pending
+  observed gpu_recreation_pending
+  observed gpu_recreation_pending
+FAIL: resized output survives repeated slot reuse
+5 failed checks

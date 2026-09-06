@@ -1,0 +1,498 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Generating HLSL shaders...
+  Generating HLSL shaders...
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/directxtk12-src/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/tracy-src/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/zydis-src/dependencies/zycore/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/asmjit-src/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/bddisasm-src/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/openxr-src/include/openxr/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/openxr-src/src/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/PortalCore/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/sdkgenny-src/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/directxtk-src/CMakeLists.txt
+  array.cpp
+  class.cpp
+  constant.cpp
+  Geometry.cpp
+  Protocol.cpp
+  indent.cpp
+cl : command line  warning D9025: overriding '/Zc:templateScope' with '/Zc:templateScope-' [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\directxtk-build\DirectXTK.vcxproj]
+  cmake_pch.cxx
+  enum.cpp
+cl : command line  warning D9025: overriding '/Zc:templateScope' with '/Zc:templateScope-' [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\directxtk-build\DirectXTK.vcxproj]
+cl : command line  warning D9025: overriding '/Zc:templateScope' with '/Zc:templateScope-' [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\directxtk-build\DirectXTK.vcxproj]
+cl : command line  warning D9025: overriding '/Zc:templateScope' with '/Zc:templateScope-' [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\directxtk-build\DirectXTK.vcxproj]
+  AlphaTestEffect.cpp
+cl : command line  warning D9025: overriding '/Zc:templateScope' with '/Zc:templateScope-' [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\directxtk-build\DirectXTK.vcxproj]
+  BasicEffect.cpp
+cl : command line  warning D9025: overriding '/Zc:templateScope' with '/Zc:templateScope-' [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\directxtk-build\DirectXTK.vcxproj]
+  BasicPostProcess.cpp
+  BufferHelpers.cpp
+  CommonStates.cpp
+  DDSTextureLoader.cpp
+  DebugEffect.cpp
+  DGSLEffect.cpp
+  DGSLEffectFactory.cpp
+  enum_class.cpp
+  DirectXHelpers.cpp
+  DualPostProcess.cpp
+  function.cpp
+  generic_type.cpp
+  DualTextureEffect.cpp
+  EffectCommon.cpp
+  EffectFactory.cpp
+  EnvironmentMapEffect.cpp
+  GeometricPrimitive.cpp
+  GraphicsMemory.cpp
+  Model.cpp
+  portal_core.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\portal-core\Release\portal_core.lib
+  ModelLoadCMO.cpp
+  ModelLoadSDKMESH.cpp
+  ModelLoadVBO.cpp
+  jsoncpp.cpp
+  openvr_api_public.cpp
+  dirtools_public.cpp
+  envvartools_public.cpp
+  NormalMapEffect.cpp
+  namespace.cpp
+  PBREffect.cpp
+  hmderrors_public.cpp
+  PBREffectFactory.cpp
+  pathtools_public.cpp
+  sharedlibtools_public.cpp
+  strtools_public.cpp
+  PrimitiveBatch.cpp
+  ScreenGrab.cpp
+  SkinnedEffect.cpp
+  SpriteBatch.cpp
+  vrpathregistry_public.cpp
+  SpriteFont.cpp
+  object.cpp
+  ToneMapPostProcess.cpp
+  parameter.cpp
+  VertexTypes.cpp
+  WICTextureLoader.cpp
+  BinaryReader.cpp
+  pointer.cpp
+  GamePad.cpp
+  Geometry.cpp
+  Keyboard.cpp
+  Mouse.cpp
+  SimpleMath.cpp
+  AudioEngine.cpp
+  DynamicSoundEffectInstance.cpp
+  SoundCommon.cpp
+  SoundEffect.cpp
+  SoundEffectInstance.cpp
+  SoundStreamInstance.cpp
+  WaveBank.cpp
+  WaveBankReader.cpp
+  WAVFileReader.cpp
+  reference.cpp
+     Creating library D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/Release/openvr_api.lib and object D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/Release/openvr_api.exp
+  openvr.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\Release\openvr_api.dll
+  sdk.cpp
+  lapi.c
+  lauxlib.c
+  lbaselib.c
+  lcode.c
+  lcorolib.c
+  static_function.cpp
+  lctype.c
+  ldblib.c
+  ldebug.c
+  ldo.c
+  ldump.c
+  lfunc.c
+  lgc.c
+  linit.c
+  liolib.c
+  llex.c
+  struct.cpp
+  lmathlib.c
+  lmem.c
+  loadlib.c
+  lobject.c
+  lopcodes.c
+  loslib.c
+  lparser.c
+  lstate.c
+  lstring.c
+  lstrlib.c
+  ltable.c
+  ltablib.c
+  ltests.c
+  ltm.c
+  lua.c
+  lundump.c
+  lutf8lib.c
+  lvm.c
+  lzio.c
+  type.cpp
+  DirectXTK.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\bin\CMake\Release\DirectXTK.lib
+  lua.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\Release\lua.lib
+  async.cpp
+  bundled_fmtlib_format.cpp
+  cfg.cpp
+  color_sinks.cpp
+  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_tables.cpp
+  typename.cpp
+  imgui_widgets.cpp
+  variable.cpp
+  file_sinks.cpp
+  spdlog.cpp
+  virtual_function.cpp
+  stdout_sinks.cpp
+  sdkgenny.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\sdkgenny-build\Release\sdkgenny.lib
+  glm.cpp
+  spdlog.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\Release\spdlog.lib
+  crt.c
+  bddisasm.c
+  bdformat.c
+  bdhelpers.c
+  glm.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\Release\glm.lib
+  imgui.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\Release\imgui.lib
+  bddisasm.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\bddisasm-build\Release\bddisasm.lib
+  archtraits.cpp
+  assembler.cpp
+  builder.cpp
+  codeholder.cpp
+  TracyClient.cpp
+  Memory.c
+  Process.c
+  Synchronization.c
+  Terminal.c
+  Thread.c
+  Allocator.c
+  ArgParse.c
+  Bitset.c
+  Format.c
+  List.c
+  String.c
+  Vector.c
+  Zycore.c
+  TracyClient.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\tracy-build\Release\TracyClient.lib
+cl : command line  warning D9025: overriding '/Zc:templateScope' with '/Zc:templateScope-' [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\directxtk12-build\DirectXTK12.vcxproj]
+  cmake_pch.cxx
+  codewriter.cpp
+  compiler.cpp
+  constpool.cpp
+  cpuinfo.cpp
+  Zycore.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\zydis-build\zycore\Release\Zycore.lib
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/zydis-src/CMakeLists.txt
+  MetaInfo.c
+  Mnemonic.c
+  Register.c
+  Segment.c
+  emithelper.cpp
+  SharedData.c
+  emitter.cpp
+  String.c
+  Utils.c
+  Zydis.c
+  Decoder.c
+  DecoderData.c
+  Encoder.c
+  emitterutils.cpp
+  EncoderData.c
+  environment.cpp
+  Disassembler.c
+  Formatter.c
+  FormatterBuffer.c
+  FormatterATT.c
+  FormatterBase.c
+  FormatterIntel.c
+  errorhandler.cpp
+  formatter.cpp
+  func.cpp
+  Zydis.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\zydis-build\Release\Zydis.lib
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/safetyhook-src/CMakeLists.txt
+  funcargscontext.cpp
+  globals.cpp
+  allocator.cpp
+  easy.cpp
+  inline_hook.cpp
+  mid_hook.cpp
+  inst.cpp
+  jitallocator.cpp
+  jitruntime.cpp
+  logger.cpp
+  operand.cpp
+  osutils.cpp
+  ralocal.cpp
+  os.linux.cpp
+cl : command line  warning D9025: overriding '/Zc:templateScope' with '/Zc:templateScope-' [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\directxtk12-build\DirectXTK12.vcxproj]
+  os.windows.cpp
+cl : command line  warning D9025: overriding '/Zc:templateScope' with '/Zc:templateScope-' [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\directxtk12-build\DirectXTK12.vcxproj]
+  AlphaTestEffect.cpp
+cl : command line  warning D9025: overriding '/Zc:templateScope' with '/Zc:templateScope-' [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\directxtk12-build\DirectXTK12.vcxproj]
+cl : command line  warning D9025: overriding '/Zc:templateScope' with '/Zc:templateScope-' [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\directxtk12-build\DirectXTK12.vcxproj]
+cl : command line  warning D9025: overriding '/Zc:templateScope' with '/Zc:templateScope-' [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\directxtk12-build\DirectXTK12.vcxproj]
+  BasicEffect.cpp
+  BasicPostProcess.cpp
+  BufferHelpers.cpp
+  utility.cpp
+  rapass.cpp
+  CommonStates.cpp
+  rastack.cpp
+  DDSTextureLoader.cpp
+  vmt_hook.cpp
+  string.cpp
+  DebugEffect.cpp
+  DescriptorHeap.cpp
+  DirectXHelpers.cpp
+  DualPostProcess.cpp
+  DualTextureEffect.cpp
+  EffectCommon.cpp
+  EffectFactory.cpp
+D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\safetyhook-src\src\utility.cpp(12,9): warning C4834: discarding return value of function with [[nodiscard]] attribute [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\safetyhook-build\safetyhook.vcxproj]
+  support.cpp
+  target.cpp
+  EffectPipelineStateDescription.cpp
+  EffectTextureFactory.cpp
+  EnvironmentMapEffect.cpp
+  GeometricPrimitive.cpp
+  type.cpp
+  GraphicsMemory.cpp
+  virtmem.cpp
+  LinearAllocator.cpp
+  zone.cpp
+  zonehash.cpp
+  Model.cpp
+  ModelLoadCMO.cpp
+  ModelLoadSDKMESH.cpp
+  ModelLoadVBO.cpp
+  zonelist.cpp
+  zonestack.cpp
+  zonetree.cpp
+  safetyhook.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\safetyhook-build\Release\safetyhook.lib
+  zonevector.cpp
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/bddisasm-src/CMakeLists.txt
+  NormalMapEffect.cpp
+  PBREffect.cpp
+  x86assembler.cpp
+  bdshemu.c
+  x86builder.cpp
+  x86compiler.cpp
+  x86emithelper.cpp
+  PBREffectFactory.cpp
+  PrimitiveBatch.cpp
+  ResourceUploadBatch.cpp
+  ScreenGrab.cpp
+  SkinnedEffect.cpp
+  SpriteBatch.cpp
+  SpriteFont.cpp
+  ToneMapPostProcess.cpp
+  bdshemu.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\bddisasm-build\Release\bdshemu.lib
+  x86formatter.cpp
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/kananlib-src/CMakeLists.txt
+  VertexTypes.cpp
+  x86func.cpp
+  WICTextureLoader.cpp
+  BinaryReader.cpp
+  GamePad.cpp
+  Geometry.cpp
+  x86instdb.cpp
+  Address.cpp
+  Config.cpp
+  Emulation.cpp
+  Input.cpp
+  Keyboard.cpp
+  Mouse.cpp
+  SimpleMath.cpp
+  AudioEngine.cpp
+  DynamicSoundEffectInstance.cpp
+  Memory.cpp
+  x86instapi.cpp
+  Module.cpp
+  SoundCommon.cpp
+  SoundEffect.cpp
+  SoundEffectInstance.cpp
+  SoundStreamInstance.cpp
+  WaveBank.cpp
+  WaveBankReader.cpp
+  x86operand.cpp
+  x86rapass.cpp
+  WAVFileReader.cpp
+  PDB.cpp
+  Patch.cpp
+  Pattern.cpp
+  DirectXTK12.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\bin\CMake\Release\DirectXTK12.lib
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/_deps/openxr-src/src/loader/CMakeLists.txt
+  android_utilities.cpp
+  api_layer_interface.cpp
+  loader_core.cpp
+  loader_instance.cpp
+  loader_logger.cpp
+  PointerHook.cpp
+  RTTI.cpp
+  Registry.cpp
+  asmjit.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\asmjit-build\Release\asmjit.lib
+  loader_logger_recorders.cpp
+  manifest_file.cpp
+  Scan.cpp
+  runtime_interface.cpp
+  xr_generated_loader.cpp
+  String.cpp
+  object_info.cpp
+  Thread.cpp
+  VtableHook.cpp
+  json_reader.cpp
+  json_value.cpp
+  json_writer.cpp
+  filesystem_utils.cpp
+  xr_generated_dispatch_table.c
+  openxr_loader.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\openxr-build\src\loader\Release\openxr_loader.lib
+  kananlib.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\kananlib-build\Release\kananlib.lib
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/CMakeLists.txt
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/dependencies/submodules/UESDK/CMakeLists.txt
+  ScriptContext.cpp
+  ScriptState.cpp
+  ScriptUtility.cpp
+  Quaternion.cpp
+  AActor.cpp
+  AHUD.cpp
+  APawn.cpp
+  APlayerCameraManager.cpp
+  APlayerController.cpp
+  CVar.cpp
+  ConsoleManager.cpp
+  DynamicRHI.cpp
+  StructObject.cpp
+  EngineModule.cpp
+  FArrayProperty.cpp
+  Vector.cpp
+  FBoolProperty.cpp
+  FCommandLine.cpp
+  FEnumProperty.cpp
+  FField.cpp
+  FMalloc.cpp
+  XInput.cpp
+  FName.cpp
+  FObjectProperty.cpp
+  FProperty.cpp
+  FRenderTarget.cpp
+  FRenderTargetPool.cpp
+  FScene.cpp
+  FSceneRenderer.cpp
+  FSceneView.cpp
+  FSceneViewFamily.cpp
+  FStructProperty.cpp
+  FTexture.cpp
+  FTextureRenderTargetResource.cpp
+  FViewport.cpp
+  FViewportInfo.cpp
+  Globals.cpp
+  KismetSystemLibrary.cpp
+  ScriptMatrix.cpp
+  ScriptRotator.cpp
+  ScriptTransform.cpp
+  ScriptVector.cpp
+  Slate.cpp
+  StereoStuff.cpp
+  UActorComponent.cpp
+  UCameraComponent.cpp
+  UClass.cpp
+  UEngine.cpp
+  UEnum.cpp
+  UFunction.cpp
+  UGameEngine.cpp
+  UGameViewportClient.cpp
+  UGameplayStatics.cpp
+  UHeadMountedDisplayFunctionLibrary.cpp
+  UKismetRenderingLibrary.cpp
+  UMotionControllerComponent.cpp
+  UObject.cpp
+  UObjectArray.cpp
+D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\dependencies\submodules\UESDK\src\sdk\UPrimitiveComponent.hpp(32,13): warning C4834: discarding return value of function with [[nodiscard]] attribute [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\dependencies\submodules\UESDK\uesdk.vcxproj]
+  (compiling source file '../../../../dependencies/submodules/UESDK/src/sdk/UMotionControllerComponent.cpp')
+  
+  UObjectBase.cpp
+  UObjectHashTables.cpp
+  UPrimitiveComponent.cpp
+  UProperty.cpp
+  USceneCaptureComponent2D.cpp
+D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\dependencies\submodules\UESDK\src\sdk\UPrimitiveComponent.hpp(32,13): warning C4834: discarding return value of function with [[nodiscard]] attribute [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\dependencies\submodules\UESDK\uesdk.vcxproj]
+  (compiling source file '../../../../dependencies/submodules/UESDK/src/sdk/UPrimitiveComponent.cpp')
+  
+  USceneComponent.cpp
+  UTexture.cpp
+  Utility.cpp
+  uesdk.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\lib\uesdk.lib
+  luavrlib.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\Release\luavrlib.lib
+  Compiling shaders for UEVR...
+  
+  fxc.exe "alpha_luminance_sprite_ps.fx" /nologo /WX /Ges /Zi /Zpc /Qstrip_reflect /Qstrip_debug /Tps_5_0 /ESpritePixelShader "/FhCompiled\alpha_luminance_sprite_ps_SpritePixelShader.inc" "/FdCompiled\alpha_luminance_sprite_ps_SpritePixelShader.pdb" /Vnalpha_luminance_sprite_ps_SpritePixelShader
+  compilation PDB save succeeded; see D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\mods\vr\shaders\Compiled\alpha_luminance_sprite_ps_SpritePixelShader.pdb
+  compilation header save succeeded; see D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\mods\vr\shaders\Compiled\alpha_luminance_sprite_ps_SpritePixelShader.inc
+  
+  fxc.exe "alpha_luminance_sprite_ps.fx" /nologo /WX /Ges /Zi /Zpc /Qstrip_reflect /Qstrip_debug /Tvs_5_0 /ESpriteVertexShader "/FhCompiled\alpha_luminance_sprite_ps_SpriteVertexShader.inc" "/FdCompiled\alpha_luminance_sprite_ps_SpriteVertexShader.pdb" /Vnalpha_luminance_sprite_ps_SpriteVertexShader
+  compilation PDB save succeeded; see D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\mods\vr\shaders\Compiled\alpha_luminance_sprite_ps_SpriteVertexShader.pdb
+  compilation header save succeeded; see D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\mods\vr\shaders\Compiled\alpha_luminance_sprite_ps_SpriteVertexShader.inc
+  Shaders compiled ok
+  Generating commit hash...
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/CMakeLists.txt
+  ExceptionHandler.cpp
+  Framework.cpp
+  Main.cpp
+  Mod.cpp
+  Mods.cpp
+  WindowFilter.cpp
+  D3D11Hook.cpp
+  D3D12Hook.cpp
+  DInputHook.cpp
+  WindowsMessageHook.cpp
+  XInputHook.cpp
+  FrameworkConfig.cpp
+  ImGuiThemeHelpers.cpp
+  LuaLoader.cpp
+  PluginLoader.cpp
+  UObjectHook.cpp
+  VR.cpp
+D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\dependencies\submodules\UESDK\src\sdk\UPrimitiveComponent.hpp(32,13): warning C4834: discarding return value of function with [[nodiscard]] attribute [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\uevr.vcxproj]
+  (compiling source file '../src/mods/UObjectHook.cpp')
+  
+  WindowMode.cpp
+  FS.cpp
+  Json.cpp
+  FFakeStereoRenderingFunctions.cpp
+  FRHITexture2DFunctions.cpp
+  FRenderTargetPoolHook.cpp
+  FUObjectArrayFunctions.cpp
+  UScriptStructFunctions.cpp
+  PortalFrame.cpp
+  PortalOutput.cpp
+  PortalSession.cpp
+D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\mods\portal\PortalFrame.cpp(36,22): error C3079: an initializer list cannot be used as the right operand of this assignment operator [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\uevr.vcxproj]
+D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\mods\portal\PortalFrame.cpp(39,68): error C2597: illegal reference to non-static member 'uevrportal::PortalFrame::gameBasis' [D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\uevr.vcxproj]
+      D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\mods\portal\PortalFrame.hpp(13,50):
+      see declaration of 'uevrportal::PortalFrame::gameBasis'
+  
+  SDKDumper.cpp
+  Bindings.cpp
+  CVarManager.cpp
+  D3D11Component.cpp
+  D3D12Component.cpp
+  FFakeStereoRenderingHook.cpp
+  IXRTrackingSystemHook.cpp
+  OverlayComponent.cpp
+  RenderTargetPoolHook.cpp
+  CommandContext.cpp
+  DirectXTK.cpp
+  TextureContext.cpp
+  OpenVR.cpp
+  OpenXR.cpp
+  imgui_impl_dx11.cpp
+  imgui_impl_dx12.cpp
+  imgui_impl_win32.cpp

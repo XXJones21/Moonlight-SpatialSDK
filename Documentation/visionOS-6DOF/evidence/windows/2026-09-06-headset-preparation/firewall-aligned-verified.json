@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-09-06T14:14:53.8280910-07:00",
+  "remoteAddress": "10.1.95.13",
+  "localPort": "4243",
+  "protocol": "UDP",
+  "program": "D:\\Tools\\Moonlight-SpatialSDK\\PortalHost\\build\\Release\\portal_host.exe",
+  "profile": "Any",
+  "enabled": "True",
+  "action": "Allow",
+  "enforcement": [
+    "ProfileInactive",
+    "Enforced",
+    "Enforced",
+    "Enforced"
+  ]
+}

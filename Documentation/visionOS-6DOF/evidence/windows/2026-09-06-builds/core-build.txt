@@ -1,0 +1,15 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/PortalCore/CMakeLists.txt
+  Geometry.cpp
+  Protocol.cpp
+  Generating Code...
+  portal_core.vcxproj -> D:\Tools\Moonlight-SpatialSDK\PortalCore\build\Release\portal_core.lib
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/PortalCore/CMakeLists.txt
+cl : command line  warning D9025: overriding '/DNDEBUG' with '/UNDEBUG' [D:\Tools\Moonlight-SpatialSDK\PortalCore\build\portal_core_tests.vcxproj]
+  GeometryTests.cpp
+  ProtocolTests.cpp
+  Generating Code...
+  portal_core_tests.vcxproj -> D:\Tools\Moonlight-SpatialSDK\PortalCore\build\Release\portal_core_tests.exe
+  Building Custom Rule D:/Tools/Moonlight-SpatialSDK/PortalCore/CMakeLists.txt

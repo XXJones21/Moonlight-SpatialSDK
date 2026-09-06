@@ -1,0 +1,13 @@
+{
+  "sourceRevision": "67d97855b1f81fb3226b43b8c4447a5eb9f1d022",
+  "sampledRecords": 63,
+  "validPairedNoErrorRecords": 60,
+  "gpuStallRecords": 0,
+  "firstGood": "[2026-09-06 15:28:00.725] [UnrealVR] [info] [Portal] output frame=2159 seq=9295 geometry=265 valid=true paired=true status=none detail=none",
+  "lastGood": "[2026-09-06 15:29:10.842] [UnrealVR] [info] [Portal] output frame=6366 seq=15604 geometry=265 valid=true paired=true status=none detail=none",
+  "otherRecords": [
+    "[2026-09-06 15:27:59.711] [UnrealVR] [info] [Portal] output frame=2099 seq=0 geometry=0 valid=false paired=false status=outputUnavailable detail=unpaired_or_stale_frame",
+    "[2026-09-06 15:28:53.492] [UnrealVR] [info] [Portal] output frame=5325 seq=0 geometry=0 valid=false paired=false status=outputUnavailable detail=unpaired_or_stale_frame",
+    "[2026-09-06 15:29:02.791] [UnrealVR] [info] [Portal] output frame=5883 seq=0 geometry=0 valid=false paired=false status=outputUnavailable detail=unpaired_or_stale_frame"
+  ]
+}

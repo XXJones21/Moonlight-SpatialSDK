@@ -1,0 +1,61 @@
+{
+  "runs": [
+    {
+      "pattern": "static",
+      "passed": true,
+      "runtimeSamples": 2192,
+      "maxPositionErrorM": 0.0,
+      "maxRotationMatrixError": 0.0,
+      "neutralMaxRotationMatrixError": 0.0,
+      "sentStates": 900,
+      "senderEpochs": [
+        "1"
+      ],
+      "postLeaseHoldSamples": 48,
+      "postLeasePositionRangeM": 0.0,
+      "postLeaseRotationMatrixRange": 0.0
+    },
+    {
+      "pattern": "sweep",
+      "passed": true,
+      "runtimeSamples": 2188,
+      "maxPositionErrorM": 0.004591578529379067,
+      "maxRotationMatrixError": 0.005733392247371419,
+      "neutralMaxRotationMatrixError": 0.0,
+      "sentStates": 900,
+      "senderEpochs": [
+        "1"
+      ],
+      "postLeaseHoldSamples": 48,
+      "postLeasePositionRangeM": 0.0,
+      "postLeaseRotationMatrixRange": 0.0
+    },
+    {
+      "pattern": "roll",
+      "passed": true,
+      "runtimeSamples": 2188,
+      "maxPositionErrorM": 0.0,
+      "maxRotationMatrixError": 0.00575806594093568,
+      "neutralMaxRotationMatrixError": 0.0,
+      "sentStates": 900,
+      "senderEpochs": [
+        "1",
+        "2"
+      ],
+      "postLeaseHoldSamples": 48,
+      "postLeasePositionRangeM": 0.0,
+      "postLeaseRotationMatrixRange": 0.0
+    },
+    {
+      "pattern": "axes",
+      "passed": true,
+      "runtimeSamples": 2446,
+      "maxPositionErrorM": 9.500000031081868e-08,
+      "maxRotationMatrixError": 4.573599221568969e-09,
+      "neutralMaxRotationMatrixError": 0.0
+    }
+  ],
+  "allPassed": true,
+  "totalRuntimeSamples": 9014,
+  "rendererValidated": false
+}

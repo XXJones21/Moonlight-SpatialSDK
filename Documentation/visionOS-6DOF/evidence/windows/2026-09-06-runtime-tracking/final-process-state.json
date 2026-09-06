@@ -1,0 +1,26 @@
+{
+  "processes": [
+    {
+      "ProcessId": 72056,
+      "Name": "HogwartsLegacy.exe",
+      "ExecutablePath": "D:\\SteamLibrary\\steamapps\\common\\Hogwarts Legacy\\HogwartsLegacy.exe"
+    },
+    {
+      "ProcessId": 36256,
+      "Name": "HogwartsLegacy.exe",
+      "ExecutablePath": "D:\\SteamLibrary\\steamapps\\common\\Hogwarts Legacy\\Phoenix\\Binaries\\Win64\\HogwartsLegacy.exe"
+    }
+  ],
+  "sockets": [
+    {
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 4242,
+      "OwningProcess": 38084
+    }
+  ],
+  "savedModes": [
+    "WindowMode_Enabled=false",
+    "WindowMode_PortalDiagnostics=false",
+    "WindowMode_PortalOutput=false"
+  ]
+}

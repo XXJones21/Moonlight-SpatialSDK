@@ -1,0 +1,44 @@
+{
+  "pattern": "sweep",
+  "passed": true,
+  "runtimeSamples": 2188,
+  "allPosesConnectedValidRunningOK": true,
+  "groups": [
+    {
+      "label": "sweep",
+      "origin": "1",
+      "samples": 619,
+      "maxPositionErrorM": 0.004591578529379067,
+      "p95PositionErrorM": 0.004340249403031238,
+      "maxRotationMatrixError": 0.005733392247371419,
+      "p95RotationMatrixError": 0.005397908937572374
+    },
+    {
+      "label": "sweep",
+      "origin": "2",
+      "samples": 619,
+      "maxPositionErrorM": 0.004591578529379067,
+      "p95PositionErrorM": 0.004340249403031238,
+      "maxRotationMatrixError": 0.005733392247371419,
+      "p95RotationMatrixError": 0.005397908937572374
+    }
+  ],
+  "comparison": "contemporaneous preceding sent pose, no fitted latency; steady axes exclude first 350 ms",
+  "positionToleranceM": 0.06,
+  "rotationMatrixTolerance": 0.08,
+  "neutralRestoration": [
+    {
+      "origin": "2",
+      "samples": 299,
+      "maxPositionErrorM": 0.0
+    },
+    {
+      "origin": "1",
+      "samples": 299,
+      "maxPositionErrorM": 0.0
+    }
+  ],
+  "portalOutputEnabled": false,
+  "hostShutdown": "terminated by harness after neutral pose",
+  "rendererStatusValidated": false
+}

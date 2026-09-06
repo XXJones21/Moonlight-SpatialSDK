@@ -1,0 +1,25 @@
+{
+  "startedAt": "2026-09-06T14:52:31.051036-07:00",
+  "endedAt": "2026-09-06T14:52:46.054997-07:00",
+  "liveStatePackets": 1456,
+  "statusPackets": 137,
+  "statusErrors": [
+    "outputUnavailable"
+  ],
+  "outputModes": [
+    "direct_sbs"
+  ],
+  "validOutputStatuses": 0,
+  "renderFrameRange": [
+    28857,
+    29751
+  ],
+  "acceptedSequenceRange": [
+    996,
+    2444
+  ],
+  "sessionMatchesCurrentInput": true,
+  "epochMatchesCurrentInput": true,
+  "lastInputTrackingValid": true,
+  "clientReceiptVerified": false
+}

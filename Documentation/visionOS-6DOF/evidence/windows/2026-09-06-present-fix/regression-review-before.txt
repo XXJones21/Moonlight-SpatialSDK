@@ -1,0 +1,10 @@
+secondary_present.cpp
+FAIL: VirtualProtect failed
+FAIL: protection failure returns HRESULT instead of escaping Present
+FAIL: VirtualProtect failed
+FAIL: protection failure returns HRESULT instead of escaping Present
+FAIL: VirtualProtect failed
+FAIL: protection failure returns HRESULT instead of escaping Present
+FAIL: VirtualProtect failed
+FAIL: protection failure returns HRESULT instead of escaping Present
+8 failed checks

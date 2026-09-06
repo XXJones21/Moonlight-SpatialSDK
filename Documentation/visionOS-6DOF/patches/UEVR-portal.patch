@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a3dcd83148480be583a4b5901da427537292ae69..71d09dc06304b1cd34cabb415b21c579c1201567 100644
+index a3dcd83148480be583a4b5901da427537292ae69..1d0c1d91ecaac3638bc3807af0aadff598851114 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -59,6 +59,7 @@ endif()
@@ -10,27 +10,27 @@ index a3dcd83148480be583a4b5901da427537292ae69..71d09dc06304b1cd34cabb415b21c579
  add_subdirectory(dependencies/submodules/UESDK)
  
  include(FetchContent)
-@@ -738,6 +739,9 @@ list(APPEND uevr_SOURCES
- 	"src/mods/UObjectHook.cpp"
- 	"src/mods/VR.cpp"
- 	"src/mods/WindowMode.cpp"
-+	"src/mods/portal/PortalSession.cpp"
+@@ -746,6 +747,9 @@ list(APPEND uevr_SOURCES
+ 	"src/mods/pluginloader/FRenderTargetPoolHook.cpp"
+ 	"src/mods/pluginloader/FUObjectArrayFunctions.cpp"
+ 	"src/mods/pluginloader/UScriptStructFunctions.cpp"
 +	"src/mods/portal/PortalFrame.cpp"
 +	"src/mods/portal/PortalOutput.cpp"
- 	"src/mods/bindings/FS.cpp"
- 	"src/mods/bindings/ImGui.cpp"
- 	"src/mods/bindings/Json.cpp"
-@@ -782,6 +786,10 @@ list(APPEND uevr_SOURCES
- 	"src/mods/UObjectHook.hpp"
- 	"src/mods/VR.hpp"
- 	"src/mods/WindowMode.hpp"
-+	"src/mods/portal/PortalSession.hpp"
++	"src/mods/portal/PortalSession.cpp"
+ 	"src/mods/uobjecthook/SDKDumper.cpp"
+ 	"src/mods/vr/Bindings.cpp"
+ 	"src/mods/vr/CVarManager.cpp"
+@@ -790,6 +794,10 @@ list(APPEND uevr_SOURCES
+ 	"src/mods/pluginloader/FRenderTargetPoolHook.hpp"
+ 	"src/mods/pluginloader/FUObjectArrayFunctions.hpp"
+ 	"src/mods/pluginloader/UScriptStructFunctions.hpp"
 +	"src/mods/portal/PortalFrame.hpp"
-+	"src/mods/portal/PortalOutput.hpp"
 +	"src/mods/portal/PortalIntegration.hpp"
- 	"src/mods/bindings/FS.hpp"
- 	"src/mods/bindings/ImGui.hpp"
- 	"src/mods/bindings/Json.hpp"
++	"src/mods/portal/PortalOutput.hpp"
++	"src/mods/portal/PortalSession.hpp"
+ 	"src/mods/uobjecthook/SDKDumper.hpp"
+ 	"src/mods/vr/CVarManager.hpp"
+ 	"src/mods/vr/D3D11Component.hpp"
 @@ -847,6 +855,9 @@ target_include_directories(uevr PUBLIC
  )
  
@@ -106,6 +106,90 @@ index 0000000000000000000000000000000000000000..f09c59805f19dc034dbb840a8f12f5e9
 +endif()
 +set(PORTAL_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 +add_subdirectory("${PORTAL_CORE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/portal-core")
+diff --git a/src/hooks/D3D12Hook.cpp b/src/hooks/D3D12Hook.cpp
+index 1d54447645937019a2224e4c15d0c6019ba386b5..4de0e0be1629a8fdcaaca6f3063ec008ed95146b 100644
+--- a/src/hooks/D3D12Hook.cpp
++++ b/src/hooks/D3D12Hook.cpp
+@@ -1,6 +1,7 @@
+ #include <thread>
+ #include <future>
+ #include <unordered_set>
++#include <exception>
+ 
+ #include <spdlog/spdlog.h>
+ #include <utility/Thread.hpp>
+@@ -402,8 +403,61 @@ HRESULT D3D12Hook::present_internal(IDXGISwapChain3* swap_chain, UINT sync_inter
+         present_fn = d3d12->m_present1_hook->get_original<Present1Fn>();
+     }
+ 
+-    if (d3d12->m_is_phase_1 && WindowFilter::get().is_filtered(swapchain_wnd)) {
++    // Secondary windows bypass the game callbacks below, including its existing
++    // recursion recovery. Keep a separate per-swapchain/entry-point stack so an
++    // overlay loop is bounded without treating nested independent presents as a loop.
++    struct SecondaryPresent {
++        IDXGISwapChain3* swapchain;
++        bool present1;
++        SecondaryPresent* previous;
++    };
++    static thread_local SecondaryPresent* active_secondary = nullptr;
++    const auto present_secondary = [&]() -> HRESULT {
++        unsigned depth = 0;
++        for (auto* active = active_secondary; active; active = active->previous) {
++            if (active->swapchain == swap_chain && active->present1 == present1) {
++                ++depth;
++            }
++        }
++        SecondaryPresent current{swap_chain, present1, active_secondary};
++        struct RestoreStack {
++            SecondaryPresent*& active;
++            SecondaryPresent* previous;
++            ~RestoreStack() { active = previous; }
++        } restore{active_secondary, active_secondary};
++        active_secondary = &current;
++
++        if (depth > 0) {
++            if (depth > 1 || (uintptr_t)present_fn == (uintptr_t)&D3D12Hook::present ||
++                (uintptr_t)present_fn == (uintptr_t)&D3D12Hook::present1) {
++                spdlog::error("Secondary Present recursion could not be recovered");
++                return DXGI_ERROR_INVALID_CALL;
++            }
++            try {
++                const auto original_bytes = utility::get_original_bytes(Address{present_fn});
++                if (!original_bytes || original_bytes->empty()) {
++                    spdlog::error("Secondary Present recursion: original bytes unavailable");
++                    return DXGI_ERROR_INVALID_CALL;
++                }
++                // Use the same on-disk restoration as the existing game Present path,
++                // with only one retry. A failed repair must not report a displayed frame.
++                ProtectionOverride protection_override{present_fn, original_bytes->size(), PAGE_EXECUTE_READWRITE};
++                memcpy(present_fn, original_bytes->data(), original_bytes->size());
++                if (!FlushInstructionCache(GetCurrentProcess(), (const void*)present_fn, original_bytes->size())) {
++                    spdlog::error("Secondary Present instruction cache flush failed");
++                    return DXGI_ERROR_INVALID_CALL;
++                }
++                spdlog::info("Restored secondary Present bytes; retrying once");
++            } catch (const std::exception& error) {
++                spdlog::error("Secondary Present restoration failed: {}", error.what());
++                return DXGI_ERROR_INVALID_CALL;
++            }
++        }
+         return present_fn(swap_chain, sync_interval, flags, params);
++    };
++
++    if (d3d12->m_is_phase_1 && WindowFilter::get().is_filtered(swapchain_wnd)) {
++        return present_secondary();
+     }
+ 
+     if (!d3d12->m_is_phase_1 && swap_chain != d3d12->m_swapchain_hook->get_instance()) {
+@@ -416,7 +470,7 @@ HRESULT D3D12Hook::present_internal(IDXGISwapChain3* swap_chain, UINT sync_inter
+         }
+ 
+         if (!d3d12->m_is_phase_1) {
+-            return present_fn(swap_chain, sync_interval, flags, params);
++            return present_secondary();
+         }
+     }
+ 
 diff --git a/src/mods/VR.cpp b/src/mods/VR.cpp
 index 0b5c53defe5c0c253235e8a4bc038e51c2e96cdc..b6cb5e936bf4e648e65f280338b64bb109dc03b1 100644
 --- a/src/mods/VR.cpp
@@ -282,7 +366,7 @@ index f60e8e4b01a65b86373eabfa7c484de5a2f24be5..1de929d35aedc9a849c6ddaa99026008
      const ModSlider::Ptr m_plane_width{ModSlider::create(generate_name("PlaneWidth"), 0.1f, 12.0f, 2.4f)};
 diff --git a/src/mods/portal/PortalFrame.cpp b/src/mods/portal/PortalFrame.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..94380eddcd7401501b0783f184be03818a9d8525
+index 0000000000000000000000000000000000000000..2ec1d3d7799135ab7a6695d8f1eed4b940ac6d45
 --- /dev/null
 +++ b/src/mods/portal/PortalFrame.cpp
 @@ -0,0 +1,67 @@
@@ -300,7 +384,7 @@ index 0000000000000000000000000000000000000000..94380eddcd7401501b0783f184be0381
 +struct Slot {std::shared_ptr<const PortalFrame> frame;unsigned views{},projections{};};
 +std::array<Slot,64> slots;
 +std::uint64_t mappingSession{},mappingEpoch{};
-+portal::RigidTransform runtimeMapping{},gameBasis{};
++portal::RigidTransform runtimeMapping{},epochGameBasis{};
 +portal::Quaternion inverse(portal::Quaternion q){return {-q.x,-q.y,-q.z,q.w};}
 +}
 +std::shared_ptr<const PortalFrame> PortalFrame::latch(std::uint64_t id,const portal::RigidTransform& raw){
@@ -321,10 +405,10 @@ index 0000000000000000000000000000000000000000..94380eddcd7401501b0783f184be0381
 +            const auto q=portal::multiply(raw.orientation,inverse(state->worldFromHead.orientation));
 +            runtimeMapping={portal::subtract(raw.position,portal::rotate(q,state->worldFromHead.position)),q};
 +            // Fixed camera origin/basis for this tracking epoch. Moving/resizing the rectangle never changes it.
-+            gameBasis={state->worldFromHead.position,state->worldFromPortal.orientation};
++            epochGameBasis={state->worldFromHead.position,state->worldFromPortal.orientation};
 +            mappingSession=state->sessionID;mappingEpoch=state->trackingEpoch;
 +        }
-+        frame->runtimeFromExternal=runtimeMapping;frame->gameBasis=gameBasis;
++        frame->runtimeFromExternal=runtimeMapping;frame->gameBasis=epochGameBasis;
 +        frame->runtimeHead=portal::compose(runtimeMapping,{state->worldFromHead.position,state->worldFromPortal.orientation});
 +        const portal::PortalGeometry geometry{state->worldFromPortal,state->widthMeters,state->heightMeters,state->geometryRevision};
 +        const auto eyes=portal::eyePositions(state->worldFromHead,state->eyeSeparationMeters);
@@ -438,10 +522,10 @@ index 0000000000000000000000000000000000000000..1396bb26bab2d811a781e0d0a84b0d56
 +}
 diff --git a/src/mods/portal/PortalOutput.cpp b/src/mods/portal/PortalOutput.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..616a67a64fbd809ed72c4f145691c3726df31e60
+index 0000000000000000000000000000000000000000..323f1dd040a57d49c494da1733d4029decca3eaa
 --- /dev/null
 +++ b/src/mods/portal/PortalOutput.cpp
-@@ -0,0 +1,214 @@
+@@ -0,0 +1,240 @@
 +#include "PortalOutput.hpp"
 +#include "PortalSession.hpp"
 +#include "WindowFilter.hpp"
@@ -453,6 +537,7 @@ index 0000000000000000000000000000000000000000..616a67a64fbd809ed72c4f145691c372
 +#include <vector>
 +#include <thread>
 +#include <atomic>
++#include <chrono>
 +#include <mutex>
 +#include <condition_variable>
 +#include <cstring>
@@ -483,8 +568,17 @@ index 0000000000000000000000000000000000000000..616a67a64fbd809ed72c4f145691c372
 +        else if(known->error=="eye_behind_or_near_portal"||known->error=="invalid_calibration")s.errorCode="invalidGeometry";
 +        else s.errorCode="staleTracking";
 +    }
-+    SPDLOG_DEBUG("[Portal] output frame={} detail={}",id,error);
 +    if(known){s.sessionID=known->state.sessionID;s.trackingEpoch=known->state.trackingEpoch;s.acceptedSequence=known->state.sequence;s.geometryRevision=known->state.geometryRevision;}
++    // Keep the suppression reason observable in Release builds. Debug macros
++    // compile out there, while per-frame info logging would overwhelm the log.
++    static std::atomic<std::int64_t> lastLogMs{0};
++    const auto nowMs=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
++    auto previous=lastLogMs.load(std::memory_order_relaxed);
++    if(nowMs-previous>=1000&&lastLogMs.compare_exchange_strong(previous,nowMs,std::memory_order_relaxed)){
++        spdlog::info("[Portal] output frame={} seq={} geometry={} valid={} paired={} status={} detail={}",
++            id,s.acceptedSequence,s.geometryRevision,known&&known->valid,
++            known&&PortalFrame::paired(id),s.errorCode,error);
++    }
 +    PortalSession::get().status(std::move(s));
 +}
 +std::vector<std::uint32_t> strip(unsigned w,const PortalFrame* f){
@@ -526,7 +620,7 @@ index 0000000000000000000000000000000000000000..616a67a64fbd809ed72c4f145691c372
 +struct PortalOutput::Impl {
 +    std::mutex windowMutex;std::condition_variable windowReady;HWND window{};bool initialized{};std::thread thread;
 +    ComPtr<ID3D11DeviceContext> context11;
-+    ComPtr<IDXGISwapChain3> swap;ComPtr<IUnknown> identity;unsigned width{},height{};DXGI_FORMAT format=DXGI_FORMAT_UNKNOWN;bool twelve{};
++    ComPtr<IDXGISwapChain3> swap;ComPtr<IUnknown> identity,queueIdentity;unsigned width{},height{};DXGI_FORMAT format=DXGI_FORMAT_UNKNOWN;bool twelve{};
 +    struct Slot11 {ComPtr<ID3D11Query> done;ComPtr<ID3D11Texture2D> source,strip,diagnostic,back;};std::array<Slot11,3> slots11;unsigned next11{};
 +    struct Slot12 {ComPtr<ID3D12CommandAllocator> allocator;ComPtr<ID3D12GraphicsCommandList> list;ComPtr<ID3D12Resource> source,upload,back;std::uint64_t done{};};std::array<Slot12,3> slots12;
 +    ComPtr<ID3D12Fence> fence;ComPtr<ID3D12CommandQueue> queue;std::uint64_t serial{};
@@ -552,12 +646,29 @@ index 0000000000000000000000000000000000000000..616a67a64fbd809ed72c4f145691c372
 +        for(auto& s:slots11)if(s.done&&context11->GetData(s.done.Get(),nullptr,0,0)!=S_OK)return false;return true;
 +    }
 +    bool idle12(){return !fence||fence->GetCompletedValue()>=serial;}
++    bool matches(IUnknown* deviceOrQueue,IUnknown* device,unsigned w,unsigned h,DXGI_FORMAT fmt,bool is12){
++        if(!swap||width!=w||height!=h||format!=fmt||twelve!=is12||(is12&&(!fence||!queue)))return false;
++        ComPtr<IUnknown> canonical;if(FAILED(device->QueryInterface(IID_PPV_ARGS(&canonical)))||identity.Get()!=canonical.Get())return false;
++        if(!is12)return true;
++        ComPtr<IUnknown> canonicalQueue;
++        return !FAILED(deviceOrQueue->QueryInterface(IID_PPV_ARGS(&canonicalQueue)))&&queueIdentity.Get()==canonicalQueue.Get();
++    }
 +    bool create(IUnknown* deviceOrQueue,IUnknown* device,unsigned w,unsigned h,DXGI_FORMAT fmt,bool is12){
 +        if(!window)return false;
++        if(matches(deviceOrQueue,device,w,h,fmt,is12))return true;
 +        ComPtr<IUnknown> canonical;if(FAILED(device->QueryInterface(IID_PPV_ARGS(&canonical))))return false;
-+        if(swap&&identity.Get()==canonical.Get()&&width==w&&height==h&&format==fmt&&twelve==is12&&(!is12||queue.Get()==deviceOrQueue))return true;
++        ComPtr<ID3D12Fence> nextFence;ComPtr<ID3D12CommandQueue> nextQueue;ComPtr<IUnknown> nextQueueIdentity;
++        if(is12){
++            ComPtr<ID3D12Device> device12;
++            if(FAILED(device->QueryInterface(IID_PPV_ARGS(&device12)))||
++               FAILED(deviceOrQueue->QueryInterface(IID_PPV_ARGS(&nextQueue)))||
++               FAILED(deviceOrQueue->QueryInterface(IID_PPV_ARGS(&nextQueueIdentity)))||
++               FAILED(device12->CreateFence(0,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&nextFence))))return false;
++        }
 +        // Caller checked all GPU completions before replacement. Format or device changes create a fresh swapchain.
-+        slots11={};slots12={};swap.Reset();fence.Reset();queue.Reset();serial=0;identity=canonical;twelve=is12;
++        // Fence, serial and per-slot completion values belong to one resource generation.
++        // A matching create() must retain all of them; never replace only the fence.
++        slots11={};slots12={};swap.Reset();fence=nextFence;queue=nextQueue;queueIdentity=nextQueueIdentity;serial=0;identity=canonical;twelve=is12;
 +        ComPtr<IDXGIFactory2> factory;if(FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))return false;
 +        DXGI_SWAP_CHAIN_DESC1 desc{};desc.Width=w;desc.Height=h;desc.Format=fmt;desc.SampleDesc.Count=1;desc.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;desc.BufferCount=3;desc.SwapEffect=DXGI_SWAP_EFFECT_FLIP_DISCARD;desc.Scaling=DXGI_SCALING_NONE;desc.AlphaMode=DXGI_ALPHA_MODE_IGNORE;
 +        ComPtr<IDXGISwapChain1> created;if(FAILED(factory->CreateSwapChainForHwnd(deviceOrQueue,window,&desc,nullptr,nullptr,&created))||FAILED(created.As(&swap)))return false;
@@ -585,7 +696,7 @@ index 0000000000000000000000000000000000000000..616a67a64fbd809ed72c4f145691c372
 +    if(format==DXGI_FORMAT_UNKNOWN||desc.Width%2||desc.Width/2<176||desc.ArraySize!=1||desc.SampleDesc.Count!=1){o.failed(id,"unsupported_color_resource");return;}
 +    if(std::abs((double(desc.Width)/2/desc.Height)/(frame->state.widthMeters/frame->state.heightMeters)-1.)>.005){o.failed(id,"content_aspect_mismatch");return;}
 +    ComPtr<ID3D11Device> device;context->GetDevice(&device);
-+    const bool recreate=!o.swap||o.twelve||o.width!=desc.Width||o.height!=desc.Height+16||o.format!=format||o.identity.Get()!=static_cast<IUnknown*>(device.Get());
++    const bool recreate=!o.matches(device.Get(),device.Get(),desc.Width,desc.Height+16,format,false);
 +    if(recreate){if(!o.idle12()||!o.idle11()){o.failed(id,"gpu_recreation_pending");return;}if(!o.create(device.Get(),device.Get(),desc.Width,desc.Height+16,format,false)){o.failed(id,"swapchain_create_failed");return;}}
 +    o.context11=context;
 +    auto& slot=o.slots11[o.next11++%3];
@@ -614,10 +725,9 @@ index 0000000000000000000000000000000000000000..616a67a64fbd809ed72c4f145691c372
 +    if(std::abs((double(desc.Width)/2/desc.Height)/(frame->state.widthMeters/frame->state.heightMeters)-1.)>.005){o.failed(id,"content_aspect_mismatch");return;}
 +    ComPtr<ID3D12Device> device;if(FAILED(source->GetDevice(IID_PPV_ARGS(&device)))){o.failed(id,"device_failed");return;}
 +    const unsigned width=static_cast<unsigned>(desc.Width);
-+    const bool recreate=!o.swap||!o.fence||!o.twelve||o.width!=width||o.height!=desc.Height+16||o.format!=format||o.identity.Get()!=static_cast<IUnknown*>(device.Get())||o.queue.Get()!=queue;
++    const bool recreate=!o.matches(queue,device.Get(),width,desc.Height+16,format,true);
 +    if(recreate){if(!o.idle12()||!o.idle11()){o.failed(id,"gpu_recreation_pending");return;}
-+        if(!o.create(queue,device.Get(),width,desc.Height+16,format,true)){o.failed(id,"swapchain_create_failed");return;}
-+        o.queue=queue;if(FAILED(device->CreateFence(0,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&o.fence)))){o.failed(id,"fence_create_failed");return;}}
++        if(!o.create(queue,device.Get(),width,desc.Height+16,format,true)){o.failed(id,"swapchain_create_failed");return;}}
 +    const unsigned index=o.swap->GetCurrentBackBufferIndex();auto& slot=o.slots12[index];
 +    if(slot.done&&o.fence->GetCompletedValue()<slot.done){o.failed(id,"gpu_busy");return;}
 +    slot.source=source;slot.upload.Reset();slot.back.Reset();
@@ -863,7 +973,7 @@ index 1a4aab6f90063685b14afa3798d3ebf208f10c5b..d8175e0ccaf67e53b5643b2f848f3058
      if (is_left_eye_frame) {
          m_submitted_left_eye = true;
 diff --git a/src/mods/vr/FFakeStereoRenderingHook.cpp b/src/mods/vr/FFakeStereoRenderingHook.cpp
-index 18d1f4e57eb4d32afe22f4a485bfeb10ceb8ff2d..6d01a41f68847ff856e054521199580328823e80 100644
+index 18d1f4e57eb4d32afe22f4a485bfeb10ceb8ff2d..b5452775b3f245834b7d52040d21fbc43b115160 100644
 --- a/src/mods/vr/FFakeStereoRenderingHook.cpp
 +++ b/src/mods/vr/FFakeStereoRenderingHook.cpp
 @@ -57,6 +57,7 @@
@@ -901,22 +1011,30 @@ index 18d1f4e57eb4d32afe22f4a485bfeb10ceb8ff2d..6d01a41f68847ff856e0545211995803
      } else {
          if (g_hook->m_has_double_precision) {
              (*out)[3][2] = sdk::globals::get_near_clipping_plane();
-@@ -5170,6 +5184,20 @@ __forceinline Matrix4x4f* FFakeStereoRenderingHook::calculate_stereo_projection_
+@@ -5170,6 +5184,28 @@ __forceinline Matrix4x4f* FFakeStereoRenderingHook::calculate_stereo_projection_
          }
  
          auto& double_matrix = *(Matrix4x4d*)out;
 +        if(WindowMode::get()->portal_output_enabled()) {
 +            const auto frame=uevrportal::gameFrame();
-+            const double nearUnits=g_hook->m_has_double_precision?double_matrix[3][2]:(*out)[3][2];
-+            if(frame&&frame->valid&&true_index>=0&&true_index<2&&std::isfinite(nearUnits)&&nearUnits>0) {
-+                const auto mat=portal::toUnrealReversedZ(frame->frusta[true_index],nearUnits);
-+                for(unsigned col=0;col<4;++col)for(unsigned row=0;row<4;++row){
-+                    if(g_hook->m_has_double_precision)double_matrix[col][row]=mat[col*4+row];
-+                    else (*out)[col][row]=float(mat[col*4+row]);
-+                }
-+                vr->m_nearz=float(nearUnits);
++            double nearUnits=g_hook->m_has_double_precision?double_matrix[3][2]:(*out)[3][2];
++            if(!std::isfinite(nearUnits)||nearUnits<=0)nearUnits=double(sdk::globals::get_near_clipping_plane());
++            if(!std::isfinite(nearUnits)||nearUnits<=0)nearUnits=1.;
++            // The emulated stereo device has no original projection to fall back to.
++            // Initialize every element even before the first pose or after lease expiry.
++            // This preview projection never marks an invalid portal frame as paired.
++            const auto mode=WindowMode::get();
++            const double aspect=double(mode->portal_eye_width())/mode->portal_eye_height();
++            auto mat=portal::toUnrealReversedZ({-1.,1.,-1./aspect,1./aspect},nearUnits);
++            if(frame&&frame->valid&&true_index>=0&&true_index<2) {
++                mat=portal::toUnrealReversedZ(frame->frusta[true_index],nearUnits);
 +                uevrportal::PortalFrame::observe(frame->gameFrameID,true_index,true);
 +            }
++            for(unsigned col=0;col<4;++col)for(unsigned row=0;row<4;++row){
++                if(g_hook->m_has_double_precision)double_matrix[col][row]=mat[col*4+row];
++                else (*out)[col][row]=float(mat[col*4+row]);
++            }
++            vr->m_nearz=float(nearUnits);
 +            return out;
 +        }
  

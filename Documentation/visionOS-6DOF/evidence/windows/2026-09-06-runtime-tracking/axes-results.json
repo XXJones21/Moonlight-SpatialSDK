@@ -1,0 +1,242 @@
+{
+  "pattern": "axes",
+  "passed": true,
+  "runtimeSamples": 2446,
+  "allPosesConnectedValidRunningOK": true,
+  "groups": [
+    {
+      "label": "pitch+1",
+      "origin": "1",
+      "samples": 42,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 4.573599221568969e-09,
+      "p95RotationMatrixError": 4.573599221568969e-09
+    },
+    {
+      "label": "pitch+1",
+      "origin": "2",
+      "samples": 42,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 4.573599221568969e-09,
+      "p95RotationMatrixError": 4.573599221568969e-09
+    },
+    {
+      "label": "pitch-1",
+      "origin": "1",
+      "samples": 42,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 4.573599221568969e-09,
+      "p95RotationMatrixError": 4.573599221568969e-09
+    },
+    {
+      "label": "pitch-1",
+      "origin": "2",
+      "samples": 42,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 4.573599221568969e-09,
+      "p95RotationMatrixError": 4.573599221568969e-09
+    },
+    {
+      "label": "roll+1",
+      "origin": "1",
+      "samples": 42,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 4.573599221568969e-09,
+      "p95RotationMatrixError": 4.573599221568969e-09
+    },
+    {
+      "label": "roll+1",
+      "origin": "2",
+      "samples": 42,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 4.573599221568969e-09,
+      "p95RotationMatrixError": 4.573599221568969e-09
+    },
+    {
+      "label": "roll-1",
+      "origin": "1",
+      "samples": 42,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 4.573599221568969e-09,
+      "p95RotationMatrixError": 4.573599221568969e-09
+    },
+    {
+      "label": "roll-1",
+      "origin": "2",
+      "samples": 42,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 4.573599221568969e-09,
+      "p95RotationMatrixError": 4.573599221568969e-09
+    },
+    {
+      "label": "x+1",
+      "origin": "1",
+      "samples": 43,
+      "maxPositionErrorM": 1.4999999992104662e-09,
+      "p95PositionErrorM": 1.4999999992104662e-09,
+      "maxRotationMatrixError": 0.0,
+      "p95RotationMatrixError": 0.0
+    },
+    {
+      "label": "x+1",
+      "origin": "2",
+      "samples": 43,
+      "maxPositionErrorM": 1.4999999992104662e-09,
+      "p95PositionErrorM": 1.4999999992104662e-09,
+      "maxRotationMatrixError": 0.0,
+      "p95RotationMatrixError": 0.0
+    },
+    {
+      "label": "x-1",
+      "origin": "1",
+      "samples": 43,
+      "maxPositionErrorM": 1.4999999992104662e-09,
+      "p95PositionErrorM": 1.4999999992104662e-09,
+      "maxRotationMatrixError": 0.0,
+      "p95RotationMatrixError": 0.0
+    },
+    {
+      "label": "x-1",
+      "origin": "2",
+      "samples": 43,
+      "maxPositionErrorM": 1.4999999992104662e-09,
+      "p95PositionErrorM": 1.4999999992104662e-09,
+      "maxRotationMatrixError": 0.0,
+      "p95RotationMatrixError": 0.0
+    },
+    {
+      "label": "y+1",
+      "origin": "1",
+      "samples": 42,
+      "maxPositionErrorM": 9.500000031081868e-08,
+      "p95PositionErrorM": 9.500000031081868e-08,
+      "maxRotationMatrixError": 0.0,
+      "p95RotationMatrixError": 0.0
+    },
+    {
+      "label": "y+1",
+      "origin": "2",
+      "samples": 42,
+      "maxPositionErrorM": 2.399999998736746e-08,
+      "p95PositionErrorM": 2.399999998736746e-08,
+      "maxRotationMatrixError": 0.0,
+      "p95RotationMatrixError": 0.0
+    },
+    {
+      "label": "y-1",
+      "origin": "1",
+      "samples": 42,
+      "maxPositionErrorM": 2.399999998736746e-08,
+      "p95PositionErrorM": 2.399999998736746e-08,
+      "maxRotationMatrixError": 0.0,
+      "p95RotationMatrixError": 0.0
+    },
+    {
+      "label": "y-1",
+      "origin": "2",
+      "samples": 42,
+      "maxPositionErrorM": 2.3799999970819385e-08,
+      "p95PositionErrorM": 2.3799999970819385e-08,
+      "maxRotationMatrixError": 0.0,
+      "p95RotationMatrixError": 0.0
+    },
+    {
+      "label": "yaw+1",
+      "origin": "1",
+      "samples": 43,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 4.573599221568969e-09,
+      "p95RotationMatrixError": 4.573599221568969e-09
+    },
+    {
+      "label": "yaw+1",
+      "origin": "2",
+      "samples": 43,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 4.573599221568969e-09,
+      "p95RotationMatrixError": 4.573599221568969e-09
+    },
+    {
+      "label": "yaw-1",
+      "origin": "1",
+      "samples": 42,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 4.573599221568969e-09,
+      "p95RotationMatrixError": 4.573599221568969e-09
+    },
+    {
+      "label": "yaw-1",
+      "origin": "2",
+      "samples": 42,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 4.573599221568969e-09,
+      "p95RotationMatrixError": 4.573599221568969e-09
+    },
+    {
+      "label": "z+1",
+      "origin": "1",
+      "samples": 43,
+      "maxPositionErrorM": 9.500000031081868e-08,
+      "p95PositionErrorM": 9.500000031081868e-08,
+      "maxRotationMatrixError": 0.0,
+      "p95RotationMatrixError": 0.0
+    },
+    {
+      "label": "z+1",
+      "origin": "2",
+      "samples": 43,
+      "maxPositionErrorM": 9.500000031081868e-08,
+      "p95PositionErrorM": 9.500000031081868e-08,
+      "maxRotationMatrixError": 0.0,
+      "p95RotationMatrixError": 0.0
+    },
+    {
+      "label": "z-1",
+      "origin": "1",
+      "samples": 42,
+      "maxPositionErrorM": 2.399999998736746e-08,
+      "p95PositionErrorM": 2.399999998736746e-08,
+      "maxRotationMatrixError": 0.0,
+      "p95RotationMatrixError": 0.0
+    },
+    {
+      "label": "z-1",
+      "origin": "2",
+      "samples": 42,
+      "maxPositionErrorM": 2.399999998736746e-08,
+      "p95PositionErrorM": 2.399999998736746e-08,
+      "maxRotationMatrixError": 0.0,
+      "p95RotationMatrixError": 0.0
+    }
+  ],
+  "comparison": "contemporaneous preceding sent pose, no fitted latency; steady axes exclude first 350 ms",
+  "positionToleranceM": 0.005,
+  "rotationMatrixTolerance": 0.01,
+  "neutralRestoration": [
+    {
+      "origin": "2",
+      "samples": 303,
+      "maxPositionErrorM": 0.0
+    },
+    {
+      "origin": "1",
+      "samples": 303,
+      "maxPositionErrorM": 0.0
+    }
+  ],
+  "portalOutputEnabled": false,
+  "hostShutdown": "terminated by harness after neutral pose",
+  "rendererStatusValidated": false
+}

@@ -1,0 +1,36 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35221.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file External\local-validation\UEVR-portal-0b59830\UEVRBackend.dll
+
+File Type: DLL
+
+  Image has the following dependencies:
+
+    WS2_32.dll
+    dxgi.dll
+    d3d11.dll
+    d3d12.dll
+    D3DCOMPILER_47.dll
+    VERSION.dll
+    ADVAPI32.dll
+    KERNEL32.dll
+    USER32.dll
+    SHELL32.dll
+    COMDLG32.dll
+    IMM32.dll
+    SHLWAPI.dll
+
+  Image has the following delay load dependencies:
+
+    openvr_api.dll
+
+  Summary
+
+       4D000 .data
+       4D000 .pdata
+      290000 .rdata
+        C000 .reloc
+        1000 .rsrc
+      821000 .text

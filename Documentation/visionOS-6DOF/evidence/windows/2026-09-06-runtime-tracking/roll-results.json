@@ -1,0 +1,44 @@
+{
+  "pattern": "roll",
+  "passed": true,
+  "runtimeSamples": 2188,
+  "allPosesConnectedValidRunningOK": true,
+  "groups": [
+    {
+      "label": "roll",
+      "origin": "1",
+      "samples": 620,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 0.00575806594093568,
+      "p95RotationMatrixError": 0.005416650431298922
+    },
+    {
+      "label": "roll",
+      "origin": "2",
+      "samples": 620,
+      "maxPositionErrorM": 0.0,
+      "p95PositionErrorM": 0.0,
+      "maxRotationMatrixError": 0.00575806594093568,
+      "p95RotationMatrixError": 0.005416650431298922
+    }
+  ],
+  "comparison": "contemporaneous preceding sent pose, no fitted latency; steady axes exclude first 350 ms",
+  "positionToleranceM": 0.06,
+  "rotationMatrixTolerance": 0.08,
+  "neutralRestoration": [
+    {
+      "origin": "2",
+      "samples": 299,
+      "maxPositionErrorM": 0.0
+    },
+    {
+      "origin": "1",
+      "samples": 299,
+      "maxPositionErrorM": 0.0
+    }
+  ],
+  "portalOutputEnabled": false,
+  "hostShutdown": "terminated by harness after neutral pose",
+  "rendererStatusValidated": false
+}

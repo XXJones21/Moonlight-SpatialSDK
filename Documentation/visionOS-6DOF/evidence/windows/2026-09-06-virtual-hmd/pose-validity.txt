@@ -1,0 +1,2 @@
+origin=2 connected=1 valid=1 tracking_result=200 position=0,1,0
+origin=1 connected=1 valid=1 tracking_result=200 position=0,2,0

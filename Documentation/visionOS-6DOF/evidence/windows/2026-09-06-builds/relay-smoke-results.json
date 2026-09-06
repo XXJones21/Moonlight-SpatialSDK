@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "scope": "relay plus synthetic sender; loopback receivers, no renderer or SteamVR input",
+  "listenPort": 14243,
+  "backendPort": 14244,
+  "trackingPort": 14242,
+  "runs": [
+    {
+      "pattern": "static",
+      "sent": 270,
+      "forwardedStates": 270,
+      "trackingPackets": 270,
+      "uniqueMotionValues": 1,
+      "resetPackets": 0,
+      "senderResult": "Sent 270 snapshots, session 15564107812329861045; CSV: D:\\Tools\\Moonlight-SpatialSDK\\Documentation\\visionOS-6DOF\\evidence\\windows\\2026-09-06-builds\\relay-static.csv"
+    },
+    {
+      "pattern": "sweep",
+      "sent": 270,
+      "forwardedStates": 270,
+      "trackingPackets": 270,
+      "uniqueMotionValues": 270,
+      "resetPackets": 0,
+      "senderResult": "Sent 270 snapshots, session 18413427306192508518; CSV: D:\\Tools\\Moonlight-SpatialSDK\\Documentation\\visionOS-6DOF\\evidence\\windows\\2026-09-06-builds\\relay-sweep.csv"
+    },
+    {
+      "pattern": "roll",
+      "sent": 270,
+      "forwardedStates": 270,
+      "trackingPackets": 269,
+      "uniqueMotionValues": 269,
+      "resetPackets": 20,
+      "senderResult": "Sent 270 snapshots, session 11910670478110075610; CSV: D:\\Tools\\Moonlight-SpatialSDK\\Documentation\\visionOS-6DOF\\evidence\\windows\\2026-09-06-builds\\relay-roll.csv"
+    }
+  ],
+  "shutdown": "test process terminated; cooperative shutdown not tested"
+}

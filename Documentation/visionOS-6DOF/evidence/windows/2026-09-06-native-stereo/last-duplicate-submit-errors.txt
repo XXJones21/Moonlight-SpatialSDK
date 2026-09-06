@@ -1,0 +1,5 @@
+[2026-09-06 12:03:18.905] [UnrealVR] [error] [VR] VRCompositor failed to submit left eye: 108
+[2026-09-06 12:03:19.033] [UnrealVR] [error] [VR] VRCompositor failed to submit left eye: 108
+[2026-09-06 12:03:19.149] [UnrealVR] [error] [VR] VRCompositor failed to submit left eye: 108
+[2026-09-06 12:03:19.278] [UnrealVR] [error] [VR] VRCompositor failed to submit left eye: 108
+[2026-09-06 12:03:19.437] [UnrealVR] [error] [VR] VRCompositor failed to submit left eye: 108

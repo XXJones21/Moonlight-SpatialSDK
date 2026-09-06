@@ -1,6 +1,6 @@
 # PC off-axis portal source handoff
 
-**Authored, unbuilt, untested, and not runtime validated.** User direction deferred installation, CMake generation, compilation, automated tests, capture experiments, and debugging. Phase 2 runtime gates remain open. Private UESDK access is required for a future full UEVR build.
+**Windows update, 2026-09-06:** The source now builds with MSVC, core/host tests and targeted regressions pass, and revision `67d9785` produces visible direct SBS with live AVP input in the tested OpenVR/Native Stereo D3D12 game. See [Windows handoff](Windows-handoff.md) for scoped evidence. Sunshine capture, decoded frame identity and headset portal video remain unvalidated. Follow the [Sunshine delivery plan](../../docs/superpowers/plans/2026-09-06-sunshine-sbs-headset.md); source presentation does not close those gates.
 
 The authored initial route is OpenVR lifecycle plus a direct pre-compositor SBS window. VRto3D projection preservation is unknown; the code does not require an unproven compositor path for portal pixels. The runtime still receives regular eye submissions for timing/lifecycle, but those submissions are not the portal capture source.
 
@@ -47,4 +47,4 @@ Scene-rendered HUD remains in the copied color target. Separate Slate/runtime UI
 
 ## Deferred acceptance
 
-See evidence/PC-baseline.md and evidence/Projection-and-capture.md. No gate is marked passed. In particular, require instrumented view order, same-frame mutation between left/right callbacks, correct portal corner projection and gamepad movement, clean D3D11/D3D12 debug-layer runs, stale/reset/reconnect drops, resize/device-recreation recovery, and Sunshine pixel/tag decoding on the actual deployment before comfort tuning.
+See evidence/PC-baseline.md and evidence/Projection-and-capture.md for the original acceptance criteria, and Windows-handoff.md for subsequent measured results. Source presentation and live camera mapping now have Windows evidence. Still require instrumented view order, same-frame mutation between left/right callbacks, correct portal corner projection and gamepad movement, clean D3D11/D3D12 debug-layer runs, stale/reset/reconnect drops, live resize/device-recreation recovery, and Sunshine pixel/tag decoding on the actual deployment before comfort tuning.

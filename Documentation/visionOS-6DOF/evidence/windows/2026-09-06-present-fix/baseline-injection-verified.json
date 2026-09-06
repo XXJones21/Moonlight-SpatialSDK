@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-09-06T14:45:40.1416262-07:00",
+  "loaded": [
+    {
+      "pid": 45236,
+      "backend": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-d700ced\\UEVRBackend.dll",
+      "sha256": "11B8493FB8351EF1E9189BEA778D29F787E791AC1432B19973F002A89F701DDB"
+    }
+  ],
+  "settings": [
+    "Frontend_RequestedRuntime=openvr_api.dll",
+    "VR_RenderingMethod=0",
+    "WindowMode_Enabled=false",
+    "WindowMode_PortalDiagnostics=false",
+    "WindowMode_PortalOutput=false"
+  ],
+  "sockets": [
+    {
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 4243,
+      "OwningProcess": 46808
+    },
+    {
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 4242,
+      "OwningProcess": 38084
+    }
+  ],
+  "userConfirmedOrdinaryLiveCamera": true,
+  "portalOutputTested": false
+}

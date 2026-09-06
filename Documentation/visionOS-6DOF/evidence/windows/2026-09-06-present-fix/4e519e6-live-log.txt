@@ -1,0 +1,1641 @@
+[2026-09-06 15:08:47.782] [UnrealVR] [info] UnrealVR entry
+[2026-09-06 15:08:47.783] [UnrealVR] [info] Commit hash: 4e519e6d1d538e3501e0679922abf1cd52800f1e
+[2026-09-06 15:08:47.783] [UnrealVR] [info] Tag: v0.2.0-alpha.1
+[2026-09-06 15:08:47.783] [UnrealVR] [info] Commits past tag: 5
+[2026-09-06 15:08:47.783] [UnrealVR] [info] Branch: visionos-portal
+[2026-09-06 15:08:47.783] [UnrealVR] [info] Total commits: 1432
+[2026-09-06 15:08:47.783] [UnrealVR] [info] Build date: 06.09.2026
+[2026-09-06 15:08:47.783] [UnrealVR] [info] Build time: 14:55
+[2026-09-06 15:08:47.783] [UnrealVR] [info] Game Module Addr: 140000000
+[2026-09-06 15:08:47.783] [UnrealVR] [info] Game Module Size: 1bcc2000
+[2026-09-06 15:08:47.784] [UnrealVR] [info] Getting OS version information...
+[2026-09-06 15:08:47.784] [UnrealVR] [info] OS Version Information
+[2026-09-06 15:08:47.784] [UnrealVR] [info] 	Major Version: 10
+[2026-09-06 15:08:47.784] [UnrealVR] [info] 	Minor Version: 0
+[2026-09-06 15:08:47.784] [UnrealVR] [info] 	Build Number: 26200
+[2026-09-06 15:08:47.784] [UnrealVR] [info] 	Platform Id: 2
+[2026-09-06 15:08:47.784] [UnrealVR] [info] Disclaimer: Framework does not send this information to the developers or any other third party.
+[2026-09-06 15:08:47.785] [UnrealVR] [info] This information is only used to help with the development of Framework.
+[2026-09-06 15:08:47.785] [UnrealVR] [info] [PluginLoader] Module path D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe
+[2026-09-06 15:08:47.785] [UnrealVR] [info] [PluginLoader] Creating directories C:\Users\josh2\AppData\Roaming\UnrealVRMod\HogwartsLegacy\plugins
+[2026-09-06 15:08:47.785] [UnrealVR] [info] [PluginLoader] Created directory for plugins: C:\Users\josh2\AppData\Roaming\UnrealVRMod\HogwartsLegacy\plugins
+[2026-09-06 15:08:47.785] [UnrealVR] [info] [PluginLoader] Loading plugins...
+[2026-09-06 15:08:47.786] [UnrealVR] [info] Shared memory constructor!
+[2026-09-06 15:08:47.786] [UnrealVR] [info] Mapped memory!
+[2026-09-06 15:08:47.786] [UnrealVR] [info] Leaving Framework constructor
+[2026-09-06 15:08:47.786] [UnrealVR] [info] Command thread entry
+[2026-09-06 15:08:47.786] [UnrealVR] [info] D3D monitor thread entry
+[2026-09-06 15:08:47.820] [UnrealVR] [info] Sending rehook request for D3D
+[2026-09-06 15:08:47.821] [UnrealVR] [info] Hooking D3D12
+[2026-09-06 15:08:47.821] [UnrealVR] [info] Creating dummy device
+[2026-09-06 15:08:47.826] [UnrealVR] [info] Dummy device: 183efa20
+[2026-09-06 15:08:47.827] [UnrealVR] [info] Creating dummy DXGI factory
+[2026-09-06 15:08:47.827] [UnrealVR] [info] Creating dummy command queue
+[2026-09-06 15:08:47.858] [UnrealVR] [info] Creating dummy swapchain
+[2026-09-06 15:08:47.858] [UnrealVR] [info] Trying swapchain attempt 0
+[2026-09-06 15:08:47.869] [UnrealVR] [info] Created dummy swapchain on attempt 0
+[2026-09-06 15:08:47.869] [UnrealVR] [info] Querying dummy swapchain
+[2026-09-06 15:08:47.872] [UnrealVR] [error] Failed to get type info: unknown exception
+[2026-09-06 15:08:47.872] [UnrealVR] [info] Finding command queue offset
+[2026-09-06 15:08:47.872] [UnrealVR] [info] Found command queue offset: 140
+[2026-09-06 15:08:47.872] [UnrealVR] [info] Initializing hooks
+[2026-09-06 15:08:47.872] [UnrealVR] [info] [PointerHook.cpp:25] [PointerHook] Hooking 7ffb8b7bc6c8->7ffb8b709960 to 7ffb24b62a90
+[2026-09-06 15:08:47.872] [UnrealVR] [info] [PointerHook.cpp:25] [PointerHook] Hooking 7ffb8b7bc738->7ffb8b709e00 to 7ffb24b629e0
+[2026-09-06 15:08:47.882] [UnrealVR] [info] Hooked DirectX 12
+[2026-09-06 15:08:47.903] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:47.911] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:47.923] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:47.938] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:47.956] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:47.972] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:47.989] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.006] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.021] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.039] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.054] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.072] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.089] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.106] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.123] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.139] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.156] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.172] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.190] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.206] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.222] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.239] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.255] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.273] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.289] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.307] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.323] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.340] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.355] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.373] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.389] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.406] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.423] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.439] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.456] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.472] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.490] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.507] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.523] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.540] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.556] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.574] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.590] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.605] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.623] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.640] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.656] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.672] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.689] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.706] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.723] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.739] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.756] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.773] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.789] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.806] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.823] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.838] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.857] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.872] [UnrealVR] [error] Failed to initialize Framework on DirectX 12
+[2026-09-06 15:08:48.889] [UnrealVR] [info] Attempting to initialize DirectX 12
+[2026-09-06 15:08:48.889] [UnrealVR] [info] [D3D12] Creating command allocator...
+[2026-09-06 15:08:48.891] [UnrealVR] [info] [D3D12] Creating RTV descriptor heap...
+[2026-09-06 15:08:48.891] [UnrealVR] [info] [D3D12] Creating SRV descriptor heap...
+[2026-09-06 15:08:48.892] [UnrealVR] [info] [D3D12] Creating render targets...
+[2026-09-06 15:08:48.892] [UnrealVR] [info] [D3D12] Back buffer format is 24
+[2026-09-06 15:08:48.894] [UnrealVR] [info] [D3D12] Initializing ImGui...
+[2026-09-06 15:08:48.894] [UnrealVR] [info] Initializing WindowsMessageHook
+[2026-09-06 15:08:48.894] [UnrealVR] [info] Hooked Windows message handler
+[2026-09-06 15:08:48.894] [UnrealVR] [info] [XInputHook] Entry
+[2026-09-06 15:08:48.894] [UnrealVR] [info] [XInputHook] Starting hook thread
+[2026-09-06 15:08:48.894] [UnrealVR] [info] [XInputHook] Hook thread started
+[2026-09-06 15:08:48.894] [UnrealVR] [info] [DInputHook.cpp:17] [DInputHook] Constructing DInputHook
+[2026-09-06 15:08:48.894] [UnrealVR] [info] [DInputHook.cpp:21] [DInputHook] Creating thread
+[2026-09-06 15:08:48.894] [UnrealVR] [info] [DInputHook.cpp:67] [DInputHook] Exiting constructor
+[2026-09-06 15:08:48.894] [UnrealVR] [info] Starting game data initialization thread
+[2026-09-06 15:08:48.895] [UnrealVR] [info] FrameworkConfig::on_initialize()
+[2026-09-06 15:08:48.895] [UnrealVR] [info] VR::on_initialize()
+[2026-09-06 15:08:48.895] [UnrealVR] [info] UObjectHook::on_initialize()
+[2026-09-06 15:08:48.895] [UnrealVR] [info] PluginLoader::on_initialize()
+[2026-09-06 15:08:48.895] [UnrealVR] [info] LuaLoader::on_initialize()
+[2026-09-06 15:08:48.895] [UnrealVR] [info] WindowMode::on_initialize()
+[2026-09-06 15:08:48.895] [UnrealVR] [info] Framework initialized
+[2026-09-06 15:08:48.895] [UnrealVR] [info] [DInputHook.cpp:24] [DInputHook] Entering thread
+[2026-09-06 15:08:48.895] [UnrealVR] [info] [DInputHook.cpp:33] [DInputHook] dinput8.dll loaded
+[2026-09-06 15:08:48.895] [UnrealVR] [info] [DInputHook.cpp:55] [DInputHook] Found DirectInput8Create at 7ffaa91811e0
+[2026-09-06 15:08:48.896] [UnrealVR] [info] [DInputHook.cpp:64] [DInputHook] Hooked DirectInput8Create
+[2026-09-06 15:08:48.901] [UnrealVR] [info] [XInputHook] Done (1_4)
+[2026-09-06 15:08:48.901] [UnrealVR] [info] [XInputHook] Done (1_3)
+[2026-09-06 15:08:48.907] [UnrealVR] [info] Running first frame D3D initialization of mods...
+[2026-09-06 15:08:48.907] [UnrealVR] [info] FrameworkConfig::on_config_load()
+[2026-09-06 15:08:48.907] [UnrealVR] [info] VR::on_config_load()
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [VR] Loading camera offsets from C:\Users\josh2\AppData\Roaming\UnrealVRMod\HogwartsLegacy\cameras.txt
+[2026-09-06 15:08:48.908] [UnrealVR] [info] UObjectHook::on_config_load()
+[2026-09-06 15:08:48.908] [UnrealVR] [info] PluginLoader::on_config_load()
+[2026-09-06 15:08:48.908] [UnrealVR] [info] LuaLoader::on_config_load()
+[2026-09-06 15:08:48.908] [UnrealVR] [info] WindowMode::on_config_load()
+[2026-09-06 15:08:48.908] [UnrealVR] [info] FrameworkConfig::on_initialize_d3d_thread()
+[2026-09-06 15:08:48.908] [UnrealVR] [info] VR::on_initialize_d3d_thread()
+[2026-09-06 15:08:48.908] [UnrealVR] [info] Attempting to load OpenVR
+[2026-09-06 15:08:48.908] [UnrealVR] [info] [VR.cpp:106] [VR] Requested runtime: openvr_api.dll
+[2026-09-06 15:08:48.909] [UnrealVR] [info] Attempting to call vr::VR_Init
+[2026-09-06 15:08:51.131] [UnrealVR] [info] Writing default binding file actions.json
+[2026-09-06 15:08:51.131] [UnrealVR] [info] Writing default binding file binding_rift.json
+[2026-09-06 15:08:51.131] [UnrealVR] [info] Writing default binding file binding_vive.json
+[2026-09-06 15:08:51.131] [UnrealVR] [info] Writing default binding file bindings_oculus_touch.json
+[2026-09-06 15:08:51.132] [UnrealVR] [info] Writing default binding file bindings_vive_controller.json
+[2026-09-06 15:08:51.132] [UnrealVR] [info] Writing default binding file bindings_knuckles.json
+[2026-09-06 15:08:51.190] [UnrealVR] [info] Made overlay with handle 459561500687
+[2026-09-06 15:08:51.190] [UnrealVR] [info] Made overlay with handle 463856467991
+[2026-09-06 15:08:51.190] [UnrealVR] [info] UObjectHook::on_initialize_d3d_thread()
+[2026-09-06 15:08:51.190] [UnrealVR] [info] PluginLoader::on_initialize_d3d_thread()
+[2026-09-06 15:08:51.190] [UnrealVR] [info] Verifying SDK pointers...
+[2026-09-06 15:08:51.190] [UnrealVR] [info] Verifying...
+[2026-09-06 15:08:51.190] [UnrealVR] [info] LuaLoader::on_initialize_d3d_thread()
+[2026-09-06 15:08:51.190] [UnrealVR] [info] WindowMode::on_initialize_d3d_thread()
+[2026-09-06 15:08:51.190] [UnrealVR] [info] FrameworkConfig::on_config_load()
+[2026-09-06 15:08:51.190] [UnrealVR] [info] VR::on_config_load()
+[2026-09-06 15:08:51.190] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.190] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:51.190] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.190] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:51.190] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:51.190] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:51.190] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.190] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.190] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_data.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [CVarManager] Loading cvars_standard.txt...
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [VR] Loading camera offsets from C:\Users\josh2\AppData\Roaming\UnrealVRMod\HogwartsLegacy\cameras.txt
+[2026-09-06 15:08:51.191] [UnrealVR] [info] UObjectHook::on_config_load()
+[2026-09-06 15:08:51.191] [UnrealVR] [info] PluginLoader::on_config_load()
+[2026-09-06 15:08:51.191] [UnrealVR] [info] LuaLoader::on_config_load()
+[2026-09-06 15:08:51.191] [UnrealVR] [info] WindowMode::on_config_load()
+[2026-09-06 15:08:51.191] [UnrealVR] [info] Saving config config.txt
+[2026-09-06 15:08:51.191] [UnrealVR] [info] [VR] Saving camera offsets to C:\Users\josh2\AppData\Roaming\UnrealVRMod\HogwartsLegacy\cameras.txt
+[2026-09-06 15:08:51.192] [UnrealVR] [info] Saved config
+[2026-09-06 15:08:51.192] [UnrealVR] [info] Signaled frontend config setup
+[2026-09-06 15:08:51.276] [UnrealVR] [info] VR: VREvent_SeatedZeroPoseReset
+[2026-09-06 15:08:51.276] [UnrealVR] [info] VR: VREvent_SeatedZeroPoseReset
+[2026-09-06 15:08:51.277] [UnrealVR] [info] [D3D12Component.cpp:1122] [VR] Setting up d3d12 textures...
+[2026-09-06 15:08:51.277] [UnrealVR] [error] [D3D12Component.cpp:1153] [VR] Failed to get back buffer (D3D12).
+[2026-09-06 15:08:51.277] [UnrealVR] [error] [D3D12Component.cpp:32] [D3D12 VR] Could not set up, trying again next frame
+[2026-09-06 15:08:51.277] [UnrealVR] [info] [UGameEngine.cpp:13] UGameEngine::get_tick_address: scanning for address
+[2026-09-06 15:08:51.277] [UnrealVR] [info] [FSceneView.cpp:113] Searching for FSceneView constructor...
+[2026-09-06 15:08:51.277] [UnrealVR] [info] [Slate.cpp:59] Attempting to locate SlateRHIRenderer::DrawWindow_RenderThread
+[2026-09-06 15:08:51.277] [UnrealVR] [info] [CVar.cpp:594] Scanning for Slate.DrawToVRRenderTarget usage...
+[2026-09-06 15:08:51.277] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate SlateRHIRenderer Slate.DrawToVRRenderTarget cvar
+[2026-09-06 15:08:51.277] [UnrealVR] [info] [Scan.cpp:2487] Scanning module D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe for string reference causeevent=
+[2026-09-06 15:08:51.279] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Engine t.MaxFPS cvar
+[2026-09-06 15:08:51.288] [UnrealVR] [info] [Scan.cpp:1929] Adding 497491 entries for module 140000000
+[2026-09-06 15:08:51.295] [UnrealVR] [info] [Scan.cpp:1946] Filtered and sorted entries down to 497491 for module 140000000
+[2026-09-06 15:08:51.311] [UnrealVR] [info] [FSceneView.cpp:133] [FSceneView] Found string references for FSceneView constructor
+[2026-09-06 15:08:51.311] [UnrealVR] [info] [FSceneView.cpp:138] [FSceneView] Found r.TranslucentSortPolicy string at 0x147fab648
+[2026-09-06 15:08:51.311] [UnrealVR] [info] [Scan.cpp:1463] Adding remaining 1875 entries to last bucket for module 140000000
+[2026-09-06 15:08:51.312] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145757fd3: 145757d23
+[2026-09-06 15:08:51.312] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140e7d1b4: 140e7d180
+[2026-09-06 15:08:51.312] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140e36c91: 140e36c60
+[2026-09-06 15:08:51.312] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140d551d4: 140d551a0
+[2026-09-06 15:08:51.314] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:51.314] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:51.314] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:51.314] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:51.324] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145a8787c: 145a86790
+[2026-09-06 15:08:51.354] [UnrealVR] [info] [FSceneView.cpp:154] [FSceneView] Found r.TranslucentSortPolicy reference at 0x140d551d4
+[2026-09-06 15:08:51.354] [UnrealVR] [info] [Scan.cpp:2137]  Checking if 140d551a0 is a real function
+[2026-09-06 15:08:51.388] [UnrealVR] [warning] [FSceneView.cpp:159] [FSceneView] Failed to find function start (with call) for reference at 0x140d551d4
+[2026-09-06 15:08:51.388] [UnrealVR] [info] [FSceneView.cpp:154] [FSceneView] Found r.TranslucentSortPolicy reference at 0x145a8787c
+[2026-09-06 15:08:51.388] [UnrealVR] [info] [Scan.cpp:2137]  Checking if 145a86790 is a real function
+[2026-09-06 15:08:51.390] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 1424e43d1: 1424e3850
+[2026-09-06 15:08:51.390] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 1424e43d1: 1424e3850
+[2026-09-06 15:08:51.390] [UnrealVR] [info] [FSceneView.cpp:174] [FSceneView] Exhaustively searching for FSceneView constructor
+[2026-09-06 15:08:51.390] [UnrealVR] [info] [FSceneView.cpp:189] [FSceneView] Exhaustively searching for references to vr.InstancedStereo in 0x145a86790
+[2026-09-06 15:08:51.392] [UnrealVR] [info] Received frontend command: 1
+[2026-09-06 15:08:51.395] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 1424e43d1: 1424e3850
+[2026-09-06 15:08:51.396] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 14256efe5: 14256ec30
+[2026-09-06 15:08:51.398] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 1443480dc: 144347ad0
+[2026-09-06 15:08:51.398] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 14436033c: 14436027f
+[2026-09-06 15:08:51.398] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 144380a56: 144380a40
+[2026-09-06 15:08:51.398] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 14439b2e1: 14439afb8
+[2026-09-06 15:08:51.400] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 14523fa66: 14523f87c
+[2026-09-06 15:08:51.400] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 1452855bd: 14528554a
+[2026-09-06 15:08:51.400] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 1455c2545: 1455c23c0
+[2026-09-06 15:08:51.401] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145874088: 145873dc0
+[2026-09-06 15:08:51.401] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145ba0c1f: 145ba09b3
+[2026-09-06 15:08:51.401] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145ba1140: 145ba0ee0
+[2026-09-06 15:08:51.401] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145bcb05f: 145bcad80
+[2026-09-06 15:08:51.401] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145bcb501: 145bcb2a0
+[2026-09-06 15:08:51.419] [UnrealVR] [error] [Scan.cpp:2794] Failed to find function start for 0x1517f258d, cannot resolve instruction
+[2026-09-06 15:08:51.435] [UnrealVR] [info] [FSceneView.cpp:231] [FSceneView] Found correct displacement at 0x145a878e8
+[2026-09-06 15:08:51.435] [UnrealVR] [info] [FSceneView.cpp:232] [FSceneView] Found 14 references to potential FSceneView constructor at 0x145a86790
+[2026-09-06 15:08:51.435] [UnrealVR] [info] [FSceneView.cpp:246] [FSceneView] Found potential FSceneView constructor at 0x145a86790
+[2026-09-06 15:08:51.435] [UnrealVR] [info] [FSceneView.cpp:256] [FSceneView] Found FSceneView constructor at 0x145a86790
+[2026-09-06 15:08:51.435] [UnrealVR] [info] [UEngine.cpp:22] Attempting to locate GEngine...
+[2026-09-06 15:08:51.435] [UnrealVR] [info] [Scan.cpp:2290] Scanning module D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe for string reference CALIBRATEMOTION
+[2026-09-06 15:08:51.460] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145828e80: 145828e60
+[2026-09-06 15:08:51.460] [UnrealVR] [info] [UEngine.cpp:32] CalibrateTilt function: 145828e60
+[2026-09-06 15:08:51.460] [UnrealVR] [info] [UEngine.cpp:50] Found GEngine at 14999de98
+[2026-09-06 15:08:51.460] [UnrealVR] [info] [UGameEngine.cpp:186] Checking if 145757c10 resides within the vtable at 1484d2338
+[2026-09-06 15:08:51.460] [UnrealVR] [info] [UGameEngine.cpp:193] Double checking UGameEngine::Tick via vtable...
+[2026-09-06 15:08:51.460] [UnrealVR] [info] [UGameEngine.cpp:203] UGameEngine::Tick: found at vtable index 86
+[2026-09-06 15:08:51.460] [UnrealVR] [info] [UGameEngine.cpp:223] UGameEngine::Tick: 145757c10
+[2026-09-06 15:08:51.460] [UnrealVR] [info] [UEngine.cpp:406] Searching for InitializeHMDDevice function...
+[2026-09-06 15:08:51.460] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Engine r.EnableStereoEmulation cvar
+[2026-09-06 15:08:51.482] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140e7d1c2
+[2026-09-06 15:08:51.482] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "t.MaxFPS" at 14999e138 (referenced at 140e7d1c9)
+[2026-09-06 15:08:51.488] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140e36ca7
+[2026-09-06 15:08:51.488] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "Slate.DrawToVRRenderTarget" at 149962eb8 (referenced at 140e36cae)
+[2026-09-06 15:08:51.495] [UnrealVR] [error] [CVar.cpp:319] Failed to find r.EnableStereoEmulation string!
+[2026-09-06 15:08:51.495] [UnrealVR] [error] [UEngine.cpp:430] Failed to locate r.EnableStereoEmulation cvar, cannot inject stereo rendering device at runtime.
+[2026-09-06 15:08:51.495] [UnrealVR] [info] [UEngine.cpp:410] Performing fallback scan for InitializeHMDDevice function...
+[2026-09-06 15:08:51.495] [UnrealVR] [info] [UEngine.cpp:182] Searching for correct string reference to "emulatestereo"...
+[2026-09-06 15:08:51.521] [UnrealVR] [info] [CVar.cpp:337] Found t.MaxFPS at 14999e138
+[2026-09-06 15:08:51.521] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate SlateRHIRenderer r.HDR.UI.CompositeMode cvar
+[2026-09-06 15:08:51.533] [UnrealVR] [info] [CVar.cpp:337] Found Slate.DrawToVRRenderTarget at 149962eb8
+[2026-09-06 15:08:51.534] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140e36f47: 140e36f10
+[2026-09-06 15:08:51.534] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140e36caa: 140e36c60
+[2026-09-06 15:08:51.534] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:51.535] [UnrealVR] [info] [CVar.cpp:613] Checking if Slate.DrawToVRRenderTarget is used at 140e36caa
+[2026-09-06 15:08:51.535] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:51.534] [UnrealVR] [error] [UEngine.cpp:230] Failed to find emulatestereo string reference!
+[2026-09-06 15:08:51.535] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140e36caa: 140e36c60
+[2026-09-06 15:08:51.535] [UnrealVR] [error] [UEngine.cpp:423] Failed to find InitializeHMDDevice function!
+[2026-09-06 15:08:51.535] [UnrealVR] [error] [UEngine.cpp:508] Failed to locate InitializeHMDDevice function, cannot inject stereo rendering device at runtime.
+[2026-09-06 15:08:51.535] [UnrealVR] [info] [CVar.cpp:622] Instruction at 140e36caa is not a usage of Slate.DrawToVRRenderTarget
+[2026-09-06 15:08:51.540] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 1452470a0: 145246cd0
+[2026-09-06 15:08:51.540] [UnrealVR] [info] [CVar.cpp:613] Checking if Slate.DrawToVRRenderTarget is used at 1452470a0
+[2026-09-06 15:08:51.540] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 1452470a0: 145246cd0
+[2026-09-06 15:08:51.540] [UnrealVR] [info] [CVar.cpp:646] Located Slate.DrawToVRRenderTarget usage at 14524709d
+[2026-09-06 15:08:51.540] [UnrealVR] [info] [Slate.cpp:81] Checking if 145246cd0 is SlateRHIRenderer::DrawWindow_RenderThread
+[2026-09-06 15:08:51.546] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145249930: 14524962b
+[2026-09-06 15:08:51.547] [UnrealVR] [info] [Slate.cpp:106]  Displacement found at 145249930
+[2026-09-06 15:08:51.547] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145249930: 14524962b
+[2026-09-06 15:08:51.547] [UnrealVR] [info] [Slate.cpp:116] Found SlateRHIRenderer::DrawWindow_RenderThread at 145246cd0
+[2026-09-06 15:08:51.547] [UnrealVR] [info] [Slate.cpp:15] Attempting to locate SlateRHIRenderer::DrawWindow_RenderThread (alternate scan)
+[2026-09-06 15:08:51.547] [UnrealVR] [info] [Scan.cpp:2290] Scanning module D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe for string reference UITargetRT
+[2026-09-06 15:08:51.568] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145247698: 145246cd0
+[2026-09-06 15:08:51.568] [UnrealVR] [info] [Scan.cpp:2137]  Checking if 145246cd0 is a real function
+[2026-09-06 15:08:51.574] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145249930: 14524962b
+[2026-09-06 15:08:51.575] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145249930: 14524962b
+[2026-09-06 15:08:51.575] [UnrealVR] [info] [Slate.cpp:43] Found SlateRHIRenderer::DrawWindow_RenderThread at 145246cd0
+[2026-09-06 15:08:51.640] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140e36f55
+[2026-09-06 15:08:51.640] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.HDR.UI.CompositeMode" at 149962ea0 (referenced at 140e36f5c)
+[2026-09-06 15:08:51.665] [UnrealVR] [info] [CVar.cpp:337] Found r.HDR.UI.CompositeMode at 149962ea0
+[2026-09-06 15:08:51.665] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Slate Slate.AllowBackgroundBlurWidgets cvar
+[2026-09-06 15:08:51.665] [UnrealVR] [info] [ConsoleManager.cpp:116] Trying to find IConsoleManager with candidate: r.DumpingMovie
+[2026-09-06 15:08:51.665] [UnrealVR] [info] [ConsoleManager.cpp:15] Finding IConsoleManager...
+[2026-09-06 15:08:51.682] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 1438f9ab8: 1438f9a80
+[2026-09-06 15:08:51.682] [UnrealVR] [info] [ConsoleManager.cpp:34] Found r.DumpingMovie stringref: 1438f9ab8
+[2026-09-06 15:08:51.682] [UnrealVR] [info] [Scan.cpp:2137]  Checking if 1438f9a80 is a real function
+[2026-09-06 15:08:51.686] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 14390939a: 143909386
+[2026-09-06 15:08:51.686] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 14390939a: 143909386
+[2026-09-06 15:08:51.698] [UnrealVR] [error] [Scan.cpp:2794] Failed to find function start for 0x14c467650, cannot resolve instruction
+[2026-09-06 15:08:51.718] [UnrealVR] [error] [ConsoleManager.cpp:42] Failed to find containing function for string ref: r.DumpingMovie
+[2026-09-06 15:08:51.719] [UnrealVR] [info] [ConsoleManager.cpp:116] Trying to find IConsoleManager with candidate: vr.pixeldensity
+[2026-09-06 15:08:51.719] [UnrealVR] [info] [ConsoleManager.cpp:15] Finding IConsoleManager...
+[2026-09-06 15:08:51.736] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 144dbcc6a: 144dbcc00
+[2026-09-06 15:08:51.736] [UnrealVR] [info] [ConsoleManager.cpp:34] Found vr.pixeldensity stringref: 144dbcc6a
+[2026-09-06 15:08:51.736] [UnrealVR] [info] [Scan.cpp:2137]  Checking if 144dbcc00 is a real function
+[2026-09-06 15:08:51.742] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 144dc6f0d: 144dc6ef0
+[2026-09-06 15:08:51.742] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 144dc6f0d: 144dc6ef0
+[2026-09-06 15:08:51.742] [UnrealVR] [info] [ConsoleManager.cpp:92] Found IConsoleManager**: 1497505a0
+[2026-09-06 15:08:51.742] [UnrealVR] [info] [ConsoleManager.cpp:93] Points to IConsoleManager*: 7fed1de20f00
+[2026-09-06 15:08:51.742] [UnrealVR] [info] [ConsoleManager.cpp:96] Took 23ms to find IConsoleManager
+[2026-09-06 15:08:51.742] [UnrealVR] [info] [ConsoleManager.cpp:120] Took 76ms to search through all candidates
+[2026-09-06 15:08:51.752] [UnrealVR] [info] [CVar.cpp:359] Found Slate.AllowBackgroundBlurWidgets at 1497fa660 (via console manager)
+[2026-09-06 15:08:51.752] [UnrealVR] [info] [CVar.cpp:830] Locating IConsoleObject vtable indices...
+[2026-09-06 15:08:51.752] [UnrealVR] [info] [CVar.cpp:833] Vtable: 147fb8440 (console obj 7fec5de3cae0)
+[2026-09-06 15:08:51.756] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:51.847] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:51.847] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f6830
+[2026-09-06 15:08:51.847] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f6835
+[2026-09-06 15:08:51.847] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f6836
+[2026-09-06 15:08:51.847] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f683a
+[2026-09-06 15:08:51.847] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f683d
+[2026-09-06 15:08:51.847] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f683f
+[2026-09-06 15:08:51.847] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f6843
+[2026-09-06 15:08:51.847] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:51.847] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4db0
+[2026-09-06 15:08:51.847] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4db4
+[2026-09-06 15:08:51.847] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4db9
+[2026-09-06 15:08:51.847] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 1438f6830, reason 1
+[2026-09-06 15:08:51.861] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:51.955] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:51.955] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f6830
+[2026-09-06 15:08:51.956] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f6835
+[2026-09-06 15:08:51.956] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f6836
+[2026-09-06 15:08:51.956] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f683a
+[2026-09-06 15:08:51.956] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f683d
+[2026-09-06 15:08:51.956] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f683f
+[2026-09-06 15:08:51.956] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f6843
+[2026-09-06 15:08:51.956] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:51.956] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4db0
+[2026-09-06 15:08:51.956] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4db4
+[2026-09-06 15:08:51.956] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4db9
+[2026-09-06 15:08:51.956] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 1438f6830, reason 1
+[2026-09-06 15:08:51.969] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:52.063] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:52.063] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f6830
+[2026-09-06 15:08:52.063] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f6835
+[2026-09-06 15:08:52.063] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f6836
+[2026-09-06 15:08:52.063] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f683a
+[2026-09-06 15:08:52.063] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f683d
+[2026-09-06 15:08:52.063] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f683f
+[2026-09-06 15:08:52.063] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438f6843
+[2026-09-06 15:08:52.063] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:52.063] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4db0
+[2026-09-06 15:08:52.063] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4db4
+[2026-09-06 15:08:52.063] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4db9
+[2026-09-06 15:08:52.063] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 1438f6830, reason 1
+[2026-09-06 15:08:52.079] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:52.170] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:52.170] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438fdb90
+[2026-09-06 15:08:52.170] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 1438fdb90, reason 1
+[2026-09-06 15:08:52.186] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:52.277] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:52.277] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438fdb90
+[2026-09-06 15:08:52.277] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 1438fdb90, reason 1
+[2026-09-06 15:08:52.289] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:52.370] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:52.370] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1438fdb90
+[2026-09-06 15:08:52.370] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 1438fdb90, reason 1
+[2026-09-06 15:08:52.383] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:52.462] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:52.462] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c40
+[2026-09-06 15:08:52.462] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c45
+[2026-09-06 15:08:52.462] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c46
+[2026-09-06 15:08:52.462] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c4a
+[2026-09-06 15:08:52.462] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c4e
+[2026-09-06 15:08:52.462] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c51
+[2026-09-06 15:08:52.462] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 143908c40, reason 1
+[2026-09-06 15:08:52.474] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:52.554] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:52.554] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c40
+[2026-09-06 15:08:52.554] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c45
+[2026-09-06 15:08:52.554] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c46
+[2026-09-06 15:08:52.554] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c4a
+[2026-09-06 15:08:52.554] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c4e
+[2026-09-06 15:08:52.554] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c51
+[2026-09-06 15:08:52.554] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 143908c40, reason 1
+[2026-09-06 15:08:52.566] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:52.646] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:52.646] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c40
+[2026-09-06 15:08:52.646] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c45
+[2026-09-06 15:08:52.646] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c46
+[2026-09-06 15:08:52.646] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c4a
+[2026-09-06 15:08:52.646] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c4e
+[2026-09-06 15:08:52.646] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143908c51
+[2026-09-06 15:08:52.646] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 143908c40, reason 1
+[2026-09-06 15:08:52.658] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:52.738] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:52.738] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1416b5950
+[2026-09-06 15:08:52.738] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 1416b5950, reason 1
+[2026-09-06 15:08:52.751] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:52.832] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:52.832] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1416b5950
+[2026-09-06 15:08:52.832] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 1416b5950, reason 1
+[2026-09-06 15:08:52.845] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:52.927] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:52.927] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1416b5950
+[2026-09-06 15:08:52.927] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 1416b5950, reason 1
+[2026-09-06 15:08:52.939] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:53.019] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.019] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1410f7020
+[2026-09-06 15:08:53.019] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 1410f7020, reason 1
+[2026-09-06 15:08:53.032] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:53.112] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.112] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1410f7020
+[2026-09-06 15:08:53.112] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 1410f7020, reason 1
+[2026-09-06 15:08:53.124] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:53.204] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.204] [UnrealVR] [info] [Utility.cpp:43] Emulating at 1410f7020
+[2026-09-06 15:08:53.204] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 1410f7020, reason 1
+[2026-09-06 15:08:53.217] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:53.296] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.296] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4da0
+[2026-09-06 15:08:53.296] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4da3
+[2026-09-06 15:08:53.296] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.296] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:53.296] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee4da0, reason 2
+[2026-09-06 15:08:53.310] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:53.391] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.391] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4da0
+[2026-09-06 15:08:53.391] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4da3
+[2026-09-06 15:08:53.391] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.391] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:53.391] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee4da0, reason 2
+[2026-09-06 15:08:53.406] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:53.487] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.487] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4da0
+[2026-09-06 15:08:53.487] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee4da3
+[2026-09-06 15:08:53.487] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.487] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:53.487] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee4da0, reason 2
+[2026-09-06 15:08:53.501] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:53.582] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.582] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c30
+[2026-09-06 15:08:53.582] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c32
+[2026-09-06 15:08:53.582] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.582] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:53.582] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee6c30, reason 2
+[2026-09-06 15:08:53.596] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:53.675] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.675] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c30
+[2026-09-06 15:08:53.675] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c32
+[2026-09-06 15:08:53.675] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.675] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:53.675] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee6c30, reason 2
+[2026-09-06 15:08:53.687] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:53.769] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.769] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c30
+[2026-09-06 15:08:53.769] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c32
+[2026-09-06 15:08:53.769] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.769] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:53.769] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee6c30, reason 2
+[2026-09-06 15:08:53.781] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:53.862] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.862] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee5050
+[2026-09-06 15:08:53.862] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee5052
+[2026-09-06 15:08:53.862] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.862] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:53.862] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee5050, reason 2
+[2026-09-06 15:08:53.874] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:53.955] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.955] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee5050
+[2026-09-06 15:08:53.955] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee5052
+[2026-09-06 15:08:53.955] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:53.955] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:53.955] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee5050, reason 2
+[2026-09-06 15:08:53.971] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:54.049] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.049] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee5050
+[2026-09-06 15:08:54.049] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee5052
+[2026-09-06 15:08:54.049] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.049] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:54.049] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee5050, reason 2
+[2026-09-06 15:08:54.062] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:54.142] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.142] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c30
+[2026-09-06 15:08:54.143] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c32
+[2026-09-06 15:08:54.143] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.143] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:54.143] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee6c30, reason 2
+[2026-09-06 15:08:54.156] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:54.239] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.239] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c30
+[2026-09-06 15:08:54.239] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c32
+[2026-09-06 15:08:54.239] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.239] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:54.239] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee6c30, reason 2
+[2026-09-06 15:08:54.252] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:54.333] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.333] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c30
+[2026-09-06 15:08:54.333] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c32
+[2026-09-06 15:08:54.333] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.333] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:54.333] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee6c30, reason 2
+[2026-09-06 15:08:54.346] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:54.430] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.430] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c30
+[2026-09-06 15:08:54.430] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c32
+[2026-09-06 15:08:54.430] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.430] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:54.430] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee6c30, reason 2
+[2026-09-06 15:08:54.444] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:54.522] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.522] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c30
+[2026-09-06 15:08:54.522] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c32
+[2026-09-06 15:08:54.522] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.522] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:54.523] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee6c30, reason 2
+[2026-09-06 15:08:54.534] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:54.615] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.615] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c30
+[2026-09-06 15:08:54.615] [UnrealVR] [info] [Utility.cpp:43] Emulating at 140ee6c32
+[2026-09-06 15:08:54.615] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.615] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:54.615] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 140ee6c30, reason 2
+[2026-09-06 15:08:54.628] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:54.707] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.707] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143905060
+[2026-09-06 15:08:54.707] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143905063
+[2026-09-06 15:08:54.707] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.707] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143905070
+[2026-09-06 15:08:54.707] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.707] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:54.707] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 143905060, reason 2
+[2026-09-06 15:08:54.720] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:54.800] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.800] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143905060
+[2026-09-06 15:08:54.801] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143905063
+[2026-09-06 15:08:54.801] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.801] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143905070
+[2026-09-06 15:08:54.801] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.801] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:54.801] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 143905060, reason 2
+[2026-09-06 15:08:54.814] [UnrealVR] [info] [Utility.cpp:29] Performing emulation to find real function...
+[2026-09-06 15:08:54.896] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.896] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143905060
+[2026-09-06 15:08:54.896] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143905063
+[2026-09-06 15:08:54.896] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.896] [UnrealVR] [info] [Utility.cpp:43] Emulating at 143905070
+[2026-09-06 15:08:54.896] [UnrealVR] [info] [Utility.cpp:40] Branch!
+[2026-09-06 15:08:54.896] [UnrealVR] [info] [Utility.cpp:43] Emulating at 0
+[2026-09-06 15:08:54.896] [UnrealVR] [error] [Utility.cpp:53] Failed to find true vfunc at 143905060, reason 2
+[2026-09-06 15:08:54.909] [UnrealVR] [info] [CVar.cpp:856] Starting from 15, looking for destructor...
+[2026-09-06 15:08:54.909] [UnrealVR] [info] [CVar.cpp:857] Looking for 1438f6830...
+[2026-09-06 15:08:54.909] [UnrealVR] [info] [CVar.cpp:861] Emulating vtable[15]...
+[2026-09-06 15:08:54.992] [UnrealVR] [info] [CVar.cpp:879] Emulating instruction at 143905060...
+[2026-09-06 15:08:54.992] [UnrealVR] [info] [CVar.cpp:926] Branch!
+[2026-09-06 15:08:54.992] [UnrealVR] [info] [CVar.cpp:879] Emulating instruction at 143905063...
+[2026-09-06 15:08:54.992] [UnrealVR] [info] [CVar.cpp:879] Emulating instruction at 143905065...
+[2026-09-06 15:08:54.992] [UnrealVR] [info] [CVar.cpp:926] Branch!
+[2026-09-06 15:08:54.992] [UnrealVR] [info] [CVar.cpp:879] Emulating instruction at 143905068...
+[2026-09-06 15:08:54.992] [UnrealVR] [info] [CVar.cpp:879] Emulating instruction at 14390506d...
+[2026-09-06 15:08:54.992] [UnrealVR] [info] [CVar.cpp:879] Emulating instruction at 1438f6830...
+[2026-09-06 15:08:54.992] [UnrealVR] [info] [CVar.cpp:888] Found destructor at index 15
+[2026-09-06 15:08:55.008] [UnrealVR] [info] [CVar.cpp:947] GetBool detected, skipping ahead...
+[2026-09-06 15:08:55.008] [UnrealVR] [info] [CVar.cpp:992] Encountered final nullptr at index 14
+[2026-09-06 15:08:55.008] [UnrealVR] [info] [CVar.cpp:993] IConsoleObject::AsConsoleCommand vtable index: 14
+[2026-09-06 15:08:55.008] [UnrealVR] [info] [CVar.cpp:994] IConsoleObject::Release vtable index: 15
+[2026-09-06 15:08:55.008] [UnrealVR] [info] [CVar.cpp:995] IConsoleVariable::Set vtable index: 16
+[2026-09-06 15:08:55.008] [UnrealVR] [info] [CVar.cpp:996] IConsoleVariable::GetInt vtable index: 18
+[2026-09-06 15:08:55.008] [UnrealVR] [info] [CVar.cpp:997] IConsoleVariable::GetFloat vtable index: 19
+[2026-09-06 15:08:55.008] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Renderer r.HZBOcclusion cvar
+[2026-09-06 15:08:55.019] [UnrealVR] [info] [CVar.cpp:359] Found r.HZBOcclusion at 14981b998 (via console manager)
+[2026-09-06 15:08:55.019] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Renderer r.InstanceCulling.OcclusionCull cvar
+[2026-09-06 15:08:55.020] [UnrealVR] [error] [CVar.cpp:365] Failed to find r.InstanceCulling.OcclusionCull in console manager!
+[2026-09-06 15:08:55.057] [UnrealVR] [error] [CVar.cpp:375] Failed to find r.InstanceCulling.OcclusionCull string!
+[2026-09-06 15:08:55.061] [UnrealVR] [info] [OpenVR.cpp:264] Original FOV for left eye: 0.95, -1.05, 0.5624993, -0.5624993
+[2026-09-06 15:08:55.061] [UnrealVR] [info] [OpenVR.cpp:265] Derived FOV for left eye:  0.95, -1.05, 0.5624993, -0.5624993
+[2026-09-06 15:08:55.061] [UnrealVR] [info] [OpenVR.cpp:266] Derived texture bounds left eye: 0, 1, 0, 1
+[2026-09-06 15:08:55.061] [UnrealVR] [info] [OpenVR.cpp:254] Eye texture proportion scale: 1 by 1
+[2026-09-06 15:08:55.061] [UnrealVR] [info] [OpenVR.cpp:264] Original FOV for right eye: 1.05, -0.95, 0.5624993, -0.5624993
+[2026-09-06 15:08:55.061] [UnrealVR] [info] [OpenVR.cpp:265] Derived FOV for right eye:  1.05, -0.95, 0.5624993, -0.5624993
+[2026-09-06 15:08:55.061] [UnrealVR] [info] [OpenVR.cpp:266] Derived texture bounds right eye: 0, 1, 0, 1
+[2026-09-06 15:08:55.061] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:08:55.148] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:276] Attempting to hook UGameEngine::Tick!
+[2026-09-06 15:08:55.197] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:359] Hooked UGameEngine::Tick!
+[2026-09-06 15:08:55.197] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:513] Attempting to hook FSlateRHIRenderer::DrawWindow_RenderThread!
+[2026-09-06 15:08:55.251] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:575] Hooked FSlateRHIRenderer::DrawWindow_RenderThread @ 0x145246cd0!
+[2026-09-06 15:08:55.251] [UnrealVR] [info] [D3D12Component.cpp:1122] [VR] Setting up d3d12 textures...
+[2026-09-06 15:08:55.251] [UnrealVR] [error] [D3D12Component.cpp:1153] [VR] Failed to get back buffer (D3D12).
+[2026-09-06 15:08:55.251] [UnrealVR] [error] [D3D12Component.cpp:32] [D3D12 VR] Could not set up, trying again next frame
+[2026-09-06 15:08:55.253] [UnrealVR] [info] [VR] Resized backbuffer textures to 3
+[2026-09-06 15:08:55.253] [UnrealVR] [info] Setting up texture context for Backbuffer
+[2026-09-06 15:08:55.253] [UnrealVR] [info] Creating RTV for texture context
+[2026-09-06 15:08:55.254] [UnrealVR] [info] Creating SRV for texture context
+[2026-09-06 15:08:55.254] [UnrealVR] [info] [VR] Created backbuffer RTV (D3D12)
+[2026-09-06 15:08:55.257] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5856] SlateRHIRenderer::DrawWindow_RenderThread called!
+[2026-09-06 15:08:55.257] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5868] [SlateRHIRenderer::DrawWindow_RenderThread] Checking if a4 is UE 5.5 variant...
+[2026-09-06 15:08:55.257] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5879] [SlateRHIRenderer::DrawWindow_RenderThread] a4 is not UE 5.5 variant!
+[2026-09-06 15:08:55.257] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6121] No UI target, skipping!
+[2026-09-06 15:08:55.258] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:378] First time calling UGameEngine::Tick!
+[2026-09-06 15:08:55.258] [UnrealVR] [info] [FName.cpp:75] FName::get_constructor_from_candidate: str_candidate=FTagMetaData
+[2026-09-06 15:08:55.267] [UnrealVR] [info] Setting up texture context for Backbuffer
+[2026-09-06 15:08:55.267] [UnrealVR] [info] Creating RTV for texture context
+[2026-09-06 15:08:55.267] [UnrealVR] [info] Creating SRV for texture context
+[2026-09-06 15:08:55.267] [UnrealVR] [info] [VR] Created backbuffer RTV (D3D12)
+[2026-09-06 15:08:55.271] [UnrealVR] [info] [FName.cpp:91] FName::get_constructor_from_candidate: str_data=14802d6f0
+[2026-09-06 15:08:55.275] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 143d30d3e: 143d30ce0
+[2026-09-06 15:08:55.275] [UnrealVR] [info] [FName.cpp:100] FName::get_constructor_from_candidate: str_ref=143d30d3e
+[2026-09-06 15:08:55.275] [UnrealVR] [info] [FName.cpp:110] FName::get_constructor_from_candidate: call_instr=143d30d42
+[2026-09-06 15:08:55.275] [UnrealVR] [info] [FName.cpp:137] FName::get_constructor_from_candidate: direct call
+[2026-09-06 15:08:55.275] [UnrealVR] [info] [FName.cpp:141] FName::get_constructor_from_candidate: result=143a1f010
+[2026-09-06 15:08:55.275] [UnrealVR] [info] [FName.cpp:170] FName::get_constructor: Found constructor in 16 ms
+[2026-09-06 15:08:55.275] [UnrealVR] [info] [FName.cpp:517] FName::get_to_string
+[2026-09-06 15:08:55.275] [UnrealVR] [info] [FName.cpp:187] FName::get_to_string: inlined_find_to_string
+[2026-09-06 15:08:55.284] [UnrealVR] [info] Setting up texture context for Backbuffer
+[2026-09-06 15:08:55.285] [UnrealVR] [info] Creating RTV for texture context
+[2026-09-06 15:08:55.285] [UnrealVR] [info] Creating SRV for texture context
+[2026-09-06 15:08:55.285] [UnrealVR] [info] [VR] Created backbuffer RTV (D3D12)
+[2026-09-06 15:08:55.296] [UnrealVR] [info] [FName.cpp:209] FName::get_to_string (inlined): str_data=14823a850
+[2026-09-06 15:08:55.302] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 14512c85d: 14512c77e
+[2026-09-06 15:08:55.302] [UnrealVR] [info] [FName.cpp:218] FName::get_to_string (inlined): str_ref=14512c85d
+[2026-09-06 15:08:55.302] [UnrealVR] [info] [Scan.cpp:3141] Reference point for 14512c85d: 14512c77e
+[2026-09-06 15:08:55.303] [UnrealVR] [info] [FName.cpp:291] FName::get_to_string (inlined alternative): result=143a2d760
+[2026-09-06 15:08:55.303] [UnrealVR] [info] [UObjectArray.cpp:92] [FUObjectArray::get] Searching for FUObjectArray...
+[2026-09-06 15:08:55.303] [UnrealVR] [info] [Scan.cpp:2319] Scanning module D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe for string references gc.MaxObjectsNotConsideredByGC and /Script/Engine.GarbageCollectionSettings
+[2026-09-06 15:08:55.336] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140d616e8: 140d616b0
+[2026-09-06 15:08:55.339] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 143c38927: 143c388a0
+[2026-09-06 15:08:55.343] [UnrealVR] [error] [Scan.cpp:2794] Failed to find function start for 0x1479dc424, cannot resolve instruction
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [Scan.cpp:2375] Found correct displacement at 0x143c3897e
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:143] [FUObjectArray::get] Found object base init function at 0x143c388a0
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:294] Skipping potential GUObjectArray at 0x14800ebf8 due to invalid boolean
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:278] Skipping potential GUObjectArray at 0x14110a350 due to negative values
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:294] Skipping potential GUObjectArray at 0x1439bbfe0 due to invalid boolean
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:294] Skipping potential GUObjectArray at 0x14800ec08 due to invalid boolean
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:294] Skipping potential GUObjectArray at 0x1439f0d20 due to invalid boolean
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:278] Skipping potential GUObjectArray at 0x149787710 due to negative values
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:172] Skipping potential GUObjectArray at 0x143c38915 due to odd alignment
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:237] Checking potential GUObjectArray at 0x1492e2968 with inlined count of 1 and chunk count of 69
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:299] Skipping potential GUObjectArray at 0x1492e2968 due to invalid pointer
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:172] Skipping potential GUObjectArray at 0x143c38963 due to odd alignment
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:219] Skipping potential GUObjectArray at 0x14977d580 due to invalid pointer @ first vfunc
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:294] Skipping potential GUObjectArray at 0x14800c510 due to invalid boolean
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:294] Skipping potential GUObjectArray at 0x1469df8a0 due to invalid boolean
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:278] Skipping potential GUObjectArray at 0x1439bda20 due to negative values
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:219] Skipping potential GUObjectArray at 0x14977d580 due to invalid pointer @ first vfunc
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:294] Skipping potential GUObjectArray at 0x14800ec28 due to invalid boolean
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:294] Skipping potential GUObjectArray at 0x1469df8a0 due to invalid boolean
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:278] Skipping potential GUObjectArray at 0x1439bcea0 due to negative values
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:278] Skipping potential GUObjectArray at 0x143c389c0 due to negative values
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:278] Skipping potential GUObjectArray at 0x143923540 due to negative values
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:172] Skipping potential GUObjectArray at 0x143c389dd due to odd alignment
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:172] Skipping potential GUObjectArray at 0x143c389dd due to odd alignment
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:299] Skipping potential GUObjectArray at 0x1497eb4c0 due to invalid pointer
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:278] Skipping potential GUObjectArray at 0x14392bf60 due to negative values
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:205] Skipping potential GUObjectArray at 0x1497eb4c8 due to invalid pointer @ first object
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:299] Skipping potential GUObjectArray at 0x1497eb4d0 due to invalid pointer
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:299] Skipping potential GUObjectArray at 0x1497eb4d8 due to invalid pointer
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:294] Skipping potential GUObjectArray at 0x1497eb7d8 due to invalid boolean
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:307] max_chunks: 33, num_chunks: 7
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:322] GUObjectArray appears to be chunked [0x1497eb7d0]
+[2026-09-06 15:08:55.366] [UnrealVR] [info] [UObjectArray.cpp:391] [FUObjectArray::get] FUObjectItem distance: 0x18
+[2026-09-06 15:08:55.367] [UnrealVR] [info] [UObjectArray.cpp:417] [FUObjectArray::get] Found GUObjectArray at 0x1497eb7d0
+[2026-09-06 15:08:55.367] [UnrealVR] [info] [UObjectArray.cpp:428] [FUObjectArray::get] 400187 objects
+[2026-09-06 15:08:55.371] [UnrealVR] [info] [UObjectBase.cpp:26] [UObjectBase] Bruteforcing offsets...
+[2026-09-06 15:08:55.372] [UnrealVR] [info] [UObjectBase.cpp:49] [UObjectBase] Found ClassPrivate at offset 0x10
+[2026-09-06 15:08:55.372] [UnrealVR] [info] [FName.cpp:547] Calling FName::to_string for the first time
+[2026-09-06 15:08:55.372] [UnrealVR] [info] [FMalloc.cpp:21] [FMalloc::get] Finding GMalloc...
+[2026-09-06 15:08:55.372] [UnrealVR] [info] [Scan.cpp:2319] Scanning module D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe for string references gc.MaxObjectsNotConsideredByGC and /Script/Engine.GarbageCollectionSettings
+[2026-09-06 15:08:55.403] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140d616e8: 140d616b0
+[2026-09-06 15:08:55.406] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 143c38927: 143c388a0
+[2026-09-06 15:08:55.411] [UnrealVR] [error] [Scan.cpp:2794] Failed to find function start for 0x1479dc424, cannot resolve instruction
+[2026-09-06 15:08:55.433] [UnrealVR] [info] [Scan.cpp:2375] Found correct displacement at 0x143c3897e
+[2026-09-06 15:08:55.435] [UnrealVR] [info] [FMalloc.cpp:152] [FMalloc::get] Found GMalloc "Binned3" at 0x149787660 (from vtable index 22)
+[2026-09-06 15:08:55.435] [UnrealVR] [info] [FMalloc.cpp:179] [FMalloc::get] Found Malloc at index 2
+[2026-09-06 15:08:55.435] [UnrealVR] [info] [FMalloc.cpp:256] [FMalloc::get] Found Realloc at index 4
+[2026-09-06 15:08:55.436] [UnrealVR] [info] [FMalloc.cpp:274] [FMalloc::get] Found Free at index 6
+[2026-09-06 15:08:55.436] [UnrealVR] [info] [UObjectBase.cpp:62] [UObjectBase] Found FName at offset 0x18 (/Script/CoreUObject)
+[2026-09-06 15:08:55.436] [UnrealVR] [info] [UObjectBase.cpp:69] [UObjectBase] Found OuterPrivate at offset 0x20
+[2026-09-06 15:08:55.436] [UnrealVR] [info] [UObjectArray.cpp:476] [FUObjectArray::get] UObject::InternalIndex offset is correct
+[2026-09-06 15:08:55.443] [UnrealVR] [warning] [UObjectArray.cpp:531] [FUObjectArray::get] Failed to determine chunk size, defaulting to 64 * 1024
+[2026-09-06 15:08:55.447] [UnrealVR] [info] [UClass.cpp:480] [UClass] Bruteforcing offsets...
+[2026-09-06 15:08:55.447] [UnrealVR] [info] [UClass.cpp:483] [UClass] UObject: 0x7fedfdff5000
+[2026-09-06 15:08:55.447] [UnrealVR] [info] [UClass.cpp:486] [UClass] UField: 0x7fedfe060000
+[2026-09-06 15:08:55.709] [UnrealVR] [info] [UClass.cpp:489] [UClass] UStruct: 0x7fedfe05fd80
+[2026-09-06 15:08:55.709] [UnrealVR] [info] [UClass.cpp:518] [UClass] Found DefaultObject at offset 0x118
+[2026-09-06 15:08:55.709] [UnrealVR] [info] [UClass.cpp:430] [UStruct] Bruteforcing offsets...
+[2026-09-06 15:08:55.710] [UnrealVR] [info] [UClass.cpp:437] [UStruct] UObject: 0x7fedfdff5000
+[2026-09-06 15:08:55.710] [UnrealVR] [info] [UClass.cpp:438] [UStruct] UField: 0x7fedfe060000
+[2026-09-06 15:08:55.710] [UnrealVR] [info] [UClass.cpp:439] [UStruct] UStruct: 0x7fedfe05fd80
+[2026-09-06 15:08:55.710] [UnrealVR] [info] [UClass.cpp:440] [UStruct] UClass: 0x7fedfe05fb40
+[2026-09-06 15:08:55.710] [UnrealVR] [info] [UClass.cpp:455] [UStruct] Found SuperStruct at offset 0x40
+[2026-09-06 15:08:55.710] [UnrealVR] [info] [UClass.cpp:50] [UStruct] Bruteforcing field offsets...
+[2026-09-06 15:08:55.725] [UnrealVR] [info] [UClass.cpp:100] [UStruct] Found ChildProperties at offset 0x50
+[2026-09-06 15:08:55.725] [UnrealVR] [info] [UClass.cpp:101] [UStruct] Found FField/UField Name at offset 0x28 (X)
+[2026-09-06 15:08:55.725] [UnrealVR] [info] [UClass.cpp:150] [UStruct] Found FFieldClass offset 0x8
+[2026-09-06 15:08:55.725] [UnrealVR] [info] [UClass.cpp:151] [UStruct] Found FFieldClass::Name offset 0x0 (FloatProperty)
+[2026-09-06 15:08:55.725] [UnrealVR] [info] [UClass.cpp:193] [UStruct] Found FField Next at offset 0x20 (Y)
+[2026-09-06 15:08:55.725] [UnrealVR] [info] [UClass.cpp:217] [UStruct] Next Next Name: Z
+[2026-09-06 15:08:55.725] [UnrealVR] [info] [FProperty.cpp:11] [FProperty] Bruteforcing offset field via FVector heuristic...
+[2026-09-06 15:08:55.725] [UnrealVR] [info] [FProperty.cpp:30] [FProperty] Found offset field at offset 0x4C
+[2026-09-06 15:08:55.728] [UnrealVR] [info] [UClass.cpp:313] [UStruct] Found UField Children at offset 0x48
+[2026-09-06 15:08:55.730] [UnrealVR] [info] [UClass.cpp:361] [UStruct] Found UField Next at offset 0x28
+[2026-09-06 15:08:55.732] [UnrealVR] [info] [UClass.cpp:413] [UStruct] Found native function offset at 0xD8
+[2026-09-06 15:08:55.772] [UnrealVR] [info] [UObjectBase.cpp:204] [UObjectBase] Found ProcessEvent index at 68
+[2026-09-06 15:08:55.815] [UnrealVR] [info] [UClass.cpp:44] [UField] Bruteforcing offsets...
+[2026-09-06 15:08:55.815] [UnrealVR] [info] [UClass.cpp:540] [UScriptStruct] Bruteforcing offsets...
+[2026-09-06 15:08:55.815] [UnrealVR] [info] [UClass.cpp:566] [UScriptStruct] Found PropertiesSize at offset 0x58
+[2026-09-06 15:08:55.815] [UnrealVR] [info] [UClass.cpp:567] [UScriptStruct] Found MinAlignment at offset 0x5C
+[2026-09-06 15:08:55.815] [UnrealVR] [info] [UClass.cpp:603] [UScriptStruct] Found StructOps at offset 0xB8
+[2026-09-06 15:08:55.815] [UnrealVR] [info] [UProperty.cpp:21] [UProperty] Bruteforcing offsets...
+[2026-09-06 15:08:55.815] [UnrealVR] [info] [FStructProperty.cpp:23] [UStruct] Checking child property XPlane
+[2026-09-06 15:08:55.815] [UnrealVR] [info] [FStructProperty.cpp:23] [UStruct] Checking child property YPlane
+[2026-09-06 15:08:55.815] [UnrealVR] [info] [FStructProperty.cpp:23] [UStruct] Checking child property ZPlane
+[2026-09-06 15:08:55.815] [UnrealVR] [info] [FStructProperty.cpp:23] [UStruct] Checking child property WPlane
+[2026-09-06 15:08:55.815] [UnrealVR] [info] [FStructProperty.cpp:35] [FStructProperty] Bruteforcing Struct field via FMatrix heuristic...
+[2026-09-06 15:08:55.815] [UnrealVR] [info] [FStructProperty.cpp:69] [FStructProperty] Found Struct field at offset 0x78
+[2026-09-06 15:08:55.815] [UnrealVR] [info] [FBoolProperty.cpp:16] [FBoolProperty::update_offsets] Updating offsets
+[2026-09-06 15:08:55.819] [UnrealVR] [info] [FBoolProperty.cpp:95] [FBoolProperty::update_offsets] Field size offset: 0x78
+[2026-09-06 15:08:55.819] [UnrealVR] [info] [FBoolProperty.cpp:96] [FBoolProperty::update_offsets] Byte offset offset: 0x79
+[2026-09-06 15:08:55.819] [UnrealVR] [info] [FBoolProperty.cpp:97] [FBoolProperty::update_offsets] Byte mask offset: 0x7A
+[2026-09-06 15:08:55.819] [UnrealVR] [info] [FBoolProperty.cpp:98] [FBoolProperty::update_offsets] Field mask offset: 0x7B
+[2026-09-06 15:08:55.819] [UnrealVR] [info] [FBoolProperty.cpp:114] [FBoolProperty::update_offsets] Found offsets
+[2026-09-06 15:08:55.819] [UnrealVR] [info] [FObjectProperty.cpp:17] [FObjectProperty::update_offsets] Updating offsets
+[2026-09-06 15:08:55.819] [UnrealVR] [info] [FObjectProperty.cpp:44] [FObjectProperty::update_offsets] Found property class offset: 0x78
+[2026-09-06 15:08:55.819] [UnrealVR] [info] [FObjectProperty.cpp:56] [FObjectProperty::update_offsets] Done
+[2026-09-06 15:08:55.819] [UnrealVR] [info] [FArrayProperty.cpp:18] [FArrayProperty::update_offsets] Updating offsets
+[2026-09-06 15:08:55.819] [UnrealVR] [info] [FArrayProperty.cpp:57] [FArrayProperty::update_offsets] Found property inner offset: 0x78
+[2026-09-06 15:08:55.819] [UnrealVR] [info] [FArrayProperty.cpp:70] [FArrayProperty::update_offsets] Done
+[2026-09-06 15:08:55.819] [UnrealVR] [info] [FEnumProperty.cpp:18] [FEnumProperty::update_offsets] Updating offsets
+[2026-09-06 15:08:55.822] [UnrealVR] [info] [FEnumProperty.cpp:90] [FEnumProperty::update_offsets] Found underlying prop offset: 0x78
+[2026-09-06 15:08:55.826] [UnrealVR] [info] [FEnumProperty.cpp:117] [FEnumProperty::update_offsets] Found enum offset: 0x80
+[2026-09-06 15:08:55.826] [UnrealVR] [info] [FProperty.cpp:55] [FProperty] Updating offsets...
+[2026-09-06 15:08:55.827] [UnrealVR] [info] [FProperty.cpp:97] [FProperty] Found PropertyFlags offset at 0x40 (full value 18001040000780)
+[2026-09-06 15:08:55.827] [UnrealVR] [info] [FProperty.cpp:110] [FProperty] done
+[2026-09-06 15:08:55.827] [UnrealVR] [info] [UFunction.cpp:20] [UFunction] Updating offsets...
+[2026-09-06 15:08:55.827] [UnrealVR] [info] [UFunction.cpp:49] [UFunction] Found function flags offset: 0xB0
+[2026-09-06 15:08:55.827] [UnrealVR] [info] [UFunction.cpp:50] [UFunction] Flags: 0x4020600
+[2026-09-06 15:08:55.827] [UnrealVR] [info] [UFunction.cpp:93] [UFunction] Done
+[2026-09-06 15:08:55.827] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4387] Checking engine pointers for StereoRenderingDevice...
+[2026-09-06 15:08:55.827] [UnrealVR] [info] [Scan.cpp:2290] Scanning module D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe for string reference r.StereoEmulationHeight
+[2026-09-06 15:08:55.859] [UnrealVR] [error] [Scan.cpp:2295] Failed to find string for r.StereoEmulationHeight
+[2026-09-06 15:08:55.859] [UnrealVR] [info] [Scan.cpp:2290] Scanning module D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe for string reference r.StereoEmulationFOV
+[2026-09-06 15:08:55.890] [UnrealVR] [error] [Scan.cpp:2295] Failed to find string for r.StereoEmulationFOV
+[2026-09-06 15:08:55.890] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:4296] Failed to find FFakeStereoRendering constructor
+[2026-09-06 15:08:55.890] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4329] Failed to locate FFakeStereoRendering constructor, using fallback method
+[2026-09-06 15:08:55.890] [UnrealVR] [error] [UEngine.cpp:508] Failed to locate InitializeHMDDevice function, cannot inject stereo rendering device at runtime.
+[2026-09-06 15:08:55.890] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:4333] Failed to find FFakeStereoRendering VTable via fallback method
+[2026-09-06 15:08:55.890] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:4391] Failed to locate fake stereo rendering device vtable, cannot verify stereo rendering device is setup.
+[2026-09-06 15:08:55.890] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4541] Calling InitializeHMDDevice...
+[2026-09-06 15:08:55.890] [UnrealVR] [error] [UEngine.cpp:508] Failed to locate InitializeHMDDevice function, cannot inject stereo rendering device at runtime.
+[2026-09-06 15:08:55.890] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4547] Called InitializeHMDDevice.
+[2026-09-06 15:08:55.890] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4387] Checking engine pointers for StereoRenderingDevice...
+[2026-09-06 15:08:55.890] [UnrealVR] [info] [Scan.cpp:2290] Scanning module D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe for string reference r.StereoEmulationHeight
+[2026-09-06 15:08:55.921] [UnrealVR] [error] [Scan.cpp:2295] Failed to find string for r.StereoEmulationHeight
+[2026-09-06 15:08:55.921] [UnrealVR] [info] [Scan.cpp:2290] Scanning module D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe for string reference r.StereoEmulationFOV
+[2026-09-06 15:08:55.953] [UnrealVR] [error] [Scan.cpp:2295] Failed to find string for r.StereoEmulationFOV
+[2026-09-06 15:08:55.953] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:4296] Failed to find FFakeStereoRendering constructor
+[2026-09-06 15:08:55.953] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4329] Failed to locate FFakeStereoRendering constructor, using fallback method
+[2026-09-06 15:08:55.953] [UnrealVR] [error] [UEngine.cpp:508] Failed to locate InitializeHMDDevice function, cannot inject stereo rendering device at runtime.
+[2026-09-06 15:08:55.953] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:4333] Failed to find FFakeStereoRendering VTable via fallback method
+[2026-09-06 15:08:55.953] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:4391] Failed to locate fake stereo rendering device vtable, cannot verify stereo rendering device is setup.
+[2026-09-06 15:08:55.953] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4550] Previous call to InitializeHMDDevice did not setup the stereo rendering device, attempting to call again...
+[2026-09-06 15:08:55.953] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4554] r.EnableStereoEmulation cvar not found, using fallback method of forcing -emulatestereo flag.
+[2026-09-06 15:08:55.953] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4588] Calling InitializeHMDDevice... AGAIN
+[2026-09-06 15:08:55.953] [UnrealVR] [error] [UEngine.cpp:508] Failed to locate InitializeHMDDevice function, cannot inject stereo rendering device at runtime.
+[2026-09-06 15:08:55.953] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4592] Called InitializeHMDDevice again.
+[2026-09-06 15:08:55.953] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4387] Checking engine pointers for StereoRenderingDevice...
+[2026-09-06 15:08:55.953] [UnrealVR] [info] [Scan.cpp:2290] Scanning module D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe for string reference r.StereoEmulationHeight
+[2026-09-06 15:08:55.984] [UnrealVR] [error] [Scan.cpp:2295] Failed to find string for r.StereoEmulationHeight
+[2026-09-06 15:08:55.984] [UnrealVR] [info] [Scan.cpp:2290] Scanning module D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe for string reference r.StereoEmulationFOV
+[2026-09-06 15:08:56.014] [UnrealVR] [error] [Scan.cpp:2295] Failed to find string for r.StereoEmulationFOV
+[2026-09-06 15:08:56.014] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:4296] Failed to find FFakeStereoRendering constructor
+[2026-09-06 15:08:56.014] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4329] Failed to locate FFakeStereoRendering constructor, using fallback method
+[2026-09-06 15:08:56.014] [UnrealVR] [error] [UEngine.cpp:508] Failed to locate InitializeHMDDevice function, cannot inject stereo rendering device at runtime.
+[2026-09-06 15:08:56.014] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:4333] Failed to find FFakeStereoRendering VTable via fallback method
+[2026-09-06 15:08:56.014] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:4391] Failed to locate fake stereo rendering device vtable, cannot verify stereo rendering device is setup.
+[2026-09-06 15:08:56.014] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:4598] Failed to setup stereo rendering device.
+[2026-09-06 15:08:56.014] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:636] Entering FFakeStereoRenderingHook::hook
+[2026-09-06 15:08:56.015] [UnrealVR] [info] [Scan.cpp:2290] Scanning module D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe for string reference r.StereoEmulationHeight
+[2026-09-06 15:08:56.045] [UnrealVR] [error] [Scan.cpp:2295] Failed to find string for r.StereoEmulationHeight
+[2026-09-06 15:08:56.045] [UnrealVR] [info] [Scan.cpp:2290] Scanning module D:\SteamLibrary\steamapps\common\Hogwarts Legacy\Phoenix\Binaries\Win64\HogwartsLegacy.exe for string reference r.StereoEmulationFOV
+[2026-09-06 15:08:56.077] [UnrealVR] [error] [Scan.cpp:2295] Failed to find string for r.StereoEmulationFOV
+[2026-09-06 15:08:56.077] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:4296] Failed to find FFakeStereoRendering constructor
+[2026-09-06 15:08:56.077] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4329] Failed to locate FFakeStereoRendering constructor, using fallback method
+[2026-09-06 15:08:56.077] [UnrealVR] [error] [UEngine.cpp:508] Failed to locate InitializeHMDDevice function, cannot inject stereo rendering device at runtime.
+[2026-09-06 15:08:56.077] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:4333] Failed to find FFakeStereoRendering VTable via fallback method
+[2026-09-06 15:08:56.077] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:649] Failed to locate Fake Stereo Rendering VTable, attempting to perform nonstandard hook
+[2026-09-06 15:08:56.174] [UnrealVR] [warning] [FFakeStereoRenderingHook.cpp:695] Failed to find version in executable
+[2026-09-06 15:08:56.175] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:674] MS: 4001b, LS: 20000
+[2026-09-06 15:08:56.175] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:680] File does not match requested version, falling back
+[2026-09-06 15:08:56.175] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:674] MS: 4001b, LS: 20000
+[2026-09-06 15:08:56.175] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:677] Found matching executable, attempting to perform nonstandard hook
+[2026-09-06 15:08:56.176] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:1607] Attempting to create a stereo device for the game using nonstandard method (4.27)
+[2026-09-06 15:08:56.176] [UnrealVR] [info] [UEngine.cpp:240] Searching for StereoRenderingDevice offset...
+[2026-09-06 15:08:56.214] [UnrealVR] [info] [UGameViewportClient.cpp:40] Analyzing CanvasObject string at 1484c108a
+[2026-09-06 15:08:56.246] [UnrealVR] [info] [UGameViewportClient.cpp:45]  No string references, continuing on to next string...
+[2026-09-06 15:08:56.246] [UnrealVR] [info] [UGameViewportClient.cpp:40] Analyzing CanvasObject string at 1484df088
+[2026-09-06 15:08:56.252] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145796cea: 145796b60
+[2026-09-06 15:08:56.256] [UnrealVR] [error] [Scan.cpp:2794] Failed to find function start for 0x1484df084, cannot resolve instruction
+[2026-09-06 15:08:56.278] [UnrealVR] [info] [UGameViewportClient.cpp:49] Found 1 string references
+[2026-09-06 15:08:56.278] [UnrealVR] [info] [UGameViewportClient.cpp:52]  Found string reference at 145796cea
+[2026-09-06 15:08:56.408] [UnrealVR] [info] [UGameViewportClient.cpp:131] Found UGameViewportClient::Draw function at 1457952b0
+[2026-09-06 15:08:56.409] [UnrealVR] [info] [UEngine.cpp:363] Found GEngine in RCX at 14579530a
+[2026-09-06 15:08:56.488] [UnrealVR] [info] [UEngine.cpp:295] Skipping write to memory instruction at 145bc32d0 (2 bytes, landing at 145bc32d2)
+[2026-09-06 15:08:56.488] [UnrealVR] [info] [UEngine.cpp:327] Found GEngine->StereoRenderingDevice access at 145bc32ee (offset: b30)
+[2026-09-06 15:08:56.503] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:1788] Current device: 0
+[2026-09-06 15:08:56.503] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2048] Attempting to hook UGameViewportClient::Draw...
+[2026-09-06 15:08:56.503] [UnrealVR] [info] [FViewport.cpp:31] [FViewport] Finding GetDebugCanvas and GetViewportSizeXY indices...
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952b0
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952b5
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952b6
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952b7
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952b8
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952ba
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952bc
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952be
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952c0
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952c8
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952cf
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952d6
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952d9
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952e0
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952e3
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952e7
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952ea
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952ee
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952f5
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952fa
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 1457952fd
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795302
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795305
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:88] [FViewport] Examining CALL at 145795305
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:95] [FViewport] Skipping RIP-relative call
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 14579530a
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795311
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795314
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:88] [FViewport] Examining CALL at 145795314
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:95] [FViewport] Skipping RIP-relative call
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795319
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 14579531c
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 14579531f
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:84] [FViewport] rip: 14579531f, rcx: f7ddc0
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795322
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795326
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:84] [FViewport] rip: 145795326, rcx: f7ddc0
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:88] [FViewport] Examining CALL at 145795326
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:112] [FViewport] Found GetDebugCanvas index: 36 (offset 120)
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 14579532c
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795335
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795338
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 14579533e
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795342
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795347
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 14579534b
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 14579534f
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795355
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 14579535b
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795362
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:88] [FViewport] Examining CALL at 145795362
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:95] [FViewport] Skipping RIP-relative call
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795367
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 14579536b
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 14579536f
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795372
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795379
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:84] [FViewport] rip: 145795379, rcx: f7ddc0
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 14579537c
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:84] [FViewport] rip: 14579537c, rcx: f7ddc0
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:88] [FViewport] Examining CALL at 14579537c
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:115] [FViewport] Found GetViewportSizeXY index: 3 (offset 18)
+[2026-09-06 15:08:56.591] [UnrealVR] [info] [FViewport.cpp:72] Emulating instruction: 145795380
+[2026-09-06 15:08:56.654] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:3904] Attempting to set up view extensions...
+[2026-09-06 15:08:56.654] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4387] Checking engine pointers for StereoRenderingDevice...
+[2026-09-06 15:08:56.658] [UnrealVR] [info] [IXRTrackingSystemHook.cpp:362] IXRTrackingSystemHook::IXRTrackingSystemHook
+[2026-09-06 15:08:56.658] [UnrealVR] [info] [IXRTrackingSystemHook.cpp:370] IXRTrackingSystemHook::pre_initialize
+[2026-09-06 15:08:56.659] [UnrealVR] [info] [Utility.cpp:80] MS: 4001b, LS: 20000
+[2026-09-06 15:08:56.760] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4092] Current ext ptr: 7fed7dfa6000
+[2026-09-06 15:08:56.760] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4093] Current ext count: 8
+[2026-09-06 15:08:56.760] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4094] Current ext capacity: 23
+[2026-09-06 15:08:56.760] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4229] Allocating new view extension entry onto existing array...
+[2026-09-06 15:08:56.760] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:1797] Finished creating stereo device for the game using nonstandard method
+[2026-09-06 15:08:56.761] [UnrealVR] [info] [LuaLoader] Initializing Lua state for the first time...
+[2026-09-06 15:08:56.761] [UnrealVR] [info] [LuaLoader] Resetting scripts...
+[2026-09-06 15:08:56.761] [UnrealVR] [info] [LuaLoader] Destroyed all Lua states.
+[2026-09-06 15:08:56.762] [UnrealVR] [info] [Plugin] Creating new ScriptState...
+[2026-09-06 15:08:56.779] [UnrealVR] [info] [LuaLoader] Creating directories C:\Users\josh2\AppData\Roaming\UnrealVRMod\HogwartsLegacy\scripts
+[2026-09-06 15:08:56.779] [UnrealVR] [info] [LuaLoader] Loading scripts...
+[2026-09-06 15:08:56.779] [UnrealVR] [info] [LuaLoader] Lua state initialized.
+[2026-09-06 15:08:56.780] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Engine r.AllowOcclusionQueries cvar
+[2026-09-06 15:08:56.791] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140dcb677: 140dcb640
+[2026-09-06 15:08:56.791] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:56.791] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:56.869] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140dcb685
+[2026-09-06 15:08:56.869] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.AllowOcclusionQueries" at 1498a9520 (referenced at 140dcb68c)
+[2026-09-06 15:08:56.881] [UnrealVR] [info] [CVar.cpp:337] Found r.AllowOcclusionQueries at 1498a9520
+[2026-09-06 15:08:56.881] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Engine r.OneFrameThreadLag cvar
+[2026-09-06 15:08:56.891] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140e7cb07: 140e7cad0
+[2026-09-06 15:08:56.891] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:56.891] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:56.971] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140e7cb15
+[2026-09-06 15:08:56.971] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.OneFrameThreadLag" at 14999e038 (referenced at 140e7cb1c)
+[2026-09-06 15:08:56.983] [UnrealVR] [info] [CVar.cpp:337] Found r.OneFrameThreadLag at 14999e038
+[2026-09-06 15:08:56.983] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Renderer r.SSGI.Enable cvar
+[2026-09-06 15:08:56.995] [UnrealVR] [info] [CVar.cpp:359] Found r.SSGI.Enable at 1498aeae8 (via console manager)
+[2026-09-06 15:08:56.995] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Renderer r.Shadow.Virtual.Enable cvar
+[2026-09-06 15:08:56.996] [UnrealVR] [error] [CVar.cpp:365] Failed to find r.Shadow.Virtual.Enable in console manager!
+[2026-09-06 15:08:57.026] [UnrealVR] [error] [CVar.cpp:375] Failed to find r.Shadow.Virtual.Enable string!
+[2026-09-06 15:08:57.026] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Renderer r.TranslucentLightingVolume cvar
+[2026-09-06 15:08:57.035] [UnrealVR] [info] [CVar.cpp:359] Found r.TranslucentLightingVolume at 1498c67c0 (via console manager)
+[2026-09-06 15:08:57.036] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Engine r.VolumetricCloud cvar
+[2026-09-06 15:08:57.046] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140de1c77: 140de1c40
+[2026-09-06 15:08:57.046] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:57.046] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:57.125] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140de1c85
+[2026-09-06 15:08:57.125] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.VolumetricCloud" at 1498c7608 (referenced at 140de1c8c)
+[2026-09-06 15:08:57.137] [UnrealVR] [info] [CVar.cpp:337] Found r.VolumetricCloud at 1498c7608
+[2026-09-06 15:08:57.137] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Engine r.AmbientOcclusionLevels cvar
+[2026-09-06 15:08:57.150] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140d85787: 140d85750
+[2026-09-06 15:08:57.150] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:57.150] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:57.230] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140d85795
+[2026-09-06 15:08:57.230] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.AmbientOcclusionLevels" at 149817238 (referenced at 140d8579c)
+[2026-09-06 15:08:57.242] [UnrealVR] [info] [CVar.cpp:337] Found r.AmbientOcclusionLevels at 149817238
+[2026-09-06 15:08:57.242] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Renderer r.DefaultFeature.AmbientOcclusion cvar
+[2026-09-06 15:08:57.251] [UnrealVR] [info] [CVar.cpp:359] Found r.DefaultFeature.AmbientOcclusion at 149997980 (via console manager)
+[2026-09-06 15:08:57.252] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Renderer r.DefaultFeature.AntiAliasing cvar
+[2026-09-06 15:08:57.264] [UnrealVR] [info] [CVar.cpp:359] Found r.DefaultFeature.AntiAliasing at 149897688 (via console manager)
+[2026-09-06 15:08:57.264] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Engine r.DepthOfFieldQuality cvar
+[2026-09-06 15:08:57.275] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140d52fe7: 140d52fb0
+[2026-09-06 15:08:57.275] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:57.275] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:57.353] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140d52ff5
+[2026-09-06 15:08:57.353] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.DepthOfFieldQuality" at 149752888 (referenced at 140d52ffc)
+[2026-09-06 15:08:57.366] [UnrealVR] [info] [CVar.cpp:337] Found r.DepthOfFieldQuality at 149752888
+[2026-09-06 15:08:57.366] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Renderer r.LightCulling.Quality cvar
+[2026-09-06 15:08:57.376] [UnrealVR] [info] [CVar.cpp:359] Found r.LightCulling.Quality at 149848c70 (via console manager)
+[2026-09-06 15:08:57.376] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Engine r.MotionBlurQuality cvar
+[2026-09-06 15:08:57.387] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140d54457: 140d54420
+[2026-09-06 15:08:57.387] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:57.387] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:57.466] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140d54465
+[2026-09-06 15:08:57.466] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.MotionBlurQuality" at 1497527f8 (referenced at 140d5446c)
+[2026-09-06 15:08:57.478] [UnrealVR] [info] [CVar.cpp:337] Found r.MotionBlurQuality at 1497527f8
+[2026-09-06 15:08:57.478] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Engine r.SceneColorFringeQuality cvar
+[2026-09-06 15:08:57.490] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140d54b77: 140d54b40
+[2026-09-06 15:08:57.490] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:57.490] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:57.569] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140d54b85
+[2026-09-06 15:08:57.569] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.SceneColorFringeQuality" at 149752798 (referenced at 140d54b8c)
+[2026-09-06 15:08:57.581] [UnrealVR] [info] [CVar.cpp:337] Found r.SceneColorFringeQuality at 149752798
+[2026-09-06 15:08:57.581] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Renderer r.SubsurfaceScattering cvar
+[2026-09-06 15:08:57.592] [UnrealVR] [info] [CVar.cpp:359] Found r.SubsurfaceScattering at 14988ab00 (via console manager)
+[2026-09-06 15:08:57.592] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Renderer r.TemporalAA.Algorithm cvar
+[2026-09-06 15:08:57.602] [UnrealVR] [info] [CVar.cpp:359] Found r.TemporalAA.Algorithm at 1495df0f0 (via console manager)
+[2026-09-06 15:08:57.602] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Renderer r.TemporalAA.Upsampling cvar
+[2026-09-06 15:08:57.611] [UnrealVR] [info] [CVar.cpp:359] Found r.TemporalAA.Upsampling at 1495df050 (via console manager)
+[2026-09-06 15:08:57.611] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Renderer r.Upscale.Quality cvar
+[2026-09-06 15:08:57.619] [UnrealVR] [info] [CVar.cpp:359] Found r.Upscale.Quality at 14988bcd0 (via console manager)
+[2026-09-06 15:08:57.619] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Renderer r.Color.Max cvar
+[2026-09-06 15:08:57.630] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140db65b1: 140db6580
+[2026-09-06 15:08:57.630] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:57.630] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:57.709] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140db65c7
+[2026-09-06 15:08:57.709] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.Color.Max" at 149880778 (referenced at 140db65ce)
+[2026-09-06 15:08:57.722] [UnrealVR] [info] [CVar.cpp:337] Found r.Color.Max at 149880778
+[2026-09-06 15:08:57.722] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Renderer r.Color.Mid cvar
+[2026-09-06 15:08:57.736] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140db6631: 140db6600
+[2026-09-06 15:08:57.736] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:57.736] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:57.814] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140db6647
+[2026-09-06 15:08:57.814] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.Color.Mid" at 149880760 (referenced at 140db664e)
+[2026-09-06 15:08:57.829] [UnrealVR] [info] [CVar.cpp:337] Found r.Color.Mid at 149880760
+[2026-09-06 15:08:57.829] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Renderer r.Color.Min cvar
+[2026-09-06 15:08:57.844] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140db66b4: 140db6680
+[2026-09-06 15:08:57.844] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:57.844] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:57.924] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140db66c2
+[2026-09-06 15:08:57.924] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.Color.Min" at 149880748 (referenced at 140db66c9)
+[2026-09-06 15:08:57.937] [UnrealVR] [info] [CVar.cpp:337] Found r.Color.Min at 149880748
+[2026-09-06 15:08:57.937] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Engine r.MotionBlur.Max cvar
+[2026-09-06 15:08:57.950] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140e742e1: 140e742b0
+[2026-09-06 15:08:57.950] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:57.950] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:58.032] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140e742f7
+[2026-09-06 15:08:58.032] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.MotionBlur.Max" at 149997aa8 (referenced at 140e742fe)
+[2026-09-06 15:08:58.045] [UnrealVR] [info] [CVar.cpp:337] Found r.MotionBlur.Max at 149997aa8
+[2026-09-06 15:08:58.045] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Engine r.SceneColorFringe.Max cvar
+[2026-09-06 15:08:58.059] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140e747d1: 140e747a0
+[2026-09-06 15:08:58.059] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:58.059] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:58.137] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140e747e7
+[2026-09-06 15:08:58.138] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.SceneColorFringe.Max" at 149997ad8 (referenced at 140e747ee)
+[2026-09-06 15:08:58.149] [UnrealVR] [info] [CVar.cpp:337] Found r.SceneColorFringe.Max at 149997ad8
+[2026-09-06 15:08:58.149] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Core r.ScreenPercentage cvar
+[2026-09-06 15:08:58.160] [UnrealVR] [info] [CVar.cpp:359] Found r.ScreenPercentage at 1495b9a88 (via console manager)
+[2026-09-06 15:08:58.160] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Renderer r.Tonemapper.Sharpen cvar
+[2026-09-06 15:08:58.172] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140dbcc64: 140dbcc30
+[2026-09-06 15:08:58.172] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:58.172] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:58.250] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140dbcc72
+[2026-09-06 15:08:58.250] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.Tonemapper.Sharpen" at 14988b668 (referenced at 140dbcc79)
+[2026-09-06 15:08:58.262] [UnrealVR] [info] [CVar.cpp:337] Found r.Tonemapper.Sharpen at 14988b668
+[2026-09-06 15:08:58.263] [UnrealVR] [info] [CVar.cpp:313] Attempting to locate Renderer r.TonemapperGamma cvar
+[2026-09-06 15:08:58.275] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 140dbcbf4: 140dbcbc0
+[2026-09-06 15:08:58.275] [UnrealVR] [info] [CVar.cpp:83] Not E8 call
+[2026-09-06 15:08:58.275] [UnrealVR] [info] [CVar.cpp:86] FF call
+[2026-09-06 15:08:58.354] [UnrealVR] [info] [CVar.cpp:117] Skipping write to memory instruction at 140dbcc02
+[2026-09-06 15:08:58.354] [UnrealVR] [info] [CVar.cpp:153] Found cvar for "r.TonemapperGamma" at 14988b728 (referenced at 140dbcc09)
+[2026-09-06 15:08:58.366] [UnrealVR] [info] [CVar.cpp:337] Found r.TonemapperGamma at 14988b728
+[2026-09-06 15:08:58.366] [UnrealVR] [info] [CVar.cpp:343] Attempting to locate Renderer r.Upscale.Softness cvar
+[2026-09-06 15:08:58.377] [UnrealVR] [info] [CVar.cpp:359] Found r.Upscale.Softness at 14988bc70 (via console manager)
+[2026-09-06 15:08:58.377] [UnrealVR] [info] [execute_console_script] Loading user_script.txt...
+[2026-09-06 15:08:58.377] [UnrealVR] [info] [VR.cpp:1378] VR: Pre-engine tick
+[2026-09-06 15:08:58.377] [UnrealVR] [info] VR: Updating action states
+[2026-09-06 15:08:58.377] [UnrealVR] [info] VR: Updated action states
+[2026-09-06 15:08:58.385] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2646] [Stage 1] ISceneViewExtension Index 14 called for the first time!
+[2026-09-06 15:08:58.385] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4613] is stereo enabled called!
+[2026-09-06 15:08:58.386] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5439] get render target manager hook called!
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6214] VRRenderTargetManager_Base::update_viewport called! true 7fee5e291338 7fee7e189010
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2389] UGameViewportClient::Draw called for the first time.
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5379] get desired number of views hook called!
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5423] get view pass for index hook called! true 0
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4692] adjust view rect called! 1
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4693]  x: 0, y: 0, w: 2560, h: 1440
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:4753] calculate stereo view offset called! 1
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5064] Finished calculating stereo view offset!
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5072] calculate stereo projection matrix called! 1 from 5879e62
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5084] Inserting midhook after CalculateStereoProjectionMatrix... @ 145879e62
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  7ffb24c6a28d
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  145879e62
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  145874448
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  145873eed
+[2026-09-06 15:08:58.399] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  145795ac9
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  7ffb24c6f9f3
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  7ffb24c8a2a0
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  145bb397b
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  145754314
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  1457583d1
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  7ffb24c8903f
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  140ee6274
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  140eed2b0
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  140eed32a
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  140eee8b6
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  140ef72c4
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  14687770e
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  7ffb901cccb7
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5093]  7ffb9156ad6c
+[2026-09-06 15:08:58.400] [UnrealVR] [info] [Globals.cpp:19] Attempting to find GNearClippingPlane
+[2026-09-06 15:08:58.415] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145bbe340: 145bbdfe0
+[2026-09-06 15:08:58.415] [UnrealVR] [info] Found reference to bEnableOnScreenDebugMessages at 145bbe340
+[2026-09-06 15:08:58.415] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 145bbe340: 145bbdfe0
+[2026-09-06 15:08:58.415] [UnrealVR] [info] [Globals.cpp:57] Found MOVSS at 145bbe396
+[2026-09-06 15:08:58.415] [UnrealVR] [info] [Globals.cpp:64] Found GNearClippingPlane at 1492d40ac
+[2026-09-06 15:08:58.415] [UnrealVR] [info] [Globals.cpp:138] GNearClippingPlane is 10
+[2026-09-06 15:08:58.415] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5233] Finished calculating stereo projection matrix!
+[2026-09-06 15:08:58.415] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5496] post calculate stereo projection matrix called!
+[2026-09-06 15:08:58.541] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5605] Found assignment of RCX to storage register at 145879601 (14)!
+[2026-09-06 15:08:58.541] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5620] Local player: 7fee1e21ed20
+[2026-09-06 15:08:58.541] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5655] Searching for PostInitProperties virtual function...
+[2026-09-06 15:08:58.541] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5679] Analyzing index 1...
+[2026-09-06 15:08:58.541] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5688] Scanning vfunc at index 1 (140ee4fc0)...
+[2026-09-06 15:08:58.541] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5679] Analyzing index 2...
+[2026-09-06 15:08:58.541] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5688] Scanning vfunc at index 2 (143c24150)...
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5679] Analyzing index 3...
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5688] Scanning vfunc at index 3 (140ee6c30)...
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5679] Analyzing index 4...
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5688] Scanning vfunc at index 4 (143c1fd50)...
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5679] Analyzing index 5...
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5688] Scanning vfunc at index 5 (143c233e0)...
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5679] Analyzing index 6...
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5688] Scanning vfunc at index 6 (140ee4fc0)...
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5679] Analyzing index 7...
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5688] Scanning vfunc at index 7 (140f00df0)...
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5679] Analyzing index 8...
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5688] Scanning vfunc at index 8 (14587eb50)...
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5700] Found PostInitProperties at 8 14587eb50!
+[2026-09-06 15:08:58.547] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5719] Calling PostInitProperties on local player!
+[2026-09-06 15:08:58.555] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5839] PostInitProperties called!
+[2026-09-06 15:08:58.555] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5103] Removing midhook after CalculateStereoProjectionMatrix, job is done...
+[2026-09-06 15:08:58.562] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6243] VRRenderTargetManager_Base::need_reallocate_view_target called!
+[2026-09-06 15:08:58.562] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6263] Stack[0]: 7ffb24c8dc5d
+[2026-09-06 15:08:58.562] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6263] Stack[1]: 145af6481
+[2026-09-06 15:08:58.562] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6280] Found return address: 145af6481
+[2026-09-06 15:08:58.578] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6121] No UI target, skipping!
+[2026-09-06 15:08:58.585] [UnrealVR] [info] [D3D12Component.cpp:1122] [VR] Setting up d3d12 textures...
+[2026-09-06 15:08:58.585] [UnrealVR] [error] [D3D12Component.cpp:1153] [VR] Failed to get back buffer (D3D12).
+[2026-09-06 15:08:58.585] [UnrealVR] [error] [D3D12Component.cpp:32] [D3D12 VR] Could not set up, trying again next frame
+[2026-09-06 15:08:58.586] [UnrealVR] [info] Setting up texture context for Backbuffer
+[2026-09-06 15:08:58.586] [UnrealVR] [info] Creating RTV for texture context
+[2026-09-06 15:08:58.586] [UnrealVR] [info] Creating SRV for texture context
+[2026-09-06 15:08:58.586] [UnrealVR] [info] [VR] Created backbuffer RTV (D3D12)
+[2026-09-06 15:08:58.639] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6287] Emulating instruction: 145af6481
+[2026-09-06 15:08:58.639] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6287] Emulating instruction: 145af6483
+[2026-09-06 15:08:58.639] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6287] Emulating instruction: 145af6485
+[2026-09-06 15:08:58.639] [UnrealVR] [error] [Emulation.cpp:154] Emulation failed at 145af648b (reason: 1)
+[2026-09-06 15:08:58.639] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6287] Emulating instruction: 145af648d
+[2026-09-06 15:08:58.639] [UnrealVR] [error] [Emulation.cpp:154] Emulation failed at 145af6490 (reason: 1)
+[2026-09-06 15:08:58.639] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6287] Emulating instruction: 145af6493
+[2026-09-06 15:08:58.639] [UnrealVR] [error] [Emulation.cpp:154] Emulation failed at 145af649a (reason: 1)
+[2026-09-06 15:08:58.639] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6287] Emulating instruction: 145af64a1
+[2026-09-06 15:08:58.639] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6287] Emulating instruction: 145af64a6
+[2026-09-06 15:08:58.639] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6312] Found force separate rt offset: 280
+[2026-09-06 15:08:58.656] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6339] Reallocating view target! 0 0 -> 1280 720
+[2026-09-06 15:08:58.665] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6169] VRRenderTargetManager::CalculateRenderTargetSize called!
+[2026-09-06 15:08:58.665] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6224] VRRenderTargetManager_Base::calculate_render_target_size called!
+[2026-09-06 15:08:58.665] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6234] RenderTargetSize Before: 2560x1440
+[2026-09-06 15:08:58.665] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6239] RenderTargetSize After: 2560x720
+[2026-09-06 15:08:58.665] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:8125] AllocateRenderTargetTexture called from: 5afb52f
+[2026-09-06 15:08:58.665] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:7750] AllocateRenderTargetTexture retaddr: 145afb52f
+[2026-09-06 15:08:58.665] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:7709] Attempting to hook UpdateViewportRHI...
+[2026-09-06 15:08:58.673] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:7714] Found InitDynamicRHI: 145afb090
+[2026-09-06 15:08:58.688] [UnrealVR] [error] [Scan.cpp:2794] Failed to find function start for 0x147e463ed, cannot resolve instruction
+[2026-09-06 15:08:58.709] [UnrealVR] [info] [PointerHook.cpp:25] [PointerHook] Hooking 14856c958->145b11f20 to 7ffb24c9ea80
+[2026-09-06 15:08:58.710] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:7754] Scanning for call instr...
+[2026-09-06 15:08:58.852] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:8045] Skipping write to memory instruction at 145afb54e (5 bytes, landing at 145afb553)
+[2026-09-06 15:08:58.852] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:8045] Skipping write to memory instruction at 145afb55e (6 bytes, landing at 145afb564)
+[2026-09-06 15:08:58.852] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:8045] Skipping write to memory instruction at 145afb564 (8 bytes, landing at 145afb56c)
+[2026-09-06 15:08:58.852] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:8045] Skipping write to memory instruction at 145afb56c (5 bytes, landing at 145afb571)
+[2026-09-06 15:08:58.852] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:8045] Skipping write to memory instruction at 145afb571 (5 bytes, landing at 145afb576)
+[2026-09-06 15:08:58.852] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:8045] Skipping write to memory instruction at 145afb576 (4 bytes, landing at 145afb57a)
+[2026-09-06 15:08:58.852] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:8045] Skipping write to memory instruction at 145afb57a (4 bytes, landing at 145afb57e)
+[2026-09-06 15:08:58.852] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:7942] AllocateRenderTargetTexture post_call: 145afb585, rel 5afb585
+[2026-09-06 15:08:58.852] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:7948] E8 call not found, assuming register call!
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6370] PreTextureHook called! 5529352112
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6403] Attempting to JIT a function to call the original function!
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6426] Insn bytes size: 7
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6428] Byte[0]: 41
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6428] Byte[1]: ff
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6428] Byte[2]: 92
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6428] Byte[3]: b8
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6428] Byte[4]: 5
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6428] Byte[5]: 0
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6428] Byte[6]: 0
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6458] Not setting RSP for emulation!
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6468] Emu landed at 143f75380
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6480] Function pointer: 143f75380
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6674] About to call the original!
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6677] Calling register version of texture create
+[2026-09-06 15:08:58.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6828] Calling common version of texture create (several arguments)
+[2026-09-06 15:08:58.871] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6849] Had to set texture hook ref in pre texture hook!
+[2026-09-06 15:08:58.871] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:7042] Created UI texture at 7fee1f1c0d20
+[2026-09-06 15:08:58.871] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:7047] Called the original function!
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:7056] Post texture hook called!
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:7057]  Ref: f7e9b0
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:7099]  Resulting texture: 7fee1f9fd000
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [StereoStuff.cpp:18] Attempting to get vtable index for FRHITexture::GetNativeResource
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [StereoStuff.cpp:30]  Vtable: 148062f50 (rel 8062f50)
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [StereoStuff.cpp:41]  Examining index 2
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [StereoStuff.cpp:41]  Examining index 3
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [StereoStuff.cpp:41]  Examining index 4
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [StereoStuff.cpp:41]  Examining index 5
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [StereoStuff.cpp:41]  Examining index 6
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:3996] Encountered attempted dereference of null pointer at 7ffb901b2a96
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [Scan.cpp:1929] Adding 1525 entries for module 7ffb901a0000
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [Scan.cpp:1946] Filtered and sorted entries down to 1525 for module 7ffb901a0000
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [Scan.cpp:2798] Reference point for 7ffb901b2a95: 7ffb901b2a70
+[2026-09-06 15:08:58.872] [UnrealVR] [error] [FFakeStereoRenderingHook.cpp:4009] Previous instruction does not use the same register as the dereference
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [StereoStuff.cpp:41]  Examining index 7
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [StereoStuff.cpp:96]  First index that wasn't self: 7
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [StereoStuff.cpp:108]  Function at 7 returned a pointer with a vtable in C:\WINDOWS\SYSTEM32\D3D12Core.dll
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [StereoStuff.cpp:109]  vtable: 7ffb4f491e58 (rel 251e58)
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [StereoStuff.cpp:125]  Found vtable index 7 for FRHITexture::GetNativeResource
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:7100]  Real resource: 2839bd0d0
+[2026-09-06 15:08:58.872] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:7108]  last texture index: 0
+[2026-09-06 15:08:58.882] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2632] [Stage 1] Found most called index to be 14 with 50 calls
+[2026-09-06 15:08:58.882] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2669] [Stage 2] SceneViewExtension Index 13 called for the first time!
+[2026-09-06 15:08:58.882] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2669] [Stage 2] SceneViewExtension Index 3 called for the first time!
+[2026-09-06 15:08:58.883] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2669] [Stage 2] SceneViewExtension Index 2 called for the first time!
+[2026-09-06 15:08:58.884] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2669] [Stage 2] SceneViewExtension Index 4 called for the first time!
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:21] Searching for FViewportInfo::GetRenderTargetProvider offset...
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x0
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:43]   Invalid first function at offset 0x0
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x8
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x8
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x10
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:36]   Invalid vtable at offset 0x10
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x18
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x18
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x20
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x20
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x28
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x28
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x30
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x30
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x38
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x38
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x40
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x40
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x48
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x48
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x50
+[2026-09-06 15:08:58.895] [UnrealVR] [info] [FViewportInfo.cpp:55]   About to emulate 0x3f7d560 (0x143f7d560)
+[2026-09-06 15:08:58.973] [UnrealVR] [info] [FViewportInfo.cpp:77]   Found call at 0x143f7d56f, skipping it
+[2026-09-06 15:08:58.973] [UnrealVR] [info] [FViewportInfo.cpp:84]   Emu status: 0
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x58
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x58
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x60
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x60
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x68
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x68
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x70
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x70
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x78
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x78
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x80
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x80
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x88
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x88
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x90
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x90
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0x98
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0x98
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0xa0
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0xa0
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0xa8
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0xa8
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0xb0
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0xb0
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0xb8
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:29]   Invalid pointer at offset 0xb8
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:24]  Examining offset 0xc0
+[2026-09-06 15:08:58.985] [UnrealVR] [info] [FViewportInfo.cpp:55]   About to emulate 0x5af9bd0 (0x145af9bd0)
+[2026-09-06 15:08:59.064] [UnrealVR] [info] [FViewportInfo.cpp:77]   Found call at 0x145af9bd9, skipping it
+[2026-09-06 15:08:59.064] [UnrealVR] [info] [FViewportInfo.cpp:84]   Emu status: 0
+[2026-09-06 15:08:59.064] [UnrealVR] [info] [FViewportInfo.cpp:93]   Found FViewportInfo::GetRenderTargetProvider offset: 0xc0
+[2026-09-06 15:08:59.064] [UnrealVR] [info] [FViewportInfo.cpp:94]   Found FSlateResource::Resource offset: 0x8
+[2026-09-06 15:08:59.077] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:5249] render texture render thread called!
+[2026-09-06 15:08:59.077] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:6162] SlateRHIRenderer::DrawWindow_RenderThread finished!
+[2026-09-06 15:08:59.078] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2669] [Stage 2] SceneViewExtension Index 7 called for the first time!
+[2026-09-06 15:08:59.079] [UnrealVR] [info] [VR] D3D12 Real backbuffer width: 2560, height: 1440, format: 24
+[2026-09-06 15:08:59.079] [UnrealVR] [info] [VR] D3D12 RT width: 1280, height: 720, format: 87
+[2026-09-06 15:08:59.084] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2669] [Stage 2] SceneViewExtension Index 1 called for the first time!
+[2026-09-06 15:08:59.084] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2669] [Stage 2] SceneViewExtension Index 5 called for the first time!
+[2026-09-06 15:08:59.085] [UnrealVR] [info] Setting up texture context for OpenVR UI
+[2026-09-06 15:08:59.086] [UnrealVR] [info] Creating RTV for texture context
+[2026-09-06 15:08:59.086] [UnrealVR] [info] Creating SRV for texture context
+[2026-09-06 15:08:59.087] [UnrealVR] [info] [D3D12] Setting up sprite batch PSO
+[2026-09-06 15:08:59.093] [UnrealVR] [info] [D3D12] Sprite batch PSO setup complete
+[2026-09-06 15:08:59.093] [UnrealVR] [info] [D3D12] Setting up sprite batch PSO
+[2026-09-06 15:08:59.094] [UnrealVR] [info] [D3D12] Sprite batch PSO setup complete
+[2026-09-06 15:08:59.094] [UnrealVR] [info] [D3D12] Setting up sprite batch PSO
+[2026-09-06 15:08:59.097] [UnrealVR] [info] [D3D12] Sprite batch PSO setup complete
+[2026-09-06 15:08:59.097] [UnrealVR] [info] [VR] d3d12 textures have been setup
+[2026-09-06 15:08:59.097] [UnrealVR] [info] [VR] Setting up game texture as reference to original
+[2026-09-06 15:08:59.097] [UnrealVR] [info] Setting up texture context for Game Texture
+[2026-09-06 15:08:59.097] [UnrealVR] [info] Creating RTV for texture context
+[2026-09-06 15:08:59.097] [UnrealVR] [info] Creating SRV for texture context
+[2026-09-06 15:08:59.098] [UnrealVR] [info] Setting up texture context for Game UI Texture
+[2026-09-06 15:08:59.098] [UnrealVR] [info] Creating RTV for texture context
+[2026-09-06 15:08:59.098] [UnrealVR] [info] Creating SRV for texture context
+[2026-09-06 15:08:59.179] [UnrealVR] [info] Finished first submit from worker thread!
+[2026-09-06 15:08:59.179] [UnrealVR] [info] Setting up texture context for Backbuffer
+[2026-09-06 15:08:59.180] [UnrealVR] [info] Creating RTV for texture context
+[2026-09-06 15:08:59.180] [UnrealVR] [info] Creating SRV for texture context
+[2026-09-06 15:08:59.180] [UnrealVR] [info] [VR] Created backbuffer RTV (D3D12)
+[2026-09-06 15:08:59.196] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2669] [Stage 2] SceneViewExtension Index 9 called for the first time!
+[2026-09-06 15:08:59.196] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2669] [Stage 2] SceneViewExtension Index 10 called for the first time!
+[2026-09-06 15:08:59.221] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2669] [Stage 2] SceneViewExtension Index 8 called for the first time!
+[2026-09-06 15:08:59.222] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2669] [Stage 2] SceneViewExtension Index 12 called for the first time!
+[2026-09-06 15:08:59.223] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2669] [Stage 2] SceneViewExtension Index 6 called for the first time!
+[2026-09-06 15:08:59.228] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (488)
+[2026-09-06 15:08:59.233] [UnrealVR] [info] Setting up texture context for Backbuffer
+[2026-09-06 15:08:59.233] [UnrealVR] [info] Creating RTV for texture context
+[2026-09-06 15:08:59.233] [UnrealVR] [info] Creating SRV for texture context
+[2026-09-06 15:08:59.234] [UnrealVR] [info] [VR] Created backbuffer RTV (D3D12)
+[2026-09-06 15:08:59.243] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2669] [Stage 2] SceneViewExtension Index 11 called for the first time!
+[2026-09-06 15:08:59.244] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (488)
+[2026-09-06 15:08:59.249] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (489)
+[2026-09-06 15:08:59.250] [UnrealVR] [info] Setting up texture context for Backbuffer
+[2026-09-06 15:08:59.250] [UnrealVR] [info] Creating RTV for texture context
+[2026-09-06 15:08:59.250] [UnrealVR] [info] Creating SRV for texture context
+[2026-09-06 15:08:59.251] [UnrealVR] [info] [VR] Created backbuffer RTV (D3D12)
+[2026-09-06 15:08:59.254] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (488)
+[2026-09-06 15:08:59.256] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (489)
+[2026-09-06 15:08:59.268] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (490)
+[2026-09-06 15:08:59.271] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (489)
+[2026-09-06 15:08:59.272] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (490)
+[2026-09-06 15:08:59.277] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (491)
+[2026-09-06 15:08:59.286] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (490)
+[2026-09-06 15:08:59.287] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (491)
+[2026-09-06 15:08:59.292] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (492)
+[2026-09-06 15:08:59.306] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (491)
+[2026-09-06 15:08:59.307] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (492)
+[2026-09-06 15:08:59.318] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (493)
+[2026-09-06 15:08:59.323] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (492)
+[2026-09-06 15:08:59.324] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (493)
+[2026-09-06 15:08:59.329] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (494)
+[2026-09-06 15:08:59.338] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 9 Found frame count offset at 70, (233)
+[2026-09-06 15:08:59.339] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (493)
+[2026-09-06 15:08:59.350] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (495)
+[2026-09-06 15:08:59.368] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (496)
+[2026-09-06 15:08:59.371] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (496)
+[2026-09-06 15:08:59.384] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (497)
+[2026-09-06 15:08:59.388] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (496)
+[2026-09-06 15:08:59.389] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (497)
+[2026-09-06 15:08:59.401] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (498)
+[2026-09-06 15:08:59.405] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 11 Found frame count offset at 64, (32751)
+[2026-09-06 15:08:59.405] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (497)
+[2026-09-06 15:08:59.406] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (498)
+[2026-09-06 15:08:59.411] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (499)
+[2026-09-06 15:08:59.419] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (498)
+[2026-09-06 15:08:59.425] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (500)
+[2026-09-06 15:08:59.442] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (501)
+[2026-09-06 15:08:59.455] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (501)
+[2026-09-06 15:08:59.459] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (502)
+[2026-09-06 15:08:59.470] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (501)
+[2026-09-06 15:08:59.471] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (502)
+[2026-09-06 15:08:59.476] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (503)
+[2026-09-06 15:08:59.488] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (502)
+[2026-09-06 15:08:59.489] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (503)
+[2026-09-06 15:08:59.500] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (504)
+[2026-09-06 15:08:59.503] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (503)
+[2026-09-06 15:08:59.505] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (504)
+[2026-09-06 15:08:59.518] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (505)
+[2026-09-06 15:08:59.521] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (504)
+[2026-09-06 15:08:59.522] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (505)
+[2026-09-06 15:08:59.527] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (506)
+[2026-09-06 15:08:59.536] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 9 Found frame count offset at 70, (233)
+[2026-09-06 15:08:59.537] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (505)
+[2026-09-06 15:08:59.538] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (506)
+[2026-09-06 15:08:59.550] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (507)
+[2026-09-06 15:08:59.553] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (506)
+[2026-09-06 15:08:59.554] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (507)
+[2026-09-06 15:08:59.568] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (508)
+[2026-09-06 15:08:59.571] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (507)
+[2026-09-06 15:08:59.572] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (508)
+[2026-09-06 15:08:59.584] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (509)
+[2026-09-06 15:08:59.587] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (508)
+[2026-09-06 15:08:59.588] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (509)
+[2026-09-06 15:08:59.592] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (510)
+[2026-09-06 15:08:59.603] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (509)
+[2026-09-06 15:08:59.604] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (510)
+[2026-09-06 15:08:59.608] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (511)
+[2026-09-06 15:08:59.620] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (510)
+[2026-09-06 15:08:59.621] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (511)
+[2026-09-06 15:08:59.634] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (512)
+[2026-09-06 15:08:59.637] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (511)
+[2026-09-06 15:08:59.638] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (512)
+[2026-09-06 15:08:59.651] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (513)
+[2026-09-06 15:08:59.654] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (512)
+[2026-09-06 15:08:59.655] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (513)
+[2026-09-06 15:08:59.659] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (514)
+[2026-09-06 15:08:59.669] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (513)
+[2026-09-06 15:08:59.671] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (514)
+[2026-09-06 15:08:59.684] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (515)
+[2026-09-06 15:08:59.687] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (514)
+[2026-09-06 15:08:59.688] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (515)
+[2026-09-06 15:08:59.701] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (516)
+[2026-09-06 15:08:59.704] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (515)
+[2026-09-06 15:08:59.705] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (516)
+[2026-09-06 15:08:59.717] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (517)
+[2026-09-06 15:08:59.720] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (516)
+[2026-09-06 15:08:59.722] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (517)
+[2026-09-06 15:08:59.734] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (518)
+[2026-09-06 15:08:59.736] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 9 Found frame count offset at 70, (233)
+[2026-09-06 15:08:59.737] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (517)
+[2026-09-06 15:08:59.738] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (518)
+[2026-09-06 15:08:59.750] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (519)
+[2026-09-06 15:08:59.753] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (518)
+[2026-09-06 15:08:59.755] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (519)
+[2026-09-06 15:08:59.768] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (520)
+[2026-09-06 15:08:59.771] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (519)
+[2026-09-06 15:08:59.772] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (520)
+[2026-09-06 15:08:59.784] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (521)
+[2026-09-06 15:08:59.787] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (520)
+[2026-09-06 15:08:59.788] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (521)
+[2026-09-06 15:08:59.800] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (522)
+[2026-09-06 15:08:59.803] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (521)
+[2026-09-06 15:08:59.804] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (522)
+[2026-09-06 15:08:59.808] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (523)
+[2026-09-06 15:08:59.821] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (522)
+[2026-09-06 15:08:59.822] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (523)
+[2026-09-06 15:08:59.835] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (524)
+[2026-09-06 15:08:59.838] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (523)
+[2026-09-06 15:08:59.839] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (524)
+[2026-09-06 15:08:59.843] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (525)
+[2026-09-06 15:08:59.854] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (524)
+[2026-09-06 15:08:59.855] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (525)
+[2026-09-06 15:08:59.867] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (526)
+[2026-09-06 15:08:59.870] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (525)
+[2026-09-06 15:08:59.871] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (526)
+[2026-09-06 15:08:59.884] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (527)
+[2026-09-06 15:08:59.887] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (526)
+[2026-09-06 15:08:59.888] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (527)
+[2026-09-06 15:08:59.900] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (528)
+[2026-09-06 15:08:59.903] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (527)
+[2026-09-06 15:08:59.904] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (528)
+[2026-09-06 15:08:59.908] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (529)
+[2026-09-06 15:08:59.920] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (528)
+[2026-09-06 15:08:59.922] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (529)
+[2026-09-06 15:08:59.934] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (530)
+[2026-09-06 15:08:59.936] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 9 Found frame count offset at 70, (233)
+[2026-09-06 15:08:59.937] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (529)
+[2026-09-06 15:08:59.938] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (530)
+[2026-09-06 15:08:59.942] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (531)
+[2026-09-06 15:08:59.954] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (530)
+[2026-09-06 15:08:59.955] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (531)
+[2026-09-06 15:08:59.968] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (532)
+[2026-09-06 15:08:59.971] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (531)
+[2026-09-06 15:08:59.972] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (532)
+[2026-09-06 15:08:59.976] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (533)
+[2026-09-06 15:08:59.988] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (532)
+[2026-09-06 15:08:59.989] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (533)
+[2026-09-06 15:09:00.001] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (534)
+[2026-09-06 15:09:00.004] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (533)
+[2026-09-06 15:09:00.005] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (534)
+[2026-09-06 15:09:00.009] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (535)
+[2026-09-06 15:09:00.021] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (534)
+[2026-09-06 15:09:00.023] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (535)
+[2026-09-06 15:09:00.034] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (536)
+[2026-09-06 15:09:00.038] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (535)
+[2026-09-06 15:09:00.039] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (536)
+[2026-09-06 15:09:00.051] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (537)
+[2026-09-06 15:09:00.054] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (536)
+[2026-09-06 15:09:00.056] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (537)
+[2026-09-06 15:09:00.060] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (538)
+[2026-09-06 15:09:00.070] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (537)
+[2026-09-06 15:09:00.072] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (538)
+[2026-09-06 15:09:00.084] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (539)
+[2026-09-06 15:09:00.087] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (538)
+[2026-09-06 15:09:00.088] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (539)
+[2026-09-06 15:09:00.102] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (540)
+[2026-09-06 15:09:00.105] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (539)
+[2026-09-06 15:09:00.106] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (540)
+[2026-09-06 15:09:00.118] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (541)
+[2026-09-06 15:09:00.120] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 11 Found frame count offset at 5c (540)
+[2026-09-06 15:09:00.121] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2741] [A3] Function index 6 Found frame count offset at 5c (541)
+[2026-09-06 15:09:00.134] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2682] [A2] Function index 5 Found frame count offset at 5c, (542)
+[2026-09-06 15:09:00.134] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2709] Found final frame count offset at 5c
+[2026-09-06 15:09:00.134] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2710] Found BeginRenderViewFamily at index 5
+[2026-09-06 15:09:00.134] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2711] Found PreRenderViewFamily_RenderThread at index 6
+[2026-09-06 15:09:00.134] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2772] Setting up BeginRenderViewFamily hook...
+[2026-09-06 15:09:00.134] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2786] Done setting up BeginRenderViewFamily hook!
+[2026-09-06 15:09:00.134] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:3236] Called SetupViewPoint for the first time
+[2026-09-06 15:09:00.137] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:3652] Called PreRenderViewFamily_RenderThread for the first time
+[2026-09-06 15:09:00.137] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:3892] Bad root or command list, falling back to Slate thread hook
+[2026-09-06 15:09:00.141] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:3217] Called SetupViewFamily for the first time
+[2026-09-06 15:09:00.141] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:3439] Called BeginRenderViewFamily for the first time
+[2026-09-06 15:09:00.141] [UnrealVR] [info] [FSceneViewFamily.cpp:21] [FSceneViewFamily] Attempting to find offsets for FSceneViewFamily
+[2026-09-06 15:09:00.141] [UnrealVR] [info] [FSceneViewFamily.cpp:39] [FSceneViewFamily] Has vtable? false
+[2026-09-06 15:09:00.141] [UnrealVR] [info] [FSceneViewFamily.cpp:67] [FSceneViewFamily] Found views offset at 0x0
+[2026-09-06 15:09:00.141] [UnrealVR] [info] [FSceneViewFamily.cpp:119] [FSceneViewFamily] Found render target offset at 0x18
+[2026-09-06 15:09:00.141] [UnrealVR] [info] [FSceneViewFamily.cpp:89] [FSceneViewFamily] Found scene interface at 0x20 (vtable 1480e8980)
+[2026-09-06 15:09:00.141] [UnrealVR] [info] [FSceneViewFamily.cpp:138] [FSceneViewFamily] Found scene interface offset at 0x20
+[2026-09-06 15:09:00.141] [UnrealVR] [info] [FScene.cpp:20] [FScene] Attempting to find offsets for FScene
+[2026-09-06 15:09:00.141] [UnrealVR] [info] [FScene.cpp:28] [FScene] Vtable: 0x1480e8980
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144372f1c (3): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 14437298c (3): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144342c97 (10): Type=2, HasBase=true, Base=3, HasDisp=true, Disp=2818
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 1443432b4 (18): Type=2, HasBase=true, Base=2, HasDisp=true, Disp=34
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144345620 (27): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144345aa1 (27): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144345867 (27): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144345960 (27): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144345804 (27): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144345a2f (27): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144368eea (28): Type=2, HasBase=true, Base=2, HasDisp=true, Disp=34
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144344c15 (30): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 1443450b8 (30): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 1441ee2c3 (33): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 1441ee2c6 (33): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 1441ee2ec (33): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.142] [UnrealVR] [info] [FScene.cpp:93] Found INC at 1441ee2ee (33): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 1443a152b (35): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 1443a0aa8 (36): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144127f57 (39): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 14436a883 (45): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 14436a886 (45): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 14436a89e (45): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 14436a8a0 (45): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 1443776c0 (57): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144369949 (60): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 14436994c (60): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 1443449ce (73): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 1443449d0 (73): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 14436ad33 (74): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 14436ad36 (74): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 14436ad5c (74): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 14436ad5e (74): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144364e68 (77): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144361356 (79): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 144355420 (94): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 1443555b0 (94): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 14436e777 (103): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 14436e7f0 (103): Type=1, HasBase=false, Base=0, HasDisp=false, Disp=0
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:93] Found INC at 1443651c0 (105): Type=2, HasBase=true, Base=1, HasDisp=true, Disp=2820
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:105] [FScene] Found a potential increment frame count instruction at 0x1443651c0, index 105
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:40] [FScene] Found start frame vtable index at 104
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:41] [FScene] Found increment frame count vtable index at 105
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:42] [FScene] Found get frame count vtable index at 106
+[2026-09-06 15:09:00.143] [UnrealVR] [info] [FScene.cpp:43] [FScene] Found frame count offset at 2820
+[2026-09-06 15:09:00.154] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:3717] Called enqueued function on the Slate thread for the first time! Frame count: 542
+[2026-09-06 15:09:00.154] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:3756] New FRHICommandBase detected
+[2026-09-06 15:09:00.158] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2801] [ISceneViewExtension] Successfully hijacked command list! 0
+[2026-09-06 15:09:00.158] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2811] [ISceneViewExtension] Command list frame count: 542
+[2026-09-06 15:09:00.158] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2812] [ISceneViewExtension] Original vtable: 1480b12b0
+[2026-09-06 15:09:00.158] [UnrealVR] [info] [FFakeStereoRenderingHook.cpp:2825] [ISceneViewExtension] Found correct execute index: 0
+[2026-09-06 15:09:15.195] [UnrealVR] [info] [Portal] output frame=1443 seq=0 geometry=0 valid=false paired=false status=outputUnavailable detail=unpaired_or_stale_frame
+[2026-09-06 15:09:15.209] [UnrealVR] [info] [OpenVR.cpp:264] Original FOV for left eye: 0.95, -1.05, 0.5624993, -0.5624993
+[2026-09-06 15:09:15.209] [UnrealVR] [info] [OpenVR.cpp:265] Derived FOV for left eye:  0.95, -1.05, 0.5624993, -0.5624993
+[2026-09-06 15:09:15.209] [UnrealVR] [info] [OpenVR.cpp:266] Derived texture bounds left eye: 0, 1, 0, 1
+[2026-09-06 15:09:15.209] [UnrealVR] [info] [OpenVR.cpp:254] Eye texture proportion scale: 1 by 1
+[2026-09-06 15:09:15.209] [UnrealVR] [info] [OpenVR.cpp:264] Original FOV for right eye: 1.05, -0.95, 0.5624993, -0.5624993
+[2026-09-06 15:09:15.209] [UnrealVR] [info] [OpenVR.cpp:265] Derived FOV for right eye:  1.05, -0.95, 0.5624993, -0.5624993
+[2026-09-06 15:09:15.209] [UnrealVR] [info] [OpenVR.cpp:266] Derived texture bounds right eye: 0, 1, 0, 1
+[2026-09-06 15:09:15.258] [UnrealVR] [info] Restored secondary Present bytes; retrying once
+[2026-09-06 15:09:16.206] [UnrealVR] [info] [Portal] output frame=1504 seq=2064 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:17.207] [UnrealVR] [info] [Portal] output frame=1564 seq=2154 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:18.207] [UnrealVR] [info] [Portal] output frame=1624 seq=2244 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:19.207] [UnrealVR] [info] [Portal] output frame=1684 seq=2335 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:20.208] [UnrealVR] [info] [Portal] output frame=1744 seq=2424 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:21.208] [UnrealVR] [info] [Portal] output frame=1804 seq=2515 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:22.223] [UnrealVR] [info] [Portal] output frame=1865 seq=2606 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:23.224] [UnrealVR] [info] [Portal] output frame=1925 seq=2696 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:24.224] [UnrealVR] [info] [Portal] output frame=1985 seq=2784 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:25.240] [UnrealVR] [info] [Portal] output frame=2046 seq=2874 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:25.306] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:09:26.241] [UnrealVR] [info] [Portal] output frame=2106 seq=2963 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:27.242] [UnrealVR] [info] [Portal] output frame=2166 seq=3053 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:28.257] [UnrealVR] [info] [Portal] output frame=2227 seq=3146 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:29.257] [UnrealVR] [info] [Portal] output frame=2287 seq=3235 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:30.258] [UnrealVR] [info] [Portal] output frame=2347 seq=3325 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:31.259] [UnrealVR] [info] [Portal] output frame=2407 seq=3415 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:32.259] [UnrealVR] [info] [Portal] output frame=2467 seq=3505 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:33.273] [UnrealVR] [info] [Portal] output frame=2528 seq=3596 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:33.320] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:09:34.274] [UnrealVR] [info] [Portal] output frame=2588 seq=3686 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:35.290] [UnrealVR] [info] [Portal] output frame=2649 seq=3778 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:36.292] [UnrealVR] [info] [Portal] output frame=2709 seq=3868 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:37.308] [UnrealVR] [info] [Portal] output frame=2770 seq=3960 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:38.307] [UnrealVR] [info] [Portal] output frame=2830 seq=4050 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:39.308] [UnrealVR] [info] [Portal] output frame=2890 seq=4139 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:40.308] [UnrealVR] [info] [Portal] output frame=2950 seq=4229 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:41.323] [UnrealVR] [info] [Portal] output frame=3011 seq=4320 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:41.837] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:09:42.323] [UnrealVR] [info] [Portal] output frame=3071 seq=4411 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:43.323] [UnrealVR] [info] [Portal] output frame=3131 seq=4501 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:44.325] [UnrealVR] [info] [Portal] output frame=3191 seq=4590 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:45.340] [UnrealVR] [info] [Portal] output frame=3252 seq=4682 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:46.340] [UnrealVR] [info] [Portal] output frame=3312 seq=4772 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:46.840] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:09:47.340] [UnrealVR] [info] [Portal] output frame=3372 seq=4862 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:48.343] [UnrealVR] [info] [Portal] output frame=3432 seq=4937 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:49.357] [UnrealVR] [info] [Portal] output frame=3493 seq=5044 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:50.359] [UnrealVR] [info] [Portal] output frame=3553 seq=5134 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:51.359] [UnrealVR] [info] [Portal] output frame=3613 seq=5224 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:51.855] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:09:52.374] [UnrealVR] [info] [Portal] output frame=3674 seq=5315 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:53.375] [UnrealVR] [info] [Portal] output frame=3734 seq=5406 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:54.390] [UnrealVR] [info] [Portal] output frame=3795 seq=5497 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:55.392] [UnrealVR] [info] [Portal] output frame=3855 seq=5587 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:56.392] [UnrealVR] [info] [Portal] output frame=3915 seq=5677 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:56.867] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:09:57.408] [UnrealVR] [info] [Portal] output frame=3976 seq=5768 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:58.409] [UnrealVR] [info] [Portal] output frame=4036 seq=5858 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:09:59.424] [UnrealVR] [info] [Portal] output frame=4097 seq=5950 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:00.426] [UnrealVR] [info] [Portal] output frame=4157 seq=6040 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:01.440] [UnrealVR] [info] [Portal] output frame=4218 seq=6132 geometry=1019 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:01.871] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:10:02.442] [UnrealVR] [info] [Portal] output frame=4278 seq=6221 geometry=1026 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:03.456] [UnrealVR] [info] [Portal] output frame=4339 seq=6311 geometry=1026 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:04.459] [UnrealVR] [info] [Portal] output frame=4399 seq=6402 geometry=1026 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:05.475] [UnrealVR] [info] [Portal] output frame=4460 seq=6493 geometry=1026 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:06.490] [UnrealVR] [info] [Portal] output frame=4521 seq=6613 geometry=1026 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:06.885] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:10:07.491] [UnrealVR] [info] [Portal] output frame=4581 seq=6749 geometry=1026 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:08.492] [UnrealVR] [info] [Portal] output frame=4641 seq=6839 geometry=1026 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:09.491] [UnrealVR] [info] [Portal] output frame=4701 seq=0 geometry=0 valid=false paired=false status=staleTracking detail=unpaired_or_stale_frame
+[2026-09-06 15:10:10.507] [UnrealVR] [info] [Portal] output frame=4762 seq=7020 geometry=1076 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:11.508] [UnrealVR] [info] [Portal] output frame=4822 seq=7111 geometry=1076 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:11.889] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:10:12.509] [UnrealVR] [info] [Portal] output frame=4882 seq=7200 geometry=1076 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:13.508] [UnrealVR] [info] [Portal] output frame=4942 seq=7270 geometry=1076 valid=true paired=true status=outputUnavailable detail=unpaired_or_stale_frame
+[2026-09-06 15:10:14.524] [UnrealVR] [info] [Portal] output frame=5003 seq=7381 geometry=1158 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:15.525] [UnrealVR] [info] [Portal] output frame=5063 seq=7472 geometry=1158 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:16.524] [UnrealVR] [info] [Portal] output frame=5123 seq=7561 geometry=1158 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:16.904] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:10:17.540] [UnrealVR] [info] [Portal] output frame=5184 seq=7652 geometry=1158 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:18.540] [UnrealVR] [info] [Portal] output frame=5244 seq=7743 geometry=1158 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:19.540] [UnrealVR] [info] [Portal] output frame=5304 seq=7832 geometry=1158 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:20.541] [UnrealVR] [info] [Portal] output frame=5364 seq=7922 geometry=1158 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:21.541] [UnrealVR] [info] [Portal] output frame=5424 seq=8065 geometry=1158 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:21.917] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:10:22.542] [UnrealVR] [info] [Portal] output frame=5484 seq=8180 geometry=1158 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:23.541] [UnrealVR] [info] [Portal] output frame=5544 seq=8270 geometry=1158 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:24.541] [UnrealVR] [info] [Portal] output frame=5604 seq=8360 geometry=1158 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:25.541] [UnrealVR] [info] [Portal] output frame=5664 seq=8450 geometry=1158 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:26.558] [UnrealVR] [info] [Portal] output frame=5725 seq=8523 geometry=1160 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:26.920] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:10:27.573] [UnrealVR] [info] [Portal] output frame=5786 seq=8632 geometry=1202 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:28.574] [UnrealVR] [info] [Portal] output frame=5846 seq=8722 geometry=1202 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:29.574] [UnrealVR] [info] [Portal] output frame=5906 seq=8811 geometry=1202 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:30.574] [UnrealVR] [info] [Portal] output frame=5966 seq=8901 geometry=1202 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:31.574] [UnrealVR] [info] [Portal] output frame=6026 seq=8991 geometry=1202 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:31.924] [UnrealVR] [info] Windows message hook is still intact, ignoring...
+[2026-09-06 15:10:32.575] [UnrealVR] [info] [Portal] output frame=6086 seq=9082 geometry=1202 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:33.575] [UnrealVR] [info] [Portal] output frame=6146 seq=9172 geometry=1202 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:34.591] [UnrealVR] [info] [Portal] output frame=6207 seq=9263 geometry=1202 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:35.592] [UnrealVR] [info] [Portal] output frame=6267 seq=9353 geometry=1202 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending
+[2026-09-06 15:10:36.592] [UnrealVR] [info] [Portal] output frame=6327 seq=9443 geometry=1202 valid=true paired=true status=outputUnavailable detail=gpu_recreation_pending

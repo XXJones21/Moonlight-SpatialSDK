@@ -1,0 +1,1 @@
+Sent 900 snapshots, session 12955382856327051903; CSV: D:\Tools\Moonlight-SpatialSDK\Documentation\visionOS-6DOF\evidence\windows\2026-09-06-runtime-tracking\sweep-sent.csv

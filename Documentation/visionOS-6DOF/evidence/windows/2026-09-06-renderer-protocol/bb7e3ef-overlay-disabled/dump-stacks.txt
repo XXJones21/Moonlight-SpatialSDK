@@ -1,0 +1,2463 @@
+exception thread=72432 code=c0000005 address=7ffb915e72eb
+
+THREAD 64716
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 144f830bd HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+1d499cd
+5 140ee681b HogwartsLegacy!AK::MemoryMgr::StopProfileThreadUsage+180b
+6 140eed2b0 HogwartsLegacy!AK::WriteBytesCount::Reserve+6680
+7 140eed32a HogwartsLegacy!AK::WriteBytesCount::Reserve+66fa
+8 140eee8b6 HogwartsLegacy!AK::WriteBytesCount::Reserve+7c86
+9 140ef72c4 HogwartsLegacy!AK::WriteBytesCount::Reserve+10694
+10 14687770e HogwartsLegacy!agsCheckDriverVersion+31fe7e
+11 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+12 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 31436
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a2d31c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7f3c2c
+4 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+5 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 73792
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 66788
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 62028
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 36492
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 74440
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 66076
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 62804
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 35796
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 64176
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 71160
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 72940
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 40612
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 69924
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 67292
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 9772
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 55516
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 70332
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 65912
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 69828
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 72248
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 60276
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 66004
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 67572
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 46208
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 74108
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 61764
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 68084
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 35064
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 59908
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 68808
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 27512
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 43444
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 41940
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 49088
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 70832
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 71080
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 55644
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 71180
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 36580
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 72372
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 61556
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 38160
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 66760
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 38620
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 57704
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 20276
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 66960
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 64208
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 59248
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 67372
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 35448
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 44268
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 15308
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 74460
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 38644
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 71344
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 51188
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 68576
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 49308
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 47532
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 5228
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 72004
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 61852
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 11896
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 56940
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 48804
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb951 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b2261
+5 1438ed85c HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b416c
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 45316
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 62016
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 74432
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 59560
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 56912
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 67480
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 62888
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 21624
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 22684
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 73368
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 11484
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 36464
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 68076
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 70064
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 74256
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 59380
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 14628
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 66396
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 63284
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 68448
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 74272
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 69740
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 64880
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 36268
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 65892
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 1462009f2 HogwartsLegacy!AK::WriteBytesMem::Clear+dcc72
+4 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+5 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 8844
+0 7ffb91624034 ntdll!ZwWaitForWorkViaWorkerFactory+14
+1 7ffb91624034 ntdll!ZwWaitForWorkViaWorkerFactory+14
+2 7ffb9151064e ntdll!RtlSetThreadSubProcessTag+1aee
+3 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+4 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 41384
+0 7ffb91620a04 ntdll!ZwDelayExecution+14
+1 7ffb91620a04 ntdll!ZwDelayExecution+14
+2 7ffb9158fa44 ntdll!RtlDelayExecution+34
+3 7ffb8ea228d1 KERNELBASE!SleepEx+91
+4 144dd6e26 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+1b9d736
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 32836
+0 7ffb91620a04 ntdll!ZwDelayExecution+14
+1 7ffb91620a04 ntdll!ZwDelayExecution+14
+2 7ffb9158fa44 ntdll!RtlDelayExecution+34
+3 7ffb8ea228d1 KERNELBASE!SleepEx+91
+4 1461a7e96 HogwartsLegacy!AK::WriteBytesMem::Clear+84116
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 36980
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1416ecea6 HogwartsLegacy!AK::WriteBytesMem::Count+37556
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 65072
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb8a7436b8 CoreMessaging!CoreUICallSend+9758
+4 7ffb8a743393 CoreMessaging!CoreUICallSend+9433
+5 7ffb8a742fee CoreMessaging!CoreUICallSend+908e
+6 7ffb8a750fac CoreMessaging!CoreUICallSend+1704c
+7 7ffb8a750537 CoreMessaging!CoreUICallSend+165d7
+8 7ffb8a748884 CoreMessaging!CoreUICallSend+e924
+9 7ffb8a74841d CoreMessaging!CoreUICallSend+e4bd
+10 7ffb8a749288 CoreMessaging!CoreUICallSend+f328
+11 7ffb8a7ab696 CoreMessaging!CoreUICallCreateEndpointHost+33c6
+12 7ffb8a7a47ef CoreMessaging!CoreUICreate+157f
+13 7ffb8a780a5b CoreMessaging!CoreUICreateEx+4dab
+14 7ffb6ad1a77d inputhost!SetInputFocus+67ed
+15 7ffb6ad11089 inputhost!CreateInputDeviceWatcher+1839
+16 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+17 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 20416
+0 7ffb91620a04 ntdll!ZwDelayExecution+14
+1 7ffb91620a04 ntdll!ZwDelayExecution+14
+2 7ffb9158fa44 ntdll!RtlDelayExecution+34
+3 7ffb8ea228d1 KERNELBASE!SleepEx+91
+4 143f88b4d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+d4f45d
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 68552
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 14546546c HogwartsLegacy!src_strerror+12e12c
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 8896
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 18024
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 73576
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 68564
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 51676
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 14399555d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+75be6d
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 43224
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1439955ad HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+75bebd
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 37664
+0 7ffb916204a4 ntdll!NtRemoveIoCompletion+14
+1 7ffb916204a4 ntdll!NtRemoveIoCompletion+14
+2 7ffb8ea02fdc KERNELBASE!GetQueuedCompletionStatus+6c
+3 7ffb74d8694a NvMessageBus!releaseMessageBusInterface+50b3a
+4 7ffb74d83746 NvMessageBus!releaseMessageBusInterface+4d936
+5 7ffb74f7156a NvMessageBus!releaseMessageBusInterface+23b75a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 39900
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb9151fc6e ntdll!RtlSleepConditionVariableSRW+1de
+3 7ffb8ea02cd8 KERNELBASE!SleepConditionVariableSRW+38
+4 7ffb74f0bed9 NvMessageBus!releaseMessageBusInterface+1d60c9
+5 7ffb74d405d2 NvMessageBus!releaseMessageBusInterface+a7c2
+6 7ffb74d37fea NvMessageBus!releaseMessageBusInterface+21da
+7 7ffb74f7156a NvMessageBus!releaseMessageBusInterface+23b75a
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 72992
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb9151fc6e ntdll!RtlSleepConditionVariableSRW+1de
+3 7ffb8ea02cd8 KERNELBASE!SleepConditionVariableSRW+38
+4 7ffb7a7da04d nvwgf2umx!NVDEV_Thunk+5a68cd
+5 7ffb7a7da246 nvwgf2umx!NVDEV_Thunk+5a6ac6
+6 7ffb79d164c3 nvwgf2umx!NVENCODEAPI_Thunk+1f2463
+7 7ffb79d1b91f nvwgf2umx!NVENCODEAPI_Thunk+1f78bf
+8 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+9 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+10 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 70552
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a257d70 nvwgf2umx!NVDEV_Thunk+245f0
+4 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+5 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+6 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 20140
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb8ea028c1 KERNELBASE!WaitForMultipleObjects+11
+4 7ffb79a42c36 nvwgf2umx!NVAPI_DirectMethods+32d16
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 67236
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a2bba4f nvwgf2umx!NVDEV_Thunk+882cf
+4 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+5 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+6 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 16676
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a257d70 nvwgf2umx!NVDEV_Thunk+245f0
+4 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+5 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+6 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 22124
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb8ea028c1 KERNELBASE!WaitForMultipleObjects+11
+4 7ffb79a42c36 nvwgf2umx!NVAPI_DirectMethods+32d16
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 70424
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 74576
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 71664
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 63720
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 33488
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 20692
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 10228
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 18900
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 64772
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 13928
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 16584
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 36660
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 64784
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb79e8898e nvwgf2umx!SetDependencyInfo+69fae
+4 7ffb79e88305 nvwgf2umx!SetDependencyInfo+69925
+5 7ffb79e7cb4d nvwgf2umx!SetDependencyInfo+5e16d
+6 7ffb7a3924da nvwgf2umx!NVDEV_Thunk+15ed5a
+7 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 74712
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 62620
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 36996
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 63932
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 66088
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 70436
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 45772
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 69364
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 64484
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 72584
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 36848
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 57796
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 72164
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a233238 nvwgf2umx!OpenAdapter12+159d88
+4 7ffb7a23315f nvwgf2umx!OpenAdapter12+159caf
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 70564
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb9151fc6e ntdll!RtlSleepConditionVariableSRW+1de
+3 7ffb8ea02cd8 KERNELBASE!SleepConditionVariableSRW+38
+4 7ffb8f163d2d msvcp_win!std::time_put<char,std::ostreambuf_iterator<char,std::char_traits<char> > >::_Getcat+bbd
+5 7ffb8f15f4a9 msvcp_win!Cnd_wait+19
+6 7ffb4f2ce01a D3D12Core!D3D12GetInterface+1962a
+7 7ffb4f36e3b4 D3D12Core!D3D12GetInterface+b99c4
+8 7ffb8ee1cd30 ucrtbase!wcsrchr+150
+9 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+10 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 71708
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb9151fc6e ntdll!RtlSleepConditionVariableSRW+1de
+3 7ffb8ea02cd8 KERNELBASE!SleepConditionVariableSRW+38
+4 7ffb8f163d2d msvcp_win!std::time_put<char,std::ostreambuf_iterator<char,std::char_traits<char> > >::_Getcat+bbd
+5 7ffb8f15f4a9 msvcp_win!Cnd_wait+19
+6 7ffb4f2ce01a D3D12Core!D3D12GetInterface+1962a
+7 7ffb4f36e3b4 D3D12Core!D3D12GetInterface+b99c4
+8 7ffb8ee1cd30 ucrtbase!wcsrchr+150
+9 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+10 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 64136
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb9151fc6e ntdll!RtlSleepConditionVariableSRW+1de
+3 7ffb8ea02cd8 KERNELBASE!SleepConditionVariableSRW+38
+4 7ffb8f163d2d msvcp_win!std::time_put<char,std::ostreambuf_iterator<char,std::char_traits<char> > >::_Getcat+bbd
+5 7ffb8f15f4a9 msvcp_win!Cnd_wait+19
+6 7ffb4f2ce01a D3D12Core!D3D12GetInterface+1962a
+7 7ffb4f36e3b4 D3D12Core!D3D12GetInterface+b99c4
+8 7ffb8ee1cd30 ucrtbase!wcsrchr+150
+9 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+10 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 68712
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb9151fc6e ntdll!RtlSleepConditionVariableSRW+1de
+3 7ffb8ea02cd8 KERNELBASE!SleepConditionVariableSRW+38
+4 7ffb8f163d2d msvcp_win!std::time_put<char,std::ostreambuf_iterator<char,std::char_traits<char> > >::_Getcat+bbd
+5 7ffb8f15f4a9 msvcp_win!Cnd_wait+19
+6 7ffb4f2ce01a D3D12Core!D3D12GetInterface+1962a
+7 7ffb4f36e3b4 D3D12Core!D3D12GetInterface+b99c4
+8 7ffb8ee1cd30 ucrtbase!wcsrchr+150
+9 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+10 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 65688
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb8ea028c1 KERNELBASE!WaitForMultipleObjects+11
+4 7ffb79a42c36 nvwgf2umx!NVAPI_DirectMethods+32d16
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 13700
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb8ea028c1 KERNELBASE!WaitForMultipleObjects+11
+4 7ffb79a42c36 nvwgf2umx!NVAPI_DirectMethods+32d16
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 67128
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb8ea028c1 KERNELBASE!WaitForMultipleObjects+11
+4 7ffb79a42c36 nvwgf2umx!NVAPI_DirectMethods+32d16
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 53444
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb9151fc6e ntdll!RtlSleepConditionVariableSRW+1de
+3 7ffb8ea02cd8 KERNELBASE!SleepConditionVariableSRW+38
+4 7ffb280ed148 GfnRuntimeSdk!gfnInitializeRuntimeSdk+eeab1
+5 7ffb280eb198 GfnRuntimeSdk!gfnInitializeRuntimeSdk+ecb01
+6 7ffb280eb010 GfnRuntimeSdk!gfnInitializeRuntimeSdk+ec979
+7 7ffb280cd16c GfnRuntimeSdk!gfnInitializeRuntimeSdk+cead5
+8 7ffb280cd771 GfnRuntimeSdk!gfnInitializeRuntimeSdk+cf0da
+9 7ffb280bb0b8 GfnRuntimeSdk!gfnInitializeRuntimeSdk+bca21
+10 7ffb2819b46c GfnRuntimeSdk!gfnInitializeRuntimeSdk+19cdd5
+11 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+12 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 72176
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb4aa54289 nvcuda64!cuProfilerStop+11ab69
+4 7ffb4a895447 nvcuda64!offset_205447
+5 7ffb4ab2019a nvcuda64!cuProfilerStop+1e6a7a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 66504
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb8ea028c1 KERNELBASE!WaitForMultipleObjects+11
+4 7ffb4a895a34 nvcuda64!offset_205a34
+5 7ffb4a974535 nvcuda64!cuProfilerStop+3ae15
+6 7ffb4a895447 nvcuda64!offset_205447
+7 7ffb4ab2019a nvcuda64!cuProfilerStop+1e6a7a
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 72432 EXCEPTION
+registers rcx=1a6e91060 rdx=0 r8=400 rsp=1a6e90fd0 readwrite=1 fault_address=1a6e90fc8
+0 7ffb915e72eb ntdll!wcstombs+e7b
+1 7ffb915e72eb ntdll!wcstombs+e7b
+2 7ffb915e0df8 ntdll!vsnwprintf+98
+3 7ffb915e0d71 ntdll!vsnwprintf+11
+4 7ffb91500d29 ntdll!RtlSleepConditionVariableCS+ff9
+5 7ffb915008c6 ntdll!RtlSleepConditionVariableCS+b96
+6 7ffb914f7ee4 ntdll!LdrGetDllHandleEx+b84
+7 7ffb914f7cf0 ntdll!LdrGetDllHandleEx+990
+8 7ffb9152ef50 ntdll!LdrLoadDll+170
+9 7ffb31a7d255 gameoverlayrenderer64!OverlayHookD3D3+2d175
+10 7ffb8ea014cf KERNELBASE!LoadLibraryExW+ff
+11 7ffb31a7d173 gameoverlayrenderer64!OverlayHookD3D3+2d093
+12 7ffb31a7d7cb gameoverlayrenderer64!OverlayHookD3D3+2d6eb
+13 143a3a9a8 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+8012b8
+14 143a317a5 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7f80b5
+15 143a38eb7 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7ff7c7
+16 143a3ee1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80572d
+17 146202beb HogwartsLegacy!AK::WriteBytesMem::Clear+dee6b
+18 146202726 HogwartsLegacy!AK::WriteBytesMem::Clear+de9a6
+19 143a2b1a0 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7f1ab0
+20 14688507e HogwartsLegacy!AK::WriteBytesCount::WriteBytes+648e
+21 7ffb61cda9c0 vcruntime140!_C_specific_handler+a0
+22 7ffb91624abf ntdll!_chkstk+9f
+23 7ffb91505e97 ntdll!RtlLocateExtendedFeature+597
+24 7ffb916243fe ntdll!KiUserExceptionDispatcher+2e
+25 7ffb31a8fd95 gameoverlayrenderer64!SteamOverlayIsUsingKeyboard+f495
+26 7ffb31a63f24 gameoverlayrenderer64!OverlayHookD3D3+13e44
+27 7ffb210e2907 UEVRBackend!D3D12Hook::present_internal+87 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:535
+28 7ffb210e2838 UEVRBackend!D3D12Hook::present+58 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:540
+29 7ffb31a63f6f gameoverlayrenderer64!OverlayHookD3D3+13e8f
+30 7ffb210e2907 UEVRBackend!D3D12Hook::present_internal+87 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:535
+31 7ffb210e2838 UEVRBackend!D3D12Hook::present+58 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:540
+32 7ffb31a63f6f gameoverlayrenderer64!OverlayHookD3D3+13e8f
+33 7ffb210e2907 UEVRBackend!D3D12Hook::present_internal+87 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:535
+34 7ffb210e2838 UEVRBackend!D3D12Hook::present+58 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:540
+35 7ffb31a63f6f gameoverlayrenderer64!OverlayHookD3D3+13e8f
+36 7ffb210e2907 UEVRBackend!D3D12Hook::present_internal+87 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:535
+37 7ffb210e2838 UEVRBackend!D3D12Hook::present+58 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:540
+38 7ffb31a63f6f gameoverlayrenderer64!OverlayHookD3D3+13e8f
+39 7ffb210e2907 UEVRBackend!D3D12Hook::present_internal+87 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:535
+40 7ffb210e2838 UEVRBackend!D3D12Hook::present+58 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:540
+41 7ffb31a63f6f gameoverlayrenderer64!OverlayHookD3D3+13e8f
+42 7ffb210e2907 UEVRBackend!D3D12Hook::present_internal+87 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:535
+43 7ffb210e2838 UEVRBackend!D3D12Hook::present+58 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:540
+44 7ffb31a63f6f gameoverlayrenderer64!OverlayHookD3D3+13e8f
+45 7ffb210e2907 UEVRBackend!D3D12Hook::present_internal+87 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:535
+46 7ffb210e2838 UEVRBackend!D3D12Hook::present+58 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\hooks\D3D12Hook.cpp:540
+47 7ffb31a63f6f gameoverlayrenderer64!OverlayHookD3D3+13e8f
+
+THREAD 61100
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb8ea028c1 KERNELBASE!WaitForMultipleObjects+11
+4 7ffb79a42c36 nvwgf2umx!NVAPI_DirectMethods+32d16
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 35820
+0 7ffb91624034 ntdll!ZwWaitForWorkViaWorkerFactory+14
+1 7ffb91624034 ntdll!ZwWaitForWorkViaWorkerFactory+14
+2 7ffb9151064e ntdll!RtlSetThreadSubProcessTag+1aee
+3 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+4 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 67740
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb8ea028c1 KERNELBASE!WaitForMultipleObjects+11
+4 7ffb79a42c36 nvwgf2umx!NVAPI_DirectMethods+32d16
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 66616
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb8ea028c1 KERNELBASE!WaitForMultipleObjects+11
+4 7ffb79a42c36 nvwgf2umx!NVAPI_DirectMethods+32d16
+5 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 50884
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb9151fc6e ntdll!RtlSleepConditionVariableSRW+1de
+3 7ffb8ea02cd8 KERNELBASE!SleepConditionVariableSRW+38
+4 7ffb5f7276ea msvcp140!Cnd_wait+2a
+5 7ffb4390964d sl.interposer!vkGetInstanceProcAddr+497d
+6 7ffb4390d3ef sl.interposer!vkGetInstanceProcAddr+871f
+7 7ffb8ee1cd30 ucrtbase!wcsrchr+150
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 73212
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb9151fc6e ntdll!RtlSleepConditionVariableSRW+1de
+3 7ffb8ea02cd8 KERNELBASE!SleepConditionVariableSRW+38
+4 7ffb43f34b51 NvTelemetryAPI64!FreeTelemetryString+32081
+5 7ffb43f21515 NvTelemetryAPI64!FreeTelemetryString+1ea45
+6 7ffb43f21278 NvTelemetryAPI64!FreeTelemetryString+1e7a8
+7 7ffb43f22156 NvTelemetryAPI64!FreeTelemetryString+1f686
+8 7ffb43f4377a NvTelemetryAPI64!FreeTelemetryString+40caa
+9 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+10 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 35276
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb8ea028c1 KERNELBASE!WaitForMultipleObjects+11
+4 7ffb4a895a34 nvcuda64!offset_205a34
+5 7ffb4a974535 nvcuda64!cuProfilerStop+3ae15
+6 7ffb4a895447 nvcuda64!offset_205447
+7 7ffb4ab2019a nvcuda64!cuProfilerStop+1e6a7a
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 66236
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb41e6b09c 190_E658703!offset_3b09c
+4 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+5 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 29576
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb902b860e combase!CoCreateInstance+190e
+4 7ffb90384baf combase!RoParameterizedTypeExtraGetTypeSignature+37f
+5 7ffb90384abf combase!RoParameterizedTypeExtraGetTypeSignature+28f
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 61152
+0 7ffb916204a4 ntdll!NtRemoveIoCompletion+14
+1 7ffb916204a4 ntdll!NtRemoveIoCompletion+14
+2 7ffb8ea02fdc KERNELBASE!GetQueuedCompletionStatus+6c
+3 7ffb74d8694a NvMessageBus!releaseMessageBusInterface+50b3a
+4 7ffb74d83746 NvMessageBus!releaseMessageBusInterface+4d936
+5 7ffb74f7156a NvMessageBus!releaseMessageBusInterface+23b75a
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 74464
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb9151fc6e ntdll!RtlSleepConditionVariableSRW+1de
+3 7ffb8ea02cd8 KERNELBASE!SleepConditionVariableSRW+38
+4 7ffb74f0bed9 NvMessageBus!releaseMessageBusInterface+1d60c9
+5 7ffb74d405d2 NvMessageBus!releaseMessageBusInterface+a7c2
+6 7ffb74d37fea NvMessageBus!releaseMessageBusInterface+21da
+7 7ffb74f7156a NvMessageBus!releaseMessageBusInterface+23b75a
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 71224
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb7a05f562 nvwgf2umx!OpenAdapter10+147262
+4 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+5 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+6 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 45596
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb8ea028c1 KERNELBASE!WaitForMultipleObjects+11
+4 7ffb7a2b7207 nvwgf2umx!NVDEV_Thunk+83a87
+5 7ffb7a3924da nvwgf2umx!NVDEV_Thunk+15ed5a
+6 7ffb7a7aa2aa nvwgf2umx!NVDEV_Thunk+576b2a
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 73372
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 32020
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 47208
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 73916
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 73656
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 25924
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 67488
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 68284
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 15004
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 43020
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 16104
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 69424
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 69880
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 63872
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 72208
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 66592
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 50288
+0 7ffb91620a04 ntdll!ZwDelayExecution+14
+1 7ffb91620a04 ntdll!ZwDelayExecution+14
+2 7ffb9158fa44 ntdll!RtlDelayExecution+34
+3 7ffb8ea228d1 KERNELBASE!SleepEx+91
+4 7ffb5f727bd7 msvcp140!Thrd_sleep+37
+5 7ffb31dae5b8 CChromaEditorLibrary64!offset_e5b8
+6 7ffb31daf512 CChromaEditorLibrary64!offset_f512
+7 7ffb31daf649 CChromaEditorLibrary64!offset_f649
+8 7ffb8ee1cd30 ucrtbase!wcsrchr+150
+9 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+10 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 71464
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb914ffe7b ntdll!RtlSleepConditionVariableCS+14b
+3 7ffb8ea03d48 KERNELBASE!SleepConditionVariableCS+38
+4 14622ebf5 HogwartsLegacy!AK::WriteBytesMem::Clear+10ae75
+5 1462307b3 HogwartsLegacy!AK::WriteBytesMem::Clear+10ca33
+6 14623074d HogwartsLegacy!AK::WriteBytesMem::Clear+10c9cd
+7 14622fefc HogwartsLegacy!AK::WriteBytesMem::Clear+10c17c
+8 146231a95 HogwartsLegacy!AK::WriteBytesMem::Clear+10dd15
+9 1462308a9 HogwartsLegacy!AK::WriteBytesMem::Clear+10cb29
+10 14622fc12 HogwartsLegacy!AK::WriteBytesMem::Clear+10be92
+11 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+12 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 47576
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb914ffe7b ntdll!RtlSleepConditionVariableCS+14b
+3 7ffb8ea03d48 KERNELBASE!SleepConditionVariableCS+38
+4 14622ebf5 HogwartsLegacy!AK::WriteBytesMem::Clear+10ae75
+5 1462307b3 HogwartsLegacy!AK::WriteBytesMem::Clear+10ca33
+6 14623074d HogwartsLegacy!AK::WriteBytesMem::Clear+10c9cd
+7 14622fefc HogwartsLegacy!AK::WriteBytesMem::Clear+10c17c
+8 146231a95 HogwartsLegacy!AK::WriteBytesMem::Clear+10dd15
+9 1462308a9 HogwartsLegacy!AK::WriteBytesMem::Clear+10cb29
+10 14622fc12 HogwartsLegacy!AK::WriteBytesMem::Clear+10be92
+11 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+12 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 74172
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb914ffe7b ntdll!RtlSleepConditionVariableCS+14b
+3 7ffb8ea03d48 KERNELBASE!SleepConditionVariableCS+38
+4 14622ebf5 HogwartsLegacy!AK::WriteBytesMem::Clear+10ae75
+5 1462307b3 HogwartsLegacy!AK::WriteBytesMem::Clear+10ca33
+6 14623074d HogwartsLegacy!AK::WriteBytesMem::Clear+10c9cd
+7 14622fefc HogwartsLegacy!AK::WriteBytesMem::Clear+10c17c
+8 146231a95 HogwartsLegacy!AK::WriteBytesMem::Clear+10dd15
+9 1462308a9 HogwartsLegacy!AK::WriteBytesMem::Clear+10cb29
+10 14622fc12 HogwartsLegacy!AK::WriteBytesMem::Clear+10be92
+11 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+12 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 60032
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb914ffe7b ntdll!RtlSleepConditionVariableCS+14b
+3 7ffb8ea03d48 KERNELBASE!SleepConditionVariableCS+38
+4 14622ebf5 HogwartsLegacy!AK::WriteBytesMem::Clear+10ae75
+5 1462307b3 HogwartsLegacy!AK::WriteBytesMem::Clear+10ca33
+6 14623074d HogwartsLegacy!AK::WriteBytesMem::Clear+10c9cd
+7 14622fefc HogwartsLegacy!AK::WriteBytesMem::Clear+10c17c
+8 146231a95 HogwartsLegacy!AK::WriteBytesMem::Clear+10dd15
+9 1462308a9 HogwartsLegacy!AK::WriteBytesMem::Clear+10cb29
+10 14622fc12 HogwartsLegacy!AK::WriteBytesMem::Clear+10be92
+11 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+12 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 55976
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffb8ea028c1 KERNELBASE!WaitForMultipleObjects+11
+4 7ffb77b3f22a AudioSes!Ordinal4+68fa
+5 7ffb77b3f1de AudioSes!Ordinal4+68ae
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 32748
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffa9a9b82ad xaudio2_9!offset_82ad
+4 7ffa9a9e41f7 xaudio2_9!X3DAudioCalculate+cc37
+5 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+6 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 19108
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 14630e806 HogwartsLegacy!AK::StreamMgr::SetFileLocationResolver+6c16
+4 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+5 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 62736
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 14628dc23 HogwartsLegacy!CAkRegistryMgr::GetObjAndAddref+edf3
+4 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+5 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 70752
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 146275772 HogwartsLegacy!CAkSpeakerPan::GetDecodingMatrixShape+b1f2
+4 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+5 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 68804
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 146244a85 HogwartsLegacy!AK::SoundEngine::Query::QueryAudioObjectIDs+1885
+4 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+5 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 58944
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 141024bda HogwartsLegacy!AK::SoundEngine::UnregisterResourceMonitorCallback+123bfa
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 33984
+0 7ffb91620a04 ntdll!ZwDelayExecution+14
+1 7ffb91620a04 ntdll!ZwDelayExecution+14
+2 7ffb9158fa44 ntdll!RtlDelayExecution+34
+3 7ffb8ea228d1 KERNELBASE!SleepEx+91
+4 143a3ed78 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+805688
+5 143891383 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+657c93
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 45624
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143ac1e74 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+888784
+5 143ac1c5e HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+88856e
+6 143aa2d0a HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+86961a
+7 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+8 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+9 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+10 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 36880
+0 7ffb91620a04 ntdll!ZwDelayExecution+14
+1 7ffb91620a04 ntdll!ZwDelayExecution+14
+2 7ffb9158fa44 ntdll!RtlDelayExecution+34
+3 7ffb8ea228d1 KERNELBASE!SleepEx+91
+4 143a3ed78 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+805688
+5 145bcbaa1 HogwartsLegacy!src_strerror+894761
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 59600
+0 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+1 7ffb91620ed4 ntdll!ZwWaitForMultipleObjects+14
+2 7ffb8ea029f3 KERNELBASE!WaitForMultipleObjectsEx+123
+3 7ffa9a9b82ad xaudio2_9!offset_82ad
+4 7ffa9a9e41f7 xaudio2_9!X3DAudioCalculate+cc37
+5 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+6 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 23820
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 145366d65 HogwartsLegacy!src_strerror+2fa25
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 10480
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb80b HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b211b
+5 1455d3aa0 HogwartsLegacy!src_strerror+29c760
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 64220
+0 7ffb916204a4 ntdll!NtRemoveIoCompletion+14
+1 7ffb916204a4 ntdll!NtRemoveIoCompletion+14
+2 7ffb8d936b1f mswsock!Tcpip6_WSHGetSockaddrType+19f
+3 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+4 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 17412
+0 7ffb91620a04 ntdll!ZwDelayExecution+14
+1 7ffb91620a04 ntdll!ZwDelayExecution+14
+2 7ffb9158fa44 ntdll!RtlDelayExecution+34
+3 7ffb8ea228d1 KERNELBASE!SleepEx+91
+4 7ffb5f727bd7 msvcp140!Thrd_sleep+37
+5 1461203df HogwartsLegacy!src_strerror+de909f
+6 1461abac3 HogwartsLegacy!AK::WriteBytesMem::Clear+87d43
+7 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+8 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+9 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+10 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 35328
+0 7ffb91620a04 ntdll!ZwDelayExecution+14
+1 7ffb91620a04 ntdll!ZwDelayExecution+14
+2 7ffb9158fa44 ntdll!RtlDelayExecution+34
+3 7ffb8ea228d1 KERNELBASE!SleepEx+91
+4 143a3ed78 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+805688
+5 142a2d6e9 HogwartsLegacy!AK::WriteBytesBuffer::GetPos+22e869
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 64964
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 70444
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143931b1f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f842f
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 66184
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1426b0b65 HogwartsLegacy!ffxGetSurfaceFormatDX12+9c235
+5 140febb84 HogwartsLegacy!AK::SoundEngine::UnregisterResourceMonitorCallback+eaba4
+6 143931b38 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6f8448
+7 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+8 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+9 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+10 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 40788
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 143bc5d82 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+98c692
+5 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+6 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 20364
+0 7ffb91620a04 ntdll!ZwDelayExecution+14
+1 7ffb91620a04 ntdll!ZwDelayExecution+14
+2 7ffb9158fa44 ntdll!RtlDelayExecution+34
+3 7ffb8ea228d1 KERNELBASE!SleepEx+91
+4 1463950d2 HogwartsLegacy!AK::WriteBytesCount::Clear+39762
+5 7ffb8ee85af0 ucrtbase!initialize_wide_environment+40
+6 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+7 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 45544
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 146391445 HogwartsLegacy!AK::WriteBytesCount::Clear+35ad5
+4 7ffb8ee85af0 ucrtbase!initialize_wide_environment+40
+5 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+6 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 67060
+0 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+1 7ffb91623fd4 ntdll!ZwWaitForAlertByThreadId+14
+2 7ffb914ffe7b ntdll!RtlSleepConditionVariableCS+14b
+3 7ffb8ea03d48 KERNELBASE!SleepConditionVariableCS+38
+4 14622ebf5 HogwartsLegacy!AK::WriteBytesMem::Clear+10ae75
+5 146215b32 HogwartsLegacy!AK::WriteBytesMem::Clear+f1db2
+6 14622fc12 HogwartsLegacy!AK::WriteBytesMem::Clear+10be92
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 66380
+0 7ffb91620a04 ntdll!ZwDelayExecution+14
+1 7ffb91620a04 ntdll!ZwDelayExecution+14
+2 7ffb9158fa44 ntdll!RtlDelayExecution+34
+3 7ffb8ea228d1 KERNELBASE!SleepEx+91
+4 7ffb210bcf1e UEVRBackend!std::this_thread::sleep_for<__int64,std::ratio<1,1000> >+14e C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\thread:223
+5 7ffb210b2fdc UEVRBackend!std::thread::_Invoke<std::tuple<`Framework::Framework'::`2'::<lambda_1>,std::stop_token>,0,1>+cc C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\thread:60
+6 7ffb217e38f6 UEVRBackend!thread_start<unsigned int (__cdecl*)(void *),1>+5a minkernel\crts\ucrt\src\appcrt\startup\thread.cpp:97
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 72292
+0 7ffb91620a04 ntdll!ZwDelayExecution+14
+1 7ffb91620a04 ntdll!ZwDelayExecution+14
+2 7ffb9158fa44 ntdll!RtlDelayExecution+34
+3 7ffb8ea228d1 KERNELBASE!SleepEx+91
+4 7ffb210bcf1e UEVRBackend!std::this_thread::sleep_for<__int64,std::ratio<1,1000> >+14e C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\thread:223
+5 7ffb210b30fa UEVRBackend!std::thread::_Invoke<std::tuple<`Framework::Framework'::`2'::<lambda_2>,std::stop_token>,0,1>+9a C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\thread:60
+6 7ffb217e38f6 UEVRBackend!thread_start<unsigned int (__cdecl*)(void *),1>+5a minkernel\crts\ucrt\src\appcrt\startup\thread.cpp:97
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 10256
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 143a3ff1d HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+80682d
+4 1438eb80b HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b211b
+5 144f6a008 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+1d30918
+6 144016167 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+ddca77
+7 144396b3f HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+115d44f
+8 14438fa36 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+1156346
+9 1438eb82b HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+6b213b
+10 144f8ac12 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+1d51522
+11 144f8baa3 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+1d523b3
+12 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+13 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+14 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+15 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 69836
+0 7ffb91620a04 ntdll!ZwDelayExecution+14
+1 7ffb91620a04 ntdll!ZwDelayExecution+14
+2 7ffb9158fa44 ntdll!RtlDelayExecution+34
+3 7ffb8ea228d1 KERNELBASE!SleepEx+91
+4 143a3ed78 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+805688
+5 144f8bbc7 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+1d524d7
+6 143a3e027 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+804937
+7 143a38151 HogwartsLegacy!USeasonChanger::ChangeCurrentSeason+7fea61
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 40128
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8e9fc11f KERNELBASE!WaitForSingleObjectEx+af
+3 7ffb305e07d3 d3d11on12!offset_107d3
+4 7ffb3062c759 d3d11on12!offset_5c759
+5 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+6 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 49332
+0 7ffb91620404 ntdll!NtWaitForSingleObject+14
+1 7ffb91620404 ntdll!NtWaitForSingleObject+14
+2 7ffb8d92951a mswsock!offset_951a
+3 7ffb8d9291f2 mswsock!offset_91f2
+4 7ffb901219d1 ws2_32!select+201
+5 7ffb21192218 UEVRBackend!uevrportal::PortalSession::receive+2b8 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\mods\portal\PortalSession.cpp:35
+6 7ffb21191b0d UEVRBackend!std::thread::_Invoke<std::tuple<`uevrportal::PortalSession::PortalSession'::`1'::<lambda_2_>,std::stop_token>,0,1>+4d C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\thread:60
+7 7ffb217e38f6 UEVRBackend!thread_start<unsigned int (__cdecl*)(void *),1>+5a minkernel\crts\ucrt\src\appcrt\startup\thread.cpp:97
+8 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+9 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 37332
+0 7ffb8e9b1344 win32u!NtUserGetMessage+14
+1 7ffb8e9b1344 win32u!NtUserGetMessage+14
+2 7ffb8f77a802 user32!GetMessageW+22
+3 7ffb31a79a88 gameoverlayrenderer64!OverlayHookD3D3+299a8
+4 7ffb2118dbf8 UEVRBackend!`uevrportal::PortalOutput::Impl::Impl'::`2'::<lambda_1>::operator()+198 D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\mods\portal\PortalOutput.cpp:96
+5 7ffb2118ce63 UEVRBackend!std::thread::_Invoke<std::tuple<`uevrportal::PortalOutput::Impl::Impl'::`2'::<lambda_1> >,0>+13 C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\thread:61
+6 7ffb217e38f6 UEVRBackend!thread_start<unsigned int (__cdecl*)(void *),1>+5a minkernel\crts\ucrt\src\appcrt\startup\thread.cpp:97
+7 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+8 7ffb9156ad6c ntdll!RtlUserThreadStart+2c
+
+THREAD 71172
+0 7ffb91624034 ntdll!ZwWaitForWorkViaWorkerFactory+14
+1 7ffb91624034 ntdll!ZwWaitForWorkViaWorkerFactory+14
+2 7ffb9151064e ntdll!RtlSetThreadSubProcessTag+1aee
+3 7ffb901cccb7 kernel32!BaseThreadInitThunk+17
+4 7ffb9156ad6c ntdll!RtlUserThreadStart+2c

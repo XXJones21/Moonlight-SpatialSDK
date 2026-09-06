@@ -1,0 +1,38 @@
+
+Packet Monitor is not running.
+
+Packet Filters:
+    None
+
+Filter added.
+Filter added.
+
+Logger Parameters:
+    Logger name:        PktMon
+    Logging mode:       Circular
+    Log file:           D:\Tools\Moonlight-SpatialSDK\Documentation\visionOS-6DOF\evidence\windows\2026-09-06-headset-preparation\portal-udp-control-all.etl
+    Max file size:      16 MB
+    Memory used:        768 MB
+
+Collected Data:
+    Packet counters, packet capture
+
+Capture Type:
+    All packets
+
+Monitored Components:
+    All
+
+Packet Filters:
+     # Name                       Protocol  Port 
+     - ----                       --------  ---- 
+     1 MoonlightPortalLive4243    UDP       4243 
+     2 MoonlightVideoControl47998 UDP      47998 
+Flushing logs...
+Merging metadata...
+Log file: D:\Tools\Moonlight-SpatialSDK\Documentation\visionOS-6DOF\evidence\windows\2026-09-06-headset-preparation\portal-udp-control-all.etl (No events lost)
+Removed all filters.
+Processing...
+
+Events formatted:    3
+Formatted file:      D:\Tools\Moonlight-SpatialSDK\Documentation\visionOS-6DOF\evidence\windows\2026-09-06-headset-preparation\portal-udp-control-all.txt

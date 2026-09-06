@@ -1,10 +1,10 @@
 {
   "repository": "https://github.com/elliotttate/UEVR-6DOF-Window",
   "baseCommit": "fb31341e860b15e116a15123820c95f044ff0a0f",
-  "authoredCommit": "562dbe3d0ae389d3616d1db62f025c43cb5cf1f1",
-  "authoredTree": "0f99698954b9a126970be6db24ee801c777908b7",
+  "authoredCommit": "67d97855b1f81fb3226b43b8c4447a5eb9f1d022",
+  "authoredTree": "62b76e100211dd709ba6ebd779e9636cf08d8498",
   "patch": "UEVR-portal.patch",
-  "patchSHA256": "85e9b72a66e3d1d95845795e0d25b0eb0c6d8f958f0b08813c6c1bbe4b926929",
-  "validation": "source authored; build, tests and runtime deferred",
+  "patchSHA256": "97b1eefc2df029579e6bdf02e49c4f6505397fd53ab8b6cda1d3720b4944dd2b",
+  "validation": "Windows MSVC Release build, eight package hashes, embedded revision and patch reverse-check passed for 67d9785. Production lifecycle regression reproduces gpu_busy then persistent gpu_recreation_pending before the fix and passes canonical identity, repeated buffer reuse, resize, queue and device changes after it. Independent review found no blockers. Live 67d9785 displays direct SBS and metadata; 60 valid paired successful sampled output records span 70 seconds with no sampled GPU stalls, and three transient unpaired/stale records recover by the next sample. Live AVP camera mapping is confirmed. Sunshine capture, decoded metadata and client portal video remain unvalidated. See evidence/windows/2026-09-06-present-fix/README.md.",
   "portalCore": "Phase1 0b7f02d plus Phase2 FrameMetadata.hpp; normalized SHA256 pins in cmake/PortalCore.cmake"
 }

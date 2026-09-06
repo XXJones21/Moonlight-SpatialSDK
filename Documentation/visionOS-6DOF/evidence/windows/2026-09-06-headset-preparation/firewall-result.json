@@ -1,0 +1,16 @@
+﻿{
+    "success":  true,
+    "timestamp":  "2026-09-06T14:01:47.7511385-07:00",
+    "name":  "MoonlightPortal-VisionPro-1921680182-4243",
+    "enabled":  "True",
+    "enforcement":  [
+                        "ProfileInactive",
+                        "Enforced",
+                        "Enforced",
+                        "Enforced"
+                    ],
+    "remoteAddress":  "192.168.0.182",
+    "localPort":  4243,
+    "program":  "D:\\Tools\\Moonlight-SpatialSDK\\PortalHost\\build\\Release\\portal_host.exe",
+    "rollbackCommand":  "Remove-NetFirewallRule -Name \u0027MoonlightPortal-VisionPro-1921680182-4243\u0027"
+}

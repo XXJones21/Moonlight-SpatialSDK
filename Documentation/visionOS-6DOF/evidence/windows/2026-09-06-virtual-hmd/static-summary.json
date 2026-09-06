@@ -1,0 +1,10 @@
+{
+  "StartedAt": "2026-09-06T11:50:22.4608255-07:00",
+  "StoppedAt": "2026-09-06T11:52:02.9639952-07:00",
+  "ElapsedSeconds": 100.5048235,
+  "Samples": 6280,
+  "UniqueRows": [
+    "0,0,2,0,0,-0,0"
+  ],
+  "IncompleteRowsExcluded": 1
+}

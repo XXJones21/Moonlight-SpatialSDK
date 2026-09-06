@@ -1,0 +1,2 @@
+output_lifetime.cpp
+PASS: canonical identity, eight-frame reuse, busy resize retention, and fence-generation reset

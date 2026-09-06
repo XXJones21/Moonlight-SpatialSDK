@@ -1,0 +1,72 @@
+{
+  "timestamp": "2026-09-06T15:07:43.187186-07:00",
+  "backupPath": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\pre-4e519e6-20260906-150743",
+  "backupFiles": [
+    {
+      "file": "actions.json",
+      "sha256": "5b3e0bc277af02723748fa00d5cc0d581238e1be40a196a74033e60859529abf"
+    },
+    {
+      "file": "bindings_knuckles.json",
+      "sha256": "3d446de56676e4a1e79f8b8ca9f646479a7c404af0334aa900406f2cf6791be0"
+    },
+    {
+      "file": "bindings_oculus_touch.json",
+      "sha256": "27e82cca54bbe93e75ffbc41dab69167de3fc7d47675759d4f1d829c8237b6c8"
+    },
+    {
+      "file": "bindings_vive_controller.json",
+      "sha256": "f2cc04210e7b11c8c0aa61625551a9a70a36fdff42a318abeeef1516a2c610e8"
+    },
+    {
+      "file": "binding_rift.json",
+      "sha256": "fd03d53baa39d7771504a90f5804765104d1514cd4f98957e780de9823ce174f"
+    },
+    {
+      "file": "binding_vive.json",
+      "sha256": "ca10fd899a84284ee458318916cfd2c582192738c236012b48d6225bb828bc02"
+    },
+    {
+      "file": "cameras.txt",
+      "sha256": "1965e554445940aff8c0d0abf7efea4f121d4bbd99f41b00a576e3a3ab69d380"
+    },
+    {
+      "file": "config.txt",
+      "sha256": "6d2cb711ea502bfc9386de5745e00343741f8a2e0c9a2f46296198487093449a"
+    },
+    {
+      "file": "imgui.ini",
+      "sha256": "e6f73af6d8ed1c0bbd4f9dd4fe78fd56cf371ac05b8bf2855839377dbfcc1093"
+    },
+    {
+      "file": "log.txt",
+      "sha256": "91491ab1aa4a01311b123b64cce82adfa2f46e2fbc31ad57bdf7cb49bfe485cf"
+    }
+  ],
+  "profilePath": "C:\\Users\\josh2\\AppData\\Roaming\\UnrealVRMod\\HogwartsLegacy",
+  "appliedKeys": {
+    "Frontend_RequestedRuntime": "openvr_api.dll",
+    "VR_RenderingMethod": "0",
+    "VR_AimMethod": "0",
+    "VR_MovementOrientation": "0",
+    "VR_AimModifyPlayerControlRotation": "false",
+    "VR_AimUsePawnControlRotation": "false",
+    "VR_DecoupledPitch": "false",
+    "VR_RoomscaleMovement": "false",
+    "VR_ControllersAllowed": "false",
+    "VR_SnapTurn": "false",
+    "VR_2DScreenMode": "false",
+    "VR_ExtremeCompatibilityMode": "false",
+    "VR_Compatibility_SceneView": "false",
+    "VR_Compatibility_SplitScreen": "false",
+    "VR_NativeStereoFix": "false",
+    "VR_WorldScale": "1.000000",
+    "UObjectHook_EnabledAtStartup": "false",
+    "WindowMode_Enabled": "false",
+    "WindowMode_PortalOutput": "false",
+    "WindowMode_PortalDiagnostics": "false"
+  },
+  "package": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-4e519e6",
+  "sourceRevision": "4e519e6d1d538e3501e0679922abf1cd52800f1e",
+  "packageFilesVerified": 8
+}

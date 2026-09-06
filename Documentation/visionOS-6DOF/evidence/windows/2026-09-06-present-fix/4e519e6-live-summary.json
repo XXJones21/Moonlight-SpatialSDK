@@ -1,0 +1,8 @@
+{
+  "sampledLogRecords": 82,
+  "details": {
+    "unpaired_or_stale_frame": 3,
+    "gpu_recreation_pending": 79
+  },
+  "validPairedGpuRecreationRecords": 79
+}

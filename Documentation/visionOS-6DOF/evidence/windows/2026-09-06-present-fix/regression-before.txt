@@ -1,0 +1,26 @@
+secondary_present.cpp
+FAIL: unbounded secondary Present recursion
+FAIL: recoverable overlay loop restores and presents
+FAIL: unbounded secondary Present recursion
+FAIL: unrecoverable loop fails without false success
+FAIL: unbounded secondary Present recursion
+FAIL: ineffective restoration has bounded retry
+FAIL: unbounded secondary Present recursion
+FAIL: recoverable overlay loop restores and presents
+FAIL: unbounded secondary Present recursion
+FAIL: unrecoverable loop fails without false success
+FAIL: unbounded secondary Present recursion
+FAIL: ineffective restoration has bounded retry
+FAIL: unbounded secondary Present recursion
+FAIL: recoverable overlay loop restores and presents
+FAIL: unbounded secondary Present recursion
+FAIL: unrecoverable loop fails without false success
+FAIL: unbounded secondary Present recursion
+FAIL: ineffective restoration has bounded retry
+FAIL: unbounded secondary Present recursion
+FAIL: recoverable overlay loop restores and presents
+FAIL: unbounded secondary Present recursion
+FAIL: unrecoverable loop fails without false success
+FAIL: unbounded secondary Present recursion
+FAIL: ineffective restoration has bounded retry
+24 failed checks

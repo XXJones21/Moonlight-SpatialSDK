@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "scope": "built PortalHost and actual PortalSession.cpp outside the game; no renderer",
+  "sessionsAccepted": 3,
+  "stateObservations": 388,
+  "staleTransitions": 3,
+  "resetEpoch2Accepted": true,
+  "receiverExitedNormallyAfterLeaseExpiry": true,
+  "runtimeTrackingDriven": false,
+  "rendererValidated": false
+}

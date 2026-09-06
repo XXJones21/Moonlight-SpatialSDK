@@ -1,0 +1,56 @@
+﻿{
+    "success":  true,
+    "timestamp":  "2026-09-06T12:48:47.6900948-07:00",
+    "rule":  {
+                 "Name":  "MoonlightPortal-VRto3D-BlockRemoteTracking-4242",
+                 "Enabled":  1,
+                 "Direction":  1,
+                 "Action":  4,
+                 "Profile":  0,
+                 "PrimaryStatus":  1,
+                 "EnforcementStatus":  {
+                                           "value":  [
+                                                         "ProfileInactive",
+                                                         "Enforced",
+                                                         "Enforced",
+                                                         "Enforced"
+                                                     ],
+                                           "Count":  4
+                                       }
+             },
+    "port":  {
+                 "Protocol":  "UDP",
+                 "LocalPort":  "4242",
+                 "RemotePort":  "Any"
+             },
+    "address":  {
+                    "LocalAddress":  "Any",
+                    "RemoteAddress":  {
+                                          "value":  [
+                                                        "0.0.0.0-126.255.255.255",
+                                                        "128.0.0.0-255.255.255.255"
+                                                    ],
+                                          "Count":  2
+                                      }
+                },
+    "application":  {
+                        "Program":  "C:\\Program Files (x86)\\Steam\\steamapps\\common\\SteamVR\\bin\\win64\\vrserver.exe"
+                    },
+    "firewallProfiles":  [
+                             {
+                                 "Name":  "Domain",
+                                 "Enabled":  1
+                             },
+                             {
+                                 "Name":  "Private",
+                                 "Enabled":  1
+                             },
+                             {
+                                 "Name":  "Public",
+                                 "Enabled":  1
+                             }
+                         ],
+    "remotePacketTested":  false,
+    "trackingEnabledByScript":  false,
+    "rollbackCommand":  "Remove-NetFirewallRule -Name \u0027MoonlightPortal-VRto3D-BlockRemoteTracking-4242\u0027"
+}

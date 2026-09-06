@@ -1,0 +1,40 @@
+
+Device 0 - vrto3d.VRto3D-1234 - Stereo3D-1 by VRto3D - HMD - generic_hmd
+	Tracking Firmware Version: 1.0
+	Hardware Revision: 1.0
+		D3DAdapterIndex:   0
+		 RecommendedRenderTargetSize: width=1280, height=720
+		 Left Projection: left=-0.950000, right=1.050000, top=-0.562500, bottom=0.562500
+		Right Projection: left=-1.050000, right=0.950000, top=-0.562500, bottom=0.562500
+		Lens Center: (0.000000, 0.000000), (0.000000, 0.000000)
+		Eye To Head Left
+1.000000 0.000000 0.000000 -0.050000
+0.000000 1.000000 0.000000 0.000000
+0.000000 0.000000 1.000000 0.000000
+		Eye To Head Left Compositor Residual
+1.000000 0.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 0.000000 1.000000
+		Eye To Head Right
+1.000000 0.000000 0.000000 0.050000
+0.000000 1.000000 0.000000 0.000000
+0.000000 0.000000 1.000000 0.000000
+		Eye To Head Right Compositor Residual
+1.000000 0.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 0.000000 1.000000
+		Tracking universe: 64 
+Driver VirtualDesktop : 0 displays
+Driver prism : 0 displays
+Driver vrto3d : 0 displays
+Driver vrlink : 0 displays
+Driver htc : 0 displays
+Driver indexcontroller : 0 displays
+Driver indexhmd : 0 displays
+Driver lighthouse : 0 displays
+Driver oculus : 0 displays
+Driver oculus_legacy : 0 displays
+Driver tundra_labs : 0 displays
+Driver gamepad : 0 displays
+Driver null : 0 displays
+Dashboard pointer device: 4294967295

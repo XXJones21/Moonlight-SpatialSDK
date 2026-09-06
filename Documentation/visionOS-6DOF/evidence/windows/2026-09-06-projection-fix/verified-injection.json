@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-09-06T13:46:22.6821400-07:00",
+  "gamePid": 73944,
+  "modules": [
+    {
+      "ModuleName": "gameoverlayrenderer64.dll",
+      "FileName": "C:\\Program Files (x86)\\Steam\\gameoverlayrenderer64.dll"
+    },
+    {
+      "ModuleName": "openvr_api.dll",
+      "FileName": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-bb7e3ef\\openvr_api.dll"
+    },
+    {
+      "ModuleName": "UEVRBackend.dll",
+      "FileName": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-bb7e3ef\\UEVRBackend.dll"
+    }
+  ],
+  "sockets": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 4244,
+      "OwningProcess": 73944
+    },
+    {
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 4242,
+      "OwningProcess": 38084
+    }
+  ]
+}

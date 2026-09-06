@@ -1,0 +1,8 @@
+{
+    "name":  "MoonlightPortal-VisionPro-1921680182-4243",
+    "remoteAddress":  "192.168.0.182",
+    "program":  "D:\\Tools\\Moonlight-SpatialSDK\\PortalHost\\build\\Release\\portal_host.exe",
+    "localPort":  "4243",
+    "protocol":  "UDP",
+    "profile":  "Any"
+}

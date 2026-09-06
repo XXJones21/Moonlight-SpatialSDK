@@ -1,0 +1,120 @@
+{
+  "session": "1102183402328536118",
+  "hostTerminatedAfterNeutral": true,
+  "senderEpoch": 2,
+  "phases": {
+    "static": {
+      "statuses": 40,
+      "errors": [
+        "outputUnavailable"
+      ],
+      "modes": [
+        "direct_sbs",
+        "unavailable"
+      ],
+      "epochs": [
+        "1"
+      ],
+      "healthyStatuses": 0,
+      "maxRenderFrameID": 0,
+      "maxAcceptedSequence": 344,
+      "visibleWindowSamplesAfter350ms": 0,
+      "windowSamplesAfter350ms": 62,
+      "rectangles": []
+    },
+    "reset": {
+      "statuses": 39,
+      "errors": [
+        "outputUnavailable",
+        "staleTracking"
+      ],
+      "modes": [
+        "unavailable"
+      ],
+      "epochs": [
+        "2"
+      ],
+      "healthyStatuses": 0,
+      "maxRenderFrameID": 0,
+      "maxAcceptedSequence": 681,
+      "visibleWindowSamplesAfter350ms": 0,
+      "windowSamplesAfter350ms": 62,
+      "rectangles": []
+    },
+    "stale": {
+      "statuses": 9,
+      "errors": [
+        "outputUnavailable",
+        "staleTracking"
+      ],
+      "modes": [
+        "unavailable"
+      ],
+      "epochs": [
+        "2"
+      ],
+      "healthyStatuses": 0,
+      "maxRenderFrameID": 0,
+      "maxAcceptedSequence": 690,
+      "visibleWindowSamplesAfter350ms": 0,
+      "windowSamplesAfter350ms": 11,
+      "rectangles": []
+    },
+    "recovery": {
+      "statuses": 29,
+      "errors": [
+        "outputUnavailable"
+      ],
+      "modes": [
+        "unavailable"
+      ],
+      "epochs": [
+        "2"
+      ],
+      "healthyStatuses": 0,
+      "maxRenderFrameID": 0,
+      "maxAcceptedSequence": 943,
+      "visibleWindowSamplesAfter350ms": 0,
+      "windowSamplesAfter350ms": 45,
+      "rectangles": []
+    },
+    "neutral": {
+      "statuses": 9,
+      "errors": [
+        "outputUnavailable",
+        "staleTracking"
+      ],
+      "modes": [
+        "unavailable"
+      ],
+      "epochs": [
+        "2"
+      ],
+      "healthyStatuses": 0,
+      "maxRenderFrameID": 0,
+      "maxAcceptedSequence": 949,
+      "visibleWindowSamplesAfter350ms": 0,
+      "windowSamplesAfter350ms": 7,
+      "rectangles": []
+    },
+    "final-stale": {
+      "statuses": 6,
+      "errors": [
+        "staleTracking"
+      ],
+      "modes": [
+        "unavailable"
+      ],
+      "epochs": [
+        "2"
+      ],
+      "healthyStatuses": 0,
+      "maxRenderFrameID": 0,
+      "maxAcceptedSequence": 949,
+      "visibleWindowSamplesAfter350ms": 0,
+      "windowSamplesAfter350ms": 8,
+      "rectangles": []
+    }
+  },
+  "passed": false
+}

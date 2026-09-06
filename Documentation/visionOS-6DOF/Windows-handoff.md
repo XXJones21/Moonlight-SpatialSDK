@@ -1,12 +1,71 @@
 # Windows handoff: virtual headset and 6DoF portal validation
 
-Prepared 2026-09-06. Branch: `moonlight-6dof-vision`. Latest code checkpoint:
+Updated 2026-09-06. Branch: `moonlight-6dof-vision`. Client baseline:
 `3e3f270` (audio buffering/controller routing), following `68e7e16` (working
-basic visionOS streaming). The user reports pushing these commits to origin.
-This document is a subsequent documentation change; ensure it reaches Windows
-before starting there.
+basic visionOS streaming). Windows UEVR fixes through `67d9785` are preserved
+in `patches/UEVR-portal.patch` with commit/tree/hash provenance in its manifest.
 
 ## Start the next session here
+
+**Windows checkpoint, 2026-09-06:** The stationary VRto3D HMD is validated.
+**Latest live result:** `67d9785` now displays SBS with the metadata strip. The
+user confirms visible output; 60 sampled valid/paired successful output records
+span 70 seconds, with advancing frames at approximately 60 fps and no sampled
+GPU stalls. Three transient unpaired/stale records recover in the next sample.
+Capture and visionOS portal video remain open.
+
+**Next implementation:** Follow the [Sunshine SBS headset delivery plan](../../docs/superpowers/plans/2026-09-06-sunshine-sbs-headset.md): provision a dedicated 2560x736 capture display, verify Sunshine source/encode dimensions, have the Mac session validate decoded metadata and panel presentation, then qualify live geometry and recovery. The physical monitor rejected this capture mode. Client/Xcode work stays with the Mac session.
+
+**Latest fix:** `67d9785` corrects inconsistent COM identity checks and replacement
+of a GPU fence while retaining completion values from its predecessor. The
+`4e519e6` live test briefly showed SBS, then logged 79 valid, paired frame failures
+with `gpu_recreation_pending`. The offline production-branch regression
+reproduced that progression before the fix and passes after it; independent
+review found no blockers. The live result above confirms presentation in this run. See the
+[Present-fix checkpoint](evidence/windows/2026-09-06-present-fix/README.md).
+The final committed-revision Release build, eight package hashes, embedded
+revision and exported patch reverse-check passed. The package is ready at
+`External/local-validation/UEVR-portal-67d9785`; its loaded backend is verified.
+The user confirmed live AVP head pose maps cleanly into the bb7e3ef-injected
+game's VRto3D view with Portal Output/window/diagnostics off. Preserve that
+baseline; proceed toward exact-size capture of the direct SBS output.
+
+The user reports stable Native Stereo after disabling frame generation/upscaling,
+with eye appearance still mismatched, and authorized deferring that visual issue.
+PortalCore, PortalHost, patched UEVR and companions now build on Windows; unit
+tests and synthetic relay/standalone receiver checks pass. Patched packages
+have been injected; the latest live test used revision `67d9785`.
+See the [build evidence](evidence/windows/2026-09-06-builds/README.md)
+and projection-fix evidence for provenance.
+Historical [runtime tracking checks with synthetic input](evidence/windows/2026-09-06-runtime-tracking/README.md)
+passed static/sweep/roll and all six isolated axes through the injected game's
+SteamVR runtime, with Portal Output off. Complete status/recovery, capture and
+headset validation remain open. The first enabled Portal Output test subsequently
+[crashed in a recurring UEVR/Steam Overlay Present chain](evidence/windows/2026-09-06-renderer-protocol/README.md).
+The overlay-disabled restart then exposed flashing with Portal Output on and no
+pose sender. A [projection initialization fix](evidence/windows/2026-09-06-projection-fix/README.md)
+was reproduced with a regression, built and packaged as revision `bb7e3ef`.
+The user confirmed Portal Output can now be toggled without flashing. A later
+crash on this revision still shows the recurring UEVR/Steam Overlay Present
+chain, despite the per-game overlay setting being disabled. The Present
+recursion recovery in d700ced subsequently executed without the prior crash
+over eight minutes of observation. Revision 67d9785 addresses the subsequent
+GPU lifetime stall; its successful live direct output is recorded above.
+
+**Latest user direction:** Stop synthetic-pose tests and proceed toward live
+Vision Pro viewing. AVP is `192.168.0.182`; Windows Ethernet is `10.1.95.5`.
+The live-only relay is running. The user explicitly approved the scoped UDP
+4243 firewall rule after the initial automatic rejection; it is now applied
+and independently verified. Live capture then established the AVP's observed
+source is `10.1.95.13`. The user approved this correction; the firewall and relay
+now use that peer. PortalHost accepts advancing live head poses with changing
+position/orientation and no receiver errors. No Xcode change was needed for this
+link; client-side changes belong in the user's separate Mac session. Live UEVR
+camera movement is confirmed, and renderer-derived status leaves the host.
+Return-status receipt on the client and portal video remain open.
+The current monitor also rejects the required 2560x736@60 mode. Follow the
+[headset preparation checkpoint](evidence/windows/2026-09-06-headset-preparation/README.md).
+Do not resume the synthetic sequence below or claim headset video is ready.
 
 > Read Documentation/visionOS-6DOF/Windows-handoff.md and the linked PC pipeline
 > and protocol documents. Inspect the existing Windows checkout and installed

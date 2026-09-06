@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-09-06T14:02:08.9492019-07:00",
+  "ruleName": "MoonlightPortal-VisionPro-1921680182-4243",
+  "enabled": "True",
+  "action": "Allow",
+  "direction": "Inbound",
+  "profile": "Any",
+  "enforcement": [
+    "ProfileInactive",
+    "Enforced",
+    "Enforced",
+    "Enforced"
+  ],
+  "protocol": "UDP",
+  "localPort": "4243",
+  "remoteAddress": "192.168.0.182",
+  "program": "D:\\Tools\\Moonlight-SpatialSDK\\PortalHost\\build\\Release\\portal_host.exe",
+  "listenerAddress": "0.0.0.0",
+  "listenerPort": 4243,
+  "listenerPid": 47372,
+  "receiverCommandLine": "\"D:\\Tools\\Moonlight-SpatialSDK\\PortalHost\\build\\Release\\portal_host.exe\" --peer 192.168.0.182 --trace-poses"
+}

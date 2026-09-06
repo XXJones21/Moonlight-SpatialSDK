@@ -1,0 +1,2 @@
+# Raw Windows packet traces stay local; readable capture summaries are retained.
+*.etl

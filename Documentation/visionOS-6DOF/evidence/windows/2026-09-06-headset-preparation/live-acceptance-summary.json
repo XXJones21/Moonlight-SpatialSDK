@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-09-06T14:16:10.458386-07:00",
+  "peer": "10.1.95.13",
+  "completeLoggedPoses": 660,
+  "firstSequence": 34393,
+  "lastSequence": 35053,
+  "sequencesStrictlyIncreasing": true,
+  "positionRangeMeters": {
+    "x": [
+      0.207317,
+      0.290388
+    ],
+    "y": [
+      1.19211,
+      1.23619
+    ],
+    "z": [
+      0.00897132,
+      0.128384
+    ]
+  },
+  "orientationChanged": true,
+  "stderrBytes": 0,
+  "syntheticSenderUsed": false,
+  "uevrConsumptionVerified": false,
+  "clientStatusReceiptVerified": false,
+  "portalVideoVerified": false
+}

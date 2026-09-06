@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-09-06T13:28:01.2728192-07:00",
+  "games": [
+    {
+      "pid": 68032,
+      "path": "D:\\SteamLibrary\\steamapps\\common\\Hogwarts Legacy\\HogwartsLegacy.exe",
+      "relevantModules": [
+        {
+          "ModuleName": "gameoverlayrenderer64.dll",
+          "FileName": "C:\\Program Files (x86)\\Steam\\gameoverlayrenderer64.dll"
+        }
+      ]
+    },
+    {
+      "pid": 62348,
+      "path": "D:\\SteamLibrary\\steamapps\\common\\Hogwarts Legacy\\Phoenix\\Binaries\\Win64\\HogwartsLegacy.exe",
+      "relevantModules": [
+        {
+          "ModuleName": "gameoverlayrenderer64.dll",
+          "FileName": "C:\\Program Files (x86)\\Steam\\gameoverlayrenderer64.dll"
+        },
+        {
+          "ModuleName": "openvr_api.dll",
+          "FileName": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-0b59830\\openvr_api.dll"
+        },
+        {
+          "ModuleName": "UEVRBackend.dll",
+          "FileName": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-0b59830\\UEVRBackend.dll"
+        }
+      ]
+    }
+  ],
+  "sockets": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 4244,
+      "OwningProcess": 62348
+    },
+    {
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 4242,
+      "OwningProcess": 38084
+    }
+  ],
+  "testProcesses": []
+}

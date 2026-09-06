@@ -1,0 +1,65 @@
+{
+  "sourceRevision": "bb7e3ef81c3a5cc55be7b1e274ab7a0a49c99cb3",
+  "configuration": "Release x64",
+  "backendEmbeddedRevisionVerified": true,
+  "injected": false,
+  "packagePath": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-bb7e3ef",
+  "files": [
+    {
+      "file": "UEVRInjector.exe",
+      "bytes": 11508203,
+      "sha256": "f61a9c75f605ff097be5fc60f574d832dedccf975c64bee6465b9d86a12021f2",
+      "source": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-0b59830\\UEVRInjector.exe",
+      "role": "original frontend"
+    },
+    {
+      "file": "UEVRInjector.dll.config",
+      "bytes": 77,
+      "sha256": "b115cf3bc35c222b952386a332bb3b827c6dcb48fa0a12bb3a8ac4e9b334c5f4",
+      "source": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-0b59830\\UEVRInjector.dll.config",
+      "role": "original frontend configuration"
+    },
+    {
+      "file": "openxr_loader.dll",
+      "bytes": 659456,
+      "sha256": "3bb4eb190024f92eecf4a0bf33669b5d0b27571ddf4c36a33c58de199ee536c1",
+      "source": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-0b59830\\openxr_loader.dll",
+      "role": "original companion; portal requires OpenVR"
+    },
+    {
+      "file": "UEVRBackend.dll",
+      "bytes": 11727360,
+      "sha256": "415c364e1cceaa41263401e36b06aa969c24f22f03ba3e6d7c846f015dd2f97f",
+      "source": "D:\\Tools\\Moonlight-SpatialSDK\\External\\UEVR-6DOF-Window\\build\\bin\\uevr\\UEVRBackend.dll",
+      "role": "new portal backend"
+    },
+    {
+      "file": "UEVRBackend.pdb",
+      "bytes": 155242496,
+      "sha256": "917762338f1afe8e2e96fec15a5ede6ee0ef7139641394f224a5dcd8ae4bff0a",
+      "source": "D:\\Tools\\Moonlight-SpatialSDK\\External\\UEVR-6DOF-Window\\build\\bin\\uevr\\UEVRBackend.pdb",
+      "role": "new backend symbols"
+    },
+    {
+      "file": "openvr_api.dll",
+      "bytes": 576512,
+      "sha256": "9e5b5af14999ec026cf759e241a5d611c20dbf83ce86cc4314bdad9ea3583541",
+      "source": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-0b59830\\openvr_api.dll",
+      "role": "matching built OpenVR library"
+    },
+    {
+      "file": "LuaVR.dll",
+      "bytes": 5213696,
+      "sha256": "46e5ee9ff2ca9d04c483f99655ff54d059b51f320255b3c4fbe7e6e2609c95c5",
+      "source": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-0b59830\\LuaVR.dll",
+      "role": "built Lua companion"
+    },
+    {
+      "file": "UEVRPluginNullifier.dll",
+      "bytes": 1043456,
+      "sha256": "e657e8e2b286282121ce350606541a10976d3c4bffb833bcff422aeaee90163d",
+      "source": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-0b59830\\UEVRPluginNullifier.dll",
+      "role": "built nullifier companion"
+    }
+  ]
+}

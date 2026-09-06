@@ -1,0 +1,369 @@
+{"kind": "window", "phase": "static", "ns": 161329946385300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161329958089700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "1", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "status", "phase": "static", "ns": 161329969592700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "2", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "direct_sbs", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161330004244700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161330062414200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161330073996900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "7", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "direct_sbs", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161330120082200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161330178248400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "7", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "direct_sbs", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161330178266200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161330236079300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161330282275500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "29", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161330293951100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161330351797900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161330386378500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "38", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161330409395000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161330467176500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161330490743400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "47", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161330525565600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161330583735600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161330595502700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "56", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161330641622700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161330699274800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "65", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161330699291400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161330757044000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161330803496900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "74", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161330814996600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161330872726200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161330907379300, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "83", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161330930672500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161330988274800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161331011578900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "92", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161331046481200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161331104513200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161331116414700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "101", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161331162906500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161331220811200, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "110", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161331220835400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161331278720500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161331325180400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "119", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161331336933100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161331395459100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161331429790300, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "128", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161331453160700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161331511073100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161331534255500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "137", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161331568976900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161331626706100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161331640140400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "146", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161331686628900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161331744373800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "155", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161331744392200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161331802490700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161331849819000, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "164", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161331862736300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161331920919800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161331955605400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "173", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161331978606400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161332037342600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161332060419200, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "182", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161332094858000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161332152482500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161332164210000, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "191", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161332210244600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161332267918300, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "200", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161332267941300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161332325385600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161332371765200, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "209", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161332383229700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161332441859000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161332476598100, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "218", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161332499595900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161332557678100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161332580824400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "227", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161332615381200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161332673011900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161332684665700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "236", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161332730743900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161332788664000, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "245", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161332788679800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161332846661200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161332892980500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "254", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161332904359700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161332962057500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161332996613100, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "263", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161333019786100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161333077641000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161333100973200, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "272", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161333135967600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161333193788400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161333205582000, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "281", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161333251812900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161333309619600, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "290", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161333309640100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161333367512400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161333414162500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "299", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161333425834600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161333483835500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161333518574100, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "308", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161333541806000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161333599611000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161333622861900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "317", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161333657763200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161333715495000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161333727525900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "326", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161333773885400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161333831389400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "335", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "static", "ns": 161333831407100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "static", "ns": 161333888819400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "static", "ns": 161333935054600, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "1", "acceptedSequence": "344", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "resetSent", "phase": "reset", "ns": 161333946573200}
+{"kind": "window", "phase": "reset", "ns": 161333946702100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161333958483900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "345", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "status", "phase": "reset", "ns": 161333981854900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "348", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161334005220500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161334063199800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161334086314700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "357", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161334120897600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161334179090300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161334190858100, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "366", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161334237286000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161334295107900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "375", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161334295125900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161334352742400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161334398638700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "384", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161334410588800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161334468699400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161334503404800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "393", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161334526095200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161334584180300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161334607485100, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "402", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161334641982000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161334699712200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161334711331200, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "411", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161334757628100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161334815540200, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "420", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161334815557000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161334872777200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161334919167300, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "429", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161334930910600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161334988535300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161335023761900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "438", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161335047285400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161335105596000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161335128682300, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "447", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161335163222100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161335221983700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161335234004400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "456", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161335280794800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161335339041100, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "465", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161335339059200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161335397694300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161335443490000, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "474", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161335455185800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161335513269700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161335548429900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "483", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161335571530300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161335629590800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161335652624000, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "492", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161335687801400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161335745952700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161335757630600, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "501", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161335804129200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161335862014900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "510", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161335862034600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161335919782500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161335966397100, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "519", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161335977877400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161336035937800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161336070913300, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "528", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161336094574300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161336152752700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161336176225200, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "537", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161336211143300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161336268932700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161336280590100, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "546", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161336326973900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161336384957400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "555", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161336384973800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161336442882400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161336489539500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "564", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161336501292900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161336559438700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161336594545200, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "573", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161336617194800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161336674941900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161336698058700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "582", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161336733112000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161336790954600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161336802492200, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "591", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161336848546900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161336906337400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "600", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161336906355900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161336964026500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161337011026900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "609", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161337022819700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161337081301100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161337116479400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "618", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161337139583900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161337197649200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161337221039600, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "627", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161337255598800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161337313195100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161337324825900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "636", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161337371094500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161337429190600, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "645", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161337429208700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161337486585300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161337532812600, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "654", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161337544276000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161337601969600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161337636996200, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "663", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161337659798600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161337717653900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161337741539500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "672", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161337776314600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "reset", "ns": 161337833970300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "reset", "ns": 161337845813700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "681", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "reset", "ns": 161337892107200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "stale", "ns": 161337949847600, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "690", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "stale", "ns": 161337949869000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "stale", "ns": 161338007185700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "stale", "ns": 161338064674300, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "690", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "stale", "ns": 161338064691800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "stale", "ns": 161338122028700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "stale", "ns": 161338179419500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "stale", "ns": 161338191026200, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "690", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "status", "phase": "stale", "ns": 161338225544100, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "690", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "stale", "ns": 161338237099900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "stale", "ns": 161338294296500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "stale", "ns": 161338340737000, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "690", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "stale", "ns": 161338352128500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "stale", "ns": 161338409809200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "stale", "ns": 161338467483700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "690", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "stale", "ns": 161338467502600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "stale", "ns": 161338524746500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "stale", "ns": 161338582084400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "stale", "ns": 161338593564900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "690", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "stale", "ns": 161338639587300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "stale", "ns": 161338697116500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "stale", "ns": 161338720390800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "690", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "stale", "ns": 161338754660300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "stale", "ns": 161338812095200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "stale", "ns": 161338846839800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "690", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "stale", "ns": 161338870042300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "stale", "ns": 161338927027400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161338950137300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161338962831600, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "691", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161339009005100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161339066725000, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "700", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161339066742100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161339124361900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161339171109500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "709", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161339182866500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161339240394800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161339275293700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "718", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161339298632000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161339356348200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161339379710700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "727", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161339414242900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161339471830200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161339483585800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "736", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161339530131300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161339587872700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "745", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161339587886100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161339645944300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161339692141700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "754", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161339703603900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161339761734200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161339796679800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "763", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161339819722500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161339878055600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161339901680200, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "772", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161339936697600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161339994550000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161340006155700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "781", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161340052403300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161340110816800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "790", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161340110834700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161340168857300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161340215548900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "799", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161340227374600, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161340285424400, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161340320388800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "808", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161340343439500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161340401697300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161340424685600, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "817", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161340460026800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161340517803800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161340529512800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "826", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161340575929100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161340633969300, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "835", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161340633984800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161340692139200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161340738293100, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "844", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161340749583700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161340806781300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161340841178800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "853", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161340864751000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161340922682700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161340946224600, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "862", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161340981045700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161341039095200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161341050948500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "871", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161341097545800, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161341155552600, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "880", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161341155570200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161341213585700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161341259672900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "889", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161341270963500, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161341328867000, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161341363300500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "898", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161341386619900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161341444415700, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161341467718300, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "907", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161341502282200, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161341560008300, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161341571825500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "916", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161341617992900, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161341675580500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "925", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161341675597100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "window", "phase": "recovery", "ns": 161341733471100, "exists": true, "visible": false, "rect": [0, 0, 3840, 1096]}
+{"kind": "status", "phase": "recovery", "ns": 161341779784000, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "934", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161341791412500, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "recovery", "ns": 161341848990100, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "recovery", "ns": 161341884179400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "943", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "recovery", "ns": 161341907455500, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "neutral", "ns": 161341953705100, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "neutral", "ns": 161341988326800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "neutral", "ns": 161342011586100, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "neutral", "ns": 161342069196900, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "neutral", "ns": 161342092470000, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "window", "phase": "neutral", "ns": 161342127638300, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "neutral", "ns": 161342185941300, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "neutral", "ns": 161342197476800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "outputUnavailable"}, "raw": null}
+{"kind": "status", "phase": "neutral", "ns": 161342197492400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "neutral", "ns": 161342244239700, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "neutral", "ns": 161342302111300, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "neutral", "ns": 161342313939500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "neutral", "ns": 161342360808800, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "neutral", "ns": 161342418479400, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "neutral", "ns": 161342418497100, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "neutral", "ns": 161342476027400, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "neutral", "ns": 161342522057300, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "neutral", "ns": 161342533493600, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "neutral", "ns": 161342591605700, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "neutral", "ns": 161342626182300, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "neutral", "ns": 161342649301400, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "neutral", "ns": 161342707488100, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "neutral", "ns": 161342731824900, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "final-stale", "ns": 161342754784900, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "final-stale", "ns": 161342813343600, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "final-stale", "ns": 161342847814000, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "final-stale", "ns": 161342871337500, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "final-stale", "ns": 161342929994000, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "final-stale", "ns": 161342965972700, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "final-stale", "ns": 161342989444600, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "final-stale", "ns": 161343048378800, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "final-stale", "ns": 161343094612800, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "final-stale", "ns": 161343105963800, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "final-stale", "ns": 161343164816700, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "final-stale", "ns": 161343210774500, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "final-stale", "ns": 161343222426900, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "final-stale", "ns": 161343279692200, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "final-stale", "ns": 161343337452200, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "final-stale", "ns": 161343337471400, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "final-stale", "ns": 161343395570900, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "window", "phase": "final-stale", "ns": 161343453085300, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}
+{"kind": "status", "phase": "final-stale", "ns": 161343464518600, "status": {"version": 1, "sessionID": "1102183402328536118", "trackingEpoch": "2", "acceptedSequence": "949", "geometryRevision": "1", "renderFrameID": "0", "trackingValid": false, "outputMode": "unavailable", "errorCode": "staleTracking"}, "raw": null}
+{"kind": "window", "phase": "final-stale", "ns": 161343511153500, "exists": false, "visible": false, "rect": [0, 0, 0, 0]}

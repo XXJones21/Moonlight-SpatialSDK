@@ -1,0 +1,39 @@
+MSBuild version 17.14.23+b0019275e for .NET Framework
+
+  DirectXTK.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\bin\CMake\Release\DirectXTK.lib
+  TracyClient.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\tracy-build\Release\TracyClient.lib
+  Zycore.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\zydis-build\zycore\Release\Zycore.lib
+  Zydis.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\zydis-build\Release\Zydis.lib
+  DirectXTK12.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\bin\CMake\Release\DirectXTK12.lib
+  asmjit.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\asmjit-build\Release\asmjit.lib
+  bddisasm.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\bddisasm-build\Release\bddisasm.lib
+  glm.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\Release\glm.lib
+  imgui.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\Release\imgui.lib
+  lua.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\Release\lua.lib
+  spdlog.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\Release\spdlog.lib
+  bdshemu.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\bddisasm-build\Release\bdshemu.lib
+  openvr.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\Release\openvr_api.dll
+  portal_core.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\portal-core\Release\portal_core.lib
+  kananlib.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\kananlib-build\Release\kananlib.lib
+  sdkgenny.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\sdkgenny-build\Release\sdkgenny.lib
+  openxr_loader.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\openxr-build\src\loader\Release\openxr_loader.lib
+  luavrlib.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\Release\luavrlib.lib
+  uesdk.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\lib\uesdk.lib
+  safetyhook.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\_deps\safetyhook-build\Release\safetyhook.lib
+  Compiling shaders for UEVR...
+  
+  fxc.exe "alpha_luminance_sprite_ps.fx" /nologo /WX /Ges /Zi /Zpc /Qstrip_reflect /Qstrip_debug /Tps_5_0 /ESpritePixelShader "/FhCompiled\alpha_luminance_sprite_ps_SpritePixelShader.inc" "/FdCompiled\alpha_luminance_sprite_ps_SpritePixelShader.pdb" /Vnalpha_luminance_sprite_ps_SpritePixelShader
+  compilation PDB save succeeded; see D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\mods\vr\shaders\Compiled\alpha_luminance_sprite_ps_SpritePixelShader.pdb
+  compilation header save succeeded; see D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\mods\vr\shaders\Compiled\alpha_luminance_sprite_ps_SpritePixelShader.inc
+  
+  fxc.exe "alpha_luminance_sprite_ps.fx" /nologo /WX /Ges /Zi /Zpc /Qstrip_reflect /Qstrip_debug /Tvs_5_0 /ESpriteVertexShader "/FhCompiled\alpha_luminance_sprite_ps_SpriteVertexShader.inc" "/FdCompiled\alpha_luminance_sprite_ps_SpriteVertexShader.pdb" /Vnalpha_luminance_sprite_ps_SpriteVertexShader
+  compilation PDB save succeeded; see D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\mods\vr\shaders\Compiled\alpha_luminance_sprite_ps_SpriteVertexShader.pdb
+  compilation header save succeeded; see D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\src\mods\vr\shaders\Compiled\alpha_luminance_sprite_ps_SpriteVertexShader.inc
+  Shaders compiled ok
+  Generating commit hash...
+  Framework.cpp
+  PluginLoader.cpp
+  PortalOutput.cpp
+  D3D12Component.cpp
+     Creating library D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/lib/uevr/UEVRBackend.lib and object D:/Tools/Moonlight-SpatialSDK/External/UEVR-6DOF-Window/build/lib/uevr/UEVRBackend.exp
+  uevr.vcxproj -> D:\Tools\Moonlight-SpatialSDK\External\UEVR-6DOF-Window\build\bin\uevr\UEVRBackend.dll

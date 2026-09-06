@@ -1,0 +1,9 @@
+Frontend_RequestedRuntime=openvr_api.dll
+VR_AimMethod=3
+VR_DecoupledPitch=true
+VR_DecoupledPitchUIAdjust=false
+VR_MovementOrientation=3
+VR_NativeStereoFix=false
+VR_NativeStereoFixSamePass=true
+VR_RenderingMethod=2
+WindowMode_Enabled=false
