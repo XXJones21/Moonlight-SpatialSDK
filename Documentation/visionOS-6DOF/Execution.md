@@ -12,7 +12,7 @@ verification boxes are intentionally pending and must not be reported as passing
 | 1 | Geometry, state/reset protocol, ordered relay, synthetic sender and fixtures authored; source review complete | Deferred |
 | 2 | OpenVR portal hooks, frame-associated direct D3D11/D3D12 SBS output, metadata, reproducible fork patch authored | Deferred |
 | 3 | Mixed immersive portal, tracked physical geometry, gestures, preview stereo, validated pose sender authored; recovery/encoding source review addressed | Deferred |
-| 4 | Pending | Deferred |
+| 4 | Pinned Moonlight source import, Xcode dependency wiring, pairing/settings UI, decoder/audio/gamepad, complete session teardown authored; source review fixes applied | Deferred |
 | 5 | Pending | Deferred |
 | 6 | Pending | Deferred |
 

@@ -438,10 +438,10 @@ index 0000000000000000000000000000000000000000..1396bb26bab2d811a781e0d0a84b0d56
 +}
 diff --git a/src/mods/portal/PortalOutput.cpp b/src/mods/portal/PortalOutput.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..d5345b405688555faf8d2a65c1e2f0dc78f14a51
+index 0000000000000000000000000000000000000000..616a67a64fbd809ed72c4f145691c3726df31e60
 --- /dev/null
 +++ b/src/mods/portal/PortalOutput.cpp
-@@ -0,0 +1,207 @@
+@@ -0,0 +1,214 @@
 +#include "PortalOutput.hpp"
 +#include "PortalSession.hpp"
 +#include "WindowFilter.hpp"
@@ -621,8 +621,15 @@ index 0000000000000000000000000000000000000000..d5345b405688555faf8d2a65c1e2f0dc
 +    const unsigned index=o.swap->GetCurrentBackBufferIndex();auto& slot=o.slots12[index];
 +    if(slot.done&&o.fence->GetCompletedValue()<slot.done){o.failed(id,"gpu_busy");return;}
 +    slot.source=source;slot.upload.Reset();slot.back.Reset();
-+    if(!slot.allocator){
-+        if(FAILED(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,IID_PPV_ARGS(&slot.allocator)))||FAILED(device->CreateCommandList(0,D3D12_COMMAND_LIST_TYPE_DIRECT,slot.allocator.Get(),nullptr,IID_PPV_ARGS(&slot.list)))){o.failed(id,"command_create_failed");return;}
++    if(!slot.allocator || !slot.list){
++        // Publish the pair only after both creations succeed; a failed list creation
++        // must not leave a slot that takes the reuse path with a null list.
++        ComPtr<ID3D12CommandAllocator> allocator;
++        ComPtr<ID3D12GraphicsCommandList> list;
++        if(FAILED(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,IID_PPV_ARGS(&allocator)))){o.failed(id,"command_create_failed");return;}
++        if(FAILED(device->CreateCommandList(0,D3D12_COMMAND_LIST_TYPE_DIRECT,allocator.Get(),nullptr,IID_PPV_ARGS(&list)))){o.failed(id,"command_create_failed");return;}
++        slot.allocator=std::move(allocator);
++        slot.list=std::move(list);
 +    }else if(FAILED(slot.allocator->Reset())||FAILED(slot.list->Reset(slot.allocator.Get(),nullptr))){o.failed(id,"command_reset_failed");return;}
 +    if(FAILED(o.swap->GetBuffer(index,IID_PPV_ARGS(&slot.back)))){slot.list->Close();o.failed(id,"backbuffer_failed");return;}
 +    const bool diagnostics=WindowMode::get()->portal_diagnostics_enabled();const unsigned uploadHeight=16+(diagnostics?desc.Height:0);

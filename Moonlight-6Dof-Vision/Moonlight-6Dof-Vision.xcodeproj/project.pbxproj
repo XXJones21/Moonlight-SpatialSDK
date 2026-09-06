@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		A00000000000000000000001 /* PortalDependencies.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = PortalDependencies.xcconfig; sourceTree = "<group>"; };
 		DFBE8F67304D3D27006FF6D3 /* Moonlight-6Dof-Vision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Moonlight-6Dof-Vision.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -15,6 +16,10 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				"ThirdParty/Moonlight/Common/enet/LICENSE",
+				"ThirdParty/Moonlight/Common/LICENSE.txt",
+				"ThirdParty/Moonlight/Import-manifest.json",
+				"ThirdParty/Moonlight/LICENSE.txt",
 			);
 			target = DFBE8F66304D3D27006FF6D3 /* Moonlight-6Dof-Vision */;
 		};
@@ -48,6 +53,7 @@
 			children = (
 				DFBE8F69304D3D27006FF6D3 /* Moonlight-6Dof-Vision */,
 				DFBE8F68304D3D27006FF6D3 /* Products */,
+				A00000000000000000000001 /* PortalDependencies.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -133,6 +139,7 @@
 /* Begin XCBuildConfiguration section */
 		DFBE8F7C304D3D2A006FF6D3 /* Debug configuration for PBXNativeTarget "Moonlight-6Dof-Vision" */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000001 /* PortalDependencies.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -161,6 +168,7 @@
 		};
 		DFBE8F7D304D3D2A006FF6D3 /* Release configuration for PBXNativeTarget "Moonlight-6Dof-Vision" */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000001 /* PortalDependencies.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

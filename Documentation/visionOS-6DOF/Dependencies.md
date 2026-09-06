@@ -20,7 +20,7 @@ do not assume it is permissively licensed. The Moonlight donor is GPL-3.0.
 VRto3D uses LGPL-3.0. This branch is an implementation
 checkout, not a distribution or an assertion of license compatibility.
 
-Phase 2 authored fork commit: `fd126ff1f31c292ed4296d693884ce688a7e5005` on the local
+Phase 2 authored fork commit: `562dbe3d0ae389d3616d1db62f025c43cb5cf1f1` on the local
 `visionos-portal` branch. Complete base-to-authored patch and its SHA256/source-tree
 manifest are in `patches/UEVR-portal.patch` and `patches/UEVR-portal.json`.
 Use `tools/visionos-portal/bootstrap_uevr.py` for source-only reproduction.

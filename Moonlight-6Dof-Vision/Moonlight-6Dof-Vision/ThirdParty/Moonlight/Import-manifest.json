@@ -1,0 +1,462 @@
+{
+  "donor": "fb349830ac980ab73dbd653b5b9c813c3b249198",
+  "common": "a517f7cbcaf37ae0003979382d4e6348f37b8b2d",
+  "enet": "c6bb0e50118d08252eee308de8412751218442d6",
+  "files": [
+    {
+      "source": "Limelight/Crypto/CryptoManager.h",
+      "destination": "Limelight/Crypto/CryptoManager.h",
+      "sha256": "7e26b86285bf310a504796be39457dc9bd23a43d9cecdd08e024e7097023ec44"
+    },
+    {
+      "source": "Limelight/Crypto/CryptoManager.m",
+      "destination": "Limelight/Crypto/CryptoManager.m",
+      "sha256": "dbbd87054611a38c5628fc6e50e089c2696ee2cc1916c6572eaf46a322a78fc5"
+    },
+    {
+      "source": "Limelight/Crypto/mkcert.h",
+      "destination": "Limelight/Crypto/mkcert.h",
+      "sha256": "d281d957c66b3bff79714ce6143d53686c6bb4fba91fb14b86e7c5f3792e2ba6"
+    },
+    {
+      "source": "Limelight/Crypto/mkcert.c",
+      "destination": "Limelight/Crypto/mkcert.c",
+      "sha256": "a4bb25d151d1ac23331437e462d2e646df2678794eee644ec0605afeaf8764d3"
+    },
+    {
+      "source": "Limelight/Utility/Utils.h",
+      "destination": "Limelight/Utility/Utils.h",
+      "sha256": "2669c450cf79b4b995e5dad44e81a9edafd2d61cb8a02ad9a2b626c3980d6257"
+    },
+    {
+      "source": "Limelight/Utility/Utils.m",
+      "destination": "Limelight/Utility/Utils.m",
+      "sha256": "34991f06f6dd5c84bc3d99c41a28aedee6e39d0103c2209ace01b30123d2ffb1"
+    },
+    {
+      "source": "Limelight/Utility/Logger.h",
+      "destination": "Limelight/Utility/Logger.h",
+      "sha256": "d7cc6f96062ae52fee7cfc157815cd1086b09dcf1c81c6df06f57558a814b6a8"
+    },
+    {
+      "source": "Limelight/Utility/Logger.m",
+      "destination": "Limelight/Utility/Logger.m",
+      "sha256": "f1e509ad4529f7e313ca31c780d7adf7db4ffca27de6d3927fb03642b446ea17"
+    },
+    {
+      "source": "Limelight/Network/HttpManager.h",
+      "destination": "Limelight/Network/HttpManager.h",
+      "sha256": "4a1b01b8eabed602ef8299793c78f0c145c3fcadc42185a4dce13e1503447fbd"
+    },
+    {
+      "source": "Limelight/Network/HttpManager.m",
+      "destination": "Limelight/Network/HttpManager.m",
+      "sha256": "74499eccfa3d21ec17d344a6511b8b3d9f2894516bcc8c2c0ac10da6eac516d8"
+    },
+    {
+      "source": "Limelight/Network/HttpRequest.h",
+      "destination": "Limelight/Network/HttpRequest.h",
+      "sha256": "6e45a5017a7ea5a3f546d5209e6b3fde04d9619ce01f7e00f93a49705a099e49"
+    },
+    {
+      "source": "Limelight/Network/HttpRequest.m",
+      "destination": "Limelight/Network/HttpRequest.m",
+      "sha256": "b2b4b1e7e41aa11fe082e71c70d4fbd494411b02a1ab3d4c23091aa76a1e3125"
+    },
+    {
+      "source": "Limelight/Network/HttpResponse.h",
+      "destination": "Limelight/Network/HttpResponse.h",
+      "sha256": "685acc748056b3d3b205a11fc4841e09cd20eabb65494fef26b32102364b782d"
+    },
+    {
+      "source": "Limelight/Network/HttpResponse.m",
+      "destination": "Limelight/Network/HttpResponse.m",
+      "sha256": "b80f8ff889b4f0591d978872723550385ed6a238338ce13a166598687f32e9bc"
+    },
+    {
+      "source": "Limelight/Network/ServerInfoResponse.h",
+      "destination": "Limelight/Network/ServerInfoResponse.h",
+      "sha256": "4eac5e3b716d8870c1c1744378061250e6d395a93744d85593d31f68203a81a5"
+    },
+    {
+      "source": "Limelight/Network/ServerInfoResponse.m",
+      "destination": "Limelight/Network/ServerInfoResponse.m",
+      "sha256": "e17260b5cf7ef03d04bc2cad8ddd2c5f9e2ad6ad0713a35e6922157f1f8c0e60"
+    },
+    {
+      "source": "Limelight/Network/PairManager.h",
+      "destination": "Limelight/Network/PairManager.h",
+      "sha256": "c1fabaeba897e95de7b1bb89d3cf7aa822abf5b50371184bca908dea2a9affbd"
+    },
+    {
+      "source": "Limelight/Network/PairManager.m",
+      "destination": "Limelight/Network/PairManager.m",
+      "sha256": "4eb41c051bfbf603439542c42fbd85f100c94260a7273ac8dbe645cc90f63ff4"
+    },
+    {
+      "source": "Limelight/Network/AppListResponse.h",
+      "destination": "Limelight/Network/AppListResponse.h",
+      "sha256": "c93e0c3f1e9dd5378ee3e411d6e7b7f01e18f5170c56522e64fde1ca4244f4e0"
+    },
+    {
+      "source": "Limelight/Network/AppListResponse.m",
+      "destination": "Limelight/Network/AppListResponse.m",
+      "sha256": "f6db8a1b6608b8492b5084e9b84079c9f0dd9aafc04258cb6c62d8529e8760ae"
+    },
+    {
+      "source": "Limelight/Stream/AnyVideoDecoderRenderer.h",
+      "destination": "Limelight/Stream/AnyVideoDecoderRenderer.h",
+      "sha256": "82a09a46e009aefeaad57ca4b15590a5dac3792a14274e148e0e0a88fe249ce9"
+    },
+    {
+      "source": "Limelight/Stream/Connection.h",
+      "destination": "Limelight/Stream/Connection.h",
+      "sha256": "716e334c492e91ff7b0ab4ffd7f981fceddb923ea2a97ecf81efb56782866d8c"
+    },
+    {
+      "source": "Limelight/Stream/Connection.m",
+      "destination": "Limelight/Stream/Connection.m",
+      "sha256": "b76d145ba260af6e46d27e72938f1665e1c63680106c169f705c203f4a799784"
+    },
+    {
+      "source": "Limelight/Stream/ConnectionCallbacks.h",
+      "destination": "Limelight/Stream/ConnectionCallbacks.h",
+      "sha256": "2e72fb6d801d0aa2f1828f9556f5b8ca52fdb22addb9920e370d7127c6c46338"
+    },
+    {
+      "source": "Limelight/Stream/StreamManager.h",
+      "destination": "Limelight/Stream/StreamManager.h",
+      "sha256": "f657c66723d59593d1ac5123d4c113bfb9228daf7e7e92a869d6e2aea9212323"
+    },
+    {
+      "source": "Limelight/Stream/StreamManager.m",
+      "destination": "Limelight/Stream/StreamManager.m",
+      "sha256": "6549b80158bda7c4f2661e1daab182ed689d528284c2969af500bfde2c8a79a5"
+    },
+    {
+      "source": "Limelight/Stream/HDRParsingUtils.h",
+      "destination": "Limelight/Stream/HDRParsingUtils.h",
+      "sha256": "0bd8146513ee647ff275f09787a02116738228ffe86163835e213e191865299e"
+    },
+    {
+      "source": "Limelight/Stream/HDRParsingUtils.m",
+      "destination": "Limelight/Stream/HDRParsingUtils.m",
+      "sha256": "049ca26f4a5093b4cac6761c66578d6cc826adfffaf67e4c9484ade1fa0fcc81"
+    },
+    {
+      "source": "Limelight/Stream/StreamConfiguration.swift",
+      "destination": "Limelight/Stream/StreamConfiguration.swift",
+      "sha256": "0b6509cec55e676ec8178ef02c1dcd122a545fb1ddba0f5e9391e9586e98470c"
+    },
+    {
+      "source": "Moonlight Vision/DrawableVideoDecoder.swift",
+      "destination": "Video/DrawableVideoDecoder.swift",
+      "sha256": "d5148492ea74ec21c8cf730d8e376afb0a71dbec31e7d1d2c642fcf150db25d5"
+    },
+    {
+      "source": "Moonlight Vision/CVMetalHelpers.swift",
+      "destination": "Video/CVMetalHelpers.swift",
+      "sha256": "27fd3a0f42d9f832c7df51d1edc19fe9a7caf1d834a8f5c1e7baa9e9918a1556"
+    },
+    {
+      "source": "Moonlight Vision/AV1Parser.swift",
+      "destination": "Video/AV1Parser.swift",
+      "sha256": "d2ea09744629f12bfd6887d2bfcc625389127fda096b2a1063e7228865bfa5ec"
+    },
+    {
+      "source": "Moonlight Vision/Shaders.metal",
+      "destination": "Video/Shaders.metal",
+      "sha256": "6206678bf5f1d0d2904fbd1ae257384dedd0319fb3ad6bcb65ee9953e53de3c8"
+    },
+    {
+      "source": "Moonlight Vision/VideoTypes.swift",
+      "destination": "Video/VideoTypes.swift",
+      "sha256": "a718b5c6de06b6ea9730186dc63ac92acc2909c2686c702a331b14f195f47971"
+    },
+    {
+      "source": "LICENSE.txt",
+      "destination": "LICENSE.txt",
+      "sha256": "0b383d5a63da644f628d99c33976ea6487ed89aaa59f0b3257992deac1171e6b"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/AudioStream.c",
+      "destination": "Common/src/AudioStream.c",
+      "sha256": "635f9c0b345a43dfc3568406cb9b978c83a6b3f1453af5cc3b79c92f7162656b"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/ByteBuffer.c",
+      "destination": "Common/src/ByteBuffer.c",
+      "sha256": "e10b88814793842fa39391252577d7d1b3a6fc06fd818e7c9e29ce78365d2c52"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/ByteBuffer.h",
+      "destination": "Common/src/ByteBuffer.h",
+      "sha256": "3c5f65fc499701fa00f00ab2652ce5fef90f8f51d1097a18c721d4f85b70c00d"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/Connection.c",
+      "destination": "Common/src/Connection.c",
+      "sha256": "c1e134a77d57730403e67392a1382163e6a3696ce5dc527a7fdfbede277c86d7"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/ConnectionTester.c",
+      "destination": "Common/src/ConnectionTester.c",
+      "sha256": "31be38eb5bdec3ad011dfc5a4beb5806a15c083cb7ec502f3fdb6b696b54fe63"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/ControlStream.c",
+      "destination": "Common/src/ControlStream.c",
+      "sha256": "457f5f1f54168348793adb67e1976b58501f62cd577c9da912dfd12c8033e9f0"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/FakeCallbacks.c",
+      "destination": "Common/src/FakeCallbacks.c",
+      "sha256": "d28336fe83c10279b12c7965950c49c20637a6f9db81d221d73cf86a3f73df84"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/Input.h",
+      "destination": "Common/src/Input.h",
+      "sha256": "9341cd3003228c37fe4c170841e5c3e47245edcfdb73fc5be0b1e2bc87a8c17a"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/InputStream.c",
+      "destination": "Common/src/InputStream.c",
+      "sha256": "021a1a74983d8156ea98bb61d88c21ba6eed8383d7ca42d0393374d0f868945d"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/Limelight-internal.h",
+      "destination": "Common/src/Limelight-internal.h",
+      "sha256": "535df1c57626ad246cc081c5c212acdf362aea5c8d5efdb22e27d2011ecee19c"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/Limelight.h",
+      "destination": "Common/src/Limelight.h",
+      "sha256": "9f8ea94a6f9b1beb0bf32ab0efe3ae11a351860b7c36eadacbef78aa9d2f14f6"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/LinkedBlockingQueue.c",
+      "destination": "Common/src/LinkedBlockingQueue.c",
+      "sha256": "a6507ebdff3ff230f995a8ea69b484926b1f805941ca71f622f749c58538224e"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/LinkedBlockingQueue.h",
+      "destination": "Common/src/LinkedBlockingQueue.h",
+      "sha256": "3e3d3f622080ba9835816079e983008b4d5cf175575ea503e044e3a80005a68f"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/Misc.c",
+      "destination": "Common/src/Misc.c",
+      "sha256": "c1dc559f3d1a97e1120c61fc92d634c35866e335bfca022fc7d3ce06d7507603"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/Platform.c",
+      "destination": "Common/src/Platform.c",
+      "sha256": "19fe2be8f0d50e314f73cd3186c9c3d321f7632eff0a4e088206cc662854ea06"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/Platform.h",
+      "destination": "Common/src/Platform.h",
+      "sha256": "e66b5dd3f3f6a7d0426bae1838ed11a969f2dfdb85fa0d7a127ccb76f2105883"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/PlatformCrypto.c",
+      "destination": "Common/src/PlatformCrypto.c",
+      "sha256": "28d8a244dd065f6a2afa278163c224490534feaedbe412cddf5a071c3ea10a5c"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/PlatformCrypto.h",
+      "destination": "Common/src/PlatformCrypto.h",
+      "sha256": "177def4422bb9f3c1a8928654102fa6414d1adc102f1c8f9e647a1143f12746c"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/PlatformSockets.c",
+      "destination": "Common/src/PlatformSockets.c",
+      "sha256": "4a975e663482e1c3915d06be3dab6be2470c45be710050aec68baf00c1532ea6"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/PlatformSockets.h",
+      "destination": "Common/src/PlatformSockets.h",
+      "sha256": "b4e39a817ae688fc51d6b3ccb1bad072faf1197d409bdfd23c4afd2a24f04d76"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/PlatformThreads.h",
+      "destination": "Common/src/PlatformThreads.h",
+      "sha256": "361fa4c88baef5d9595004ae000b2900e14a45c97552c300912249d273e70351"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/RecorderCallbacks.c",
+      "destination": "Common/src/RecorderCallbacks.c",
+      "sha256": "be74f586fe76ed32a0c171d7110008bd1f74b9cd097f5811223831ecab0b2a8e"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/RtpAudioQueue.c",
+      "destination": "Common/src/RtpAudioQueue.c",
+      "sha256": "b2d67012efaea75f5c858ac2ae82b63e0bc4fc77a5d5d151d60e031ed0391464"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/RtpAudioQueue.h",
+      "destination": "Common/src/RtpAudioQueue.h",
+      "sha256": "dd2d6a4706a2d860c91e666d3c494566b65cac5aa9f6fa3e507198c32e72f6a8"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/RtpVideoQueue.c",
+      "destination": "Common/src/RtpVideoQueue.c",
+      "sha256": "9b20b70334df3426b0f53c51b22bb075e8aaa15635f10a23193e294a970220f6"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/RtpVideoQueue.h",
+      "destination": "Common/src/RtpVideoQueue.h",
+      "sha256": "810c75abc8c4cb1266d22d399abff9f16d290a897f711a8aaecd55e8e38b89f1"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/Rtsp.h",
+      "destination": "Common/src/Rtsp.h",
+      "sha256": "65aaac15ba3f568ec88781a77ad5e34b44cac9f9654ed13734a8322be94b92cc"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/RtspConnection.c",
+      "destination": "Common/src/RtspConnection.c",
+      "sha256": "b8106afed8166c9bca3a7aeadc332138f7537a9e0ab5969baf7f1da31cc589da"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/RtspParser.c",
+      "destination": "Common/src/RtspParser.c",
+      "sha256": "b80ddf5c020b33dd25d44401e1a9d2e081ee128b1de88a7d6f646663844c7a88"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/SdpGenerator.c",
+      "destination": "Common/src/SdpGenerator.c",
+      "sha256": "23b5be261e51e498903139ce08152c090b8c7143210d2ef94f141989b536cff2"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/SimpleStun.c",
+      "destination": "Common/src/SimpleStun.c",
+      "sha256": "1205be735c53bd08931c375b533c79046a22e2bbfc2bf635693ab30cdee18aed"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/Video.h",
+      "destination": "Common/src/Video.h",
+      "sha256": "8a8b373c02c9f1d92fa5e471d5f89210cdd9f6fd5c995b0ea373c2ccff74a420"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/VideoDepacketizer.c",
+      "destination": "Common/src/VideoDepacketizer.c",
+      "sha256": "3a0909a8031b16d2e75c95e5d3d1ffcd1e682fb64fc10173c5d91f3f265b9b57"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/src/VideoStream.c",
+      "destination": "Common/src/VideoStream.c",
+      "sha256": "012f9cb22f99929d89b9a8738c9d03a801a1ba610474cb3ba892ecd30294aa78"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/reedsolomon/rs.c",
+      "destination": "Common/reedsolomon/rs.c",
+      "sha256": "81a369536f6c32ace654ef82cc427cb9042f507cfb5fd5a48bf2ca4c8b1c6529"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/reedsolomon/rs.h",
+      "destination": "Common/reedsolomon/rs.h",
+      "sha256": "d61adef64a44cddd6b7680fa53fcd31729a89904ade0996a810a7626c039faa4"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/callbacks.c",
+      "destination": "Common/enet/callbacks.c",
+      "sha256": "005540118eff46ffef5aff373ef773a497902d867759bf364e79e39875919415"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/compress.c",
+      "destination": "Common/enet/compress.c",
+      "sha256": "f14e3479d059c99189bc941bfb31339b1d754b18647c0efa261fab1dbeb63835"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/host.c",
+      "destination": "Common/enet/host.c",
+      "sha256": "89ec09a479e41866976148255b566430b401cb2b16be96432a1de7465246d4b4"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/list.c",
+      "destination": "Common/enet/list.c",
+      "sha256": "361b6b42e2870c835a0a37b5b4e649c82436b0e2189ef285bfd75373c5a0471f"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/packet.c",
+      "destination": "Common/enet/packet.c",
+      "sha256": "6efa345fca1550f9d83541f7115ca335be231431a388c97119e8890dfde48795"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/peer.c",
+      "destination": "Common/enet/peer.c",
+      "sha256": "d7512fb5bc06680aa24c4beaf07219c74b59af4d2b2f61b49a7f6daaf3a166bf"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/protocol.c",
+      "destination": "Common/enet/protocol.c",
+      "sha256": "97e988b77e1a0b37d193da5c686a1432bc2b7395d34d98138c73dcb7a145832b"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/unix.c",
+      "destination": "Common/enet/unix.c",
+      "sha256": "36163d9a03f7cd74a9135abd99861236b7f1bca22c0b217de4f0140537c91bcb"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/win32.c",
+      "destination": "Common/enet/win32.c",
+      "sha256": "811399e8d77b8c0d3d9d37a2c4e2c2b1e993b1090679f32021c6e006128b97f8"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/include/enet/callbacks.h",
+      "destination": "Common/enet/include/enet/callbacks.h",
+      "sha256": "07503c89a70c602d0713299efb9a548e743e260b0ede204931a06ffae6ad2e1b"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/include/enet/enet.h",
+      "destination": "Common/enet/include/enet/enet.h",
+      "sha256": "1da628ee16d62a3704a892f2ac7aa0f94257e61abe41455bb116037b2204261d"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/include/enet/list.h",
+      "destination": "Common/enet/include/enet/list.h",
+      "sha256": "a8b8f60c838e12b2505fe1bda66a1c31046bc0c5225d2a9731d0508a19387c2f"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/include/enet/protocol.h",
+      "destination": "Common/enet/include/enet/protocol.h",
+      "sha256": "7ccfe356d899bd69e024acf1200dfcb306fcb70f428ca1e8aab94bdf924e104f"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/include/enet/time.h",
+      "destination": "Common/enet/include/enet/time.h",
+      "sha256": "b025aee33536c608e15e7c2e3354d64c5a0e7cf81c3ed5e79fecf413133299bc"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/include/enet/types.h",
+      "destination": "Common/enet/include/enet/types.h",
+      "sha256": "5a3dd1641333f8cfcf5565e7539cd0d00da497777fe8e3c9cc9c538a2ddfba59"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/include/enet/unix.h",
+      "destination": "Common/enet/include/enet/unix.h",
+      "sha256": "4fcce7170e2a0ba9df986dd14670959f673c6a8c72c78d5f5117e0fab0b845f4"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/include/enet/utility.h",
+      "destination": "Common/enet/include/enet/utility.h",
+      "sha256": "7ac6c7d50c8e74caa5181add463d35e75f721324b7be1470265ec6016318d210"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/include/enet/win32.h",
+      "destination": "Common/enet/include/enet/win32.h",
+      "sha256": "ba0fcb977a7e2c69f1ac81ed23b51d12f88e1aa8139f342915de15bb6689588b"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/LICENSE.txt",
+      "destination": "Common/LICENSE.txt",
+      "sha256": "53927bd0b739d38c87a0a82236fd9b070c2dfff11c0c119be50372005d5047ad"
+    },
+    {
+      "source": "moonlight-common/moonlight-common-c/enet/LICENSE",
+      "destination": "Common/enet/LICENSE",
+      "sha256": "3c326d1182a09bdd48101b7eab2bf2312c76286e756b46cd24844359d7dfecf3"
+    }
+  ]
+}

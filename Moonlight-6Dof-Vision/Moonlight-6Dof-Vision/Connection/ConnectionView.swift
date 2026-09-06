@@ -1,0 +1,122 @@
+import SwiftUI
+
+struct ConnectionView: View {
+    @Environment(AppModel.self) private var app
+    @Environment(\.openImmersiveSpace) private var openImmersiveSpace
+    @State private var showServer = false
+    @State private var showOptions = false
+    @State private var showConfiguration = false
+    @State private var showCapabilities = false
+    @State private var showEffects = false
+
+    var body: some View {
+        @Bindable var connection = app.connection
+        ScrollView {
+            VStack(spacing: 12) {
+                Label("Moonlight Connection", systemImage: "moon.stars.fill").font(.title2).frame(maxWidth: .infinity)
+                Divider().opacity(0.3)
+                HStack(alignment: .top, spacing: 10) {
+                    Button { if connection.paired { launch() } else { showServer = true } } label: {
+                        VStack(spacing: 8) {
+                            Image(systemName: "desktopcomputer").font(.title)
+                            Text(connection.selected?.name ?? "Ready to connect").lineLimit(2)
+                            if let server = connection.selected { Text(server.address).font(.caption).foregroundStyle(.secondary) }
+                            if connection.paired { Text("Connect").fontWeight(.semibold) }
+                        }.frame(maxWidth: .infinity, minHeight: 110)
+                    }.buttonStyle(.bordered).disabled(connection.busy || app.session.state == .connecting || app.session.state == .stopping)
+                    Button { showServer = true } label: {
+                        VStack(spacing: 8) { Image(systemName: "plus").font(.title); Text(connection.paired ? "Pair New Server" : "Connect to PC") }
+                            .frame(maxWidth: .infinity, minHeight: 110)
+                    }.buttonStyle(.bordered).disabled(connection.busy)
+                }
+                if connection.servers.count > 1 {
+                    Picker("Server", selection: Binding(get: { connection.selected?.id ?? "" }, set: { id in if let server = connection.servers.first(where: { $0.id == id }) { connection.select(server) } })) {
+                        ForEach(connection.servers) { Text($0.name).tag($0.id) }
+                    }.disabled(connection.busy)
+                }
+                Text(connection.status).frame(maxWidth: .infinity, alignment: .leading).foregroundStyle(.secondary)
+                HStack(alignment: .top, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        if connection.loadingApplications { ProgressView("Loading applications…") }
+                        else if !connection.applications.isEmpty {
+                            Picker("Application", selection: $connection.appID) {
+                                if !connection.applications.contains(where: { $0.id == connection.appID }) { Text("App ID \(connection.appID)").tag(connection.appID) }
+                                ForEach(connection.applications) { Text($0.name).tag($0.id) }
+                            }
+                        } else {
+                            if let error = connection.appListError { Text("App list: \(error)").foregroundStyle(.orange) }
+                            TextField("App ID", text: $connection.appID).textFieldStyle(.roundedBorder)
+                        }
+                        Button("Options") { showOptions = true }
+                    }.frame(maxWidth: .infinity)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Label(app.session.gamepad.name, systemImage: "gamecontroller")
+                        if let config = app.session.activeConfiguration {
+                            Text("Resolution: \(app.session.negotiatedWidth) × \(app.session.negotiatedHeight)")
+                            Text("FPS: \(config.fps) requested")
+                            Text("Audio: \(config.audio)")
+                        } else { Text("Not streaming") }
+                    }.font(.caption).frame(maxWidth: .infinity, alignment: .leading)
+                }
+                if showConfiguration { StreamConfigurationView(saved: connection.preferences, apply: connection.apply) }
+                if app.session.state != .idle {
+                    Text(app.session.stage).foregroundStyle(.secondary)
+                    Button("Disconnect") { app.disconnect() }
+                }
+                if let message = app.message { Text(message).foregroundStyle(.orange).textSelection(.enabled) }
+                Divider().opacity(0.3)
+                Button("Launch Immersive Mode (No Connection)") { Task { await openPortal() } }.disabled(app.immersiveSpaceState == .inTransition)
+            }.padding(16)
+        }.frame(minWidth: 680, minHeight: 450).glassBackgroundEffect(in: .rect(cornerRadius: 16))
+        .sheet(isPresented: $showServer) { ServerPairingSheet() }
+        .sheet(isPresented: $connection.showPIN) { PINSheet(pin: connection.pin ?? "") }
+        .sheet(isPresented: $showOptions) {
+            VStack(spacing: 12) {
+                Button("Configure Stream") { showConfiguration.toggle(); showOptions = false }
+                Button("Device Capabilities") { showOptions = false; showCapabilities = true }
+                Button("Reset Client Pairing", role: .destructive) { Task { await app.session.stop(); connection.resetPairing(); showOptions = false } }.disabled(connection.busy)
+                Button("Immersive Options") { showOptions = false; showEffects = true }
+                Button("Cancel", role: .cancel) { showOptions = false }
+            }.buttonStyle(.bordered).padding(24)
+        }
+        .sheet(isPresented: $showCapabilities) { DeviceCapabilitiesView() }
+        .sheet(isPresented: $showEffects) { ImmersiveOptionsView() }
+    }
+    private func launch() {
+        guard let server = app.connection.launchServer else { return }
+        app.connection.saveSelection()
+        Task { if await openPortal() { await app.start(server: server) } }
+    }
+    @discardableResult private func openPortal() async -> Bool {
+        if app.immersiveSpaceState == .open { return true }
+        guard app.immersiveSpaceState == .closed else { return false }
+        app.immersiveSpaceState = .inTransition
+        switch await openImmersiveSpace(id: app.immersiveSpaceID) {
+        case .opened: app.immersiveSpaceState = .open; return true
+        case .userCancelled: app.immersiveSpaceState = .closed; return false
+        case .error: app.message = "The immersive space could not open"; app.immersiveSpaceState = .closed; return false
+        @unknown default: app.immersiveSpaceState = .closed; return false
+        }
+    }
+}
+
+struct ServerPairingSheet: View {
+    @Environment(AppModel.self) private var app
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        @Bindable var connection = app.connection
+        VStack(spacing: 16) {
+            Text("Connect to Server").font(.title2)
+            TextField("IP Address", text: $connection.host).textInputAutocapitalization(.never).autocorrectionDisabled()
+            TextField("Port", text: $connection.port).keyboardType(.numberPad)
+            HStack { Button("Cancel", role: .cancel) { dismiss() }; Button("Connect") { connection.connectToServer(); dismiss() } }
+        }.textFieldStyle(.roundedBorder).padding(24).frame(width: 420)
+    }
+}
+struct PINSheet: View {
+    let pin: String
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        VStack(spacing: 20) { Text("Enter this PIN on your server").font(.title2); Text(pin).font(.system(size: 44, weight: .bold, design: .monospaced)); Button("OK") { dismiss() } }.padding(32)
+    }
+}
