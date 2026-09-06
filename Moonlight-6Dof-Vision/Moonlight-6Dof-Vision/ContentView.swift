@@ -1,52 +1,16 @@
-//
-//  ContentView.swift
-//  Moonlight-6Dof-Vision
-//
-//  Created by Joshua Jones on 9/5/26.
-//
-
 import SwiftUI
-import RealityKit
 
 struct ContentView: View {
-
-    @State private var enlarge = false
-
+    @Environment(AppModel.self) private var app
     var body: some View {
-        RealityView { content in
-            // Add the initial RealityKit content
-            if let scene = try? await Entity(named: "Scene", in: .main) {
-                content.add(scene)
-            }
-        } update: { content in
-            // Update the RealityKit content when SwiftUI state changes
-            if let scene = content.entities.first {
-                let uniformScale: Float = enlarge ? 1.4 : 1.0
-                scene.transform.scale = [uniformScale, uniformScale, uniformScale]
-            }
-        }
-        .gesture(TapGesture().targetedToAnyEntity().onEnded { _ in
-            enlarge.toggle()
-        })
-        .toolbar {
-            ToolbarItemGroup(placement: .bottomOrnament) {
-                VStack (spacing: 12) {
-                    Button {
-                        enlarge.toggle()
-                    } label: {
-                        Text(enlarge ? "Reduce RealityView Content" : "Enlarge RealityView Content")
-                    }
-                    .animation(.none, value: 0)
-                    .fontWeight(.semibold)
-
-                    ToggleImmersiveSpaceButton()
-                }
-            }
-        }
+        VStack(spacing: 20) {
+            Label("Moonlight Connection", systemImage: "moon.stars.fill").font(.title)
+            Divider()
+            Text(app.portal.trackingMessage)
+            if let message = app.message { Text(message).foregroundStyle(.red) }
+            ToggleImmersiveSpaceButton()
+            Button("Recenter Portal") { app.portal.recenter() }.disabled(!app.portal.trackingValid && !app.portal.needsRecenter)
+            Text("Drag the plane to move it. Use two hands to turn it. Drag a corner to resize.").foregroundStyle(.secondary)
+        }.padding(24).frame(minWidth: 650, minHeight: 400)
     }
-}
-
-#Preview(windowStyle: .volumetric) {
-    ContentView()
-        .environment(AppModel())
 }

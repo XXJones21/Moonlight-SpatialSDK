@@ -1,34 +1,16 @@
-//
-//  Moonlight_6Dof_VisionApp.swift
-//  Moonlight-6Dof-Vision
-//
-//  Created by Joshua Jones on 9/5/26.
-//
-
 import SwiftUI
 
 @main
 struct Moonlight_6Dof_VisionApp: App {
-
     @State private var appModel = AppModel()
-
     var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environment(appModel)
-        }
-        .windowStyle(.volumetric)
-
+        WindowGroup(id: "settings") { ContentView().environment(appModel) }
+            .windowStyle(.plain)
+            .defaultSize(width: 800, height: 550)
         ImmersiveSpace(id: appModel.immersiveSpaceID) {
-            ImmersiveView()
-                .environment(appModel)
-                .onAppear {
-                    appModel.immersiveSpaceState = .open
-                }
-                .onDisappear {
-                    appModel.immersiveSpaceState = .closed
-                }
+            ImmersiveView().environment(appModel)
+                .onAppear { appModel.immersiveSpaceState = .open }
         }
-        .immersionStyle(selection: .constant(.full), in: .full)
+        .immersionStyle(selection: .constant(.mixed), in: .mixed)
     }
 }

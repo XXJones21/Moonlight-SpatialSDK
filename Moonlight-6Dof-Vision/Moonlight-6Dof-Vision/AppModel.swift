@@ -1,21 +1,17 @@
-//
-//  AppModel.swift
-//  Moonlight-6Dof-Vision
-//
-//  Created by Joshua Jones on 9/5/26.
-//
-
 import SwiftUI
+import RealityKit
 
-/// Maintains app-wide state
-@MainActor
-@Observable
-class AppModel {
+@MainActor @Observable
+final class AppModel {
     let immersiveSpaceID = "ImmersiveSpace"
-    enum ImmersiveSpaceState {
-        case closed
-        case inTransition
-        case open
-    }
+    enum ImmersiveSpaceState { case closed, inTransition, open }
     var immersiveSpaceState = ImmersiveSpaceState.closed
+    let portal = PortalSceneController()
+    var immersiveEffectsEnabled = false
+    var roomDimming = false
+    var lightingEmission = false
+    var spatialAudio = false
+    var message: String?
+    var disconnected = false
+    func disconnect() { disconnected = true }
 }
