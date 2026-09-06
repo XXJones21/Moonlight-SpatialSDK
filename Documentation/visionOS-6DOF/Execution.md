@@ -9,7 +9,7 @@ verification boxes are intentionally pending and must not be reported as passing
 | Phase | Source work | Verification |
 |---|---|---|
 | 0 | Dependency pins, reproducible setup, shared scheme | Deferred |
-| 1 | Pending | Deferred |
+| 1 | Geometry, state/reset protocol, ordered relay, synthetic sender and fixtures authored; source review complete | Deferred |
 | 2 | Pending | Deferred |
 | 3 | Pending | Deferred |
 | 4 | Pending | Deferred |

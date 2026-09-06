@@ -4,6 +4,9 @@
 |---|---|---|
 | UEVR | https://github.com/elliotttate/UEVR-6DOF-Window (agent/6dof-window-mode) | fb31341e860b15e116a15123820c95f044ff0a0f |
 | Moonlight vision donor | https://github.com/RikuKunMS2/moonlight-ios-vision (vision-testflight) | fb349830ac980ab73dbd653b5b9c813c3b249198 |
+| VRto3D reference | https://github.com/oneup03/VRto3D | edac2b23a982f3d51d7cac6674131f032d9f6515 |
+| Moonlight C core | https://github.com/moonlight-stream/moonlight-common-c | a517f7cbcaf37ae0003979382d4e6348f37b8b2d |
+| ENet | https://github.com/cgutman/enet | c6bb0e50118d08252eee308de8412751218442d6 |
 
 Reference checkouts live under ignored External/. UEVR changes are exported as
 a patch for other machines; do not depend on an unpublished local checkout.
