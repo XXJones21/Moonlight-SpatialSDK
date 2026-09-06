@@ -20,13 +20,15 @@ import Observation
     private var client: MLClient?
     init() {
         if let data = UserDefaults.standard.data(forKey: "portal.servers"), let stored = try? JSONDecoder().decode([SavedServer].self, from: data) { servers = stored }
-        if let first = servers.first { selected = first; host = first.host; port = String(first.port); appID = first.appID }
+        let savedID = UserDefaults.standard.string(forKey: "portal.selectedServer")
+        if let first = servers.first(where: { $0.id == savedID }) ?? servers.first { selected = first; host = first.host; port = String(first.port); appID = first.appID }
     }
     var paired: Bool { selected.map { PortalKeychain.data(for: $0.address) != nil } ?? false }
     var launchServer: SavedServer? { guard var selected, paired else { return nil }; selected.appID = appID; return selected }
     func select(_ server: SavedServer) {
         guard !busy else { return }
         request = UUID(); selected = server; host = server.host; port = String(server.port); appID = server.appID
+        UserDefaults.standard.set(server.id, forKey: "portal.selectedServer")
         applications = []; appListError = nil; loadApplications()
     }
     func connectToServer() {
@@ -63,6 +65,7 @@ import Observation
         client.inspect(address: server.address, certificate: PortalKeychain.data(for: server.address))
     }
     private func finishPairing(_ server: SavedServer) {
+        UserDefaults.standard.set(server.id, forKey: "portal.selectedServer")
         busy = false; showPIN = false; status = "Paired! Click Connect to continue"
         if let index = servers.firstIndex(where: { $0.id == server.id }) { servers[index] = server } else { servers.append(server) }
         saveServers(); loadApplications()
@@ -87,6 +90,7 @@ import Observation
             self.loadingApplications = false
             if name == "apps", let apps = payload["apps"] as? [[String: String]] {
                 self.applications = apps.compactMap { guard let id = $0["id"], let name = $0["name"] else { return nil }; return AppChoice(id: id, name: name) }.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+                if !self.applications.contains(where: { $0.id == self.appID }), let first = self.applications.first { self.appID = first.id }
                 self.appListError = nil
             } else { self.appListError = payload["message"] as? String ?? "Application list failed" }
         } }

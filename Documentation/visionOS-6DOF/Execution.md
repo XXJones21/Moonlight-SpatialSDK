@@ -14,7 +14,7 @@ verification boxes are intentionally pending and must not be reported as passing
 | 3 | Mixed immersive portal, tracked physical geometry, gestures, preview stereo, validated pose sender authored; recovery/encoding source review addressed | Deferred |
 | 4 | Pinned Moonlight source import, Xcode dependency wiring, pairing/settings UI, decoder/audio/gamepad, complete session teardown authored; source review fixes applied | Deferred |
 | 5 | Tracking/video loop, strict status parsing, decoded eye metadata gate/crop, manipulation revisions and generation-safe recovery authored | Deferred |
-| 6 | Pending | Deferred |
+| 6 | Quest parity controls/settings, capability feedback, recovery UI, persisted effects/calibration, audio positioning, lighting and Mac onboarding authored | Deferred |
 
 Preserve unrelated Quality-of-Life-Improvements.md, multi-display plan and
 MyApplication changes. Commit only this investigation's files. No remote push.

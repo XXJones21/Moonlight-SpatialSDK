@@ -22,6 +22,18 @@ static NSData* key = nil;
 static NSData* cert = nil;
 static NSData* p12 = nil;
 
++ (NSString*) clientUniqueID {
+    // Derive the protocol UID from the persistent public certificate. Resetting
+    // client identity therefore resets both certificate and UID atomically.
+    NSData *certificate = [self readCertFromFile];
+    if (!certificate) return nil;
+    unsigned char digest[SHA256_DIGEST_LENGTH];
+    SHA256(certificate.bytes, certificate.length, digest);
+    NSMutableString *identifier = [NSMutableString stringWithCapacity:16];
+    for (int i=0; i<8; ++i) [identifier appendFormat:@"%02X", digest[i]];
+    return identifier;
+}
+
 - (NSData*) createAESKeyFromSaltSHA1:(NSData*)saltedPIN {
     return [[self SHA1HashData:saltedPIN] subdataWithRange:NSMakeRange(0, 16)];
 }

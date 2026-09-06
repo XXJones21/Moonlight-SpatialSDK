@@ -10,6 +10,12 @@ import Observation
     var statistics = "Not streaming"
     var activeConfiguration: StreamPreferences?
     var negotiatedWidth = 0, negotiatedHeight = 0
+    var negotiatedHDR: Bool?
+    var dynamicRangeDescription: String {
+        guard let requested = activeConfiguration else { return "Not streaming" }
+        guard let negotiatedHDR else { return requested.hdr ? "HDR requested; awaiting result" : "SDR requested" }
+        return negotiatedHDR ? "HDR active" : (requested.hdr ? "HDR unavailable; streaming SDR" : "SDR active")
+    }
     var videoTexture: TextureResource?
     let gamepad = PortalGamepad()
     var onTexture: ((TextureResource, Int, Int) -> Void)?
@@ -59,6 +65,7 @@ import Observation
             config.colorRange = preferences.fullRange ? 1 : 0; config.colorSpace = preferences.hdr ? 2 : 1
             config.serverCert = certificate; config.gamepadMask = 1; config.useFramePacing = false
             self.client = client; self.decoder = decoder; self.activeConfiguration = preferences
+            negotiatedHDR = nil
             state = .connecting; stage = "Connecting"
             client.start(config: config, renderer: decoder)
             statsTask = Task { [weak self] in
@@ -87,6 +94,7 @@ import Observation
             // inside the shared task prevents a reconnect from racing another waiter's cleanup.
             self.client = nil; self.decoder = nil; self.videoTexture = nil
             self.activeConfiguration = nil; self.negotiatedWidth = 0; self.negotiatedHeight = 0
+            self.negotiatedHDR = nil
             self.statistics = "Not streaming"; self.state = .idle; self.stopping = nil
         }
         stopping = stopTask
@@ -97,7 +105,9 @@ import Observation
         case "stage": stage = payload["message"] as? String ?? "Connecting"
         case "started": stage = "Connected"; onStarted?()
         case "video": state = .streaming
-        case "hdr": decoder?.setHdrMode(payload["enabled"] as? Bool ?? false)
+        case "hdr":
+            let enabled = payload["enabled"] as? Bool ?? false
+            negotiatedHDR = enabled; decoder?.setHdrMode(enabled)
         case "rumble": gamepad.rumble(low: (payload["low"] as? NSNumber)?.doubleValue ?? 0, high: (payload["high"] as? NSNumber)?.doubleValue ?? 0)
         case "error", "terminated":
             let message = payload["message"] as? String ?? "Connection ended (\(payload["code"] ?? "unknown"))"

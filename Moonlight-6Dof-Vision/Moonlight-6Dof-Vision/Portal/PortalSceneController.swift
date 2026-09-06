@@ -8,6 +8,9 @@ final class PortalSceneController {
     let root = Entity()
     let surface = ModelEntity()
     let shelf = Entity()
+    let backdrop = ModelEntity()
+    private let glow = ModelEntity()
+    private let light = PointLight()
     var width: Float = 0.7 * 16 / 9
     var height: Float = 0.7
     var revision: UInt64 = 1
@@ -19,9 +22,11 @@ final class PortalSceneController {
     var shelfVisible = true
     var cornersVisible = true
     var manipulating = false
+    private var shelfHovered = false
     var deviceToHead = SIMD3<Float>.zero
     var eyeSeparation: Double = 0.064
     var onSample: ((simd_float4x4, Bool, UInt64, UInt64) -> Void)?
+    var onHeadSample: ((simd_float4x4) -> Void)?
     var onEpoch: ((UInt64, UInt64) -> Void)?
     var onGeometryChanged: (() -> Void)?
     private var session: ARKitSession?
@@ -35,11 +40,21 @@ final class PortalSceneController {
     private var sizeStart: SIMD2<Float>?
     private var yawStart: simd_quatf?
     private var baseAspect: Float = 16 / 9
+    private var materialToken = UUID()
     private var stereoMaterial: ShaderGraphMaterial?
 
     init() {
         root.name = "PortalRoot"; surface.name = "PortalSurface"
         root.addChild(surface); root.addChild(shelf)
+        backdrop.name = "PortalBackdrop"
+        backdrop.model = ModelComponent(mesh: Self.mesh(width: width + 0.012, height: height + 0.012), materials: [UnlitMaterial(color: .darkGray)])
+        backdrop.position.z = -0.008
+        backdrop.components.set(InputTargetComponent())
+        backdrop.components.set(HoverEffectComponent())
+        root.addChild(backdrop)
+        glow.model = ModelComponent(mesh: Self.mesh(width: width + 0.08, height: height + 0.08), materials: [UnlitMaterial(color: .black)])
+        glow.position.z = -0.012; glow.isEnabled = false; root.addChild(glow)
+        light.position = [0, 0, 0.1]; light.light.attenuationRadius = 3; light.isEnabled = false; root.addChild(light)
         surface.components.set(InputTargetComponent())
         surface.components.set(HoverEffectComponent())
         for index in 0..<4 {
@@ -55,9 +70,10 @@ final class PortalSceneController {
     }
 
     func install(texture: TextureResource, isCurrent: @MainActor () -> Bool = { true }) async throws {
+        let token = UUID(); materialToken = token
         var material = try await ShaderGraphMaterial(named: "/Root/SBSMaterial", from: "SBSMaterial")
         try material.setParameter(name: "texture", value: .textureResource(texture))
-        guard isCurrent() else { return }
+        guard token == materialToken, isCurrent() else { return }
         stereoMaterial = material
         surface.model?.materials = [material]
     }
@@ -89,7 +105,7 @@ final class PortalSceneController {
     func tick() {
         let now = CACurrentMediaTime()
         if !manipulating {
-            shelfVisible = now < shelfUntil
+            shelfVisible = shelfHovered || now < shelfUntil
             cornersVisible = now < cornersUntil
         }
         shelf.isEnabled = shelfVisible && !manipulating
@@ -112,6 +128,7 @@ final class PortalSceneController {
         }
         if !trackingValid { revealControls(); trackingMessage = "Tracking active" }
         trackingValid = true; lastHead = head
+        onHeadSample?(head)
         onSample?(head, true, trackingEpoch, UInt64(now * 1_000_000_000))
     }
 
@@ -144,9 +161,18 @@ final class PortalSceneController {
         guard aspect.isFinite, aspect > 0, aspect != baseAspect else { return }
         baseAspect = aspect; resetSize()
     }
+    func calibrationChanged() { changed() }
+    func setLightingColor(_ rgb: SIMD3<Float>, enabled: Bool) {
+        let color = UIColor(red: CGFloat(rgb.x), green: CGFloat(rgb.y), blue: CGFloat(rgb.z), alpha: 1)
+        glow.model?.materials = [UnlitMaterial(color: color)]
+        glow.components.set(OpacityComponent(opacity: 0.25))
+        glow.isEnabled = enabled; light.isEnabled = enabled
+        light.light.color = color; light.light.intensity = 50
+    }
     func resetSize() { height = 0.7; width = min(10, max(0.5, height * baseAspect)); height = width / baseAspect; changed() }
     func revealControls() { shelfUntil = CACurrentMediaTime() + 3; cornersUntil = CACurrentMediaTime() + 1.5; shelfVisible = true; cornersVisible = true }
     func keepShelfVisible() { shelfUntil = CACurrentMediaTime() + 3; shelfVisible = true }
+    func shelfHover(_ active: Bool) { shelfHovered = active; keepShelfVisible() }
 
     func drag(_ value: EntityTargetValue<DragGesture.Value>) {
         guard yawStart == nil else { return }
@@ -181,7 +207,13 @@ final class PortalSceneController {
     private func updateGeometry() {
         surface.model?.mesh = Self.mesh(width: width, height: height)
         surface.components.set(CollisionComponent(shapes: [.generateBox(size: [width, height, 0.015])]))
+        backdrop.model?.mesh = Self.mesh(width: width + 0.012, height: height + 0.012)
+        backdrop.components.set(CollisionComponent(shapes: [.generateBox(size: [width + 0.012, height + 0.012, 0.015])]))
+        glow.model?.mesh = Self.mesh(width: width + 0.08, height: height + 0.08)
         for (index, corner) in corners.enumerated() {
+            corner.scale = SIMD3(repeating: width / (0.7 * baseAspect))
+            // Retain a 10 cm physical hit target when the visible handle shrinks.
+            corner.components.set(CollisionComponent(shapes: [.generateBox(size: SIMD3(repeating: max(0.10, 0.10 / corner.scale.x)))]))
             corner.position = [index % 2 == 0 ? -width / 2 : width / 2, index < 2 ? -height / 2 : height / 2, 0.015]
         }
         shelf.position = [0, -height / 2 - 0.06, 0.015]

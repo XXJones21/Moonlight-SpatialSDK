@@ -39,7 +39,8 @@
         [self emit:@"host" payload:@{@"name":[response getStringTag:@"hostname"]?:address,
             @"paired":@([[response getStringTag:@"PairStatus"] isEqualToString:@"1"] && certificate!=nil),
             @"httpsPort":@([[response getStringTag:@"HttpsPort"] intValue]?:47984),
-            @"codecs":@([[response getStringTag:@"ServerCodecModeSupport"] intValue])}];
+            @"codecs":@([[response getStringTag:@"ServerCodecModeSupport"] longLongValue]),
+            @"serverInfoXML":response.data?:[NSData data]}];
     }];
 }
 - (void)pair:(NSString *)address certificate:(NSData *)certificate {
@@ -52,6 +53,7 @@
 }
 - (void)apps:(NSString *)address certificate:(NSData *)certificate {
     [_operations addOperationWithBlock:^{
+        if(![self prepareIdentity]) return;
         HttpManager *http=[[HttpManager alloc] initWithAddress:address httpsPort:0 serverCert:certificate];
         AppListResponse *response=[AppListResponse new];
         [http executeRequestSynchronously:[HttpRequest requestForResponse:response withUrlRequest:[http newAppListRequest]]];

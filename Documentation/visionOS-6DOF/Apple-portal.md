@@ -28,6 +28,10 @@ Sources:
 
 The associated-window sample intentionally couples dismissal; this app uses
 separate lifetime ownership to preserve the Quest Settings semantics.
+Settings uses a value-based WindowGroup with the stable value `main`, so repeated
+open requests reuse the same window. Return to Home opens it before dismissing
+the space. See [WindowGroup](https://developer.apple.com/documentation/swiftui/windowgroup)
+and [presenting windows and spaces](https://developer.apple.com/documentation/visionos/presenting-windows-and-spaces).
 Build, gesture feel, stereo eye order, UV orientation, tracking recovery, SDK
 availability and hardware operation are **unverified**, deferred by user request.
 

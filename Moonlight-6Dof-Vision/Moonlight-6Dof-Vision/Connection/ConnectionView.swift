@@ -6,8 +6,8 @@ struct ConnectionView: View {
     @State private var showServer = false
     @State private var showOptions = false
     @State private var showConfiguration = false
-    @State private var showCapabilities = false
     @State private var showEffects = false
+    @State private var showCalibration = false
 
     var body: some View {
         @Bindable var connection = app.connection
@@ -52,15 +52,19 @@ struct ConnectionView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Label(app.session.gamepad.name, systemImage: "gamecontroller")
                         if let config = app.session.activeConfiguration {
-                            Text("Resolution: \(app.session.negotiatedWidth) × \(app.session.negotiatedHeight)")
+                            Text("Per eye: \(app.session.negotiatedWidth / 2) × \(app.session.negotiatedHeight)")
+                            Text("SBS transport: \(config.encodedWidth) × \(config.encodedHeight)").foregroundStyle(.secondary)
                             Text("FPS: \(config.fps) requested")
                             Text("Audio: \(config.audio)")
+                            Text(app.session.dynamicRangeDescription)
                         } else { Text("Not streaming") }
                     }.font(.caption).frame(maxWidth: .infinity, alignment: .leading)
                 }
                 if showConfiguration { StreamConfigurationView(saved: connection.preferences, apply: connection.apply) }
                 if app.session.state != .idle {
                     Text(app.session.stage).foregroundStyle(.secondary)
+                    Text(app.coordinator.status).font(.caption).foregroundStyle(.secondary)
+                    DisclosureGroup("Connection Details") { Text(app.session.statistics).font(.caption.monospaced()).textSelection(.enabled) }
                     Button("Disconnect") { app.disconnect() }
                 }
                 if let message = app.message { Text(message).foregroundStyle(.orange).textSelection(.enabled) }
@@ -72,15 +76,22 @@ struct ConnectionView: View {
         .sheet(isPresented: $connection.showPIN) { PINSheet(pin: connection.pin ?? "") }
         .sheet(isPresented: $showOptions) {
             VStack(spacing: 12) {
-                Button("Configure Stream") { showConfiguration.toggle(); showOptions = false }
-                Button("Device Capabilities") { showOptions = false; showCapabilities = true }
-                Button("Reset Client Pairing", role: .destructive) { Task { await app.session.stop(); connection.resetPairing(); showOptions = false } }.disabled(connection.busy)
-                Button("Immersive Options") { showOptions = false; showEffects = true }
+                Button { showConfiguration.toggle(); showOptions = false } label: {
+                    VStack(alignment: .leading) { Text(showConfiguration ? "Hide Stream Configuration" : "Configure Stream"); Text("Device Capabilities").font(.caption).foregroundStyle(.secondary) }.frame(maxWidth: .infinity, alignment: .leading)
+                }
+                Button(role: .destructive) { Task { await app.coordinator.stop(); connection.resetPairing(); showOptions = false } } label: {
+                    VStack(alignment: .leading) { Text("Reset Client Pairing"); Text("Clear cert & UID").font(.caption).foregroundStyle(.secondary) }.frame(maxWidth: .infinity, alignment: .leading)
+                }.disabled(connection.busy)
+                Button { showOptions = false; showEffects = true } label: {
+                    VStack(alignment: .leading) { Text("Immersive Options"); Text("Enable immersive features").font(.caption).foregroundStyle(.secondary) }.frame(maxWidth: .infinity, alignment: .leading)
+                }
+                DisclosureGroup("Advanced") { Button("Portal Calibration") { showOptions = false; showCalibration = true } }
                 Button("Cancel", role: .cancel) { showOptions = false }
             }.buttonStyle(.bordered).padding(24)
         }
-        .sheet(isPresented: $showCapabilities) { DeviceCapabilitiesView() }
         .sheet(isPresented: $showEffects) { ImmersiveOptionsView() }
+        .sheet(isPresented: $showCalibration) { PortalCalibrationView() }
+        .task { if connection.paired { connection.loadApplications() } }
     }
     private func launch() {
         guard let server = app.connection.launchServer else { return }

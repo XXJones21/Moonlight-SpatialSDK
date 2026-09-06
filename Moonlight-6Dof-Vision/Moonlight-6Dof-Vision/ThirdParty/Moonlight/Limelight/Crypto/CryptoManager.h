@@ -10,6 +10,7 @@
 
 + (void) generateKeyPairUsingSSL;
 + (void) resetIdentity;
++ (NSString*) clientUniqueID;
 + (NSData*) readCertFromFile;
 + (NSData*) readKeyFromFile;
 + (NSData*) readP12FromFile;

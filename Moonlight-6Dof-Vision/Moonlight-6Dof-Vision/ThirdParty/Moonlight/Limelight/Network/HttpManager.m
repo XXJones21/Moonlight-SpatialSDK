@@ -52,9 +52,8 @@
 
 - (id) initWithAddress:(NSString*) hostAddressPortString httpsPort:(unsigned short)httpsPort serverCert:(NSData*) serverCert {
     self = [super init];
-    // Use the same UID for all Moonlight clients to allow them
-    // quit games started on another Moonlight client.
-    _uniqueId = @"0123456789ABCDEF";
+    _uniqueId = [CryptoManager clientUniqueID];
+    if (!_uniqueId) return nil;
     _deviceName = deviceName;
     _serverCert = serverCert;
     
