@@ -19,3 +19,11 @@ UEVR's root LICENSE says Copyright (c) 2022-2025 praydog, All rights reserved;
 do not assume it is permissively licensed. The Moonlight donor is GPL-3.0.
 VRto3D uses LGPL-3.0. This branch is an implementation
 checkout, not a distribution or an assertion of license compatibility.
+
+Phase 2 authored fork commit: `fd126ff1f31c292ed4296d693884ce688a7e5005` on the local
+`visionos-portal` branch. Complete base-to-authored patch and its SHA256/source-tree
+manifest are in `patches/UEVR-portal.patch` and `patches/UEVR-portal.json`.
+Use `tools/visionos-portal/bootstrap_uevr.py` for source-only reproduction.
+This records source authorship; no build, tests, installed runtime or capture
+validation was performed. PortalCore is supplied through an explicit absolute
+CMake path and normalized content hashes recorded in the fork.

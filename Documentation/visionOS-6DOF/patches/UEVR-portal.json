@@ -1,0 +1,10 @@
+{
+  "repository": "https://github.com/elliotttate/UEVR-6DOF-Window",
+  "baseCommit": "fb31341e860b15e116a15123820c95f044ff0a0f",
+  "authoredCommit": "fd126ff1f31c292ed4296d693884ce688a7e5005",
+  "authoredTree": "9016e66d4813883c315c6fddc5ee477202a1b9c3",
+  "patch": "UEVR-portal.patch",
+  "patchSHA256": "0a5317384ae83a8e9a7bd11b21780e36b5f742ad8bb16936e65a519742041550",
+  "validation": "source authored; build, tests and runtime deferred",
+  "portalCore": "Phase1 0b7f02d plus Phase2 FrameMetadata.hpp; normalized SHA256 pins in cmake/PortalCore.cmake"
+}

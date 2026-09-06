@@ -1,0 +1,38 @@
+{
+  "state": "not executed; source authoring only",
+  "uevrBase": "fb31341e860b15e116a15123820c95f044ff0a0f",
+  "runtimeIntent": "OpenVR",
+  "stereoIntent": "Native Stereo",
+  "baselineCaptureIntent": {
+    "width": 3840,
+    "height": 1080,
+    "layout": "full SBS",
+    "fps": 60
+  },
+  "portalDefaultIntent": {
+    "eyeWidth": 1280,
+    "eyeHeight": 720,
+    "captureWidth": 2560,
+    "captureHeight": 736,
+    "fps": 60
+  },
+  "portalBenchIntent": {
+    "eyeWidth": 1920,
+    "eyeHeight": 1080,
+    "captureWidth": 3840,
+    "captureHeight": 1096,
+    "fps": 60
+  },
+  "measured": {
+    "game": null,
+    "gameProfile": null,
+    "steamVRVersion": null,
+    "VRto3DInstalledBuild": null,
+    "sunshineVersion": null,
+    "displayMode": null,
+    "driverConfigurationKeys": null,
+    "captureFiles": [],
+    "trackingCSV": null
+  },
+  "checksPassed": []
+}

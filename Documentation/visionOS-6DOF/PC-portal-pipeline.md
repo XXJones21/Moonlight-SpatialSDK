@@ -1,0 +1,50 @@
+# PC off-axis portal source handoff
+
+**Authored, unbuilt, untested, and not runtime validated.** User direction deferred installation, CMake generation, compilation, automated tests, capture experiments, and debugging. Phase 2 runtime gates remain open. Private UESDK access is required for a future full UEVR build.
+
+The authored initial route is OpenVR lifecycle plus a direct pre-compositor SBS window. VRto3D projection preservation is unknown; the code does not require an unproven compositor path for portal pixels. The runtime still receives regular eye submissions for timing/lifecycle, but those submissions are not the portal capture source.
+
+## Source acquisition
+
+The pinned base and exact authored commit/tree/patch SHA256 are in patches/UEVR-portal.json. The binary-safe patch contains the complete delta from fb31341e860b15e116a15123820c95f044ff0a0f. Use tools/visionos-portal/bootstrap_uevr.py on a clean base checkout to apply the patch; --clone is explicit source-only network acquisition. It does not install submodules, generate CMake, build, test, inject, or start runtime services. Patch application stages the authored tree but makes no commit. Use export_uevr_patch.py only after committing a deliberate update in the external fork.
+
+Future configuration must pass an absolute -DPORTAL_CORE_SOURCE_DIR pointing to this repo's PortalCore. cmake/PortalCore.cmake pins normalized SHA256 of the four phase 1 geometry/protocol files and the phase 2 metadata header, and disables standalone core tests in the injected backend build. No mutable network reference supplies the math/protocol library. Both cmake.toml and generated CMakeLists.txt were updated manually because generation is deferred; regenerate and inspect the delta during the build handoff.
+
+## Supported initial configuration
+
+Use the game's ordinary camera/gamepad controls, OpenVR, and Native Stereo. PortalOutput defaults off. It is independent of the old WindowMode Enabled toggle. Both WindowMode color masks and its CutsceneComfort transient mask are bypassed while PortalOutput is on; rounding and feathering belong to the final receiver material.
+
+Portal mode fails closed with OpenXR, AFR/sequential rendering, 2D-screen mode, extreme compatibility, scene-view compatibility, native stereo fix, split-screen compatibility, stereo emulation, roomscale, head/controller aiming, or decoupled pitch. The stereo override returns before mod aim/roomscale callbacks, preserving the incoming game's camera. Independent third-party camera modifications and game-specific native VR behavior are outside the initial supported profile and need a separate review. Disabling PortalOutput restores the original branches and hides the direct window.
+
+The source supports single-sample, one-slice RGBA8/BGRA8 textures (including compatible typeless/sRGB resources); HDR/10-bit/FP16, MSAA, arrays, and other formats produce outputUnavailable. There is no silent conversion. Eye content aspect must agree with accepted geometry within 0.5 percent.
+
+The 6DOF Window sidebar includes Portal Output, capture diagnostics, eye content width/height and desktop X/Y coordinates. Width/height default to 1280/720 and override OpenVR's portal render target size; benchmark at 1920/1080. These dimensions follow the source texture allocation rather than stretching a copied image. Source sizes must match the client session choice. Choose the capture display's physical desktop origin in X/Y and use a matching display mode, 2560x736 or 3840x1096. Set physical display scaling to 100 percent and Sunshine capture/encoding dimensions to that exact size, full SBS, 60 fps requested. Resolution negotiation and display-mode support are still unmeasured.
+
+## Coherence and coordinate ownership
+
+PortalSession binds exclusively to 127.0.0.1:4244, accepts only 127.0.0.1:4243 state/reset packets, and sends status back from the same bound socket. The worker performs parsing/order/session/epoch acceptance and retains the steady-clock 250 ms lease. Rendering only copies a snapshot under a short mutex; it never waits for UDP I/O. Status cannot remain healthy indefinitely when presentation stops.
+
+OpenVR::update_poses normalizes its engine frame identifier before PortalFrame::latch. Repeated latch requests for that ID return the same immutable shared frame. The 64-slot cache records exact IDs (no modulo-only reuse); view and projection callbacks mark both eyes against that ID. Direct output requires the queued OpenVR render frame, all four observations, a valid frame, and a live matching session/epoch. Missing association drops output; it does not stamp the newest state. Debug logs identify latch, view, projection, output, eye, sequence, and revision. The sidebar displays eye origins and frusta.
+
+At the first accepted state in an epoch, runtimeFromExternal aligns external head to the unmodified OpenVR head. A separate fixed game basis captures the initial head position and initial portal orientation. Subsequent portal moves/resizes only change its rectangle and view direction; they never reset the game/player origin. External eye positions include calibrated separation rotated by the physical head. The view looks along the portal normal, not the head orientation. External relative positions map (-z,x,y) to Unreal (+X forward,+Y right,+Z up); incoming game camera rotation is composed with portal orientation and its position retained. Physical offsets multiply world_to_meters and the UEVR world scale once. Head rotation only affects the physical eye offsets. Near distance read from the engine projection is already in Unreal units and is not multiplied again. Both float and double projection paths write PortalCore's asymmetric reversed-Z matrix without symmetric FOV clamps.
+
+## Pose consumer trace
+
+- OpenVR render/game HMD poses and pose_queue are populated with the latched mapped portal-aligned head, with zero velocity. Runtime identity, controller poses, timing and lifecycle remain OpenVR-owned. Explicit get_hmd_transform(frameID) looks up the exact portal frame instead of resampling tracking.
+- VR eye transform/offset and projection getters use the same game frame, with calibrated physical-eye offsets expressed in the portal-aligned head basis. Raw/current OpenVR head getters consume the replaced queue. The compositor submit pose is taken from its queued frame.
+- FFakeStereoRenderingHook's Native Stereo view/projection branches bypass standing-origin subtraction, head aiming, roomscale pawn movement, snapturn and compatibility paths. Baseline wants_reset_origin is suppressed while portal mode owns calibration. Incoming gamepad camera transforms remain intact.
+- IXRTrackingSystemHook reports identity/zero for engine-relative HMD camera data/pose and player camera updates, and skips head-rotation/aim adjustment. That explicitly prevents a native camera extension applying an additional tracking delta before the stereo hook. Internal explicit runtime pose consumers still have the full latched mapped pose. Portal mode avoids the baseline relative-transform code patch.
+- View-extension render/RHI enqueue hooks select the render pose frame without receiving UDP data. Native stereo/sceneview fixes that rebuild views are rejected; their late updates are not asserted compatible.
+- WindowMode and D3D11 compatibility reprojection shaders are bypassed. Runtime OverlayComponent and separate UI/controller attachments are not the captured portal scene. UObjectHook's view callbacks are bypassed by the dedicated stereo branch. External plugins using public pose/standing-origin APIs need individual validation before inclusion.
+
+## Direct output and resource ownership
+
+D3D11/D3D12 call PortalOutput with the engine's doublewide scene resource before compositor submission. The new HWND is registered with UEVR WindowFilter before its first Present, preventing recursive interception as the game swapchain. Copying that entire resource pairs both Native Stereo eyes without accumulating independent eye textures. The output appends a 16-row metadata strip with no CPU scene readback. D3D11 retains source/backbuffer/strip/diagnostic textures until an event query completes; D3D12 uses a direct command queue, explicit source/backbuffer transitions, upload buffers, command allocators and per-slot fence values. Resources cannot be reused/recreated before GPU completion. Busy slots fail closed. Device/format/size changes replace the swapchain after completion; removed devices are handled as failed output. Presentation success and source-frame metadata are telemetry only, not evidence that Sunshine captured correct pixels.
+
+Optional diagnostics replace the source with two synthetic labeled images, four numbered corners, checkerboard panels at 1.25/2.5/3.75 meters, frame ID and geometry revision. Rays use the latched per-eye frusta and relative portal orientation. Both eyes then pass through the same direct GPU copy/metadata route. The CPU diagnostic rasterizer is intentional fixture generation, not game image readback, and must be off for performance work.
+
+Scene-rendered HUD remains in the copied color target. Separate Slate/runtime UI and depth swapchains are not composited into the direct window. Configure game menus and UEVR from the normal Windows desktop before enabling PortalOutput. Turn PortalOutput off to change a menu rendered exclusively into the separate UI target, then re-enable once back in the game. This is the initial usable desktop configuration path; games that require a separate UI overlay continuously during gameplay need deliberate composition before they qualify as supported portal profiles.
+
+## Deferred acceptance
+
+See evidence/PC-baseline.md and evidence/Projection-and-capture.md. No gate is marked passed. In particular, require instrumented view order, same-frame mutation between left/right callbacks, correct portal corner projection and gamepad movement, clean D3D11/D3D12 debug-layer runs, stale/reset/reconnect drops, resize/device-recreation recovery, and Sunshine pixel/tag decoding on the actual deployment before comfort tuning.

@@ -10,7 +10,7 @@ verification boxes are intentionally pending and must not be reported as passing
 |---|---|---|
 | 0 | Dependency pins, reproducible setup, shared scheme | Deferred |
 | 1 | Geometry, state/reset protocol, ordered relay, synthetic sender and fixtures authored; source review complete | Deferred |
-| 2 | Pending | Deferred |
+| 2 | OpenVR portal hooks, frame-associated direct D3D11/D3D12 SBS output, metadata, reproducible fork patch authored | Deferred |
 | 3 | Pending | Deferred |
 | 4 | Pending | Deferred |
 | 5 | Pending | Deferred |

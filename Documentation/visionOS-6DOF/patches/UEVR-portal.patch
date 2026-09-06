@@ -1,0 +1,1051 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a3dcd83148480be583a4b5901da427537292ae69..71d09dc06304b1cd34cabb415b21c579c1201567 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -59,6 +59,7 @@ endif()
+ 
+ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+ 
++include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/PortalCore.cmake")
+ add_subdirectory(dependencies/submodules/UESDK)
+ 
+ include(FetchContent)
+@@ -738,6 +739,9 @@ list(APPEND uevr_SOURCES
+ 	"src/mods/UObjectHook.cpp"
+ 	"src/mods/VR.cpp"
+ 	"src/mods/WindowMode.cpp"
++	"src/mods/portal/PortalSession.cpp"
++	"src/mods/portal/PortalFrame.cpp"
++	"src/mods/portal/PortalOutput.cpp"
+ 	"src/mods/bindings/FS.cpp"
+ 	"src/mods/bindings/ImGui.cpp"
+ 	"src/mods/bindings/Json.cpp"
+@@ -782,6 +786,10 @@ list(APPEND uevr_SOURCES
+ 	"src/mods/UObjectHook.hpp"
+ 	"src/mods/VR.hpp"
+ 	"src/mods/WindowMode.hpp"
++	"src/mods/portal/PortalSession.hpp"
++	"src/mods/portal/PortalFrame.hpp"
++	"src/mods/portal/PortalOutput.hpp"
++	"src/mods/portal/PortalIntegration.hpp"
+ 	"src/mods/bindings/FS.hpp"
+ 	"src/mods/bindings/ImGui.hpp"
+ 	"src/mods/bindings/Json.hpp"
+@@ -847,6 +855,9 @@ target_include_directories(uevr PUBLIC
+ )
+ 
+ target_link_libraries(uevr PUBLIC
++	portal_core
++	ws2_32
++	dxgi
+ 	shlwapi
+ 	d3d11
+ 	d3d12
+diff --git a/cmake.toml b/cmake.toml
+index 0ded84a7735ca35508706b207234820d4dbdffe8..ffe1ea62adb1bb841974894214ac41003c403652 100644
+--- a/cmake.toml
++++ b/cmake.toml
+@@ -35,6 +35,7 @@ endif()
+ 
+ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+ 
++include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/PortalCore.cmake")
+ add_subdirectory(dependencies/submodules/UESDK)
+ """
+ 
+@@ -241,6 +242,9 @@ compile-options = ["/GS-", "/bigobj", "/EHa", "/MP"]
+ compile-features = ["cxx_std_23"]
+ compile-definitions = []
+ link-libraries = [
++    "portal_core",
++    "ws2_32",
++    "dxgi",
+     "shlwapi",
+     "d3d11",
+     "d3d12",
+diff --git a/cmake/PortalCore.cmake b/cmake/PortalCore.cmake
+new file mode 100644
+index 0000000000000000000000000000000000000000..f09c59805f19dc034dbb840a8f12f5e99be86232
+--- /dev/null
++++ b/cmake/PortalCore.cmake
+@@ -0,0 +1,37 @@
++# PortalCore phase 1 contract + phase 2 frame metadata; authored, not configured.
++set(PORTAL_CORE_SOURCE_DIR "" CACHE PATH "Absolute path to Moonlight-SpatialSDK/PortalCore")
++if(NOT IS_ABSOLUTE "${PORTAL_CORE_SOURCE_DIR}")
++  message(FATAL_ERROR "Set -DPORTAL_CORE_SOURCE_DIR to the PortalCore source directory")
++endif()
++file(READ "${PORTAL_CORE_SOURCE_DIR}/include/portal/Geometry.hpp" portal_source)
++string(REPLACE "\r\n" "\n" portal_source "${portal_source}")
++string(SHA256 portal_hash "${portal_source}")
++if(NOT portal_hash STREQUAL "2185c7926536b0ce9023439196767642bd85a1d4fdc32d294f862fdff2189f43")
++  message(FATAL_ERROR "PortalCore contract pin mismatch: include/portal/Geometry.hpp")
++endif()
++file(READ "${PORTAL_CORE_SOURCE_DIR}/include/portal/Protocol.hpp" portal_source)
++string(REPLACE "\r\n" "\n" portal_source "${portal_source}")
++string(SHA256 portal_hash "${portal_source}")
++if(NOT portal_hash STREQUAL "fe1218aacb44386ef9349fab399d7ec9c91720b370aebddef92f002c60465e71")
++  message(FATAL_ERROR "PortalCore contract pin mismatch: include/portal/Protocol.hpp")
++endif()
++file(READ "${PORTAL_CORE_SOURCE_DIR}/src/Geometry.cpp" portal_source)
++string(REPLACE "\r\n" "\n" portal_source "${portal_source}")
++string(SHA256 portal_hash "${portal_source}")
++if(NOT portal_hash STREQUAL "e713864a3c873c271d6c414958a9be26284bffa878182c4b3d3e7d2565b70aba")
++  message(FATAL_ERROR "PortalCore contract pin mismatch: src/Geometry.cpp")
++endif()
++file(READ "${PORTAL_CORE_SOURCE_DIR}/src/Protocol.cpp" portal_source)
++string(REPLACE "\r\n" "\n" portal_source "${portal_source}")
++string(SHA256 portal_hash "${portal_source}")
++if(NOT portal_hash STREQUAL "815e2fb5e0b0a5f4412334d21ddcb6f6d2691a511d3d689f44f36f1967f9972f")
++  message(FATAL_ERROR "PortalCore contract pin mismatch: src/Protocol.cpp")
++endif()
++file(READ "${PORTAL_CORE_SOURCE_DIR}/include/portal/FrameMetadata.hpp" portal_source)
++string(REPLACE "\r\n" "\n" portal_source "${portal_source}")
++string(SHA256 portal_hash "${portal_source}")
++if(NOT portal_hash STREQUAL "e98928ec2b022719cb366812cb364139f22a021a3067c046926c5aaa4a083987")
++  message(FATAL_ERROR "PortalCore contract pin mismatch: include/portal/FrameMetadata.hpp")
++endif()
++set(PORTAL_BUILD_TESTS OFF CACHE BOOL "" FORCE)
++add_subdirectory("${PORTAL_CORE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/portal-core")
+diff --git a/src/mods/VR.cpp b/src/mods/VR.cpp
+index 0b5c53defe5c0c253235e8a4bc038e51c2e96cdc..b6cb5e936bf4e648e65f280338b64bb109dc03b1 100644
+--- a/src/mods/VR.cpp
++++ b/src/mods/VR.cpp
+@@ -24,6 +24,7 @@
+ #include "utility/Logging.hpp"
+ 
+ #include "VR.hpp"
++#include "portal/PortalIntegration.hpp"
+ 
+ std::shared_ptr<VR>& VR::get() {
+     //static std::shared_ptr<VR> instance = std::make_shared<VR>();
+@@ -1585,7 +1586,7 @@ void VR::update_hmd_state(bool from_view_extensions, uint32_t frame_count) {
+     // Update the poses used for the game
+     // If we used the data directly from the WaitGetPoses call, we would have to lock a different mutex and wait a long time
+     // This is because the WaitGetPoses call is blocking, and we don't want to block any game logic
+-    if (runtime->wants_reset_origin && runtime->ready() && runtime->got_first_valid_poses) {
++    if (!WindowMode::get()->portal_output_enabled() && runtime->wants_reset_origin && runtime->ready() && runtime->got_first_valid_poses) {
+         std::unique_lock _{ runtime->pose_mtx };
+         set_rotation_offset(glm::identity<glm::quat>());
+         m_standing_origin = get_position_unsafe(vr::k_unTrackedDeviceIndex_Hmd);
+@@ -2903,6 +2904,7 @@ Matrix4x4f VR::get_hmd_rotation(uint32_t frame_count) const {
+ }
+ 
+ Matrix4x4f VR::get_hmd_transform(uint32_t frame_count) const {
++    if(WindowMode::get()->portal_output_enabled()){const auto f=uevrportal::PortalFrame::find(frame_count);return f&&f->valid?uevrportal::matrix(f->runtimeHead):glm::identity<Matrix4x4f>();}
+     ZoneScopedN(__FUNCTION__);
+ 
+     if (get_runtime()->is_openvr()) {
+@@ -3001,6 +3003,7 @@ vr::HmdMatrix34_t VR::get_raw_transform(uint32_t index) const {
+ }
+ 
+ Vector4f VR::get_eye_offset(VRRuntime::Eye eye) const {
++    if(WindowMode::get()->portal_output_enabled())return uevrportal::eyeMatrix(static_cast<unsigned>(eye))[3];
+     ZoneScopedN(__FUNCTION__);
+ 
+     if (!is_hmd_active()) {
+@@ -3017,6 +3020,7 @@ Vector4f VR::get_eye_offset(VRRuntime::Eye eye) const {
+ }
+ 
+ Vector4f VR::get_current_offset() {
++    if(WindowMode::get()->portal_output_enabled())return uevrportal::eyeMatrix(m_frame_count % 2 == m_left_eye_interval?0:1)[3];
+     if (!is_hmd_active()) {
+         return Vector4f{};
+     }
+@@ -3033,6 +3037,7 @@ Vector4f VR::get_current_offset() {
+ }
+ 
+ Matrix4x4f VR::get_eye_transform(uint32_t index) {
++    if(WindowMode::get()->portal_output_enabled())return uevrportal::eyeMatrix(index);
+     ZoneScopedN(__FUNCTION__);
+ 
+     if (!is_hmd_active() || index > 2) {
+@@ -3045,6 +3050,7 @@ Matrix4x4f VR::get_eye_transform(uint32_t index) {
+ }
+ 
+ Matrix4x4f VR::get_current_eye_transform(bool flip) {
++    if(WindowMode::get()->portal_output_enabled())return uevrportal::eyeMatrix((m_frame_count % 2 == m_left_eye_interval)^flip?0:1);
+     if (!is_hmd_active()) {
+         return glm::identity<Matrix4x4f>();
+     }
+@@ -3061,6 +3067,7 @@ Matrix4x4f VR::get_current_eye_transform(bool flip) {
+ }
+ 
+ Matrix4x4f VR::get_projection_matrix(VRRuntime::Eye eye, bool flip) {
++    if(WindowMode::get()->portal_output_enabled())return uevrportal::projection(static_cast<unsigned>(eye)^unsigned(flip),m_nearz);
+     ZoneScopedN(__FUNCTION__);
+ 
+     if (!is_hmd_active()) {
+@@ -3077,6 +3084,7 @@ Matrix4x4f VR::get_projection_matrix(VRRuntime::Eye eye, bool flip) {
+ }
+ 
+ Matrix4x4f VR::get_current_projection_matrix(bool flip) {
++    if(WindowMode::get()->portal_output_enabled())return uevrportal::projection((m_frame_count % 2 == m_left_eye_interval)^flip?0:1,m_nearz);
+     if (!is_hmd_active()) {
+         return glm::identity<Matrix4x4f>();
+     }
+diff --git a/src/mods/WindowMode.cpp b/src/mods/WindowMode.cpp
+index 876b2345b54a3d155b06c0c756e7a76671a46dd3..94c5c88c4c625477b10299c3790a62dcd23a6474 100644
+--- a/src/mods/WindowMode.cpp
++++ b/src/mods/WindowMode.cpp
+@@ -10,6 +10,9 @@
+ #include <spdlog/spdlog.h>
+ 
+ #include "VR.hpp"
++#include "portal/PortalSession.hpp"
++#include "portal/PortalFrame.hpp"
++#include "portal/PortalOutput.hpp"
+ 
+ #pragma comment(lib, "d3dcompiler")
+ 
+@@ -240,7 +243,7 @@ WindowMode::WindowMode() {
+         "D3D11 constant buffers must be 16-byte aligned");
+     static_assert(sizeof(Constants) / sizeof(float) <= 64,
+         "D3D12 root constants must fit the 64-DWORD root signature limit");
+-    m_options = {*m_enabled, *m_lock_aspect, *m_plane_width, *m_plane_height,
++    m_options = {*m_portal_output, *m_portal_diagnostics, *m_portal_desktop_x, *m_portal_desktop_y, *m_portal_eye_width, *m_portal_eye_height, *m_enabled, *m_lock_aspect, *m_plane_width, *m_plane_height,
+         *m_anchor_distance, *m_feather, *m_corner_radius, *m_curvature,
+         *m_surround_red, *m_surround_green, *m_surround_blue, *m_opacity,
+         *m_external_bridge_available};
+@@ -258,6 +261,27 @@ void WindowMode::on_draw_sidebar_entry(std::string_view entry) {
+ 
+     ImGui::TextWrapped("Optional comfort view: places a physical flat or curved aperture in tracking space. The aperture stays where it was anchored while you move or turn your head.");
+     ImGui::Spacing();
++    if (m_portal_output->draw("Portal Output (external off-axis / direct SBS)")) {
++        uevrportal::PortalFrame::reset();
++        if(m_portal_output->value()) (void)uevrportal::PortalSession::get();
++        else uevrportal::PortalOutput::get().hide();
++    }
++    m_portal_diagnostics->draw("Portal capture diagnostics");
++    m_portal_desktop_x->draw("Portal display desktop X");
++    m_portal_desktop_y->draw("Portal display desktop Y");
++    m_portal_eye_width->draw("Portal eye content width");
++    m_portal_eye_height->draw("Portal eye content height");
++    ImGui::Text("Direct capture: %u x %u (includes 16 metadata rows)",portal_eye_width()*2,portal_eye_height()+16);
++    if(m_portal_output->value()) {
++        ImGui::TextWrapped("Source authored, unverified: OpenVR + Native Stereo only. Capture the UEVR Portal SBS window. Separate VR UI is configured on the normal desktop.");
++        const auto frame=uevrportal::PortalFrame::current();
++        if(frame){
++            ImGui::Text("Frame %llu / seq %llu / geometry %llu",frame->gameFrameID,frame->state.sequence,frame->state.geometryRevision);
++            ImGui::Text("%s",frame->error.c_str());
++            for(unsigned eye=0;eye<2;++eye){const auto p=frame->externalEyes[eye];const auto f=frame->frusta[eye];
++                ImGui::Text("Eye %u: %.3f %.3f %.3f | %.4f %.4f %.4f %.4f",eye,p.x,p.y,p.z,f.left,f.right,f.bottom,f.top);}
++        }
++    }
+     if (m_enabled->draw("Enable Room-Anchored 6DOF Window") && m_enabled->value()) {
+         request_recenter();
+     }
+@@ -674,6 +698,7 @@ ID3D11RenderTargetView* WindowMode::get_d3d11_rtv(ID3D11Device* device, ID3D11Te
+ 
+ bool WindowMode::draw_d3d11(ID3D11DeviceContext* context, ID3D11Texture2D* target,
+     ID3D11RenderTargetView* rtv, Layout layout) {
++    if (portal_output_enabled()) return false;
+     const auto settings = get_render_settings();
+     if (!update_enabled_state() || context == nullptr || target == nullptr ||
+         settings.opacity <= 0.001f) {
+@@ -870,6 +895,7 @@ bool WindowMode::ensure_d3d12_objects(ID3D12Device* device, DXGI_FORMAT format)
+ 
+ bool WindowMode::draw_d3d12(ID3D12GraphicsCommandList* command_list, ID3D12Resource* target,
+     D3D12_CPU_DESCRIPTOR_HANDLE rtv, Layout layout, D3D12_RESOURCE_STATES target_state) {
++    if (portal_output_enabled()) return false;
+     const auto settings = get_render_settings();
+     if (!update_enabled_state() || command_list == nullptr || target == nullptr ||
+         rtv.ptr == 0 || settings.opacity <= 0.001f) {
+diff --git a/src/mods/WindowMode.hpp b/src/mods/WindowMode.hpp
+index f60e8e4b01a65b86373eabfa7c484de5a2f24be5..1de929d35aedc9a849c6ddaa99026008cf29742d 100644
+--- a/src/mods/WindowMode.hpp
++++ b/src/mods/WindowMode.hpp
+@@ -58,6 +58,12 @@ public:
+     void on_draw_sidebar_entry(std::string_view entry) override;
+     void on_device_reset() override;
+     void request_recenter();
++    bool portal_output_enabled() const { return m_portal_output->value(); }
++    bool portal_diagnostics_enabled() const { return m_portal_diagnostics->value(); }
++    int portal_desktop_x() const { return static_cast<int>(m_portal_desktop_x->value()); }
++    int portal_desktop_y() const { return static_cast<int>(m_portal_desktop_y->value()); }
++    unsigned portal_eye_width() const { return static_cast<unsigned>(m_portal_eye_width->value()) & ~1u; }
++    unsigned portal_eye_height() const { return static_cast<unsigned>(m_portal_eye_height->value()) & ~1u; }
+     void apply_cutscene_comfort_state(std::string_view payload);
+     Status get_status() const;
+ 
+@@ -128,6 +134,12 @@ private:
+     void reset_d3d11();
+     void reset_d3d12();
+ 
++    const ModSlider::Ptr m_portal_desktop_x{ModSlider::create(generate_name("PortalDesktopX"), -16384.f, 16384.f, 0.f)};
++    const ModSlider::Ptr m_portal_desktop_y{ModSlider::create(generate_name("PortalDesktopY"), -16384.f, 16384.f, 0.f)};
++    const ModSlider::Ptr m_portal_eye_width{ModSlider::create(generate_name("PortalEyeWidth"), 352.f, 3840.f, 1280.f)};
++    const ModSlider::Ptr m_portal_eye_height{ModSlider::create(generate_name("PortalEyeHeight"), 240.f, 2160.f, 720.f)};
++    const ModToggle::Ptr m_portal_output{ModToggle::create(generate_name("PortalOutput"), false)};
++    const ModToggle::Ptr m_portal_diagnostics{ModToggle::create(generate_name("PortalDiagnostics"), false)};
+     const ModToggle::Ptr m_enabled{ModToggle::create(generate_name("Enabled"), false)};
+     const ModToggle::Ptr m_lock_aspect{ModToggle::create(generate_name("LockAspect"), false)};
+     const ModSlider::Ptr m_plane_width{ModSlider::create(generate_name("PlaneWidth"), 0.1f, 12.0f, 2.4f)};
+diff --git a/src/mods/portal/PortalFrame.cpp b/src/mods/portal/PortalFrame.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..94380eddcd7401501b0783f184be03818a9d8525
+--- /dev/null
++++ b/src/mods/portal/PortalFrame.cpp
+@@ -0,0 +1,67 @@
++#include "PortalFrame.hpp"
++#include "PortalSession.hpp"
++#include "../WindowMode.hpp"
++#include "../VR.hpp"
++#include <spdlog/spdlog.h>
++#include <atomic>
++
++namespace uevrportal {
++namespace {
++std::mutex cacheMutex;
++std::atomic<std::uint64_t> currentID{};
++struct Slot {std::shared_ptr<const PortalFrame> frame;unsigned views{},projections{};};
++std::array<Slot,64> slots;
++std::uint64_t mappingSession{},mappingEpoch{};
++portal::RigidTransform runtimeMapping{},gameBasis{};
++portal::Quaternion inverse(portal::Quaternion q){return {-q.x,-q.y,-q.z,q.w};}
++}
++std::shared_ptr<const PortalFrame> PortalFrame::latch(std::uint64_t id,const portal::RigidTransform& raw){
++    if(!WindowMode::get()->portal_output_enabled())return {};
++    std::scoped_lock lock(cacheMutex);
++    auto& slot=slots[id%slots.size()];
++    if(slot.frame&&slot.frame->gameFrameID==id)return slot.frame;
++    auto frame=std::make_shared<PortalFrame>();frame->gameFrameID=id;
++    const auto state=PortalSession::get().latest();
++    if(state)frame->state=*state;
++    const auto vr=VR::get();
++    if(!vr->get_runtime()->is_openvr()||vr->is_using_afr()||vr->is_using_2d_screen()||vr->is_extreme_compatibility_mode_enabled()||
++       vr->is_splitscreen_compatibility_enabled()||vr->is_sceneview_compatibility_enabled()||vr->is_native_stereo_fix_enabled()||vr->is_stereo_emulation_enabled()||
++       vr->is_roomscale_enabled()||vr->is_headlocked_aim_enabled()||vr->is_controller_aim_enabled()||vr->is_decoupled_pitch_enabled())frame->error="unsupported_portal_configuration";
++    else if(state&&portal::validTransform(raw)){
++        frame->state=*state;
++        if(mappingSession!=state->sessionID||mappingEpoch!=state->trackingEpoch){
++            const auto q=portal::multiply(raw.orientation,inverse(state->worldFromHead.orientation));
++            runtimeMapping={portal::subtract(raw.position,portal::rotate(q,state->worldFromHead.position)),q};
++            // Fixed camera origin/basis for this tracking epoch. Moving/resizing the rectangle never changes it.
++            gameBasis={state->worldFromHead.position,state->worldFromPortal.orientation};
++            mappingSession=state->sessionID;mappingEpoch=state->trackingEpoch;
++        }
++        frame->runtimeFromExternal=runtimeMapping;frame->gameBasis=gameBasis;
++        frame->runtimeHead=portal::compose(runtimeMapping,{state->worldFromHead.position,state->worldFromPortal.orientation});
++        const portal::PortalGeometry geometry{state->worldFromPortal,state->widthMeters,state->heightMeters,state->geometryRevision};
++        const auto eyes=portal::eyePositions(state->worldFromHead,state->eyeSeparationMeters);
++        if(eyes){
++            frame->externalEyes=*eyes;
++            const auto left=portal::portalFrustum(geometry,(*eyes)[0]);const auto right=portal::portalFrustum(geometry,(*eyes)[1]);
++            if(left&&right){
++                frame->frusta={*left,*right};frame->valid=true;frame->error="none";
++                for(unsigned eye=0;eye<2;++eye)frame->eyeOffsets[eye]=portal::rotate(inverse(state->worldFromPortal.orientation),portal::subtract((*eyes)[eye],state->worldFromHead.position));
++            }else frame->error="eye_behind_or_near_portal";
++        }else frame->error="invalid_calibration";
++    }
++    slot={frame,0,0};currentID.store(id,std::memory_order_release);
++    SPDLOG_DEBUG("[Portal] latch frame={} seq={} geometry={} valid={} error={}",id,frame->state.sequence,frame->state.geometryRevision,frame->valid,frame->error);
++    return frame;
++}
++std::shared_ptr<const PortalFrame> PortalFrame::current(){return find(currentID.load(std::memory_order_acquire));}
++std::shared_ptr<const PortalFrame> PortalFrame::find(std::uint64_t id){
++    std::scoped_lock lock(cacheMutex);const auto& s=slots[id%slots.size()];return s.frame&&s.frame->gameFrameID==id?s.frame:nullptr;
++}
++void PortalFrame::observe(std::uint64_t id,unsigned eye,bool projection){
++    if(eye>1)return;std::scoped_lock lock(cacheMutex);auto& s=slots[id%slots.size()];
++    if(s.frame&&s.frame->gameFrameID==id){(projection?s.projections:s.views)|=1u<<eye;
++        SPDLOG_DEBUG("[Portal] {} frame={} eye={} seq={} geometry={}",projection?"projection":"view",id,eye,s.frame->state.sequence,s.frame->state.geometryRevision);}
++}
++bool PortalFrame::paired(std::uint64_t id){std::scoped_lock lock(cacheMutex);const auto& s=slots[id%slots.size()];return s.frame&&s.frame->gameFrameID==id&&s.views==3&&s.projections==3;}
++void PortalFrame::reset(){std::scoped_lock lock(cacheMutex);slots={};mappingSession=0;mappingEpoch=0;}
++}
+diff --git a/src/mods/portal/PortalFrame.hpp b/src/mods/portal/PortalFrame.hpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..74ab8934a34f71eccc4add0c920cb337f51dcb36
+--- /dev/null
++++ b/src/mods/portal/PortalFrame.hpp
+@@ -0,0 +1,26 @@
++#pragma once
++#include <portal/Protocol.hpp>
++#include <array>
++#include <memory>
++#include <mutex>
++#include <optional>
++#include <string>
++
++namespace uevrportal {
++struct PortalFrame {
++    portal::StateSnapshot state{};
++    std::uint64_t gameFrameID{};
++    portal::RigidTransform runtimeFromExternal{},gameBasis{},runtimeHead{};
++    std::array<portal::Vec3,2> externalEyes{},eyeOffsets{};
++    std::array<portal::EyeFrustum,2> frusta{};
++    bool valid{};
++    std::string error="awaiting_state";
++    // Called only by OpenVR update_poses with the engine frame identifier and unmodified runtime pose.
++    static std::shared_ptr<const PortalFrame> latch(std::uint64_t gameFrameID,const portal::RigidTransform& runtimeHead);
++    static std::shared_ptr<const PortalFrame> find(std::uint64_t gameFrameID);
++    static std::shared_ptr<const PortalFrame> current();
++    static void observe(std::uint64_t gameFrameID,unsigned eye,bool projection);
++    static bool paired(std::uint64_t gameFrameID);
++    static void reset();
++};
++}
+diff --git a/src/mods/portal/PortalIntegration.hpp b/src/mods/portal/PortalIntegration.hpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..1396bb26bab2d811a781e0d0a84b0d5689689ad4
+--- /dev/null
++++ b/src/mods/portal/PortalIntegration.hpp
+@@ -0,0 +1,45 @@
++#pragma once
++#include "PortalFrame.hpp"
++#include "../WindowMode.hpp"
++#include "../VR.hpp"
++#include <cmath>
++#include <glm/gtc/quaternion.hpp>
++#include <glm/gtx/quaternion.hpp>
++#include <glm/gtx/euler_angles.hpp>
++namespace uevrportal {
++inline std::shared_ptr<const PortalFrame> gameFrame(){return PortalFrame::current();}
++inline Matrix4x4f matrix(const portal::RigidTransform& t){
++    auto m=glm::mat4_cast(glm::quat{float(t.orientation.w),float(t.orientation.x),float(t.orientation.y),float(t.orientation.z)});
++    m[3]=Vector4f{float(t.position.x),float(t.position.y),float(t.position.z),1.f};return m;
++}
++inline portal::RigidTransform transform(const Matrix4x4f& m){
++    const auto q=glm::normalize(glm::quat{m});return {{m[3].x,m[3].y,m[3].z},{q.x,q.y,q.z,q.w}};
++}
++inline Matrix4x4f eyeMatrix(unsigned eye){
++    auto m=glm::identity<Matrix4x4f>();const auto f=gameFrame();
++    if(f&&f->valid&&eye<2){const auto p=f->eyeOffsets[eye];m[3]=Vector4f{float(p.x),float(p.y),float(p.z),1};}return m;
++}
++inline Matrix4x4f projection(unsigned eye,double nearUnits){
++    auto m=glm::identity<Matrix4x4f>();const auto f=gameFrame();
++    if(f&&f->valid&&eye<2&&std::isfinite(nearUnits)&&nearUnits>0){
++        const auto a=portal::toUnrealReversedZ(f->frusta[eye],nearUnits);
++        for(unsigned c=0;c<4;++c)for(unsigned row=0;row<4;++row)m[c][row]=float(a[c*4+row]);
++    }return m;
++}
++// Unreal camera basis: +X forward,+Y right,+Z up. External: +X right,+Y up,+Z toward viewer.
++// The incoming game camera remains authoritative for gamepad locomotion; physical offset is added once.
++template<class Rotation,class Location>
++inline void applyView(const PortalFrame& f,unsigned eye,Rotation& rotation,Location& location,double scale){
++    const double pitch=glm::radians(double(rotation.pitch)),yaw=glm::radians(double(rotation.yaw)),roll=glm::radians(double(rotation.roll));
++    const auto game=glm::angleAxis(yaw,glm::dvec3{0,0,1})*glm::angleAxis(-pitch,glm::dvec3{0,1,0})*glm::angleAxis(-roll,glm::dvec3{1,0,0});
++    const auto p=portal::inverseTransformPoint(f.gameBasis,f.externalEyes[eye]);
++    const auto delta=game*(glm::dvec3{-p.z,p.x,p.y}*scale);
++    location.x+=delta.x;location.y+=delta.y;location.z+=delta.z;
++    const auto b=f.gameBasis.orientation;
++    const auto q=portal::multiply({-b.x,-b.y,-b.z,b.w},f.state.worldFromPortal.orientation);
++    // Quaternion vector transforms as an axial vector under the handedness change.
++    const auto composed=game*glm::dquat{q.w,q.z,-q.x,-q.y};
++    double y,pit,r;glm::extractEulerAngleZYX(glm::mat4_cast(composed),y,pit,r);
++    rotation.pitch=glm::degrees(-pit);rotation.yaw=glm::degrees(y);rotation.roll=glm::degrees(-r);
++}
++}
+diff --git a/src/mods/portal/PortalOutput.cpp b/src/mods/portal/PortalOutput.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..d5345b405688555faf8d2a65c1e2f0dc78f14a51
+--- /dev/null
++++ b/src/mods/portal/PortalOutput.cpp
+@@ -0,0 +1,207 @@
++#include "PortalOutput.hpp"
++#include "PortalSession.hpp"
++#include "WindowFilter.hpp"
++#include "../WindowMode.hpp"
++#include <portal/FrameMetadata.hpp>
++#include <dxgi1_4.h>
++#include <wrl/client.h>
++#include <array>
++#include <vector>
++#include <thread>
++#include <atomic>
++#include <mutex>
++#include <condition_variable>
++#include <cstring>
++#include <algorithm>
++#include <cmath>
++#include <cstdio>
++#include <spdlog/spdlog.h>
++
++namespace uevrportal {
++using Microsoft::WRL::ComPtr;
++namespace {
++DXGI_FORMAT colorFormat(DXGI_FORMAT f){
++    switch(f){case DXGI_FORMAT_R8G8B8A8_UNORM:case DXGI_FORMAT_R8G8B8A8_TYPELESS:case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:return DXGI_FORMAT_R8G8B8A8_UNORM;
++    case DXGI_FORMAT_B8G8R8A8_UNORM:case DXGI_FORMAT_B8G8R8A8_TYPELESS:case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:return DXGI_FORMAT_B8G8R8A8_UNORM;
++    default:return DXGI_FORMAT_UNKNOWN;}
++}
++std::shared_ptr<const PortalFrame> accepted(std::uint64_t id){
++    const auto f=PortalFrame::find(id);
++    if(!f||!f->valid||!PortalFrame::paired(id)||!PortalSession::get().matchesLease(f->state))return {};
++    return f;
++}
++void report(std::uint64_t id,const std::shared_ptr<const PortalFrame>& f,const char* error){
++    const auto known=f?f:PortalFrame::find(id);
++    portal::StatusSnapshot s{};s.renderFrameID=id;s.outputMode="direct_sbs";s.trackingValid=f&&std::strcmp(error,"none")==0;
++    s.errorCode=s.trackingValid?"none":"outputUnavailable";
++    if(known&&!known->valid){
++        if(known->error=="unsupported_portal_configuration")s.errorCode="unsupportedRuntime";
++        else if(known->error=="eye_behind_or_near_portal"||known->error=="invalid_calibration")s.errorCode="invalidGeometry";
++        else s.errorCode="staleTracking";
++    }
++    SPDLOG_DEBUG("[Portal] output frame={} detail={}",id,error);
++    if(known){s.sessionID=known->state.sessionID;s.trackingEpoch=known->state.trackingEpoch;s.acceptedSequence=known->state.sequence;s.geometryRevision=known->state.geometryRevision;}
++    PortalSession::get().status(std::move(s));
++}
++std::vector<std::uint32_t> strip(unsigned w,const PortalFrame* f){
++    portal::FrameMetadata m{};
++    if(f)m={true,f->state.sessionID,f->state.trackingEpoch,f->state.geometryRevision,f->gameFrameID};
++    const auto tag=portal::encodeFrameMetadata(m);
++    std::vector<std::uint32_t> pixels(w*2*16);
++    for(unsigned y=0;y<16;++y)for(unsigned x=0;x<w*2;++x)pixels[y*w*2+x]=portal::metadataPixel(tag,w,x%w,y);
++    return pixels;
++}
++// Deliberate synthetic fixture upload (no game image readback). Three fixed-depth panels expose parallax.
++// The diagnostic replaces both source eyes before the same GPU output copies and metadata append.
++std::vector<std::uint32_t> diagnostic(unsigned width,unsigned height,const PortalFrame& f){
++    std::vector<std::uint32_t> out(width*height,0xff101010);const unsigned w=width/2;
++    for(unsigned eye=0;eye<2;++eye){const auto fr=f.frusta[eye];const auto origin=portal::inverseTransformPoint(f.gameBasis,f.externalEyes[eye]);
++        const auto b=f.gameBasis.orientation;const auto q=portal::multiply({-b.x,-b.y,-b.z,b.w},f.state.worldFromPortal.orientation);
++        for(unsigned y=0;y<height;++y)for(unsigned x=0;x<w;++x){
++            const auto ray=portal::rotate(q,{fr.left+(fr.right-fr.left)*(x+.5)/w,fr.top-(fr.top-fr.bottom)*(y+.5)/height,-1});
++            std::uint32_t color=0xff181818;
++            for(int plane=3;plane>=1;--plane){const double depth=plane*1.25;const double t=(-depth-origin.z)/ray.z;
++                const double px=origin.x+ray.x*t,py=origin.y+ray.y*t;
++                if(t>0&&std::abs(px-(plane-2)*.6)<.25&&std::abs(py)<.5){const bool check=(int(std::floor(px*20))+int(std::floor(py*20)))&1;color=check?0xffdddddd:0xff333333;}}
++            if(x<8||x+8>=w||y<8||y+8>=height)color=eye?0xff00ffff:0xffffff00;
++            out[y*width+eye*w+x]=color;
++        }
++        // Decimal glyphs: eye 0/1, corners 1..4; frame and geometry in two rows.
++        constexpr unsigned glyphs[10]={0x7b6f,0x2492,0x73e7,0x73cf,0x5bc9,0x79cf,0x79ef,0x7249,0x7bef,0x7bcf};
++        auto text=[&](unsigned tx,unsigned ty,const char* value){for(;*value;++value,tx+=16){if(*value<'0'||*value>'9')continue;const auto bits=glyphs[*value-'0'];
++            for(unsigned gy=0;gy<5;++gy)for(unsigned gx=0;gx<3;++gx)if(bits&(1u<<(14-gy*3-gx)))for(unsigned sy=0;sy<4;++sy)for(unsigned sx=0;sx<4;++sx){const auto xx=tx+gx*4+sx,yy=ty+gy*4+sy;if(xx<w&&yy<height)out[yy*width+eye*w+xx]=0xffffffff;}}};
++        text(12,12,"1");text(w>32?w-32:0,12,"2");text(12,height>32?height-32:0,"3");text(w>32?w-32:0,height>32?height-32:0,"4");
++        text(w/2,12,eye?"1":"0");char value[32];std::snprintf(value,sizeof(value),"%llu",static_cast<unsigned long long>(f.gameFrameID));text(12,48,value);
++        std::snprintf(value,sizeof(value),"%llu",static_cast<unsigned long long>(f.state.geometryRevision));text(12,76,value);
++    }return out;
++}
++D3D12_RESOURCE_BARRIER transition(ID3D12Resource* r,D3D12_RESOURCE_STATES a,D3D12_RESOURCE_STATES b){
++    D3D12_RESOURCE_BARRIER out{};out.Type=D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;out.Transition={r,D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,a,b};return out;
++}
++}
++struct PortalOutput::Impl {
++    std::mutex windowMutex;std::condition_variable windowReady;HWND window{};bool initialized{};std::thread thread;
++    ComPtr<ID3D11DeviceContext> context11;
++    ComPtr<IDXGISwapChain3> swap;ComPtr<IUnknown> identity;unsigned width{},height{};DXGI_FORMAT format=DXGI_FORMAT_UNKNOWN;bool twelve{};
++    struct Slot11 {ComPtr<ID3D11Query> done;ComPtr<ID3D11Texture2D> source,strip,diagnostic,back;};std::array<Slot11,3> slots11;unsigned next11{};
++    struct Slot12 {ComPtr<ID3D12CommandAllocator> allocator;ComPtr<ID3D12GraphicsCommandList> list;ComPtr<ID3D12Resource> source,upload,back;std::uint64_t done{};};std::array<Slot12,3> slots12;
++    ComPtr<ID3D12Fence> fence;ComPtr<ID3D12CommandQueue> queue;std::uint64_t serial{};
++    Impl(){thread=std::thread([this]{
++        SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
++        WNDCLASSW wc{};wc.lpfnWndProc=[](HWND w,UINT m,WPARAM a,LPARAM b)->LRESULT{if(m==WM_CLOSE){ShowWindow(w,SW_HIDE);return 0;}if(m==WM_APP+1){DestroyWindow(w);PostQuitMessage(0);return 0;}return DefWindowProcW(w,m,a,b);};wc.hInstance=GetModuleHandleW(nullptr);wc.lpszClassName=L"UEVRPortalSBS";RegisterClassW(&wc);
++        const auto w=CreateWindowExW(WS_EX_NOACTIVATE,wc.lpszClassName,L"UEVR Portal SBS",WS_POPUP,0,0,3840,1096,nullptr,nullptr,wc.hInstance,nullptr);
++        // Exclude our swapchain from the global Present/Resize hooks before its first presentation.
++        if(w)WindowFilter::get().filter_window(w);
++        {std::scoped_lock lock(windowMutex);window=w;initialized=true;}windowReady.notify_one();
++        if(w){MSG msg;while(GetMessageW(&msg,nullptr,0,0)>0){TranslateMessage(&msg);DispatchMessageW(&msg);}}
++    });std::unique_lock lock(windowMutex);windowReady.wait(lock,[this]{return initialized;});}
++    ~Impl(){
++        // Teardown retains D3D12 uploads/source/backbuffers until the submitted command queue completes.
++        if(fence&&queue&&fence->GetCompletedValue()<serial){HANDLE event=CreateEventW(nullptr,FALSE,FALSE,nullptr);if(event){if(SUCCEEDED(fence->SetEventOnCompletion(serial,event)))WaitForSingleObject(event,INFINITE);CloseHandle(event);}}
++        while(!idle11())std::this_thread::yield();
++        if(window)PostMessageW(window,WM_APP+1,0,0);if(thread.joinable())thread.join();
++    }
++    bool idle11(){
++        if(!context11)return true;
++        ComPtr<ID3D11Device> device;context11->GetDevice(&device);
++        if(FAILED(device->GetDeviceRemovedReason()))return true;
++        for(auto& s:slots11)if(s.done&&context11->GetData(s.done.Get(),nullptr,0,0)!=S_OK)return false;return true;
++    }
++    bool idle12(){return !fence||fence->GetCompletedValue()>=serial;}
++    bool create(IUnknown* deviceOrQueue,IUnknown* device,unsigned w,unsigned h,DXGI_FORMAT fmt,bool is12){
++        if(!window)return false;
++        ComPtr<IUnknown> canonical;if(FAILED(device->QueryInterface(IID_PPV_ARGS(&canonical))))return false;
++        if(swap&&identity.Get()==canonical.Get()&&width==w&&height==h&&format==fmt&&twelve==is12&&(!is12||queue.Get()==deviceOrQueue))return true;
++        // Caller checked all GPU completions before replacement. Format or device changes create a fresh swapchain.
++        slots11={};slots12={};swap.Reset();fence.Reset();queue.Reset();serial=0;identity=canonical;twelve=is12;
++        ComPtr<IDXGIFactory2> factory;if(FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))return false;
++        DXGI_SWAP_CHAIN_DESC1 desc{};desc.Width=w;desc.Height=h;desc.Format=fmt;desc.SampleDesc.Count=1;desc.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;desc.BufferCount=3;desc.SwapEffect=DXGI_SWAP_EFFECT_FLIP_DISCARD;desc.Scaling=DXGI_SCALING_NONE;desc.AlphaMode=DXGI_ALPHA_MODE_IGNORE;
++        ComPtr<IDXGISwapChain1> created;if(FAILED(factory->CreateSwapChainForHwnd(deviceOrQueue,window,&desc,nullptr,nullptr,&created))||FAILED(created.As(&swap)))return false;
++        factory->MakeWindowAssociation(window,DXGI_MWA_NO_ALT_ENTER);width=w;height=h;format=fmt;
++        return true;
++    }
++    void show(){
++        const auto oldDPI=SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
++        const auto mode=WindowMode::get();
++        SetWindowPos(window,nullptr,mode->portal_desktop_x(),mode->portal_desktop_y(),width,height,SWP_NOACTIVATE|SWP_NOZORDER);
++        ShowWindow(window,SW_SHOWNOACTIVATE);
++        if(oldDPI)SetThreadDpiAwarenessContext(oldDPI);
++    }
++    void failed(std::uint64_t id,const char* error){if(window)ShowWindow(window,SW_HIDE);report(id,{},error);}
++};
++PortalOutput& PortalOutput::get(){static PortalOutput output;return output;}
++PortalOutput::PortalOutput():impl_(std::make_unique<Impl>()){}
++PortalOutput::~PortalOutput()=default;
++void PortalOutput::hide(){if(impl_->window)ShowWindow(impl_->window,SW_HIDE);}
++void PortalOutput::d3d11(ID3D11DeviceContext* context,ID3D11Texture2D* source,std::uint64_t id){
++    auto& o=*impl_;const auto frame=accepted(id);
++    if(!frame){o.failed(id,"unpaired_or_stale_frame");return;}
++    if(!context||!source){o.failed(id,"missing_d3d11_source");return;}
++    D3D11_TEXTURE2D_DESC desc{};source->GetDesc(&desc);const auto format=colorFormat(desc.Format);
++    if(format==DXGI_FORMAT_UNKNOWN||desc.Width%2||desc.Width/2<176||desc.ArraySize!=1||desc.SampleDesc.Count!=1){o.failed(id,"unsupported_color_resource");return;}
++    if(std::abs((double(desc.Width)/2/desc.Height)/(frame->state.widthMeters/frame->state.heightMeters)-1.)>.005){o.failed(id,"content_aspect_mismatch");return;}
++    ComPtr<ID3D11Device> device;context->GetDevice(&device);
++    const bool recreate=!o.swap||o.twelve||o.width!=desc.Width||o.height!=desc.Height+16||o.format!=format||o.identity.Get()!=static_cast<IUnknown*>(device.Get());
++    if(recreate){if(!o.idle12()||!o.idle11()){o.failed(id,"gpu_recreation_pending");return;}if(!o.create(device.Get(),device.Get(),desc.Width,desc.Height+16,format,false)){o.failed(id,"swapchain_create_failed");return;}}
++    o.context11=context;
++    auto& slot=o.slots11[o.next11++%3];
++    if(slot.done&&context->GetData(slot.done.Get(),nullptr,0,D3D11_ASYNC_GETDATA_DONOTFLUSH)!=S_OK){o.failed(id,"gpu_busy");return;}
++    slot={};slot.source=source;
++    if(FAILED(o.swap->GetBuffer(o.swap->GetCurrentBackBufferIndex(),IID_PPV_ARGS(&slot.back)))){o.failed(id,"backbuffer_failed");return;}
++    auto sd=desc;sd.Width=desc.Width;sd.Height=16;sd.MipLevels=1;sd.ArraySize=1;sd.Format=format;sd.Usage=D3D11_USAGE_IMMUTABLE;sd.BindFlags=0;sd.CPUAccessFlags=0;sd.MiscFlags=0;
++    const auto pixels=strip(desc.Width/2,frame.get());D3D11_SUBRESOURCE_DATA data{pixels.data(),desc.Width*4,0};
++    if(FAILED(device->CreateTexture2D(&sd,&data,&slot.strip))){o.failed(id,"metadata_upload_failed");return;}
++    if(WindowMode::get()->portal_diagnostics_enabled()){
++        const auto fixture=diagnostic(desc.Width,desc.Height,*frame);sd.Height=desc.Height;data.pSysMem=fixture.data();
++        if(FAILED(device->CreateTexture2D(&sd,&data,&slot.diagnostic))){o.failed(id,"diagnostic_upload_failed");return;}
++    }
++    D3D11_QUERY_DESC query{D3D11_QUERY_EVENT,0};if(FAILED(device->CreateQuery(&query,&slot.done))){o.failed(id,"gpu_query_failed");return;}
++    D3D11_BOX box{0,0,0,desc.Width,desc.Height,1};context->CopySubresourceRegion(slot.back.Get(),0,0,0,0,slot.diagnostic?slot.diagnostic.Get():source,0,&box);
++    context->CopySubresourceRegion(slot.back.Get(),0,0,desc.Height,0,slot.strip.Get(),0,nullptr);context->End(slot.done.Get());
++    const auto result=o.swap->Present(0,0);context->Flush();
++    if(FAILED(result)){o.failed(id,"present_failed");return;}o.show();report(id,frame,"none");
++}
++void PortalOutput::d3d12(ID3D12CommandQueue* queue,ID3D12Resource* source,D3D12_RESOURCE_STATES sourceState,std::uint64_t id){
++    auto& o=*impl_;const auto frame=accepted(id);
++    if(!frame){o.failed(id,"unpaired_or_stale_frame");return;}
++    if(!queue||!source||queue->GetDesc().Type!=D3D12_COMMAND_LIST_TYPE_DIRECT){o.failed(id,"missing_d3d12_direct_queue");return;}
++    const auto desc=source->GetDesc();const auto format=colorFormat(desc.Format);
++    if(format==DXGI_FORMAT_UNKNOWN||desc.Dimension!=D3D12_RESOURCE_DIMENSION_TEXTURE2D||desc.Width%2||desc.Width/2<176||desc.DepthOrArraySize!=1||desc.SampleDesc.Count!=1){o.failed(id,"unsupported_color_resource");return;}
++    if(std::abs((double(desc.Width)/2/desc.Height)/(frame->state.widthMeters/frame->state.heightMeters)-1.)>.005){o.failed(id,"content_aspect_mismatch");return;}
++    ComPtr<ID3D12Device> device;if(FAILED(source->GetDevice(IID_PPV_ARGS(&device)))){o.failed(id,"device_failed");return;}
++    const unsigned width=static_cast<unsigned>(desc.Width);
++    const bool recreate=!o.swap||!o.fence||!o.twelve||o.width!=width||o.height!=desc.Height+16||o.format!=format||o.identity.Get()!=static_cast<IUnknown*>(device.Get())||o.queue.Get()!=queue;
++    if(recreate){if(!o.idle12()||!o.idle11()){o.failed(id,"gpu_recreation_pending");return;}
++        if(!o.create(queue,device.Get(),width,desc.Height+16,format,true)){o.failed(id,"swapchain_create_failed");return;}
++        o.queue=queue;if(FAILED(device->CreateFence(0,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&o.fence)))){o.failed(id,"fence_create_failed");return;}}
++    const unsigned index=o.swap->GetCurrentBackBufferIndex();auto& slot=o.slots12[index];
++    if(slot.done&&o.fence->GetCompletedValue()<slot.done){o.failed(id,"gpu_busy");return;}
++    slot.source=source;slot.upload.Reset();slot.back.Reset();
++    if(!slot.allocator){
++        if(FAILED(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,IID_PPV_ARGS(&slot.allocator)))||FAILED(device->CreateCommandList(0,D3D12_COMMAND_LIST_TYPE_DIRECT,slot.allocator.Get(),nullptr,IID_PPV_ARGS(&slot.list)))){o.failed(id,"command_create_failed");return;}
++    }else if(FAILED(slot.allocator->Reset())||FAILED(slot.list->Reset(slot.allocator.Get(),nullptr))){o.failed(id,"command_reset_failed");return;}
++    if(FAILED(o.swap->GetBuffer(index,IID_PPV_ARGS(&slot.back)))){slot.list->Close();o.failed(id,"backbuffer_failed");return;}
++    const bool diagnostics=WindowMode::get()->portal_diagnostics_enabled();const unsigned uploadHeight=16+(diagnostics?desc.Height:0);
++    const unsigned rowPitch=(width*4+255)&~255u;D3D12_HEAP_PROPERTIES heap{};heap.Type=D3D12_HEAP_TYPE_UPLOAD;
++    D3D12_RESOURCE_DESC buffer{};buffer.Dimension=D3D12_RESOURCE_DIMENSION_BUFFER;buffer.Width=std::uint64_t(rowPitch)*uploadHeight;buffer.Height=1;buffer.DepthOrArraySize=1;buffer.MipLevels=1;buffer.SampleDesc.Count=1;buffer.Layout=D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
++    if(FAILED(device->CreateCommittedResource(&heap,D3D12_HEAP_FLAG_NONE,&buffer,D3D12_RESOURCE_STATE_GENERIC_READ,nullptr,IID_PPV_ARGS(&slot.upload)))){slot.list->Close();o.failed(id,"metadata_upload_failed");return;}
++    void* mapped{};D3D12_RANGE noRead{0,0};if(FAILED(slot.upload->Map(0,&noRead,&mapped))){slot.list->Close();o.failed(id,"upload_map_failed");return;}
++    const auto pixels=strip(width/2,frame.get());for(unsigned y=0;y<16;++y)std::memcpy(static_cast<char*>(mapped)+y*rowPitch,pixels.data()+y*width,width*4);
++    if(diagnostics){const auto fixture=diagnostic(width,desc.Height,*frame);for(unsigned y=0;y<desc.Height;++y)std::memcpy(static_cast<char*>(mapped)+(y+16)*rowPitch,fixture.data()+y*width,width*4);}
++    slot.upload->Unmap(0,nullptr);
++    auto command=slot.list.Get();auto backBarrier=transition(slot.back.Get(),D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_COPY_DEST);command->ResourceBarrier(1,&backBarrier);
++    D3D12_TEXTURE_COPY_LOCATION dst{};dst.pResource=slot.back.Get();dst.Type=D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
++    D3D12_TEXTURE_COPY_LOCATION src{};src.pResource=source;src.Type=D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
++    D3D12_TEXTURE_COPY_LOCATION upload{};upload.pResource=slot.upload.Get();upload.Type=D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;upload.PlacedFootprint.Footprint={format,width,16,1,rowPitch};
++    if(diagnostics){auto image=upload;image.PlacedFootprint.Offset=std::uint64_t(rowPitch)*16;image.PlacedFootprint.Footprint.Height=desc.Height;command->CopyTextureRegion(&dst,0,0,0,&image,nullptr);}
++    else {auto barrier=transition(source,sourceState,D3D12_RESOURCE_STATE_COPY_SOURCE);if(sourceState!=D3D12_RESOURCE_STATE_COPY_SOURCE)command->ResourceBarrier(1,&barrier);
++        D3D12_BOX box{0,0,0,width,desc.Height,1};command->CopyTextureRegion(&dst,0,0,0,&src,&box);
++        if(sourceState!=D3D12_RESOURCE_STATE_COPY_SOURCE){std::swap(barrier.Transition.StateBefore,barrier.Transition.StateAfter);command->ResourceBarrier(1,&barrier);}}
++    command->CopyTextureRegion(&dst,0,desc.Height,0,&upload,nullptr);std::swap(backBarrier.Transition.StateBefore,backBarrier.Transition.StateAfter);command->ResourceBarrier(1,&backBarrier);
++    if(FAILED(command->Close())){o.failed(id,"command_close_failed");return;}
++    ID3D12CommandList* lists[]={command};queue->ExecuteCommandLists(1,lists);
++    const auto presented=o.swap->Present(0,0);slot.done=++o.serial;
++    if(FAILED(queue->Signal(o.fence.Get(),slot.done))){o.failed(id,"queue_signal_failed");return;}
++    if(FAILED(presented)){o.failed(id,"present_failed");return;}o.show();report(id,frame,"none");
++}
++}
+diff --git a/src/mods/portal/PortalOutput.hpp b/src/mods/portal/PortalOutput.hpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..ed8dcef123c8a0a1ffe7fbd9e4afb8289781b885
+--- /dev/null
++++ b/src/mods/portal/PortalOutput.hpp
+@@ -0,0 +1,20 @@
++#pragma once
++#include <d3d11.h>
++#include <d3d12.h>
++#include <memory>
++#include "PortalFrame.hpp"
++namespace uevrportal {
++// Own presentation window, same device/queue as the game; no compositor projection/bounds/warp.
++class PortalOutput {
++public:
++    static PortalOutput& get();
++    PortalOutput();
++    ~PortalOutput();
++    void d3d11(ID3D11DeviceContext*,ID3D11Texture2D* doubleWide,std::uint64_t frameID);
++    void d3d12(ID3D12CommandQueue*,ID3D12Resource* doubleWide,D3D12_RESOURCE_STATES,std::uint64_t frameID);
++    void hide();
++private:
++    struct Impl;
++    std::unique_ptr<Impl> impl_;
++};
++}
+diff --git a/src/mods/portal/PortalSession.cpp b/src/mods/portal/PortalSession.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..67ff75f5f6c28b0b7022d76efe0be2b3411bd2d6
+--- /dev/null
++++ b/src/mods/portal/PortalSession.cpp
+@@ -0,0 +1,65 @@
++#include <winsock2.h>
++#include <ws2tcpip.h>
++#include "PortalSession.hpp"
++#include <array>
++#pragma comment(lib,"ws2_32")
++
++namespace uevrportal {
++PortalSession& PortalSession::get(){static PortalSession session;return session;}
++PortalSession::PortalSession():worker_([this](std::stop_token stop){receive(stop);}){}
++PortalSession::~PortalSession(){worker_.request_stop();if(worker_.joinable())worker_.join();}
++std::optional<portal::StateSnapshot> PortalSession::latest() const {
++    std::scoped_lock lock(mutex_);
++    if(acceptance_.stale(portal::StateAcceptance::Clock::now()))return {};
++    return acceptance_.latest();
++}
++bool PortalSession::matchesLease(const portal::StateSnapshot& state) const {
++    std::scoped_lock lock(mutex_);
++    return !acceptance_.stale(portal::StateAcceptance::Clock::now())&&state.sessionID==acceptance_.sessionID()&&state.trackingEpoch==acceptance_.trackingEpoch();
++}
++void PortalSession::status(portal::StatusSnapshot s){std::scoped_lock lock(mutex_);status_=std::move(s);statusTime_=portal::StateAcceptance::Clock::now();}
++std::string PortalSession::error()const{std::scoped_lock lock(mutex_);return error_;}
++void PortalSession::receive(std::stop_token stop){
++    WSADATA data{};
++    auto fail=[&](const char* e){std::scoped_lock lock(mutex_);error_=e;};
++    if(WSAStartup(MAKEWORD(2,2),&data)){fail("winsock_start_failed");return;}
++    SOCKET socket=::socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP);
++    if(socket==INVALID_SOCKET){fail("socket_failed");WSACleanup();return;}
++    BOOL exclusive=TRUE;setsockopt(socket,SOL_SOCKET,SO_EXCLUSIVEADDRUSE,reinterpret_cast<char*>(&exclusive),sizeof(exclusive));
++    sockaddr_in local{};local.sin_family=AF_INET;local.sin_addr.s_addr=htonl(INADDR_LOOPBACK);local.sin_port=htons(4244);
++    if(bind(socket,reinterpret_cast<sockaddr*>(&local),sizeof(local))==SOCKET_ERROR){fail("loopback_4244_bind_failed");closesocket(socket);WSACleanup();return;}
++    sockaddr_in host=local;host.sin_port=htons(4243);
++    auto lastStatus=portal::StateAcceptance::Clock::now();
++    while(!stop.stop_requested()){
++        fd_set read;FD_ZERO(&read);FD_SET(socket,&read);timeval timeout{0,20000};
++        if(select(0,&read,nullptr,nullptr,&timeout)>0){
++            std::array<std::byte,2048> buffer{};sockaddr_in from{};int length=sizeof(from);
++            const int n=recvfrom(socket,reinterpret_cast<char*>(buffer.data()),int(buffer.size()),0,reinterpret_cast<sockaddr*>(&from),&length);
++            if(n>0&&from.sin_family==AF_INET&&from.sin_addr.s_addr==host.sin_addr.s_addr&&from.sin_port==host.sin_port){
++                const auto bytes=std::span<const std::byte>{buffer.data(),static_cast<size_t>(n)};
++                const auto state=portal::decodeState(bytes);const auto reset=portal::decodeReset(bytes);
++                std::scoped_lock lock(mutex_);
++                if(state&&acceptance_.accept(*state,portal::StateAcceptance::Clock::now()))error_=state->trackingValid?"none":"tracking_invalid";
++                else if(reset&&acceptance_.acceptReset(*reset))error_="awaiting_epoch_state";
++                else error_="rejected_packet";
++            }
++        }
++        const auto now=portal::StateAcceptance::Clock::now();
++        if(now-lastStatus>=std::chrono::milliseconds(50)){
++            portal::StatusSnapshot out;
++            {std::scoped_lock lock(mutex_);out=status_;
++                if(out.sessionID!=acceptance_.sessionID()||out.trackingEpoch!=acceptance_.trackingEpoch()||acceptance_.stale(now)){
++                    const auto& last=acceptance_.latest();
++                    out={acceptance_.sessionID(),acceptance_.trackingEpoch(),last?last->sequence:0,last?last->geometryRevision:0,0,false,"direct_sbs",acceptance_.stale(now)?"staleTracking":"outputUnavailable"};
++                }
++            }
++            if(!out.sessionID||!out.trackingEpoch){lastStatus=now;continue;}
++            {std::scoped_lock lock(mutex_);if(now-statusTime_>portal::TrackingLease){out.trackingValid=false;out.errorCode="outputUnavailable";}}
++            const auto json=portal::encodeStatus(out);
++            sendto(socket,json.data(),static_cast<int>(json.size()),0,reinterpret_cast<sockaddr*>(&host),sizeof(host));
++            lastStatus=now;
++        }
++    }
++    closesocket(socket);WSACleanup();
++}
++}
+diff --git a/src/mods/portal/PortalSession.hpp b/src/mods/portal/PortalSession.hpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..ab16b466cb4b86f87c2d6c838682cfeccf8cadc0
+--- /dev/null
++++ b/src/mods/portal/PortalSession.hpp
+@@ -0,0 +1,28 @@
++#pragma once
++#include <portal/Protocol.hpp>
++#include <atomic>
++#include <memory>
++#include <mutex>
++#include <thread>
++
++namespace uevrportal {
++// Receiver owns only protocol state. Renderer publishes immutable status; it never calls recv/send.
++class PortalSession {
++public:
++    static PortalSession& get();
++    PortalSession();
++    ~PortalSession();
++    std::optional<portal::StateSnapshot> latest() const;
++    bool matchesLease(const portal::StateSnapshot&) const;
++    void status(portal::StatusSnapshot status);
++    std::string error() const;
++private:
++    void receive(std::stop_token stop);
++    mutable std::mutex mutex_;
++    portal::StateAcceptance acceptance_;
++    portal::StatusSnapshot status_{};
++    portal::StateAcceptance::Clock::time_point statusTime_{};
++    std::string error_="awaiting_state";
++    std::jthread worker_;
++};
++}
+diff --git a/src/mods/vr/D3D11Component.cpp b/src/mods/vr/D3D11Component.cpp
+index f32064206a9eda5a29ed3fd8f33350dbe4ac3ab1..1a19ba6c173c72a3d452eb85a09bb5796b254bd0 100644
+--- a/src/mods/vr/D3D11Component.cpp
++++ b/src/mods/vr/D3D11Component.cpp
+@@ -17,6 +17,7 @@ namespace pixel_shader1 {
+ #include "Framework.hpp"
+ #include "../VR.hpp"
+ #include "../WindowMode.hpp"
++#include "../portal/PortalOutput.hpp"
+ 
+ #include "D3D11Component.hpp"
+ 
+@@ -528,6 +529,11 @@ vr::EVRCompositorError D3D11Component::on_frame(VR* vr) {
+     #endif
+     }
+ 
++    if(WindowMode::get()->portal_output_enabled()) {
++        const auto openvr=vr->get_runtime<runtimes::OpenVR>();
++        const auto portalID=runtime->is_openvr()?openvr->portal_render_frame_id().value_or(0):0;
++        uevrportal::PortalOutput::get().d3d11(context.Get(),backbuffer.Get(),portalID);
++    }
+     // If m_frame_count is even, we're rendering the left eye.
+     if (is_left_eye_frame) {
+         m_submitted_left_eye = true;
+@@ -577,7 +583,7 @@ vr::EVRCompositorError D3D11Component::on_frame(VR* vr) {
+ 
+             const auto submit_pose = vr->m_openvr->get_pose_for_submit();
+ 
+-            if (m_is_shader_setup) {
++            if (m_is_shader_setup && !WindowMode::get()->portal_output_enabled()) {
+                 ID3D11RenderTargetView* views[] = { m_left_eye_rtv.Get() };
+                 context->OMSetRenderTargets(1, views, nullptr);
+                 //context->ClearRenderTargetView(m_right_eye_rtv.Get(), clear_color);
+@@ -748,7 +754,7 @@ vr::EVRCompositorError D3D11Component::on_frame(VR* vr) {
+ 
+                 context->CopySubresourceRegion(m_left_eye_tex.Get(), 0, 0, 0, 0, backbuffer.Get(), 0, &src_box);
+ 
+-                if (m_is_shader_setup) {
++                if (m_is_shader_setup && !WindowMode::get()->portal_output_enabled()) {
+                     ID3D11RenderTargetView* views[] = { m_left_eye_rtv.Get() };
+                     context->OMSetRenderTargets(1, views, nullptr);
+                     //context->ClearRenderTargetView(m_right_eye_rtv.Get(), clear_color);
+@@ -815,7 +821,7 @@ vr::EVRCompositorError D3D11Component::on_frame(VR* vr) {
+                 context->CopySubresourceRegion(m_right_eye_tex.Get(), 0, 0, 0, 0, m_scene_capture_tex_ref.tex.Get(), 0, &left_src_box);
+             }
+ 
+-            if (m_is_shader_setup) {
++            if (m_is_shader_setup && !WindowMode::get()->portal_output_enabled()) {
+                 ID3D11RenderTargetView* views[] = { m_right_eye_rtv.Get() };
+                 context->OMSetRenderTargets(1, views, nullptr);
+                 invoke_shader(vr->m_frame_count, 1, m_backbuffer_size[0] / 2, m_backbuffer_size[1]);
+diff --git a/src/mods/vr/D3D12Component.cpp b/src/mods/vr/D3D12Component.cpp
+index 1a4aab6f90063685b14afa3798d3ebf208f10c5b..d8175e0ccaf67e53b5643b2f848f30588a1cdd84 100644
+--- a/src/mods/vr/D3D12Component.cpp
++++ b/src/mods/vr/D3D12Component.cpp
+@@ -8,6 +8,7 @@
+ #include "Framework.hpp"
+ #include "../VR.hpp"
+ #include "../WindowMode.hpp"
++#include "../portal/PortalOutput.hpp"
+ 
+ #include <../../directxtk12-src/Inc/ResourceUploadBatch.h>
+ #include <../../directxtk12-src/Inc/RenderTargetState.h>
+@@ -435,6 +436,11 @@ vr::EVRCompositorError D3D12Component::on_frame(VR* vr) {
+     #endif
+     }
+ 
++    if(WindowMode::get()->portal_output_enabled()) {
++        const auto openvr=vr->get_runtime<runtimes::OpenVR>();
++        const auto portalID=runtime->is_openvr()?openvr->portal_render_frame_id().value_or(0):0;
++        uevrportal::PortalOutput::get().d3d12(command_queue,backbuffer.Get(),D3D12_RESOURCE_STATE_RENDER_TARGET,portalID);
++    }
+     // If m_frame_count is even, we're rendering the left eye.
+     if (is_left_eye_frame) {
+         m_submitted_left_eye = true;
+diff --git a/src/mods/vr/FFakeStereoRenderingHook.cpp b/src/mods/vr/FFakeStereoRenderingHook.cpp
+index 18d1f4e57eb4d32afe22f4a485bfeb10ceb8ff2d..6d01a41f68847ff856e054521199580328823e80 100644
+--- a/src/mods/vr/FFakeStereoRenderingHook.cpp
++++ b/src/mods/vr/FFakeStereoRenderingHook.cpp
+@@ -57,6 +57,7 @@
+ #include "../../utility/Logging.hpp"
+ 
+ #include "FFakeStereoRenderingHook.hpp"
++#include "../portal/PortalIntegration.hpp"
+ 
+ #include <tracy/Tracy.hpp>
+ 
+@@ -4840,6 +4841,16 @@ __forceinline void FFakeStereoRenderingHook::calculate_stereo_view_offset(
+         return;
+     }
+ 
++    if(WindowMode::get()->portal_output_enabled()) {
++        const auto frame=uevrportal::gameFrame();
++        const double scale=double(world_to_meters)*vr->get_world_scale();
++        if(frame&&frame->valid&&true_index>=0&&true_index<2&&std::isfinite(scale)&&scale>0) {
++            if(has_double_precision)uevrportal::applyView(*frame,true_index,*rot_d,*reinterpret_cast<Vector3d*>(view_location),scale);
++            else uevrportal::applyView(*frame,true_index,*view_rotation,*view_location,scale);
++            uevrportal::PortalFrame::observe(frame->gameFrameID,true_index,false);
++        }
++        return;
++    }
+     const auto& mods = g_framework->get_mods()->get_mods();
+ 
+     if (!is_full_pass) {
+@@ -5123,6 +5134,9 @@ __forceinline Matrix4x4f* FFakeStereoRenderingHook::calculate_stereo_projection_
+     // Can happen if we hooked this differently.
+     if (g_hook->m_calculate_stereo_projection_matrix_hook) {
+         g_hook->m_calculate_stereo_projection_matrix_hook.call<Matrix4x4f*>(stereo, out, view_index);
++    } else if(WindowMode::get()->portal_output_enabled()) {
++        if(g_hook->m_has_double_precision)(*(Matrix4x4d*)out)[3][2]=double(sdk::globals::get_near_clipping_plane());
++        else (*out)[3][2]=sdk::globals::get_near_clipping_plane();
+     } else {
+         if (g_hook->m_has_double_precision) {
+             (*out)[3][2] = sdk::globals::get_near_clipping_plane();
+@@ -5170,6 +5184,20 @@ __forceinline Matrix4x4f* FFakeStereoRenderingHook::calculate_stereo_projection_
+         }
+ 
+         auto& double_matrix = *(Matrix4x4d*)out;
++        if(WindowMode::get()->portal_output_enabled()) {
++            const auto frame=uevrportal::gameFrame();
++            const double nearUnits=g_hook->m_has_double_precision?double_matrix[3][2]:(*out)[3][2];
++            if(frame&&frame->valid&&true_index>=0&&true_index<2&&std::isfinite(nearUnits)&&nearUnits>0) {
++                const auto mat=portal::toUnrealReversedZ(frame->frusta[true_index],nearUnits);
++                for(unsigned col=0;col<4;++col)for(unsigned row=0;row<4;++row){
++                    if(g_hook->m_has_double_precision)double_matrix[col][row]=mat[col*4+row];
++                    else (*out)[col][row]=float(mat[col*4+row]);
++                }
++                vr->m_nearz=float(nearUnits);
++                uevrportal::PortalFrame::observe(frame->gameFrameID,true_index,true);
++            }
++            return out;
++        }
+ 
+         if (!g_hook->m_has_double_precision) {
+             float old_znear = (*out)[3][2];
+diff --git a/src/mods/vr/IXRTrackingSystemHook.cpp b/src/mods/vr/IXRTrackingSystemHook.cpp
+index 10469ae02aa4d02dcaf85ee348a8301984dd0d86..f1fa8e5d4921002e4d7f6b4bc25c3b787c6fa136 100644
+--- a/src/mods/vr/IXRTrackingSystemHook.cpp
++++ b/src/mods/vr/IXRTrackingSystemHook.cpp
+@@ -29,6 +29,7 @@
+ #include <sdk/UFunction.hpp>
+ 
+ #include "IXRTrackingSystemHook.hpp"
++#include "../WindowMode.hpp"
+ 
+ detail::IXRTrackingSystemVT& get_tracking_system_vtable(std::optional<std::string> version_override = std::nullopt) {
+     const auto str_version = version_override.has_value() ? version_override.value() : utility::narrow(sdk::search_for_version(utility::get_executable()).value_or(L"0.00"));
+@@ -1229,8 +1230,8 @@ void IXRTrackingSystemHook::get_hmd_data(sdk::IXRTrackingSystem*, void* world, v
+ 
+     static const auto hmd_data_struct = sdk::FUObjectArray::get() != nullptr ? (sdk::UScriptStruct*)sdk::find_uobject(L"ScriptStruct /Script/HeadMountedDisplay.XRHMDData") : nullptr;
+ 
+-    const auto position = rotation_offset * glm::vec3{vr->get_position(vr->get_hmd_index()) - vr->get_standing_origin()};
+-    const auto rotation = glm::normalize(rotation_offset * glm::quat{vr->get_rotation(vr->get_hmd_index())});
++    const auto position = WindowMode::get()->portal_output_enabled()?glm::vec3{}:rotation_offset * glm::vec3{vr->get_position(vr->get_hmd_index()) - vr->get_standing_origin()};
++    const auto rotation = WindowMode::get()->portal_output_enabled()?glm::identity<glm::quat>():glm::normalize(rotation_offset * glm::quat{vr->get_rotation(vr->get_hmd_index())});
+ 
+     if (hmd_data_struct == nullptr) {
+         const auto data = (ue4_27::FXRHMDData*)hmd_data;
+@@ -1281,8 +1282,8 @@ void IXRTrackingSystemHook::get_current_pose(sdk::IXRTrackingSystem*, int32_t de
+     // Todo: motion controllers? Don't know how BP can pass through a valid device id
+     case 0: 
+     default: {
+-        const auto position = rotation_offset * glm::vec3{vr->get_position(vr->get_hmd_index()) - vr->get_standing_origin()};
+-        const auto rotation = glm::normalize(rotation_offset * glm::quat{vr->get_rotation(vr->get_hmd_index())});
++        const auto position = WindowMode::get()->portal_output_enabled()?glm::vec3{}:rotation_offset * glm::vec3{vr->get_position(vr->get_hmd_index()) - vr->get_standing_origin()};
++        const auto rotation = WindowMode::get()->portal_output_enabled()?glm::identity<glm::quat>():glm::normalize(rotation_offset * glm::quat{vr->get_rotation(vr->get_hmd_index())});
+ 
+         const auto is_ue5 = g_hook->m_stereo_hook->has_double_precision();
+ 
+@@ -1638,6 +1639,7 @@ IXRTrackingSystemHook::SharedPtr* IXRTrackingSystemHook::get_view_extension(sdk:
+ }
+ 
+ void IXRTrackingSystemHook::apply_hmd_rotation(sdk::IXRCamera*, sdk::APlayerController* player_controller, Rotator<float>* rot) {
++    if(WindowMode::get()->portal_output_enabled())return;
+     SPDLOG_INFO_ONCE("apply_hmd_rotation {:x}", (uintptr_t)_ReturnAddress());
+ 
+     if (VR::get()->is_hmd_active() && !g_hook->m_process_view_rotation_hook && !g_hook->m_attempted_hook_view_rotation) {
+@@ -1714,7 +1716,7 @@ bool IXRTrackingSystemHook::update_player_camera(sdk::IXRCamera*, Quat<float>* r
+         }
+     }
+ 
+-    if (!g_hook->m_relative_transform_corrected) {
++    if (!WindowMode::get()->portal_output_enabled() && !g_hook->m_relative_transform_corrected) {
+         g_hook->m_relative_transform_corrected = true;
+ 
+         const auto return_address = (uintptr_t)_ReturnAddress();
+@@ -1809,7 +1811,7 @@ void IXRTrackingSystemHook::process_view_rotation(
+ 
+     auto& vr = VR::get();
+ 
+-    if (!vr->is_hmd_active() || !vr->is_any_aim_method_active()) {
++    if (WindowMode::get()->portal_output_enabled() || !vr->is_hmd_active() || !vr->is_any_aim_method_active()) {
+         call_orig();
+         return;
+     }
+@@ -1822,6 +1824,7 @@ void IXRTrackingSystemHook::process_view_rotation(
+ }
+ 
+ void IXRTrackingSystemHook::pre_update_view_rotation(sdk::UObject* reference_obj, Rotator<float>* rot) {
++    if(WindowMode::get()->portal_output_enabled())return;
+     auto& vr = VR::get();
+ 
+     if (m_stereo_hook->has_double_precision()) {
+@@ -1834,6 +1837,7 @@ void IXRTrackingSystemHook::pre_update_view_rotation(sdk::UObject* reference_obj
+ }
+ 
+ void IXRTrackingSystemHook::update_view_rotation(sdk::UObject* reference_obj, Rotator<float>* rot) {
++    if(WindowMode::get()->portal_output_enabled())return;
+     auto& vr = VR::get();
+ 
+     // Double check that the player controller passed through here is the local player controller
+diff --git a/src/mods/vr/runtimes/OpenVR.cpp b/src/mods/vr/runtimes/OpenVR.cpp
+index 28c2f1df5edb1e0fe8bb0c9dd5a31990b871627f..1c5a7924685f47cd7855670d24b4fd8dfae361e9 100644
+--- a/src/mods/vr/runtimes/OpenVR.cpp
++++ b/src/mods/vr/runtimes/OpenVR.cpp
+@@ -1,6 +1,7 @@
+ #include "../../VR.hpp"
+ 
+ #include "OpenVR.hpp"
++#include "../../portal/PortalIntegration.hpp"
+ 
+ namespace runtimes {
+ VRRuntime::Error OpenVR::synchronize_frame(std::optional<uint32_t> frame_count) {
+@@ -118,6 +119,16 @@ VRRuntime::Error OpenVR::update_poses(bool from_view_extensions, uint32_t frame_
+         this->internal_frame_count = frame_count;
+     }
+ 
++    if(WindowMode::get()->portal_output_enabled()) {
++        auto& tracked=this->render_poses[vr::k_unTrackedDeviceIndex_Hmd];
++        const auto raw=glm::rowMajor4(Matrix4x4f{*(Matrix3x4f*)&tracked.mDeviceToAbsoluteTracking});
++        const auto portalFrame=uevrportal::PortalFrame::latch(frame_count,uevrportal::transform(raw));
++        // Keep identity/timing/controllers from OpenVR; all camera and late-update poses use this immutable frame.
++        const auto mapped=portalFrame&&portalFrame->valid?uevrportal::matrix(portalFrame->runtimeHead):glm::identity<Matrix4x4f>();
++        for(unsigned row=0;row<3;++row)for(unsigned col=0;col<4;++col)tracked.mDeviceToAbsoluteTracking.m[row][col]=mapped[col][row];
++        tracked.vVelocity={};tracked.vAngularVelocity={};tracked.bPoseIsValid=portalFrame&&portalFrame->valid;
++        this->game_poses[vr::k_unTrackedDeviceIndex_Hmd]=tracked;
++    }
+     const auto& hmd_pose = this->render_poses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
+     this->pose_queue[frame_count % this->pose_queue.size()] = hmd_pose;
+     
+@@ -136,10 +147,12 @@ VRRuntime::Error OpenVR::update_render_target_size() {
+ }
+ 
+ uint32_t OpenVR::get_width() const {
++    if(WindowMode::get()->portal_output_enabled())return WindowMode::get()->portal_eye_width();
+     return this->w * eye_width_adjustment;
+ }
+ 
+ uint32_t OpenVR::get_height() const {
++    if(WindowMode::get()->portal_output_enabled())return WindowMode::get()->portal_eye_height();
+     return this->h * eye_height_adjustment;
+ }
+ 
+diff --git a/src/mods/vr/runtimes/OpenVR.hpp b/src/mods/vr/runtimes/OpenVR.hpp
+index 90ba854942001ba2750dc1a99779a67d44edd48d..92c9e0b98d841058e5ece135427a7235e472ee04 100644
+--- a/src/mods/vr/runtimes/OpenVR.hpp
++++ b/src/mods/vr/runtimes/OpenVR.hpp
+@@ -48,6 +48,11 @@ struct OpenVR final : public VRRuntime {
+     }
+ 
+     vr::HmdMatrix34_t get_pose_for_submit();
++    std::optional<uint32_t> portal_render_frame_id() const {
++        std::shared_lock lock(pose_mtx);
++        if(!has_render_frame_count)return {};
++        return internal_render_frame_count;
++    }
+ 
+     void on_device_reset() override {
+         std::unique_lock _{ this->pose_mtx };

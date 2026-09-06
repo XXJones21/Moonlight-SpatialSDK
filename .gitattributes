@@ -1,0 +1,2 @@
+# Preserve reproducible patch checksums on Windows and macOS.
+Documentation/visionOS-6DOF/patches/*.patch -text
