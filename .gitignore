@@ -29,3 +29,10 @@ logs/
 *.temp
 *~
 
+# Pinned portal reference checkouts and local outputs
+External/
+.superpowers/
+PortalHost/local.json
+Moonlight-6Dof-Vision/**/xcuserdata/
+DerivedData/
+
