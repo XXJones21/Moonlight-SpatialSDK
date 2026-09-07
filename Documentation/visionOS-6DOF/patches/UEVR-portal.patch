@@ -522,11 +522,12 @@ index 0000000000000000000000000000000000000000..1396bb26bab2d811a781e0d0a84b0d56
 +}
 diff --git a/src/mods/portal/PortalOutput.cpp b/src/mods/portal/PortalOutput.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..323f1dd040a57d49c494da1733d4029decca3eaa
+index 0000000000000000000000000000000000000000..84f3c66198ec5af4b0d4112e905713f9a9cd585b
 --- /dev/null
 +++ b/src/mods/portal/PortalOutput.cpp
-@@ -0,0 +1,240 @@
+@@ -0,0 +1,250 @@
 +#include "PortalOutput.hpp"
++#include "PortalUI12.hpp"
 +#include "PortalSession.hpp"
 +#include "WindowFilter.hpp"
 +#include "../WindowMode.hpp"
@@ -622,7 +623,7 @@ index 0000000000000000000000000000000000000000..323f1dd040a57d49c494da1733d4029d
 +    ComPtr<ID3D11DeviceContext> context11;
 +    ComPtr<IDXGISwapChain3> swap;ComPtr<IUnknown> identity,queueIdentity;unsigned width{},height{};DXGI_FORMAT format=DXGI_FORMAT_UNKNOWN;bool twelve{};
 +    struct Slot11 {ComPtr<ID3D11Query> done;ComPtr<ID3D11Texture2D> source,strip,diagnostic,back;};std::array<Slot11,3> slots11;unsigned next11{};
-+    struct Slot12 {ComPtr<ID3D12CommandAllocator> allocator;ComPtr<ID3D12GraphicsCommandList> list;ComPtr<ID3D12Resource> source,upload,back;std::uint64_t done{};};std::array<Slot12,3> slots12;
++    struct Slot12 {ComPtr<ID3D12CommandAllocator> allocator;ComPtr<ID3D12GraphicsCommandList> list;ComPtr<ID3D12Resource> source,upload,back;PortalUI12 ui;std::uint64_t done{};};std::array<Slot12,3> slots12;
 +    ComPtr<ID3D12Fence> fence;ComPtr<ID3D12CommandQueue> queue;std::uint64_t serial{};
 +    Impl(){thread=std::thread([this]{
 +        SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
@@ -716,7 +717,8 @@ index 0000000000000000000000000000000000000000..323f1dd040a57d49c494da1733d4029d
 +    const auto result=o.swap->Present(0,0);context->Flush();
 +    if(FAILED(result)){o.failed(id,"present_failed");return;}o.show();report(id,frame,"none");
 +}
-+void PortalOutput::d3d12(ID3D12CommandQueue* queue,ID3D12Resource* source,D3D12_RESOURCE_STATES sourceState,std::uint64_t id){
++void PortalOutput::d3d12(ID3D12CommandQueue* queue,ID3D12Resource* source,D3D12_RESOURCE_STATES sourceState,std::uint64_t id,
++    ID3D12Resource* gameUI, ID3D12Resource* frameworkUI){
 +    auto& o=*impl_;const auto frame=accepted(id);
 +    if(!frame){o.failed(id,"unpaired_or_stale_frame");return;}
 +    if(!queue||!source||queue->GetDesc().Type!=D3D12_COMMAND_LIST_TYPE_DIRECT){o.failed(id,"missing_d3d12_direct_queue");return;}
@@ -743,6 +745,9 @@ index 0000000000000000000000000000000000000000..323f1dd040a57d49c494da1733d4029d
 +    }else if(FAILED(slot.allocator->Reset())||FAILED(slot.list->Reset(slot.allocator.Get(),nullptr))){o.failed(id,"command_reset_failed");return;}
 +    if(FAILED(o.swap->GetBuffer(index,IID_PPV_ARGS(&slot.back)))){slot.list->Close();o.failed(id,"backbuffer_failed");return;}
 +    const bool diagnostics=WindowMode::get()->portal_diagnostics_enabled();const unsigned uploadHeight=16+(diagnostics?desc.Height:0);
++    if(!slot.ui.prepare(device.Get(),slot.back.Get(),{diagnostics?nullptr:gameUI,diagnostics?nullptr:frameworkUI})){
++        slot.list->Close();o.failed(id,"ui_composition_prepare_failed");return;
++    }
 +    const unsigned rowPitch=(width*4+255)&~255u;D3D12_HEAP_PROPERTIES heap{};heap.Type=D3D12_HEAP_TYPE_UPLOAD;
 +    D3D12_RESOURCE_DESC buffer{};buffer.Dimension=D3D12_RESOURCE_DIMENSION_BUFFER;buffer.Width=std::uint64_t(rowPitch)*uploadHeight;buffer.Height=1;buffer.DepthOrArraySize=1;buffer.MipLevels=1;buffer.SampleDesc.Count=1;buffer.Layout=D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 +    if(FAILED(device->CreateCommittedResource(&heap,D3D12_HEAP_FLAG_NONE,&buffer,D3D12_RESOURCE_STATE_GENERIC_READ,nullptr,IID_PPV_ARGS(&slot.upload)))){slot.list->Close();o.failed(id,"metadata_upload_failed");return;}
@@ -758,6 +763,11 @@ index 0000000000000000000000000000000000000000..323f1dd040a57d49c494da1733d4029d
 +    else {auto barrier=transition(source,sourceState,D3D12_RESOURCE_STATE_COPY_SOURCE);if(sourceState!=D3D12_RESOURCE_STATE_COPY_SOURCE)command->ResourceBarrier(1,&barrier);
 +        D3D12_BOX box{0,0,0,width,desc.Height,1};command->CopyTextureRegion(&dst,0,0,0,&src,&box);
 +        if(sourceState!=D3D12_RESOURCE_STATE_COPY_SOURCE){std::swap(barrier.Transition.StateBefore,barrier.Transition.StateAfter);command->ResourceBarrier(1,&barrier);}}
++    if(!diagnostics&&(gameUI||frameworkUI)){
++        auto uiBarrier=transition(slot.back.Get(),D3D12_RESOURCE_STATE_COPY_DEST,D3D12_RESOURCE_STATE_RENDER_TARGET);
++        command->ResourceBarrier(1,&uiBarrier);slot.ui.draw(command,width/2,desc.Height);
++        std::swap(uiBarrier.Transition.StateBefore,uiBarrier.Transition.StateAfter);command->ResourceBarrier(1,&uiBarrier);
++    }
 +    command->CopyTextureRegion(&dst,0,desc.Height,0,&upload,nullptr);std::swap(backBarrier.Transition.StateBefore,backBarrier.Transition.StateAfter);command->ResourceBarrier(1,&backBarrier);
 +    if(FAILED(command->Close())){o.failed(id,"command_close_failed");return;}
 +    ID3D12CommandList* lists[]={command};queue->ExecuteCommandLists(1,lists);
@@ -768,10 +778,10 @@ index 0000000000000000000000000000000000000000..323f1dd040a57d49c494da1733d4029d
 +}
 diff --git a/src/mods/portal/PortalOutput.hpp b/src/mods/portal/PortalOutput.hpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..ed8dcef123c8a0a1ffe7fbd9e4afb8289781b885
+index 0000000000000000000000000000000000000000..2f28f9edacb9d98e0e0fad4b1d950049986fa647
 --- /dev/null
 +++ b/src/mods/portal/PortalOutput.hpp
-@@ -0,0 +1,20 @@
+@@ -0,0 +1,21 @@
 +#pragma once
 +#include <d3d11.h>
 +#include <d3d12.h>
@@ -785,7 +795,8 @@ index 0000000000000000000000000000000000000000..ed8dcef123c8a0a1ffe7fbd9e4afb828
 +    PortalOutput();
 +    ~PortalOutput();
 +    void d3d11(ID3D11DeviceContext*,ID3D11Texture2D* doubleWide,std::uint64_t frameID);
-+    void d3d12(ID3D12CommandQueue*,ID3D12Resource* doubleWide,D3D12_RESOURCE_STATES,std::uint64_t frameID);
++    void d3d12(ID3D12CommandQueue*,ID3D12Resource* doubleWide,D3D12_RESOURCE_STATES,std::uint64_t frameID,
++        ID3D12Resource* gameUI = nullptr, ID3D12Resource* frameworkUI = nullptr);
 +    void hide();
 +private:
 +    struct Impl;
@@ -897,6 +908,162 @@ index 0000000000000000000000000000000000000000..ab16b466cb4b86f87c2d6c838682cfec
 +    std::jthread worker_;
 +};
 +}
+diff --git a/src/mods/portal/PortalUI12.hpp b/src/mods/portal/PortalUI12.hpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..9c554436933ce48a08e09f71e4edce683e7d0378
+--- /dev/null
++++ b/src/mods/portal/PortalUI12.hpp
+@@ -0,0 +1,150 @@
++#pragma once
++#include <d3d12.h>
++#include <d3dcompiler.h>
++#include <wrl/client.h>
++#include <array>
++#include <algorithm>
++#include <cstring>
++#include <cstdint>
++#include <cfloat>
++#include <climits>
++
++namespace uevrportal {
++// One instance per fenced output slot. prepare() may only run after that slot
++// completes. Resources AND descriptors remain owned until the next safe reuse.
++// Inputs are UEVR's premultiplied UI textures in PIXEL_SHADER_RESOURCE state;
++// the game HUD copy has already had its configurable alpha inversion applied.
++class PortalUI12 {
++    template<class T> using Ptr = Microsoft::WRL::ComPtr<T>;
++    Ptr<ID3D12RootSignature> root_;
++    Ptr<ID3D12PipelineState> pipeline_;
++    Ptr<ID3D12DescriptorHeap> srv_, rtv_;
++    std::array<Ptr<ID3D12Resource>, 2> layers_;
++    Ptr<ID3D12Resource> target_;
++    Ptr<IUnknown> identity_;
++    DXGI_FORMAT format_ = DXGI_FORMAT_UNKNOWN;
++    UINT stride_{};
++
++    static DXGI_FORMAT viewFormat(DXGI_FORMAT f) {
++        switch (f) {
++        case DXGI_FORMAT_R8G8B8A8_TYPELESS: case DXGI_FORMAT_R8G8B8A8_UNORM:
++        case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB: return DXGI_FORMAT_R8G8B8A8_UNORM;
++        case DXGI_FORMAT_B8G8R8A8_TYPELESS: case DXGI_FORMAT_B8G8R8A8_UNORM:
++        case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB: return DXGI_FORMAT_B8G8R8A8_UNORM;
++        default: return DXGI_FORMAT_UNKNOWN;
++        }
++    }
++    bool initialize(ID3D12Device* device, DXGI_FORMAT format) {
++        // Full-screen triangle; a separate viewport places the same flat UI
++        // on the physical portal plane in each eye, with no scene reprojection.
++        static constexpr char shader[] = R"(
++Texture2D ui : register(t0);
++SamplerState uiSampler : register(s0);
++struct V { float4 position : SV_Position; float2 uv : TEXCOORD0; };
++V vs(uint id : SV_VertexID) {
++    V o; o.uv=float2((id << 1) & 2, id & 2);
++    o.position=float4(o.uv.x*2-1, 1-o.uv.y*2, 0, 1); return o;
++}
++float4 ps(V input) : SV_Target { return ui.Sample(uiSampler, input.uv); }
++)";
++        Ptr<ID3DBlob> vs, ps, errors, serialized;
++        if (FAILED(D3DCompile(shader, std::strlen(shader), "PortalUI", nullptr, nullptr,
++                "vs", "vs_5_0", D3DCOMPILE_ENABLE_STRICTNESS, 0, &vs, &errors)) ||
++            FAILED(D3DCompile(shader, std::strlen(shader), "PortalUI", nullptr, nullptr,
++                "ps", "ps_5_0", D3DCOMPILE_ENABLE_STRICTNESS, 0, &ps, &errors))) return false;
++        D3D12_DESCRIPTOR_RANGE range{};
++        range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; range.NumDescriptors = 1;
++        D3D12_ROOT_PARAMETER parameter{};
++        parameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
++        parameter.DescriptorTable = {1, &range}; parameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
++        D3D12_STATIC_SAMPLER_DESC sampler{};
++        sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
++        sampler.AddressU = sampler.AddressV = sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
++        sampler.MaxAnisotropy = 1; sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
++        sampler.MaxLOD = FLT_MAX; sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
++        D3D12_ROOT_SIGNATURE_DESC rd{};
++        rd.NumParameters = 1; rd.pParameters = &parameter; rd.NumStaticSamplers = 1; rd.pStaticSamplers = &sampler;
++        if (FAILED(D3D12SerializeRootSignature(&rd, D3D_ROOT_SIGNATURE_VERSION_1, &serialized, &errors)) ||
++            FAILED(device->CreateRootSignature(0, serialized->GetBufferPointer(), serialized->GetBufferSize(), IID_PPV_ARGS(&root_)))) return false;
++        D3D12_GRAPHICS_PIPELINE_STATE_DESC pd{};
++        pd.pRootSignature = root_.Get();
++        pd.VS = {vs->GetBufferPointer(), vs->GetBufferSize()}; pd.PS = {ps->GetBufferPointer(), ps->GetBufferSize()};
++        auto& blend = pd.BlendState.RenderTarget[0];
++        blend.BlendEnable = TRUE; blend.SrcBlend = D3D12_BLEND_ONE; blend.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
++        blend.BlendOp = blend.BlendOpAlpha = D3D12_BLEND_OP_ADD;
++        blend.SrcBlendAlpha = D3D12_BLEND_ONE; blend.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
++        blend.LogicOp = D3D12_LOGIC_OP_NOOP; blend.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
++        pd.SampleMask = UINT_MAX; pd.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
++        pd.RasterizerState.CullMode = D3D12_CULL_MODE_NONE; pd.RasterizerState.DepthClipEnable = TRUE;
++        pd.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
++        pd.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
++        pd.NumRenderTargets = 1; pd.RTVFormats[0] = format; pd.SampleDesc.Count = 1;
++        if (FAILED(device->CreateGraphicsPipelineState(&pd, IID_PPV_ARGS(&pipeline_)))) return false;
++        D3D12_DESCRIPTOR_HEAP_DESC hd{};
++        hd.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV; hd.NumDescriptors = 2; hd.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
++        if (FAILED(device->CreateDescriptorHeap(&hd, IID_PPV_ARGS(&srv_)))) return false;
++        hd.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; hd.NumDescriptors = 1; hd.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
++        if (FAILED(device->CreateDescriptorHeap(&hd, IID_PPV_ARGS(&rtv_)))) return false;
++        stride_ = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
++        format_ = format;
++        return SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&identity_)));
++    }
++public:
++    bool prepare(ID3D12Device* device, ID3D12Resource* target, const std::array<ID3D12Resource*, 2>& layers) {
++        layers_ = {}; target_.Reset();
++        if (!layers[0] && !layers[1]) return true;
++        if (!device || !target) return false;
++        const auto td = target->GetDesc();
++        Ptr<IUnknown> identity; if (FAILED(device->QueryInterface(IID_PPV_ARGS(&identity)))) return false;
++        if (td.Format != viewFormat(td.Format) || td.SampleDesc.Count != 1 ||
++            td.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || td.DepthOrArraySize != 1 ||
++            !(td.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)) return false;
++        if (!pipeline_ || !srv_ || !rtv_ || identity_.Get() != identity.Get() || format_ != td.Format) {
++            *this = PortalUI12{};
++            if (!initialize(device, td.Format)) return false;
++        }
++        for (unsigned i = 0; i < layers.size(); ++i) {
++            if (!layers[i]) continue;
++            const auto d = layers[i]->GetDesc(); const auto format = viewFormat(d.Format);
++            Ptr<ID3D12Device> owner; Ptr<IUnknown> ownerIdentity;
++            if (FAILED(layers[i]->GetDevice(IID_PPV_ARGS(&owner))) || FAILED(owner.As(&ownerIdentity)) ||
++                ownerIdentity.Get() != identity.Get() || layers[i] == target ||
++                format == DXGI_FORMAT_UNKNOWN || d.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D ||
++                d.SampleDesc.Count != 1 || d.DepthOrArraySize != 1 || !d.Width || !d.Height ||
++                (d.Flags & D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE)) return false;
++            D3D12_SHADER_RESOURCE_VIEW_DESC sd{};
++            sd.Format = format; sd.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
++            sd.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; sd.Texture2D.MipLevels = 1;
++            auto cpu = srv_->GetCPUDescriptorHandleForHeapStart(); cpu.ptr += i * stride_;
++            device->CreateShaderResourceView(layers[i], &sd, cpu); layers_[i] = layers[i];
++        }
++        target_ = target; device->CreateRenderTargetView(target, nullptr, rtv_->GetCPUDescriptorHandleForHeapStart());
++        return true;
++    }
++    // Caller owns this command list and transitions target to/from RENDER_TARGET.
++    // No source transitions, writes, readback, queue submission, or waits here.
++    void draw(ID3D12GraphicsCommandList* command, unsigned eyeWidth, unsigned contentHeight) {
++        if (!target_ || !command || !eyeWidth || !contentHeight) return;
++        const auto td = target_->GetDesc();
++        if (std::uint64_t(eyeWidth) * 2 > td.Width || contentHeight > td.Height) return;
++        command->SetPipelineState(pipeline_.Get()); command->SetGraphicsRootSignature(root_.Get());
++        ID3D12DescriptorHeap* heaps[] = {srv_.Get()}; command->SetDescriptorHeaps(1, heaps);
++        const auto rtv = rtv_->GetCPUDescriptorHandleForHeapStart(); command->OMSetRenderTargets(1, &rtv, FALSE, nullptr);
++        command->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
++        for (unsigned i = 0; i < layers_.size(); ++i) {
++            if (!layers_[i]) continue;
++            const auto d = layers_[i]->GetDesc();
++            const float scale = (std::min)(float(eyeWidth) / float(d.Width), float(contentHeight) / float(d.Height));
++            const float w = float(d.Width) * scale, h = float(d.Height) * scale;
++            auto gpu = srv_->GetGPUDescriptorHandleForHeapStart(); gpu.ptr += i * stride_;
++            command->SetGraphicsRootDescriptorTable(0, gpu);
++            for (unsigned eye = 0; eye < 2; ++eye) {
++                const D3D12_VIEWPORT viewport{eye * float(eyeWidth) + (eyeWidth-w)*.5f, (contentHeight-h)*.5f, w, h, 0, 1};
++                const D3D12_RECT scissor{LONG(eye*eyeWidth), 0, LONG((eye+1)*eyeWidth), LONG(contentHeight)};
++                command->RSSetViewports(1, &viewport); command->RSSetScissorRects(1, &scissor);
++                command->DrawInstanced(3, 1, 0, 0);
++            }
++        }
++    }
++};
++}
 diff --git a/src/mods/vr/D3D11Component.cpp b/src/mods/vr/D3D11Component.cpp
 index f32064206a9eda5a29ed3fd8f33350dbe4ac3ab1..1a19ba6c173c72a3d452eb85a09bb5796b254bd0 100644
 --- a/src/mods/vr/D3D11Component.cpp
@@ -949,7 +1116,7 @@ index f32064206a9eda5a29ed3fd8f33350dbe4ac3ab1..1a19ba6c173c72a3d452eb85a09bb579
                  context->OMSetRenderTargets(1, views, nullptr);
                  invoke_shader(vr->m_frame_count, 1, m_backbuffer_size[0] / 2, m_backbuffer_size[1]);
 diff --git a/src/mods/vr/D3D12Component.cpp b/src/mods/vr/D3D12Component.cpp
-index 1a4aab6f90063685b14afa3798d3ebf208f10c5b..d8175e0ccaf67e53b5643b2f848f30588a1cdd84 100644
+index 1a4aab6f90063685b14afa3798d3ebf208f10c5b..3ae005c8757b9046ed6b01c58496c5ba6606fb74 100644
 --- a/src/mods/vr/D3D12Component.cpp
 +++ b/src/mods/vr/D3D12Component.cpp
 @@ -8,6 +8,7 @@
@@ -960,14 +1127,22 @@ index 1a4aab6f90063685b14afa3798d3ebf208f10c5b..d8175e0ccaf67e53b5643b2f848f3058
  
  #include <../../directxtk12-src/Inc/ResourceUploadBatch.h>
  #include <../../directxtk12-src/Inc/RenderTargetState.h>
-@@ -435,6 +436,11 @@ vr::EVRCompositorError D3D12Component::on_frame(VR* vr) {
+@@ -435,6 +436,19 @@ vr::EVRCompositorError D3D12Component::on_frame(VR* vr) {
      #endif
      }
  
 +    if(WindowMode::get()->portal_output_enabled()) {
 +        const auto openvr=vr->get_runtime<runtimes::OpenVR>();
 +        const auto portalID=runtime->is_openvr()?openvr->portal_render_frame_id().value_or(0):0;
-+        uevrportal::PortalOutput::get().d3d12(command_queue,backbuffer.Get(),D3D12_RESOURCE_STATE_RENDER_TARGET,portalID);
++        // The original game UI target was cleared above. Use the same retained,
++        // alpha-corrected copy submitted to OpenVR, on the same ordered queue.
++        // Framework UI is a separate premultiplied texture; suppress it when
++        // closed so the previous menu image cannot remain in the portal.
++        const auto frameworkUI=g_framework->get_rendertarget_d3d12();
++        const auto gameUI=(runtime->is_openvr()&&is_right_eye_frame&&ui_target&&!is_2d_screen)
++            ?m_openvr.ui_tex.texture.Get():nullptr;
++        uevrportal::PortalOutput::get().d3d12(command_queue,backbuffer.Get(),D3D12_RESOURCE_STATE_RENDER_TARGET,portalID,
++            gameUI,g_framework->is_drawing_anything()?frameworkUI.Get():nullptr);
 +    }
      // If m_frame_count is even, we're rendering the left eye.
      if (is_left_eye_frame) {

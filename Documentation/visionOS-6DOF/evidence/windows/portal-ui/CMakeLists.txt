@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.20)
+project(PortalUITest LANGUAGES CXX)
+add_executable(portal_ui_test portal_ui_test.cpp)
+target_compile_features(portal_ui_test PRIVATE cxx_std_17)
+target_compile_definitions(portal_ui_test PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN)
+target_include_directories(portal_ui_test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../External/UEVR-6DOF-Window/src/mods/portal")
+target_link_libraries(portal_ui_test PRIVATE d3d12 dxgi d3dcompiler)

@@ -1,10 +1,10 @@
 {
   "repository": "https://github.com/elliotttate/UEVR-6DOF-Window",
   "baseCommit": "fb31341e860b15e116a15123820c95f044ff0a0f",
-  "authoredCommit": "67d97855b1f81fb3226b43b8c4447a5eb9f1d022",
-  "authoredTree": "62b76e100211dd709ba6ebd779e9636cf08d8498",
+  "authoredCommit": "e0d3fa877f4a9bcf8eb66a8ae7b6b1833a06e904",
+  "authoredTree": "130960ebc1fd4a5e3467a8403d15e40523e23a0c",
   "patch": "UEVR-portal.patch",
-  "patchSHA256": "97b1eefc2df029579e6bdf02e49c4f6505397fd53ab8b6cda1d3720b4944dd2b",
-  "validation": "Windows MSVC Release build, eight package hashes, embedded revision and patch reverse-check passed for 67d9785. Production lifecycle regression reproduces gpu_busy then persistent gpu_recreation_pending before the fix and passes canonical identity, repeated buffer reuse, resize, queue and device changes after it. Independent review found no blockers. Live 67d9785 displays direct SBS and metadata; 60 valid paired successful sampled output records span 70 seconds with no sampled GPU stalls, and three transient unpaired/stale records recover by the next sample. Live AVP camera mapping is confirmed. Sunshine capture, decoded metadata and client portal video remain unvalidated. See evidence/windows/2026-09-06-present-fix/README.md.",
+  "patchSHA256": "df3c0d364acb3997a2112839472caede9ab0e31a9e402457830058eb2bb0f027",
+  "validation": "e0d3fa8: Windows MSVC Release build, eight package file hashes, embedded committed revision and exported patch reverse-check pass. Real D3D12 compositor passes 24 offline WARP pixel frames with debug layer enabled and no error/corruption messages; existing projection (72 cases), secondary Present (32 cases), and output lifetime regressions pass. Independent review found no material defects. New revision is injected with verified 2560x720 allocation. The corrected 18:40:14 headset recording verifies game main menu and UEVR overlay visibility in the left eye. Windows mouse clicks, gameplay HUD, right-eye artifacts and gray-panel recovery remain open. Earlier 67d9785 live baseline has user-confirmed headset video and Xbox input through Sunshine 2560x736/60. See evidence/windows/portal-ui/README.md and Mac-handoff-panel-size-and-ui.md.",
   "portalCore": "Phase1 0b7f02d plus Phase2 FrameMetadata.hpp; normalized SHA256 pins in cmake/PortalCore.cmake"
 }

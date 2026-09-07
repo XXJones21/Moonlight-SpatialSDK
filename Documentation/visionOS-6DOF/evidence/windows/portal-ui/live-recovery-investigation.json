@@ -1,0 +1,29 @@
+{
+  "revision": "e0d3fa877f4a9bcf8eb66a8ae7b6b1833a06e904",
+  "sampledOutputReasons": {
+    "unpaired_or_stale_frame": 55,
+    "none": 102
+  },
+  "firstSuccess": "[2026-09-06 18:35:27.912] [UnrealVR] [info] [Portal] output frame=515 seq=22801 geometry=872 valid=true paired=true status=none detail=none",
+  "lastSuccess": "[2026-09-06 18:37:21.185] [UnrealVR] [info] [Portal] output frame=5741 seq=1063 geometry=885 valid=true paired=true status=none detail=none",
+  "lastObservedOutput": "[2026-09-06 18:38:04.466] [UnrealVR] [info] [Portal] output frame=8338 seq=0 geometry=0 valid=false paired=false status=staleTracking detail=unpaired_or_stale_frame",
+  "note": "Rate-limited records, not frame drop rate. Renderer resumed successful paired output after reconnect; headset recovery not confirmed.",
+  "windowOverlap": {
+    "gamePid": 62992,
+    "gameHwnd": 1054036,
+    "portalHwnd": 2892982,
+    "bothBefore": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "gameAfter": [
+      80,
+      80,
+      1680,
+      1080
+    ]
+  },
+  "userReport": "UI visually clean, Windows mouse hover works but left-click fails. Headset became grey and reconnect did not restore it."
+}

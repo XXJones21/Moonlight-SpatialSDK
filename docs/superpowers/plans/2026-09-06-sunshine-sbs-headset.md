@@ -23,6 +23,15 @@
 
 ## Established baseline and remaining boundary
 
+**Latest live update:** User confirms headset game frames and restored
+controller input after enabling Portal Output. Screen-recording samples show
+presentation. Direct device metadata/CRC diagnostics and full stereo/geometry
+qualification remain open; do not equate visible video with all acceptance
+checks. See [first headset results](../../../Documentation/visionOS-6DOF/evidence/windows/sunshine-sbs/first-headset-video.md).
+The next baseline check follows a Portal Eye Content Width edit that caused
+content_aspect_mismatch. Pixel size stays 1280x720 per eye; physical resizing is
+owned by visionOS. Missing separate UI and scene artifacts need further work.
+
 UEVR revision `67d97855b1f81fb3226b43b8c4447a5eb9f1d022` is built, packaged and injected. The user sees both direct SBS eyes and the metadata strip. Sixty sampled successful output records span 70 seconds, with approximately 60 fps frame progression and no sampled GPU stalls. Three unpaired/stale records recover by the next sample. Live AVP camera mapping works. See [live evidence](../../../Documentation/visionOS-6DOF/evidence/windows/2026-09-06-present-fix/README.md).
 
 The physical display is 2560x1440 at 144 Hz and rejected a non-mutating test of 2560x736 at 60 Hz (`DISP_CHANGE_BADMODE`, -2). A direct window occupying part of that desktop is not yet a correctly sized capture source. A grey client alone cannot distinguish capture selection, negotiation, metadata or frame-gate failures.
@@ -33,9 +42,9 @@ The physical display is 2560x1440 at 144 Hz and rejected a non-mutating test of 
 
 **Interface:** Produces a verified display device ID, physical desktop origin `(x,y)`, 2560x736 mode at 60 Hz and 100% scaling.
 
-- [ ] Inventory the installed Sunshine version and detected display IDs again; save only relevant display and encoder records. Verify the physical display's existing rejection from `evidence/windows/2026-09-06-headset-preparation/display-mode-check.json` rather than repeating disruptive changes.
-- [ ] Select a maintained Windows virtual-display driver supporting custom modes and the current Windows/GPU combination. Before installation, record its official source, release, signature, exact install/uninstall commands, configuration path and rollback procedure in the evidence README. Verify these against that release; do not assume Sunshine itself supplies a virtual display.
-- [ ] At the installation checkpoint, add a dedicated extended display with 2560x736 at 60 Hz, SDR and 100% scaling. Keep the physical display available for game and UEVR menus. Record the actual device ID and desktop origin; do not assume `(0,0)`.
+- [x] Inventory the installed Sunshine version and detected display IDs again; save only relevant display and encoder records. Verify the physical display's existing rejection from `evidence/windows/2026-09-06-headset-preparation/display-mode-check.json` rather than repeating disruptive changes. Sunshine still detects only physical DISPLAY1 at 2560x1440.
+- [x] Select and prepare the signed VirtualDrivers 25.7.23 driver-only package. Existing C:\VirtualDisplayDriver files are identical to the verified release; no matching device is registered. Hashes/signatures, original settings backups, exact commands and rollback are recorded in [capture preparation](../../../Documentation/visionOS-6DOF/evidence/windows/sunshine-sbs/README.md). Read-only preparation checks pass. Runtime compatibility and capture support remain unverified until installation.
+- [x] At the installation checkpoint, add a dedicated extended display with 2560x736 at 60 Hz, SDR and 100% scaling. Verified DISPLAY5, origin (2560,0), device ID `{9acddf6d-43cc-576e-9aff-0c5fc80b4cc8}`; physical DISPLAY1 remains primary. See capture preparation evidence.
 - [ ] Set UEVR Portal desktop X/Y to that origin, eye width 1280 and eye height 720. Keep Portal Output on and Room-Anchored Window off. Verify the portal client area fills the capture display exactly and the whole metadata strip remains present, without taskbar, menus or cursor obscuring it.
 - [ ] Save measured display mode, window client rectangle and a source screenshot. Confirm the existing game still produces valid paired output after moving the window.
 
@@ -47,8 +56,8 @@ The physical display is 2560x1440 at 144 Hz and rejected a non-mutating test of 
 
 **Interface:** Consumes Task 1's display ID; produces a Sunshine stream whose visible decoded raster is 2560x736 at requested 60 fps, SDR HEVC and stereo audio.
 
-- [ ] Confirm the installed version's output selection syntax in its UI/logs. Set `output_name` to the actual capture display identifier supported by that version. Record whether selection is global; preserve the original selection for ordinary flat streaming.
-- [ ] Configure a clearly named portal streaming entry and keep game launching/injection user-controlled during initial validation. Prevent automatic resolution remapping from changing the dedicated mode. Do not assume a client resolution request alone changes the display.
+- [x] Confirm the installed version's output selection syntax in its UI/logs. Set `output_name` to the actual capture display identifier supported by that version. Selection is global; original config/apps are backed up. Startup logs confirm capture 2560x736 at offset (2560,0), 60 Hz.
+- [x] Add `UEVR Portal (SBS)` while preserving existing entries and user-controlled game injection. Set `dd_configuration_option=disabled` to prevent automatic mode changes. Actual client-requested and negotiated dimensions remain unverified.
 - [ ] Coordinate a stream reconnect with the user and Mac session. Request exactly 2560x736, 60 fps, HEVC SDR and stereo audio. Record requested dimensions separately from actual capture and encoder dimensions.
 - [ ] Verify Sunshine selected the intended display/GPU and negotiated the exact output dimensions and codec. Distinguish internal codec alignment/padding from the visible decoded raster; no change to the visible image is acceptable.
 - [ ] Save the relevant session log excerpt and verify the normal desktop remains usable for configuration. If the wrong display or dimensions are selected, fix that boundary before investigating headset rendering.
@@ -94,3 +103,17 @@ The physical display is 2560x1440 at 144 Hz and rejected a non-mutating test of 
 - [ ] Commit evidence and close only passed gates. Keep longer gameplay, 3840x1096 mode, detailed eye rendering mismatch, D3D11 qualification and Settings/audio lifecycle as separate follow-ups.
 
 **Pass:** The actual game stays visible and geometrically correct under live input, recovers safely from invalid state, and can be launched again from the saved procedure.
+
+## UI and panel sizing follow-up — 2026-09-06
+
+Josh confirms both the separate game UI and the UEVR overlay are required.
+Windows revision e0d3fa8 adds both to D3D12 direct output; Release build,
+24 WARP compositor frames with debug layer, existing regressions and review pass.
+The exact-revision package and exported patch are prepared. Live injection/UI
+acceptance remains pending. See [UI checkpoint](../../../Documentation/visionOS-6DOF/evidence/windows/portal-ui/README.md).
+
+The [Mac handoff](../../../Documentation/visionOS-6DOF/Mac-handoff-panel-size-and-ui.md)
+covers a larger physical panel and clearer resize controls. Windows has not
+edited client source. Keep 1280x720 per eye / 2560x736 full raster / 60 fps fixed.
+Complete UI/size acceptance, then isolate existing scene glitches. Higher
+resolutions and up to 90 fps follow stability and coordinated mode support.

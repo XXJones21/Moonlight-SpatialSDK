@@ -2,10 +2,32 @@
 
 Updated 2026-09-06. Branch: `moonlight-6dof-vision`. Client baseline:
 `3e3f270` (audio buffering/controller routing), following `68e7e16` (working
-basic visionOS streaming). Windows UEVR fixes through `67d9785` are preserved
+basic visionOS streaming). Windows UEVR fixes through `e0d3fa8` are preserved
 in `patches/UEVR-portal.patch` with commit/tree/hash provenance in its manifest.
 
+**New live UI checkpoint:** `e0d3fa8` adds separate game HUD/menus and
+the UEVR settings overlay to the D3D12 direct SBS exporter. Its injected revision
+and 2560x720 allocation are verified. The corrected 18:40:14 recording shows both
+the game main menu and UEVR overlay in the headset's recorded left eye. Mouse
+click handling, gameplay HUD, right-eye glitches and gray-panel recovery remain
+open. The game desktop window was moved off the virtual capture display after
+it reopened over the SBS window. Release build,
+24 WARP pixel frames with the D3D12 debug layer, prior regressions and independent
+review pass. The package is `External/local-validation/UEVR-portal-e0d3fa8`;
+close game/injector before switching. See [UI checkpoint](evidence/windows/portal-ui/README.md)
+and the [Mac handoff for larger physical panels](Mac-handoff-panel-size-and-ui.md).
+Keep 1280x720 per eye and 60 fps while stabilizing. No Swift/Xcode edits were made here.
+
 ## Start the next session here
+
+**Headset checkpoint:** The user now confirms live game video and working
+controller input after enabling Portal Output, through Sunshine's dedicated
+2560x736/60 SDR display. A headset recording provides visible presentation
+evidence. UI composition, visual stability and full geometry/recovery remain
+open. Changing Portal Eye Content Width broke the fixed aspect/size contract;
+keep 1280x720 per eye and enlarge the physical panel in visionOS. See
+[first headset results](evidence/windows/sunshine-sbs/first-headset-video.md).
+Earlier source-only checkpoints below describe the preceding implementation.
 
 **Windows checkpoint, 2026-09-06:** The stationary VRto3D HMD is validated.
 **Latest live result:** `67d9785` now displays SBS with the metadata strip. The

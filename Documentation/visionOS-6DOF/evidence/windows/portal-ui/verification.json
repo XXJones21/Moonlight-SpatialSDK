@@ -1,0 +1,30 @@
+{
+  "revision": "e0d3fa877f4a9bcf8eb66a8ae7b6b1833a06e904",
+  "backendSHA256": "ec25c6c9af41b1e743069bf2c27812483f152ea261b150f4e83e4db92bf7979f",
+  "build": "MSVC 19.44 Release x64, committed revision embedded",
+  "warpPixelFrames": 24,
+  "debugLayer": "enabled, no error/corruption messages",
+  "projectionCases": 72,
+  "secondaryPresentCases": 32,
+  "outputLifetime": "passed",
+  "review": "no material defects",
+  "packageFilesVerified": 8,
+  "patchReverseCheck": "passed",
+  "liveInjection": "verified from UEVR game log at 18:35:09, revision e0d3fa877f4a9bcf8eb66a8ae7b6b1833a06e904",
+  "clientChanges": "none; Mac handoff only",
+  "liveAllocation": "2560x720 verified",
+  "headsetMenuVisibility": "Game main menu and UEVR settings overlay visible in left-eye recording at 0.3, 1.6 and 3.4 seconds",
+  "recording": {
+    "file": "ScreenRecording_09-06-2026 18-40-14_1.mov",
+    "sha256": "9d694eb78b4b6a924166fe56989450e9742fcedfd70096cf91cb88c34daf58ee",
+    "durationSeconds": 3.998333,
+    "eye": "left only, per user"
+  },
+  "pending": [
+    "Windows mouse click confirmation after moving game to physical display",
+    "gameplay HUD",
+    "right-eye UEVR artifacts",
+    "headset gray-panel recovery",
+    "Mac physical panel sizing"
+  ]
+}
