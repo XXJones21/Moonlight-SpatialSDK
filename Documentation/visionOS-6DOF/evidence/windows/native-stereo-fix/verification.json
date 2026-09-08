@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-08",
+  "sourceRevision": "4007df45c6017eccc3354df603b0a97043fda7ae",
+  "releaseBuild": "passed; rebuilt after commit; embedded revision verified",
+  "copyAndCombinedUI": "231 checks; 36 copy frames + 6 combined frames; D3D12 debug layer enabled",
+  "pairStateMachine": "20 checks passed",
+  "productionFrameCache": "50 checks passed",
+  "existingUI": "24 WARP frames passed with D3D12 debug layer",
+  "regressions": "output lifetime including dual-source retention; 32 secondary Present; 72 projection cases passed",
+  "review": "independent review and follow-up found no remaining code blockers",
+  "packageFilesVerified": 8,
+  "patchReverseCheck": "passed",
+  "liveQualification": "pending; profile backed up and staging verified 2026-09-08; saved settings already matched; new injector launched; not yet injected",
+  "logsSHA256": {
+    "tests": "2548d40b41d9936dee42e7737076707f22bd2f3342f5a22d03be130dc2df3d85",
+    "ui-tests": "6a1e345d2b547524b67c011325b073cfb4b5e0a15b758a3d868b5421fb649800",
+    "cache-tests": "79f5b8223b7984b952f51ef867e94a0682b485a1090349dd8ab4fb0811a7074b",
+    "regressions": "6f6fb9d275518ba2354bc17891732bc3832b57f8695b7c9546faca0b1118f9bb"
+  }
+}

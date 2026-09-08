@@ -1,0 +1,32 @@
+UpdateCTestConfiguration  from :D:/Tools/Moonlight-SpatialSDK/build/native-stereo-fix-tests/DartConfiguration.tcl
+Test project D:/Tools/Moonlight-SpatialSDK/build/native-stereo-fix-tests
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start 1: eye_copy
+
+1: Test command: D:\Tools\Moonlight-SpatialSDK\build\native-stereo-fix-tests\Release\eye_copy_test.exe
+1: Working Directory: D:/Tools/Moonlight-SpatialSDK/build/native-stereo-fix-tests
+1: Test timeout computed to be: 9999879
+1: D3D12 debug layer: enabled
+1: Validation checks completed
+1: 36 WARP pixel frames (distinct/shared, RGBA/BGRA, typeless/sRGB, restored states)
+1: 6 combined eye-copy + HUD/menu frames; 2 gated batches of 3 in-flight slots, caller refs released, fenced reuse
+1: PASS 231 checks, 0 failures
+1/2 Test #1: eye_copy .........................   Passed    0.30 sec
+test 2
+    Start 2: native_pair
+
+2: Test command: D:\Tools\Moonlight-SpatialSDK\build\native-stereo-fix-tests\Release\pair_test.exe
+2: Working Directory: D:/Tools/Moonlight-SpatialSDK/build/native-stereo-fix-tests
+2: Test timeout computed to be: 9999879
+2: 20 native pair checks passed
+2/2 Test #2: native_pair ......................   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.31 sec

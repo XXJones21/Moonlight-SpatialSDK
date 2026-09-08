@@ -1,10 +1,11 @@
 {
   "repository": "https://github.com/elliotttate/UEVR-6DOF-Window",
   "baseCommit": "fb31341e860b15e116a15123820c95f044ff0a0f",
-  "authoredCommit": "e0d3fa877f4a9bcf8eb66a8ae7b6b1833a06e904",
-  "authoredTree": "130960ebc1fd4a5e3467a8403d15e40523e23a0c",
+  "authoredCommit": "2c3523958a0fc61124b02fca7c8edef9d99fb991",
+  "authoredTree": "8b3abb4c5b2d3a4841664f4537e93c5f9ccff79e",
   "patch": "UEVR-portal.patch",
-  "patchSHA256": "df3c0d364acb3997a2112839472caede9ab0e31a9e402457830058eb2bb0f027",
-  "validation": "e0d3fa8: Windows MSVC Release build, eight package file hashes, embedded committed revision and exported patch reverse-check pass. Real D3D12 compositor passes 24 offline WARP pixel frames with debug layer enabled and no error/corruption messages; existing projection (72 cases), secondary Present (32 cases), and output lifetime regressions pass. Independent review found no material defects. New revision is injected with verified 2560x720 allocation. The corrected 18:40:14 headset recording verifies game main menu and UEVR overlay visibility in the left eye. Windows mouse clicks, gameplay HUD, right-eye artifacts and gray-panel recovery remain open. Earlier 67d9785 live baseline has user-confirmed headset video and Xbox input through Sunshine 2560x736/60. See evidence/windows/portal-ui/README.md and Mac-handoff-panel-size-and-ui.md.",
-  "portalCore": "Phase1 0b7f02d plus Phase2 FrameMetadata.hpp; normalized SHA256 pins in cmake/PortalCore.cmake"
+  "patchSHA256": "3564e1dbfc983d5c8d31e6221b1680c697f962f927f2d43de3577cd6e58da4fc",
+  "validation": "Release build, embedded revision, eight package hashes, cache/GPU/Present/projection regressions and patch reverse-check passed. Menu/game transitions user-validated with c34eaa2 plus live window-order fix; permanent 2c35239 binary not yet injected.",
+  "portalCore": "Phase1 0b7f02d plus Phase2 FrameMetadata.hpp; normalized SHA256 pins in cmake/PortalCore.cmake",
+  "validationEvidence": "../evidence/windows/frame-identity-recovery/verification-2c35239.json"
 }

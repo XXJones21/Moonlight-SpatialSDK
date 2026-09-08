@@ -1,0 +1,12 @@
+cache_test.cpp
+Geometry.cpp
+Generating Code...
+FAIL scene counter rewind must not rewind wire frame identity
+Traceback (most recent call last):
+  File "D:\Tools\Moonlight-SpatialSDK\Documentation\visionOS-6DOF\evidence\windows\native-stereo-fix\test_frame_cache.py", line 173, in <module>
+    subprocess.run([str(exe)],check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\josh2\miniconda3\Lib\subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\native-frame-cache\\cache_test.exe']' returned non-zero exit status 1.

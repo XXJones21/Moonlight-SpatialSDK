@@ -1,0 +1,18 @@
+{
+  "revision": "c34eaa24894a240a97b7eaefbc092c8303cd37a1",
+  "date": "2026-09-08",
+  "build": "Release x64 passed, rebuilt after commit; embedded revision verified",
+  "regression": "failed before correction; 107 production cache/metadata/status checks pass",
+  "gpu": "231 checks and 20 native-pair checks pass; D3D12 debug layer enabled",
+  "existingRegressions": "GPU lifetime, 32 secondary Present, 72 projection checks pass",
+  "review": "independent review found no blockers; suggested late-frame test added and passes",
+  "packageFilesVerified": 8,
+  "patchReverseCheck": "passed",
+  "live": "User confirmed loading/pause recovery with c34eaa2. Later fullscreen occlusion recovered after live nonactivating topmost change; repeated menu/game transitions accepted on 2026-09-08. Game and injector subsequently closed.",
+  "logsSHA256": {
+    "red.txt": "b60a2dbe4a01aca42f3ebda20a7c45e7adfa191274675a4ea5e9c891ca6cfb4e",
+    "green.txt": "5fd0db7c8edf0756e99b759a7dbecdc606ef43a6854807b02c7682e3fd0d41a1",
+    "regressions.txt": "6f6fb9d275518ba2354bc17891732bc3832b57f8695b7c9546faca0b1118f9bb",
+    "warp.txt": "2548d40b41d9936dee42e7737076707f22bd2f3342f5a22d03be130dc2df3d85"
+  }
+}

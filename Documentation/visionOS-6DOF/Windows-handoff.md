@@ -1,9 +1,34 @@
 # Windows handoff: virtual headset and 6DoF portal validation
 
-Updated 2026-09-06. Branch: `moonlight-6dof-vision`. Client baseline:
+Updated 2026-09-08. Branch: `moonlight-6dof-vision`. Client baseline:
 `3e3f270` (audio buffering/controller routing), following `68e7e16` (working
-basic visionOS streaming). Windows UEVR fixes through `e0d3fa8` are preserved
+basic visionOS streaming). Windows UEVR fixes through `2c35239` are preserved
 in `patches/UEVR-portal.patch` with commit/tree/hash provenance in its manifest.
+
+**Validated stabilization checkpoint:** Josh confirms menu/game transitions now
+recover and the portal works as intended. Native Stereo Fix eye capture (`4007df4`)
+resolves the unsupported separate-eye source path. Monotonic transmitted frame IDs
+(`c34eaa2`) tolerate Unreal scene-counter resets during pause/loading. The final
+window-order correction (`2c35239`) keeps SBS above the game when fullscreen
+restoration moves the game back onto the capture monitor, without taking focus.
+
+The live accepted run used `c34eaa2` plus the equivalent topmost window change.
+The permanent `2c35239` Release package is built and verified at
+`External/local-validation/UEVR-portal-2c35239`, but has not been injected.
+Game and injector are now closed. The next launch should use this package;
+its prepared profile retains Native Stereo Fix and starts with Portal Output off.
+Build, regression checks, eight package hashes, embedded revision and exported
+patch reverse-check pass. No host or Xcode changes were needed for these fixes.
+
+See [recovery and acceptance evidence](evidence/windows/frame-identity-recovery/README.md).
+The 13:22:50 headset recording shows menus and gameplay; sampled frames also
+show transition blanking and small centered menu content, retained as polish work.
+It records one eye and cannot establish both-eye quality or the stream cadence.
+Keep 1280x720 per eye, 2560x736 capture and 60 fps as the accepted baseline.
+Next: menu sizing/transition polish and desktop interaction, then controlled
+resolution increases and qualification up to 90 fps with the Mac session.
+Earlier checkpoints below are historical and their pending statuses are superseded
+by this checkpoint only for the behavior explicitly accepted above.
 
 **New live UI checkpoint:** `e0d3fa8` adds separate game HUD/menus and
 the UEVR settings overlay to the D3D12 direct SBS exporter. Its injected revision

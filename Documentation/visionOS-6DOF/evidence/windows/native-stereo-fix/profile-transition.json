@@ -1,0 +1,63 @@
+{
+  "timestamp": "2026-09-08T12:28:27.832066-07:00",
+  "sourceRevision": "4007df45c6017eccc3354df603b0a97043fda7ae",
+  "package": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\UEVR-portal-4007df4",
+  "backupPath": "D:\\Tools\\Moonlight-SpatialSDK\\External\\local-validation\\pre-native-fix-4007df4-20260908-122827",
+  "backupFiles": [
+    {
+      "file": "actions.json",
+      "sha256": "5b3e0bc277af02723748fa00d5cc0d581238e1be40a196a74033e60859529abf"
+    },
+    {
+      "file": "bindings_knuckles.json",
+      "sha256": "3d446de56676e4a1e79f8b8ca9f646479a7c404af0334aa900406f2cf6791be0"
+    },
+    {
+      "file": "bindings_oculus_touch.json",
+      "sha256": "27e82cca54bbe93e75ffbc41dab69167de3fc7d47675759d4f1d829c8237b6c8"
+    },
+    {
+      "file": "bindings_vive_controller.json",
+      "sha256": "f2cc04210e7b11c8c0aa61625551a9a70a36fdff42a318abeeef1516a2c610e8"
+    },
+    {
+      "file": "binding_rift.json",
+      "sha256": "fd03d53baa39d7771504a90f5804765104d1514cd4f98957e780de9823ce174f"
+    },
+    {
+      "file": "binding_vive.json",
+      "sha256": "ca10fd899a84284ee458318916cfd2c582192738c236012b48d6225bb828bc02"
+    },
+    {
+      "file": "cameras.txt",
+      "sha256": "1965e554445940aff8c0d0abf7efea4f121d4bbd99f41b00a576e3a3ab69d380"
+    },
+    {
+      "file": "config.txt",
+      "sha256": "b22fa0d097dce4ae7c54ced3c38d66dced7215d9891a236f7eec3505cd91ba8d"
+    },
+    {
+      "file": "imgui.ini",
+      "sha256": "67aefacb81c3a89c06158d399db49356cd8218a7c8498b4f60d0287f8522dd14"
+    },
+    {
+      "file": "log.txt",
+      "sha256": "9ea812f0157c75afe2d33058dc3a72fd3b1aa770bcc2ecfe3dd3f5bbff31305c"
+    }
+  ],
+  "appliedSettings": {
+    "Frontend_RequestedRuntime": "openvr_api.dll",
+    "VR_RenderingMethod": "0",
+    "VR_NativeStereoFix": "true",
+    "WindowMode_Enabled": "false",
+    "WindowMode_PortalOutput": "false",
+    "WindowMode_PortalDiagnostics": "false",
+    "WindowMode_PortalDesktopX": "2560.000000",
+    "WindowMode_PortalDesktopY": "0.000000",
+    "WindowMode_PortalEyeWidth": "1280.000000",
+    "WindowMode_PortalEyeHeight": "720.000000"
+  },
+  "changes": {},
+  "packageFilesVerified": 8,
+  "injected": false
+}

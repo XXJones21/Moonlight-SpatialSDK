@@ -1,0 +1,15 @@
+{
+  "revision": "2c3523958a0fc61124b02fca7c8edef9d99fb991",
+  "build": "Release x64 passed before and after commit; embedded revision verified",
+  "checks": "107 production frame-cache checks; source lifetime regression; 32 secondary Present cases; 72 projection cases; eye_copy and native_pair CTest targets passed",
+  "packageFilesVerified": 8,
+  "backendSHA256": "e6ecdfb314f2c9f8c481c06e20aa40137d7a02222a6f2a51d83cc7838bc62598",
+  "patchReverseCheck": "passed",
+  "live": "c34eaa2 plus equivalent live HWND_TOPMOST/NOACTIVATE change accepted by user; permanent 2c35239 binary packaged but not injected",
+  "focusProbe": {
+    "foregroundBefore": 2624140,
+    "foregroundAfter": 2624140,
+    "preserved": true
+  },
+  "baseline": "1280x720 per eye, 2560x736 capture, 60 fps; higher resolution/90 fps not qualified"
+}

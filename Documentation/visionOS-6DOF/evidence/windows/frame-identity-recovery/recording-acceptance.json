@@ -1,0 +1,13 @@
+{
+  "path": "C:\\Users\\josh2\\Downloads\\ScreenRecording_09-08-2026 13-22-50_1.MOV",
+  "sha256": "aaccbe4079e333ebad2242f234ead32ebafe2f51c9b46b27d839c12bd67438e3",
+  "bytes": 35406211,
+  "durationSeconds": 21.103333,
+  "dimensions": [
+    1920,
+    1080
+  ],
+  "codec": "h264",
+  "averageFrameRate": "190200/6331",
+  "inspection": "Contact sheet sampled every 3 seconds shows pause menu, gameplay, black menu rectangles and a transient gray panel. Single recorded eye; does not independently establish both-eye matching or stream frame rate. User confirms successful repeated menu/game transitions."
+}

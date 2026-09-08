@@ -10,9 +10,11 @@ import time
 
 arguments=argparse.ArgumentParser()
 arguments.add_argument('--output',type=pathlib.Path)
+arguments.add_argument('--duration', type=int, choices=range(1, 61), default=15)
+arguments.add_argument('--wait-for-state', type=int, choices=range(0, 601), default=0)
 args=arguments.parse_args()
 
-result = {"startedAt": datetime.datetime.now().astimezone().isoformat(), "durationSeconds": 15,
+result = {"startedAt": datetime.datetime.now().astimezone().isoformat(), "durationSeconds": args.duration,
           "interface": "10.1.95.5", "syntheticPacketsSent": 0}
 counts = collections.Counter()
 portal_samples = []
@@ -26,7 +28,10 @@ try:
     capture.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
     capture.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
     capture.settimeout(0.5)
-    deadline = time.monotonic() + result["durationSeconds"]
+    waiting = args.wait_for_state > 0
+    result['armedAt'] = result['startedAt']
+    result['triggered'] = not waiting
+    deadline = time.monotonic() + (args.wait_for_state or result["durationSeconds"])
     total = 0
     while time.monotonic() < deadline:
         try:
@@ -43,13 +48,22 @@ try:
         if not ({source, destination} & {4243, 47998, 47999, 48000}):
             continue
         source_ip, dest_ip = socket.inet_ntoa(packet[12:16]), socket.inet_ntoa(packet[16:20])
-        counts[f"{source_ip}:{source} -> {dest_ip}:{destination}"] += 1
         payload=packet[offset + 8:offset + length]
+        if waiting:
+            if destination != 4243 or len(payload) != 200 or payload[:4] != b'P6DV':
+                continue
+            waiting = False
+            result['triggered'] = True
+            result['startedAt'] = datetime.datetime.now().astimezone().isoformat()
+            deadline = time.monotonic() + result['durationSeconds']
+            if args.output:
+                args.output.with_suffix('.started.json').write_text(json.dumps({'startedAt': result['startedAt']}))
+        counts[f"{source_ip}:{source} -> {dest_ip}:{destination}"] += 1
         if source==4243 and source_ip==result['interface'] and payload.startswith(b'{'):
             try:
                 status=json.loads(payload)
                 if status.get('version')==1 and 'renderFrameID' in status:
-                    statuses.append(status)
+                    statuses.append({'observedAt': datetime.datetime.now().astimezone().isoformat(), **status})
             except (ValueError,UnicodeError):
                 pass
         if destination==4243:

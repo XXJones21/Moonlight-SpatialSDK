@@ -8,6 +8,14 @@ source=(repo/'External/UEVR-6DOF-Window/src/mods/portal/PortalOutput.cpp').read_
 methods=source[source.index('    bool idle12()'):source.index('    void show()')]
 start=source.index('    ComPtr<ID3D12Device> device;',source.index('void PortalOutput::d3d12'))
 dispatch=source[start:source.index('    slot.source=source;',start)]
+retention_start=source.index('    slot.source=source;',start)
+retention=source[retention_start:source.index('\n',retention_start)]+'\n'
+# Eye-region validation is covered by the production WARP helper tests. Keep
+# this deterministic harness focused on the unchanged recreation/fence branch.
+copy_start=dispatch.find('    const unsigned eyeWidth=')
+if copy_start >= 0:
+    copy_end=dispatch.index('    const bool recreate=',copy_start)
+    dispatch=dispatch[:copy_start]+dispatch[copy_end:]
 tail_start=source.index('    const auto presented=o.swap->Present',start)
 tail=source[tail_start:source.index('\n}',tail_start)]
 scratch=repo/'External/local-validation/output-lifetime-regression'
@@ -73,7 +81,7 @@ struct Impl {
     HWND window=reinterpret_cast<void*>(1);
     ComPtr<IDXGISwapChain3> swap;ComPtr<IUnknown> identity,queueIdentity;
     unsigned width=0,height=0;DXGI_FORMAT format=0;bool twelve=false;
-    struct Slot {uint64_t done=0;};std::array<Slot,3>slots11{},slots12{};
+    struct Slot {uint64_t done=0;ComPtr<Source> source,rightSource;ComPtr<IUnknown> upload,back;};std::array<Slot,3>slots11{},slots12{};
     ComPtr<ID3D12Fence> fence;ComPtr<ID3D12CommandQueue> queue;uint64_t serial=0;
     int displayed=0;std::vector<std::string> failures;
     bool idle11(){return true;}
@@ -83,8 +91,9 @@ struct Impl {
 middle=r'''
 };
 void report(uint64_t,void*,const char*){}
-void frame(Impl& o,Source* source,ID3D12CommandQueue* queue,Description desc={}){
+void frame(Impl& o,Source* source,ID3D12CommandQueue* queue,Description desc={},Source* right=nullptr){
     const DXGI_FORMAT format=1;const uint64_t id=42;void* frame=nullptr;
+    struct Eye{Source* resource;};const std::array<Eye,2> eyes{{{source},{right?right:source}}};
 '''
 suffix=r'''
 }
@@ -126,12 +135,21 @@ int main(){
     ID3D12CommandQueue replacementDeviceQueue;
     frame(output,&replacementSource,&replacementDeviceQueue,{3840,1080});
     check(output.identity.Get()==replacementDevice.canonical&&output.serial==1&&fencesCreated==4,"real device change replaces generation");
+    Impl busy;ID3D12CommandQueue busyQueue;busyQueue.completeImmediately=false;
+    Source leftA{&device},rightA{&device},leftB{&device},rightB{&device};
+    for(int i=0;i<3;++i)frame(busy,&leftA,&busyQueue,{},&rightA);
+    check(busy.displayed==3,"three distinct native pairs can be queued");
+    frame(busy,&leftB,&busyQueue,{},&rightB);
+    check(busy.displayed==3&&busy.failures.back()=="gpu_busy","fourth submission cannot reuse busy slot");
+    for(auto& slot:busy.slots12)check(slot.source.Get()==&leftA&&slot.rightSource.Get()==&rightA,"busy slot retains both previous eye sources");
+    busyQueue.finish();frame(busy,&leftB,&busyQueue,{},&rightB);
+    check(busy.displayed==4&&busy.slots12[0].source.Get()==&leftB&&busy.slots12[0].rightSource.Get()==&rightB,"completed slot replaces both retained sources");
     if(failures){std::cerr<<failures<<" failed checks\n";return 1;}
-    std::cout<<"PASS: canonical identity, eight-frame reuse, busy resize retention, and fence-generation reset\n";
+    std::cout<<"PASS: canonical identity, eight-frame reuse, busy resize retention, fence-generation reset, and dual-source busy-slot retention\n";
 }
 '''
 cpp=scratch/'output_lifetime.cpp'
-cpp.write_text(prefix+methods+middle+dispatch+tail+suffix)
+cpp.write_text(prefix+methods+middle+dispatch+retention+tail+suffix)
 exe=scratch/'output_lifetime.exe'
 subprocess.run(['cl','/nologo','/EHsc','/std:c++17','/MD',str(cpp),f'/Fe:{exe}',f'/Fo:{scratch/"output_lifetime.obj"}'],check=True)
 raise SystemExit(subprocess.run([str(exe)]).returncode)

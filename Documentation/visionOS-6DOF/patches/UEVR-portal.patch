@@ -268,7 +268,7 @@ index 0b5c53defe5c0c253235e8a4bc038e51c2e96cdc..b6cb5e936bf4e648e65f280338b64bb1
          return glm::identity<Matrix4x4f>();
      }
 diff --git a/src/mods/WindowMode.cpp b/src/mods/WindowMode.cpp
-index 876b2345b54a3d155b06c0c756e7a76671a46dd3..94c5c88c4c625477b10299c3790a62dcd23a6474 100644
+index 876b2345b54a3d155b06c0c756e7a76671a46dd3..a123788cfc70e291c66a9d6e26f804a2b078fc72 100644
 --- a/src/mods/WindowMode.cpp
 +++ b/src/mods/WindowMode.cpp
 @@ -10,6 +10,9 @@
@@ -306,7 +306,7 @@ index 876b2345b54a3d155b06c0c756e7a76671a46dd3..94c5c88c4c625477b10299c3790a62dc
 +    m_portal_eye_height->draw("Portal eye content height");
 +    ImGui::Text("Direct capture: %u x %u (includes 16 metadata rows)",portal_eye_width()*2,portal_eye_height()+16);
 +    if(m_portal_output->value()) {
-+        ImGui::TextWrapped("Source authored, unverified: OpenVR + Native Stereo only. Capture the UEVR Portal SBS window. Separate VR UI is configured on the normal desktop.");
++        ImGui::TextWrapped("OpenVR + Native Stereo. Native Stereo Fix requires D3D12. Capture the UEVR Portal SBS window; use the game desktop window for menu input.");
 +        const auto frame=uevrportal::PortalFrame::current();
 +        if(frame){
 +            ImGui::Text("Frame %llu / seq %llu / geometry %llu",frame->gameFrameID,frame->state.sequence,frame->state.geometryRevision);
@@ -318,7 +318,15 @@ index 876b2345b54a3d155b06c0c756e7a76671a46dd3..94c5c88c4c625477b10299c3790a62dc
      if (m_enabled->draw("Enable Room-Anchored 6DOF Window") && m_enabled->value()) {
          request_recenter();
      }
-@@ -674,6 +698,7 @@ ID3D11RenderTargetView* WindowMode::get_d3d11_rtv(ID3D11Device* device, ID3D11Te
+@@ -300,6 +324,7 @@ void WindowMode::on_draw_sidebar_entry(std::string_view entry) {
+ }
+ 
+ void WindowMode::on_device_reset() {
++    uevrportal::PortalFrame::reset();
+     invalidate_anchor();
+     reset_d3d11();
+     reset_d3d12();
+@@ -674,6 +699,7 @@ ID3D11RenderTargetView* WindowMode::get_d3d11_rtv(ID3D11Device* device, ID3D11Te
  
  bool WindowMode::draw_d3d11(ID3D11DeviceContext* context, ID3D11Texture2D* target,
      ID3D11RenderTargetView* rtv, Layout layout) {
@@ -326,7 +334,7 @@ index 876b2345b54a3d155b06c0c756e7a76671a46dd3..94c5c88c4c625477b10299c3790a62dc
      const auto settings = get_render_settings();
      if (!update_enabled_state() || context == nullptr || target == nullptr ||
          settings.opacity <= 0.001f) {
-@@ -870,6 +895,7 @@ bool WindowMode::ensure_d3d12_objects(ID3D12Device* device, DXGI_FORMAT format)
+@@ -870,6 +896,7 @@ bool WindowMode::ensure_d3d12_objects(ID3D12Device* device, DXGI_FORMAT format)
  
  bool WindowMode::draw_d3d12(ID3D12GraphicsCommandList* command_list, ID3D12Resource* target,
      D3D12_CPU_DESCRIPTOR_HANDLE rtv, Layout layout, D3D12_RESOURCE_STATES target_state) {
@@ -364,14 +372,127 @@ index f60e8e4b01a65b86373eabfa7c484de5a2f24be5..1de929d35aedc9a849c6ddaa99026008
      const ModToggle::Ptr m_enabled{ModToggle::create(generate_name("Enabled"), false)};
      const ModToggle::Ptr m_lock_aspect{ModToggle::create(generate_name("LockAspect"), false)};
      const ModSlider::Ptr m_plane_width{ModSlider::create(generate_name("PlaneWidth"), 0.1f, 12.0f, 2.4f)};
+diff --git a/src/mods/portal/PortalEyeCopy12.hpp b/src/mods/portal/PortalEyeCopy12.hpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..758a34b75b563b94b621cdab311a7e88f05dbffc
+--- /dev/null
++++ b/src/mods/portal/PortalEyeCopy12.hpp
+@@ -0,0 +1,103 @@
++#pragma once
++#include <array>
++#include <d3d12.h>
++#include <wrl/client.h>
++#include <limits>
++
++namespace uevrportal {
++struct PortalEyeSource12 {
++    ID3D12Resource* resource{};
++    D3D12_RESOURCE_STATES state{};
++    D3D12_BOX box{};
++};
++struct PortalEyeCopy12 {
++    // Sources describe subresource zero of single-slice, non-MSAA 2D textures.
++    // The caller owns source lifetime and queue ordering through GPU completion.
++    static const char* validate(ID3D12Device* device, const std::array<PortalEyeSource12, 2>& eyes,
++                                UINT eyeWidth, UINT height, DXGI_FORMAT outputFormat) {
++        if (!device) return "portal eye copy has no device";
++        if (!eyeWidth || !height || eyeWidth > (std::numeric_limits<UINT>::max)() / 2)
++            return "portal eye copy has invalid dimensions";
++        const auto family = formatFamily(outputFormat);
++        if (!family) return "portal eye copy output format is unsupported";
++        Microsoft::WRL::ComPtr<IUnknown> deviceIdentity;
++        if (FAILED(device->QueryInterface(IID_PPV_ARGS(&deviceIdentity))))
++            return "portal eye copy device identity is unavailable";
++        std::array<Microsoft::WRL::ComPtr<IUnknown>, 2> sourceIdentities;
++        for (size_t i = 0; i < eyes.size(); ++i) {
++            const auto& eye = eyes[i];
++            if (!eye.resource) return i == 0 ? "portal left eye source is missing" : "portal right eye source is missing";
++            const auto desc = eye.resource->GetDesc();
++            if (desc.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D || desc.DepthOrArraySize != 1 ||
++                desc.SampleDesc.Count != 1 || desc.SampleDesc.Quality != 0)
++                return i == 0 ? "portal left eye texture shape is unsupported" : "portal right eye texture shape is unsupported";
++            if (formatFamily(desc.Format) != family)
++                return i == 0 ? "portal left eye format is incompatible" : "portal right eye format is incompatible";
++            const auto& box = eye.box;
++            if (box.front != 0 || box.back != 1 || box.left >= box.right || box.top >= box.bottom ||
++                box.right > desc.Width || box.bottom > desc.Height ||
++                box.right - box.left != eyeWidth || box.bottom - box.top != height)
++                return i == 0 ? "portal left eye copy box is invalid" : "portal right eye copy box is invalid";
++            Microsoft::WRL::ComPtr<ID3D12Device> sourceDevice;
++            Microsoft::WRL::ComPtr<IUnknown> sourceDeviceIdentity;
++            if (FAILED(eye.resource->GetDevice(IID_PPV_ARGS(&sourceDevice))) ||
++                FAILED(sourceDevice.As(&sourceDeviceIdentity)) || sourceDeviceIdentity.Get() != deviceIdentity.Get())
++                return i == 0 ? "portal left eye belongs to another device" : "portal right eye belongs to another device";
++            if (FAILED(eye.resource->QueryInterface(IID_PPV_ARGS(&sourceIdentities[i]))))
++                return "portal eye source identity is unavailable";
++        }
++        if (sourceIdentities[0].Get() == sourceIdentities[1].Get() && eyes[0].state != eyes[1].state)
++            return "portal shared eye source has inconsistent resource states";
++        return nullptr;
++    }
++
++    // Requires validate() success and a private destination in COPY_DEST, at
++    // least 2*eyeWidth by box height. Only image rows are written; metadata and
++    // the destination state remain owned by the caller.
++    static void record(ID3D12GraphicsCommandList* command, ID3D12Resource* destination,
++                       const std::array<PortalEyeSource12, 2>& eyes, UINT eyeWidth) {
++        Microsoft::WRL::ComPtr<IUnknown> leftIdentity, rightIdentity;
++        eyes[0].resource->QueryInterface(IID_PPV_ARGS(&leftIdentity));
++        eyes[1].resource->QueryInterface(IID_PPV_ARGS(&rightIdentity));
++        const bool shared = leftIdentity.Get() == rightIdentity.Get();
++        std::array<D3D12_RESOURCE_BARRIER, 2> barriers{};
++        UINT count{};
++        for (UINT i = 0; i < (shared ? 1u : 2u); ++i) {
++            if (eyes[i].state == D3D12_RESOURCE_STATE_COPY_SOURCE) continue;
++            auto& barrier = barriers[count++];
++            barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
++            barrier.Transition = {eyes[i].resource, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
++                                  eyes[i].state, D3D12_RESOURCE_STATE_COPY_SOURCE};
++        }
++        if (count) command->ResourceBarrier(count, barriers.data());
++        D3D12_TEXTURE_COPY_LOCATION dst{};
++        dst.pResource = destination;
++        dst.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
++        for (UINT i = 0; i < eyes.size(); ++i) {
++            D3D12_TEXTURE_COPY_LOCATION src{};
++            src.pResource = eyes[i].resource;
++            src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
++            command->CopyTextureRegion(&dst, i * eyeWidth, 0, 0, &src, &eyes[i].box);
++        }
++        for (UINT i = 0; i < count; ++i) {
++            auto& transition = barriers[i].Transition;
++            transition.StateAfter = transition.StateBefore;
++            transition.StateBefore = D3D12_RESOURCE_STATE_COPY_SOURCE;
++        }
++        if (count) command->ResourceBarrier(count, barriers.data());
++    }
++
++private:
++    static unsigned formatFamily(DXGI_FORMAT format) {
++        switch (format) {
++        case DXGI_FORMAT_R8G8B8A8_TYPELESS:
++        case DXGI_FORMAT_R8G8B8A8_UNORM:
++        case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB: return 1;
++        case DXGI_FORMAT_B8G8R8A8_TYPELESS:
++        case DXGI_FORMAT_B8G8R8A8_UNORM:
++        case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB: return 2;
++        default: return 0;
++        }
++    }
++};
++}
 diff --git a/src/mods/portal/PortalFrame.cpp b/src/mods/portal/PortalFrame.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..2ec1d3d7799135ab7a6695d8f1eed4b940ac6d45
+index 0000000000000000000000000000000000000000..81a66734286414cab48c29497b438fdbbece5785
 --- /dev/null
 +++ b/src/mods/portal/PortalFrame.cpp
-@@ -0,0 +1,67 @@
+@@ -0,0 +1,125 @@
 +#include "PortalFrame.hpp"
 +#include "PortalSession.hpp"
++#include "PortalNativePair.hpp"
++#include "Framework.hpp"
++#include <d3d12.h>
++#include <wrl/client.h>
 +#include "../WindowMode.hpp"
 +#include "../VR.hpp"
 +#include <spdlog/spdlog.h>
@@ -381,23 +502,42 @@ index 0000000000000000000000000000000000000000..2ec1d3d7799135ab7a6695d8f1eed4b9
 +namespace {
 +std::mutex cacheMutex;
 +std::atomic<std::uint64_t> currentID{};
-+struct Slot {std::shared_ptr<const PortalFrame> frame;unsigned views{},projections{};};
++struct Slot {
++    std::shared_ptr<const PortalFrame> frame;unsigned views{},projections{};
++    PortalNativePair nativePair;
++    std::array<const void*,2> nativeViews{};
++    std::array<Microsoft::WRL::ComPtr<ID3D12Resource>,2> nativeSources;
++};
 +std::array<Slot,64> slots;
 +std::uint64_t mappingSession{},mappingEpoch{};
++// Protected by cacheMutex; deliberately survives portal/device/cache resets.
++std::uint64_t nextOutputFrameID{};
++std::optional<std::pair<bool,bool>> latchedMode;
 +portal::RigidTransform runtimeMapping{},epochGameBasis{};
 +portal::Quaternion inverse(portal::Quaternion q){return {-q.x,-q.y,-q.z,q.w};}
 +}
 +std::shared_ptr<const PortalFrame> PortalFrame::latch(std::uint64_t id,const portal::RigidTransform& raw){
 +    if(!WindowMode::get()->portal_output_enabled())return {};
 +    std::scoped_lock lock(cacheMutex);
-+    auto& slot=slots[id%slots.size()];
-+    if(slot.frame&&slot.frame->gameFrameID==id)return slot.frame;
-+    auto frame=std::make_shared<PortalFrame>();frame->gameFrameID=id;
-+    const auto state=PortalSession::get().latest();
-+    if(state)frame->state=*state;
 +    const auto vr=VR::get();
++    const auto mode=std::pair{vr->is_native_stereo_fix_enabled(),vr->is_native_stereo_fix_same_pass_enabled()};
++    const auto state=PortalSession::get().latest();
++    // A mode transition invalidates in-flight CPU evidence, including off/on
++    // transitions that would otherwise find an older native pair in the ring.
++    if((latchedMode&&*latchedMode!=mode)||
++       (state&&mappingSession&&(mappingSession!=state->sessionID||mappingEpoch!=state->trackingEpoch)))slots={};
++    latchedMode=mode;
++    auto& slot=slots[id%slots.size()];
++    if(slot.frame&&slot.frame->gameFrameID==id&&
++       slot.frame->nativeStereoFix==vr->is_native_stereo_fix_enabled()&&
++       slot.frame->sameStereoPass==vr->is_native_stereo_fix_same_pass_enabled())return slot.frame;
++    auto frame=std::make_shared<PortalFrame>();frame->gameFrameID=id;frame->outputFrameID=++nextOutputFrameID;
++    if(state)frame->state=*state;
++    frame->nativeStereoFix=vr->is_native_stereo_fix_enabled();
++    frame->sameStereoPass=vr->is_native_stereo_fix_same_pass_enabled();
 +    if(!vr->get_runtime()->is_openvr()||vr->is_using_afr()||vr->is_using_2d_screen()||vr->is_extreme_compatibility_mode_enabled()||
-+       vr->is_splitscreen_compatibility_enabled()||vr->is_sceneview_compatibility_enabled()||vr->is_native_stereo_fix_enabled()||vr->is_stereo_emulation_enabled()||
++       vr->is_splitscreen_compatibility_enabled()||vr->is_sceneview_compatibility_enabled()||
++       (frame->nativeStereoFix&&g_framework->get_renderer_type()!=Framework::RendererType::D3D12)||vr->is_stereo_emulation_enabled()||
 +       vr->is_roomscale_enabled()||vr->is_headlocked_aim_enabled()||vr->is_controller_aim_enabled()||vr->is_decoupled_pitch_enabled())frame->error="unsupported_portal_configuration";
 +    else if(state&&portal::validTransform(raw)){
 +        frame->state=*state;
@@ -435,14 +575,49 @@ index 0000000000000000000000000000000000000000..2ec1d3d7799135ab7a6695d8f1eed4b9
 +        SPDLOG_DEBUG("[Portal] {} frame={} eye={} seq={} geometry={}",projection?"projection":"view",id,eye,s.frame->state.sequence,s.frame->state.geometryRevision);}
 +}
 +bool PortalFrame::paired(std::uint64_t id){std::scoped_lock lock(cacheMutex);const auto& s=slots[id%slots.size()];return s.frame&&s.frame->gameFrameID==id&&s.views==3&&s.projections==3;}
-+void PortalFrame::reset(){std::scoped_lock lock(cacheMutex);slots={};mappingSession=0;mappingEpoch=0;}
++void PortalFrame::constructed(const std::shared_ptr<const PortalFrame>& frame,unsigned eye,const void* view){
++    if(!frame||!frame->valid||!frame->nativeStereoFix||!view||eye>1)return;
++    std::scoped_lock lock(cacheMutex);auto& s=slots[frame->gameFrameID%slots.size()];
++    if(s.frame!=frame)return;
++    const auto key=reinterpret_cast<std::uintptr_t>(view);
++    // Rebind construction addresses without discarding an already submitted
++    // older frame: the engine can recycle its view objects ahead of Present.
++    for(auto& previous:slots)if(&previous!=&s)for(auto& binding:previous.nativeViews)if(binding==view)binding=nullptr;
++    s.nativeViews[eye]=view;
++    s.nativePair.view(eye,key);
++}
++std::shared_ptr<const PortalFrame> PortalFrame::beginNativePair(const void* left,const void* right){
++    std::scoped_lock lock(cacheMutex);
++    for(auto& s:slots)if(s.frame&&s.frame->valid&&s.frame->nativeStereoFix&&s.views==3&&s.projections==3&&
++        s.nativeViews[0]==left&&s.nativeViews[1]==right){
++        if(s.nativePair.begin(reinterpret_cast<std::uintptr_t>(left),reinterpret_cast<std::uintptr_t>(right)))return s.frame;
++    }
++    return {};
++}
++void PortalFrame::completeNativePair(const std::shared_ptr<const PortalFrame>& frame,std::uint32_t renderID,
++    ID3D12Resource* left,ID3D12Resource* right){
++    if(!frame)return;
++    std::scoped_lock lock(cacheMutex);auto& s=slots[frame->gameFrameID%slots.size()];
++    if(s.frame!=frame)return;
++    for(auto& previous:slots)if(&previous!=&s&&previous.nativePair.hasRenderID(renderID)){
++        previous.nativePair.invalidate();s.nativePair.invalidate();return;
++    }
++    s.nativePair.complete(renderID,reinterpret_cast<std::uintptr_t>(left),reinterpret_cast<std::uintptr_t>(right));
++    if(s.nativePair.matches(renderID,reinterpret_cast<std::uintptr_t>(left),reinterpret_cast<std::uintptr_t>(right)))s.nativeSources={left,right};
++}
++std::shared_ptr<const PortalFrame> PortalFrame::nativeFrame(std::uint32_t renderID,ID3D12Resource* left,ID3D12Resource* right){
++    std::scoped_lock lock(cacheMutex);
++    for(const auto& s:slots)if(s.frame&&s.nativePair.matches(renderID,reinterpret_cast<std::uintptr_t>(left),reinterpret_cast<std::uintptr_t>(right)))return s.frame;
++    return {};
++}
++void PortalFrame::reset(){std::scoped_lock lock(cacheMutex);slots={};latchedMode.reset();mappingSession=0;mappingEpoch=0;}
 +}
 diff --git a/src/mods/portal/PortalFrame.hpp b/src/mods/portal/PortalFrame.hpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..74ab8934a34f71eccc4add0c920cb337f51dcb36
+index 0000000000000000000000000000000000000000..c2e8af1a9ceea9e51cd06cf9718faa6a63e00206
 --- /dev/null
 +++ b/src/mods/portal/PortalFrame.hpp
-@@ -0,0 +1,26 @@
+@@ -0,0 +1,38 @@
 +#pragma once
 +#include <portal/Protocol.hpp>
 +#include <array>
@@ -451,14 +626,20 @@ index 0000000000000000000000000000000000000000..74ab8934a34f71eccc4add0c920cb337
 +#include <optional>
 +#include <string>
 +
++struct ID3D12Resource;
++
 +namespace uevrportal {
 +struct PortalFrame {
 +    portal::StateSnapshot state{};
 +    std::uint64_t gameFrameID{};
++    // Wire identity must not rewind when Unreal switches scenes or view families.
++    // The engine identifier above remains the key for pose/source association.
++    std::uint64_t outputFrameID{};
 +    portal::RigidTransform runtimeFromExternal{},gameBasis{},runtimeHead{};
 +    std::array<portal::Vec3,2> externalEyes{},eyeOffsets{};
 +    std::array<portal::EyeFrustum,2> frusta{};
 +    bool valid{};
++    bool nativeStereoFix{}, sameStereoPass{};
 +    std::string error="awaiting_state";
 +    // Called only by OpenVR update_poses with the engine frame identifier and unmodified runtime pose.
 +    static std::shared_ptr<const PortalFrame> latch(std::uint64_t gameFrameID,const portal::RigidTransform& runtimeHead);
@@ -466,6 +647,12 @@ index 0000000000000000000000000000000000000000..74ab8934a34f71eccc4add0c920cb337
 +    static std::shared_ptr<const PortalFrame> current();
 +    static void observe(std::uint64_t gameFrameID,unsigned eye,bool projection);
 +    static bool paired(std::uint64_t gameFrameID);
++    static void constructed(const std::shared_ptr<const PortalFrame>&, unsigned eye, const void* view);
++    static std::shared_ptr<const PortalFrame> beginNativePair(const void* leftView, const void* rightView);
++    static void completeNativePair(const std::shared_ptr<const PortalFrame>&, std::uint32_t renderID,
++        ID3D12Resource* left, ID3D12Resource* right);
++    static std::shared_ptr<const PortalFrame> nativeFrame(std::uint32_t renderID,
++        ID3D12Resource* left, ID3D12Resource* right);
 +    static void reset();
 +};
 +}
@@ -520,17 +707,62 @@ index 0000000000000000000000000000000000000000..1396bb26bab2d811a781e0d0a84b0d56
 +    rotation.pitch=glm::degrees(-pit);rotation.yaw=glm::degrees(y);rotation.roll=glm::degrees(-r);
 +}
 +}
+diff --git a/src/mods/portal/PortalNativePair.hpp b/src/mods/portal/PortalNativePair.hpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..16584aed63c0852fad2559bc328e77c6edaea33c
+--- /dev/null
++++ b/src/mods/portal/PortalNativePair.hpp
+@@ -0,0 +1,37 @@
++#pragma once
++#include <array>
++#include <cstdint>
++
++namespace uevrportal {
++// Per immutable PortalFrame; caller serializes access and retains the resources.
++// Eye identity comes from construction order before Same Stereo Pass relabeling.
++class PortalNativePair {
++public:
++    void view(unsigned eye, std::uintptr_t identity) {
++        if (eye > 1 || !identity || started_) { invalidate(); return; }
++        if (views_[eye]) { invalidate(); return; }
++        views_[eye] = identity;
++    }
++    bool contains(std::uintptr_t identity) const {
++        return identity && (views_[0] == identity || views_[1] == identity);
++    }
++    bool begin(std::uintptr_t left, std::uintptr_t right) {
++        if (invalid_ || started_ || !left || !right || left == right ||
++            views_[0] != left || views_[1] != right) { invalidate(); return false; }
++        started_ = true; return true;
++    }
++    void complete(std::uint32_t renderID, std::uintptr_t left, std::uintptr_t right) {
++        if (invalid_ || !started_ || complete_ || !left || !right || left == right) { invalidate(); return; }
++        renderID_ = renderID; sources_ = {left, right}; complete_ = true;
++    }
++    bool hasRenderID(std::uint32_t id) const { return complete_ && !invalid_ && renderID_ == id; }
++    bool matches(std::uint32_t id, std::uintptr_t left, std::uintptr_t right) const {
++        return hasRenderID(id) && sources_[0] == left && sources_[1] == right;
++    }
++    void invalidate() { invalid_ = true; }
++private:
++    std::array<std::uintptr_t, 2> views_{}, sources_{};
++    std::uint32_t renderID_{};
++    bool started_{}, complete_{}, invalid_{};
++};
++}
 diff --git a/src/mods/portal/PortalOutput.cpp b/src/mods/portal/PortalOutput.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..84f3c66198ec5af4b0d4112e905713f9a9cd585b
+index 0000000000000000000000000000000000000000..7b5e71995e5d3425950901f720857cde750ed403
 --- /dev/null
 +++ b/src/mods/portal/PortalOutput.cpp
-@@ -0,0 +1,250 @@
+@@ -0,0 +1,268 @@
 +#include "PortalOutput.hpp"
 +#include "PortalUI12.hpp"
++#include "PortalEyeCopy12.hpp"
 +#include "PortalSession.hpp"
 +#include "WindowFilter.hpp"
 +#include "../WindowMode.hpp"
++#include "../VR.hpp"
 +#include <portal/FrameMetadata.hpp>
 +#include <dxgi1_4.h>
 +#include <wrl/client.h>
@@ -557,12 +789,16 @@ index 0000000000000000000000000000000000000000..84f3c66198ec5af4b0d4112e905713f9
 +}
 +std::shared_ptr<const PortalFrame> accepted(std::uint64_t id){
 +    const auto f=PortalFrame::find(id);
-+    if(!f||!f->valid||!PortalFrame::paired(id)||!PortalSession::get().matchesLease(f->state))return {};
++    const auto vr=VR::get();
++    if(!f||!f->valid||!WindowMode::get()->portal_output_enabled()||
++       f->nativeStereoFix!=vr->is_native_stereo_fix_enabled()||
++       (f->nativeStereoFix&&f->sameStereoPass!=vr->is_native_stereo_fix_same_pass_enabled())||
++       !PortalFrame::paired(id)||!PortalSession::get().matchesLease(f->state))return {};
 +    return f;
 +}
 +void report(std::uint64_t id,const std::shared_ptr<const PortalFrame>& f,const char* error){
 +    const auto known=f?f:PortalFrame::find(id);
-+    portal::StatusSnapshot s{};s.renderFrameID=id;s.outputMode="direct_sbs";s.trackingValid=f&&std::strcmp(error,"none")==0;
++    portal::StatusSnapshot s{};s.renderFrameID=known?known->outputFrameID:0;s.outputMode="direct_sbs";s.trackingValid=f&&std::strcmp(error,"none")==0;
 +    s.errorCode=s.trackingValid?"none":"outputUnavailable";
 +    if(known&&!known->valid){
 +        if(known->error=="unsupported_portal_configuration")s.errorCode="unsupportedRuntime";
@@ -576,15 +812,15 @@ index 0000000000000000000000000000000000000000..84f3c66198ec5af4b0d4112e905713f9
 +    const auto nowMs=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 +    auto previous=lastLogMs.load(std::memory_order_relaxed);
 +    if(nowMs-previous>=1000&&lastLogMs.compare_exchange_strong(previous,nowMs,std::memory_order_relaxed)){
-+        spdlog::info("[Portal] output frame={} seq={} geometry={} valid={} paired={} status={} detail={}",
++        spdlog::info("[Portal] output frame={} seq={} geometry={} valid={} paired={} status={} detail={} nativeFix={} outputFrame={}",
 +            id,s.acceptedSequence,s.geometryRevision,known&&known->valid,
-+            known&&PortalFrame::paired(id),s.errorCode,error);
++            known&&PortalFrame::paired(id),s.errorCode,error,known&&known->nativeStereoFix,s.renderFrameID);
 +    }
 +    PortalSession::get().status(std::move(s));
 +}
 +std::vector<std::uint32_t> strip(unsigned w,const PortalFrame* f){
 +    portal::FrameMetadata m{};
-+    if(f)m={true,f->state.sessionID,f->state.trackingEpoch,f->state.geometryRevision,f->gameFrameID};
++    if(f)m={true,f->state.sessionID,f->state.trackingEpoch,f->state.geometryRevision,f->outputFrameID};
 +    const auto tag=portal::encodeFrameMetadata(m);
 +    std::vector<std::uint32_t> pixels(w*2*16);
 +    for(unsigned y=0;y<16;++y)for(unsigned x=0;x<w*2;++x)pixels[y*w*2+x]=portal::metadataPixel(tag,w,x%w,y);
@@ -623,7 +859,7 @@ index 0000000000000000000000000000000000000000..84f3c66198ec5af4b0d4112e905713f9
 +    ComPtr<ID3D11DeviceContext> context11;
 +    ComPtr<IDXGISwapChain3> swap;ComPtr<IUnknown> identity,queueIdentity;unsigned width{},height{};DXGI_FORMAT format=DXGI_FORMAT_UNKNOWN;bool twelve{};
 +    struct Slot11 {ComPtr<ID3D11Query> done;ComPtr<ID3D11Texture2D> source,strip,diagnostic,back;};std::array<Slot11,3> slots11;unsigned next11{};
-+    struct Slot12 {ComPtr<ID3D12CommandAllocator> allocator;ComPtr<ID3D12GraphicsCommandList> list;ComPtr<ID3D12Resource> source,upload,back;PortalUI12 ui;std::uint64_t done{};};std::array<Slot12,3> slots12;
++    struct Slot12 {ComPtr<ID3D12CommandAllocator> allocator;ComPtr<ID3D12GraphicsCommandList> list;ComPtr<ID3D12Resource> source,rightSource,upload,back;PortalUI12 ui;std::uint64_t done{};};std::array<Slot12,3> slots12;
 +    ComPtr<ID3D12Fence> fence;ComPtr<ID3D12CommandQueue> queue;std::uint64_t serial{};
 +    Impl(){thread=std::thread([this]{
 +        SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
@@ -679,7 +915,9 @@ index 0000000000000000000000000000000000000000..84f3c66198ec5af4b0d4112e905713f9
 +    void show(){
 +        const auto oldDPI=SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 +        const auto mode=WindowMode::get();
-+        SetWindowPos(window,nullptr,mode->portal_desktop_x(),mode->portal_desktop_y(),width,height,SWP_NOACTIVATE|SWP_NOZORDER);
++        // The game may restore its fullscreen desktop over the capture display
++        // after menus/loading. Keep the SBS source visible without taking focus.
++        SetWindowPos(window,HWND_TOPMOST,mode->portal_desktop_x(),mode->portal_desktop_y(),width,height,SWP_NOACTIVATE);
 +        ShowWindow(window,SW_SHOWNOACTIVATE);
 +        if(oldDPI)SetThreadDpiAwarenessContext(oldDPI);
 +    }
@@ -718,8 +956,15 @@ index 0000000000000000000000000000000000000000..84f3c66198ec5af4b0d4112e905713f9
 +    if(FAILED(result)){o.failed(id,"present_failed");return;}o.show();report(id,frame,"none");
 +}
 +void PortalOutput::d3d12(ID3D12CommandQueue* queue,ID3D12Resource* source,D3D12_RESOURCE_STATES sourceState,std::uint64_t id,
-+    ID3D12Resource* gameUI, ID3D12Resource* frameworkUI){
-+    auto& o=*impl_;const auto frame=accepted(id);
++    ID3D12Resource* gameUI, ID3D12Resource* frameworkUI, ID3D12Resource* nativeRight){
++    auto& o=*impl_;
++    const auto nativeFix=VR::get()->is_native_stereo_fix_enabled();
++    if(nativeFix){
++        const auto native=PortalFrame::nativeFrame(static_cast<std::uint32_t>(id),source,nativeRight);
++        if(!native){o.failed(id,"native_eye_pair_unavailable");return;}
++        id=native->gameFrameID;
++    }
++    const auto frame=accepted(id);
 +    if(!frame){o.failed(id,"unpaired_or_stale_frame");return;}
 +    if(!queue||!source||queue->GetDesc().Type!=D3D12_COMMAND_LIST_TYPE_DIRECT){o.failed(id,"missing_d3d12_direct_queue");return;}
 +    const auto desc=source->GetDesc();const auto format=colorFormat(desc.Format);
@@ -727,12 +972,18 @@ index 0000000000000000000000000000000000000000..84f3c66198ec5af4b0d4112e905713f9
 +    if(std::abs((double(desc.Width)/2/desc.Height)/(frame->state.widthMeters/frame->state.heightMeters)-1.)>.005){o.failed(id,"content_aspect_mismatch");return;}
 +    ComPtr<ID3D12Device> device;if(FAILED(source->GetDevice(IID_PPV_ARGS(&device)))){o.failed(id,"device_failed");return;}
 +    const unsigned width=static_cast<unsigned>(desc.Width);
++    const unsigned eyeWidth=width/2;
++    const std::array<PortalEyeSource12,2> eyes{{
++        {source,sourceState,{0,0,0,eyeWidth,desc.Height,1}},
++        {nativeFix?nativeRight:source,sourceState,{nativeFix?0u:eyeWidth,0,0,nativeFix?eyeWidth:width,desc.Height,1}}
++    }};
++    if(const auto error=PortalEyeCopy12::validate(device.Get(),eyes,eyeWidth,desc.Height,format)){o.failed(id,error);return;}
 +    const bool recreate=!o.matches(queue,device.Get(),width,desc.Height+16,format,true);
 +    if(recreate){if(!o.idle12()||!o.idle11()){o.failed(id,"gpu_recreation_pending");return;}
 +        if(!o.create(queue,device.Get(),width,desc.Height+16,format,true)){o.failed(id,"swapchain_create_failed");return;}}
 +    const unsigned index=o.swap->GetCurrentBackBufferIndex();auto& slot=o.slots12[index];
 +    if(slot.done&&o.fence->GetCompletedValue()<slot.done){o.failed(id,"gpu_busy");return;}
-+    slot.source=source;slot.upload.Reset();slot.back.Reset();
++    slot.source=source;slot.rightSource=eyes[1].resource;slot.upload.Reset();slot.back.Reset();
 +    if(!slot.allocator || !slot.list){
 +        // Publish the pair only after both creations succeed; a failed list creation
 +        // must not leave a slot that takes the reuse path with a null list.
@@ -757,12 +1008,9 @@ index 0000000000000000000000000000000000000000..84f3c66198ec5af4b0d4112e905713f9
 +    slot.upload->Unmap(0,nullptr);
 +    auto command=slot.list.Get();auto backBarrier=transition(slot.back.Get(),D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_COPY_DEST);command->ResourceBarrier(1,&backBarrier);
 +    D3D12_TEXTURE_COPY_LOCATION dst{};dst.pResource=slot.back.Get();dst.Type=D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-+    D3D12_TEXTURE_COPY_LOCATION src{};src.pResource=source;src.Type=D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 +    D3D12_TEXTURE_COPY_LOCATION upload{};upload.pResource=slot.upload.Get();upload.Type=D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;upload.PlacedFootprint.Footprint={format,width,16,1,rowPitch};
 +    if(diagnostics){auto image=upload;image.PlacedFootprint.Offset=std::uint64_t(rowPitch)*16;image.PlacedFootprint.Footprint.Height=desc.Height;command->CopyTextureRegion(&dst,0,0,0,&image,nullptr);}
-+    else {auto barrier=transition(source,sourceState,D3D12_RESOURCE_STATE_COPY_SOURCE);if(sourceState!=D3D12_RESOURCE_STATE_COPY_SOURCE)command->ResourceBarrier(1,&barrier);
-+        D3D12_BOX box{0,0,0,width,desc.Height,1};command->CopyTextureRegion(&dst,0,0,0,&src,&box);
-+        if(sourceState!=D3D12_RESOURCE_STATE_COPY_SOURCE){std::swap(barrier.Transition.StateBefore,barrier.Transition.StateAfter);command->ResourceBarrier(1,&barrier);}}
++    else PortalEyeCopy12::record(command,slot.back.Get(),eyes,eyeWidth);
 +    if(!diagnostics&&(gameUI||frameworkUI)){
 +        auto uiBarrier=transition(slot.back.Get(),D3D12_RESOURCE_STATE_COPY_DEST,D3D12_RESOURCE_STATE_RENDER_TARGET);
 +        command->ResourceBarrier(1,&uiBarrier);slot.ui.draw(command,width/2,desc.Height);
@@ -778,10 +1026,10 @@ index 0000000000000000000000000000000000000000..84f3c66198ec5af4b0d4112e905713f9
 +}
 diff --git a/src/mods/portal/PortalOutput.hpp b/src/mods/portal/PortalOutput.hpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..2f28f9edacb9d98e0e0fad4b1d950049986fa647
+index 0000000000000000000000000000000000000000..ec4bea3d7d1ff60b5eed5b28a9aec44775ebfaa2
 --- /dev/null
 +++ b/src/mods/portal/PortalOutput.hpp
-@@ -0,0 +1,21 @@
+@@ -0,0 +1,22 @@
 +#pragma once
 +#include <d3d11.h>
 +#include <d3d12.h>
@@ -796,7 +1044,8 @@ index 0000000000000000000000000000000000000000..2f28f9edacb9d98e0e0fad4b1d950049
 +    ~PortalOutput();
 +    void d3d11(ID3D11DeviceContext*,ID3D11Texture2D* doubleWide,std::uint64_t frameID);
 +    void d3d12(ID3D12CommandQueue*,ID3D12Resource* doubleWide,D3D12_RESOURCE_STATES,std::uint64_t frameID,
-+        ID3D12Resource* gameUI = nullptr, ID3D12Resource* frameworkUI = nullptr);
++        ID3D12Resource* gameUI = nullptr, ID3D12Resource* frameworkUI = nullptr,
++        ID3D12Resource* nativeRight = nullptr);
 +    void hide();
 +private:
 +    struct Impl;
@@ -1116,7 +1365,7 @@ index f32064206a9eda5a29ed3fd8f33350dbe4ac3ab1..1a19ba6c173c72a3d452eb85a09bb579
                  context->OMSetRenderTargets(1, views, nullptr);
                  invoke_shader(vr->m_frame_count, 1, m_backbuffer_size[0] / 2, m_backbuffer_size[1]);
 diff --git a/src/mods/vr/D3D12Component.cpp b/src/mods/vr/D3D12Component.cpp
-index 1a4aab6f90063685b14afa3798d3ebf208f10c5b..3ae005c8757b9046ed6b01c58496c5ba6606fb74 100644
+index 1a4aab6f90063685b14afa3798d3ebf208f10c5b..65bf3cc5e920cf03afb30e163a88ae7260c1672b 100644
 --- a/src/mods/vr/D3D12Component.cpp
 +++ b/src/mods/vr/D3D12Component.cpp
 @@ -8,6 +8,7 @@
@@ -1127,7 +1376,7 @@ index 1a4aab6f90063685b14afa3798d3ebf208f10c5b..3ae005c8757b9046ed6b01c58496c5ba
  
  #include <../../directxtk12-src/Inc/ResourceUploadBatch.h>
  #include <../../directxtk12-src/Inc/RenderTargetState.h>
-@@ -435,6 +436,19 @@ vr::EVRCompositorError D3D12Component::on_frame(VR* vr) {
+@@ -435,6 +436,20 @@ vr::EVRCompositorError D3D12Component::on_frame(VR* vr) {
      #endif
      }
  
@@ -1142,13 +1391,14 @@ index 1a4aab6f90063685b14afa3798d3ebf208f10c5b..3ae005c8757b9046ed6b01c58496c5ba
 +        const auto gameUI=(runtime->is_openvr()&&is_right_eye_frame&&ui_target&&!is_2d_screen)
 +            ?m_openvr.ui_tex.texture.Get():nullptr;
 +        uevrportal::PortalOutput::get().d3d12(command_queue,backbuffer.Get(),D3D12_RESOURCE_STATE_RENDER_TARGET,portalID,
-+            gameUI,g_framework->is_drawing_anything()?frameworkUI.Get():nullptr);
++            gameUI,g_framework->is_drawing_anything()?frameworkUI.Get():nullptr,
++            vr->is_native_stereo_fix_enabled()?m_scene_capture_tex.texture.Get():nullptr);
 +    }
      // If m_frame_count is even, we're rendering the left eye.
      if (is_left_eye_frame) {
          m_submitted_left_eye = true;
 diff --git a/src/mods/vr/FFakeStereoRenderingHook.cpp b/src/mods/vr/FFakeStereoRenderingHook.cpp
-index 18d1f4e57eb4d32afe22f4a485bfeb10ceb8ff2d..b5452775b3f245834b7d52040d21fbc43b115160 100644
+index 18d1f4e57eb4d32afe22f4a485bfeb10ceb8ff2d..89ff4657e6369c7ff3edc2100eafa0307e92d38a 100644
 --- a/src/mods/vr/FFakeStereoRenderingHook.cpp
 +++ b/src/mods/vr/FFakeStereoRenderingHook.cpp
 @@ -57,6 +57,7 @@
@@ -1159,7 +1409,61 @@ index 18d1f4e57eb4d32afe22f4a485bfeb10ceb8ff2d..b5452775b3f245834b7d52040d21fbc4
  
  #include <tracy/Tracy.hpp>
  
-@@ -4840,6 +4841,16 @@ __forceinline void FFakeStereoRenderingHook::calculate_stereo_view_offset(
+@@ -3192,7 +3193,14 @@ sdk::FSceneView* FFakeStereoRenderingHook::sceneview_constructor(sdk::FSceneView
+ 
+     last_index++;
+ 
++    // Capture the immutable portal frame before construction; Same Stereo Pass
++    // has relabeled the engine pass above, but true_index still identifies the eye.
++    const auto portalConstructionFrame = WindowMode::get()->portal_output_enabled()
++        ? uevrportal::gameFrame() : nullptr;
+     auto result = g_hook->m_sceneview_data.constructor_hook.unsafe_call<sdk::FSceneView*>(view, init_options, a3, a4);
++    if (portalConstructionFrame && vr->is_native_stereo_fix_enabled()) {
++        uevrportal::PortalFrame::constructed(portalConstructionFrame, true_index, result);
++    }
+ 
+     // Reset the view count back to what it was.
+     if (views_original_count.has_value()) {
+@@ -3359,6 +3367,22 @@ void FFakeStereoRenderingHook::begin_render_viewfamily_real(void* render_module,
+         return;
+     }
+ 
++    // Retain exactly the native resources supplied to this two-view submission.
++    // A single-view startup or unrelated capture cannot produce pair evidence.
++    std::shared_ptr<const uevrportal::PortalFrame> portalNativeFrame;
++    Microsoft::WRL::ComPtr<ID3D12Resource> portalLeft, portalRight;
++    if (WindowMode::get()->portal_output_enabled() &&
++        g_framework->get_renderer_type() == Framework::RendererType::D3D12 && views.count == 2) {
++        portalNativeFrame = uevrportal::PortalFrame::beginNativePair(views[0], views[1]);
++        if (portalNativeFrame) {
++            sdk::FRenderTarget::update_offsets(view_family_target);
++            const auto leftTexture = view_family_target->get_render_target_texture();
++            const auto rightTexture = rtfrt->get_render_target_texture();
++            if (leftTexture && *leftTexture) portalLeft = (ID3D12Resource*)(*leftTexture)->get_native_resource();
++            if (rightTexture && *rightTexture) portalRight = (ID3D12Resource*)(*rightTexture)->get_native_resource();
++        }
++    }
++
+     bool wants_swap = false;
+     if (views.count > 1) {
+         views.count = 1;
+@@ -3427,6 +3451,15 @@ void FFakeStereoRenderingHook::begin_render_viewfamily_real(void* render_module,
+         std::swap(views[0], views[1]);
+ 
+         view_family->set_render_target(original_target);
++
++        if (portalNativeFrame) {
++            // The final family callback supplies the frame ID later enqueued on
++            // the render/RHI path. Keep that alias separate from the latched pose
++            // ID: native-fix clones runtime poses and can advance family counters.
++            const auto familyFrame = *(uint32_t*)((uintptr_t)view_family + SceneViewExtensionAnalyzer::frame_count_offset);
++            const uint32_t renderFrame = familyFrame + g_hook->get_frame_delay_compensation();
++            uevrportal::PortalFrame::completeNativePair(portalNativeFrame, renderFrame, portalLeft.Get(), portalRight.Get());
++        }
+     }
+ 
+     views.count = prev_count;
+@@ -4840,6 +4873,16 @@ __forceinline void FFakeStereoRenderingHook::calculate_stereo_view_offset(
          return;
      }
  
@@ -1176,7 +1480,7 @@ index 18d1f4e57eb4d32afe22f4a485bfeb10ceb8ff2d..b5452775b3f245834b7d52040d21fbc4
      const auto& mods = g_framework->get_mods()->get_mods();
  
      if (!is_full_pass) {
-@@ -5123,6 +5134,9 @@ __forceinline Matrix4x4f* FFakeStereoRenderingHook::calculate_stereo_projection_
+@@ -5123,6 +5166,9 @@ __forceinline Matrix4x4f* FFakeStereoRenderingHook::calculate_stereo_projection_
      // Can happen if we hooked this differently.
      if (g_hook->m_calculate_stereo_projection_matrix_hook) {
          g_hook->m_calculate_stereo_projection_matrix_hook.call<Matrix4x4f*>(stereo, out, view_index);
@@ -1186,7 +1490,7 @@ index 18d1f4e57eb4d32afe22f4a485bfeb10ceb8ff2d..b5452775b3f245834b7d52040d21fbc4
      } else {
          if (g_hook->m_has_double_precision) {
              (*out)[3][2] = sdk::globals::get_near_clipping_plane();
-@@ -5170,6 +5184,28 @@ __forceinline Matrix4x4f* FFakeStereoRenderingHook::calculate_stereo_projection_
+@@ -5170,6 +5216,28 @@ __forceinline Matrix4x4f* FFakeStereoRenderingHook::calculate_stereo_projection_
          }
  
          auto& double_matrix = *(Matrix4x4d*)out;

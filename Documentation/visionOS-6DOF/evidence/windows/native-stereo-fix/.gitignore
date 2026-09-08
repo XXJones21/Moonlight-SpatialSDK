@@ -1,0 +1,5 @@
+# Preserve the bounded offline qualification transcripts with the tests.
+!tests.log
+!ui-tests.log
+!cache-tests.log
+!regressions.log

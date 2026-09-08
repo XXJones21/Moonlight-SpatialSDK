@@ -1,0 +1,886 @@
+[
+  {
+    "time": "2026-09-08T13:15:25.865020-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "image": "source-0.png",
+    "output": "[2026-09-08 13:15:26.047] [UnrealVR] [info] [Portal] output frame=7628 seq=4891 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=14798"
+  },
+  {
+    "time": "2026-09-08T13:15:27.053354-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:27.062] [UnrealVR] [info] [Portal] output frame=7689 seq=4983 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=14859"
+  },
+  {
+    "time": "2026-09-08T13:15:28.141262-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:28.062] [UnrealVR] [info] [Portal] output frame=7749 seq=5073 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=14919"
+  },
+  {
+    "time": "2026-09-08T13:15:29.232618-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:29.063] [UnrealVR] [info] [Portal] output frame=7809 seq=5163 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=14979"
+  },
+  {
+    "time": "2026-09-08T13:15:30.359820-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:30.078] [UnrealVR] [info] [Portal] output frame=7870 seq=5254 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15040"
+  },
+  {
+    "time": "2026-09-08T13:15:31.471325-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:31.078] [UnrealVR] [info] [Portal] output frame=7930 seq=5344 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15100"
+  },
+  {
+    "time": "2026-09-08T13:15:32.591709-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:32.079] [UnrealVR] [info] [Portal] output frame=7989 seq=5434 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15159"
+  },
+  {
+    "time": "2026-09-08T13:15:33.728160-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:33.079] [UnrealVR] [info] [Portal] output frame=8048 seq=5524 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15218"
+  },
+  {
+    "time": "2026-09-08T13:15:34.835746-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:34.079] [UnrealVR] [info] [Portal] output frame=8108 seq=5614 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15278"
+  },
+  {
+    "time": "2026-09-08T13:15:35.958842-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:35.079] [UnrealVR] [info] [Portal] output frame=8168 seq=5704 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15338"
+  },
+  {
+    "time": "2026-09-08T13:15:37.074983-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "image": "source-10.png",
+    "output": "[2026-09-08 13:15:37.096] [UnrealVR] [info] [Portal] output frame=8289 seq=5886 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15459"
+  },
+  {
+    "time": "2026-09-08T13:15:38.226754-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:38.111] [UnrealVR] [info] [Portal] output frame=8350 seq=5977 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15520"
+  },
+  {
+    "time": "2026-09-08T13:15:39.333586-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:39.111] [UnrealVR] [info] [Portal] output frame=8408 seq=6067 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15578"
+  },
+  {
+    "time": "2026-09-08T13:15:40.431212-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:40.113] [UnrealVR] [info] [Portal] output frame=8468 seq=6158 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15638"
+  },
+  {
+    "time": "2026-09-08T13:15:41.540920-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:41.112] [UnrealVR] [info] [Portal] output frame=8528 seq=6247 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15698"
+  },
+  {
+    "time": "2026-09-08T13:15:42.651151-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:42.130] [UnrealVR] [info] [Portal] output frame=8589 seq=6339 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15759"
+  },
+  {
+    "time": "2026-09-08T13:15:43.751682-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:43.146] [UnrealVR] [info] [Portal] output frame=8650 seq=6430 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15820"
+  },
+  {
+    "time": "2026-09-08T13:15:44.846354-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:44.162] [UnrealVR] [info] [Portal] output frame=8711 seq=6522 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15881"
+  },
+  {
+    "time": "2026-09-08T13:15:45.955189-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:45.181] [UnrealVR] [info] [Portal] output frame=8772 seq=6613 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=15942"
+  },
+  {
+    "time": "2026-09-08T13:15:47.062110-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:46.195] [UnrealVR] [info] [Portal] output frame=8833 seq=6705 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16003"
+  },
+  {
+    "time": "2026-09-08T13:15:48.164063-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "image": "source-20.png",
+    "output": "[2026-09-08 13:15:48.195] [UnrealVR] [info] [Portal] output frame=8953 seq=6885 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16123"
+  },
+  {
+    "time": "2026-09-08T13:15:49.295583-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": false,
+      "magic": "\u0000\u0010\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:49.195] [UnrealVR] [info] [Portal] output frame=9013 seq=6975 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16183"
+  },
+  {
+    "time": "2026-09-08T13:15:50.397698-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:50.212] [UnrealVR] [info] [Portal] output frame=9074 seq=7066 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16244"
+  },
+  {
+    "time": "2026-09-08T13:15:51.499383-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:51.228] [UnrealVR] [info] [Portal] output frame=9135 seq=7158 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16305"
+  },
+  {
+    "time": "2026-09-08T13:15:52.597383-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:52.228] [UnrealVR] [info] [Portal] output frame=9195 seq=7248 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16365"
+  },
+  {
+    "time": "2026-09-08T13:15:53.701202-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:53.228] [UnrealVR] [info] [Portal] output frame=9254 seq=7338 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16424"
+  },
+  {
+    "time": "2026-09-08T13:15:54.784831-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:54.228] [UnrealVR] [info] [Portal] output frame=9314 seq=7428 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16484"
+  },
+  {
+    "time": "2026-09-08T13:15:55.872081-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:55.229] [UnrealVR] [info] [Portal] output frame=9374 seq=7518 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16544"
+  },
+  {
+    "time": "2026-09-08T13:15:56.952863-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:56.229] [UnrealVR] [info] [Portal] output frame=9434 seq=7608 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16604"
+  },
+  {
+    "time": "2026-09-08T13:15:58.030493-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:15:57.230] [UnrealVR] [info] [Portal] output frame=9494 seq=7698 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16664"
+  },
+  {
+    "time": "2026-09-08T13:15:59.107223-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "image": "source-30.png",
+    "output": "[2026-09-08 13:15:58.230] [UnrealVR] [info] [Portal] output frame=9554 seq=7788 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16724"
+  },
+  {
+    "time": "2026-09-08T13:16:00.217211-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:16:00.246] [UnrealVR] [info] [Portal] output frame=9675 seq=7969 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16845"
+  },
+  {
+    "time": "2026-09-08T13:16:01.308793-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:16:01.246] [UnrealVR] [info] [Portal] output frame=9735 seq=8059 geometry=2151 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16905"
+  },
+  {
+    "time": "2026-09-08T13:16:02.396640-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:16:02.262] [UnrealVR] [info] [Portal] output frame=9796 seq=8149 geometry=2193 valid=true paired=true status=none detail=none nativeFix=true outputFrame=16966"
+  },
+  {
+    "time": "2026-09-08T13:16:03.477275-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:16:03.262] [UnrealVR] [info] [Portal] output frame=9856 seq=8239 geometry=2193 valid=true paired=true status=none detail=none nativeFix=true outputFrame=17026"
+  },
+  {
+    "time": "2026-09-08T13:16:04.553339-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:16:04.277] [UnrealVR] [info] [Portal] output frame=9917 seq=8330 geometry=2193 valid=true paired=true status=none detail=none nativeFix=true outputFrame=17087"
+  },
+  {
+    "time": "2026-09-08T13:16:05.631211-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:16:05.278] [UnrealVR] [info] [Portal] output frame=9977 seq=8420 geometry=2193 valid=true paired=true status=none detail=none nativeFix=true outputFrame=17147"
+  },
+  {
+    "time": "2026-09-08T13:16:06.711362-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:16:06.278] [UnrealVR] [info] [Portal] output frame=10037 seq=8510 geometry=2193 valid=true paired=true status=none detail=none nativeFix=true outputFrame=17207"
+  },
+  {
+    "time": "2026-09-08T13:16:07.791432-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:16:07.279] [UnrealVR] [info] [Portal] output frame=10097 seq=8600 geometry=2193 valid=true paired=true status=none detail=none nativeFix=true outputFrame=17267"
+  },
+  {
+    "time": "2026-09-08T13:16:08.875548-07:00",
+    "visible": true,
+    "bounds": [
+      2560,
+      0,
+      5120,
+      736
+    ],
+    "metadata": {
+      "eyeTagsEqual": true,
+      "magic": "\u0000\u0000\u0000\u0000",
+      "version": 0,
+      "flags": 0,
+      "crcValid": false,
+      "session": "0",
+      "epoch": 0,
+      "geometry": 0,
+      "frame": 0
+    },
+    "output": "[2026-09-08 13:16:08.295] [UnrealVR] [info] [Portal] output frame=10158 seq=8692 geometry=2193 valid=true paired=true status=none detail=none nativeFix=true outputFrame=17328"
+  }
+]
