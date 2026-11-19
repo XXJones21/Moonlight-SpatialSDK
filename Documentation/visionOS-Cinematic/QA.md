@@ -9,6 +9,12 @@ plus `Streaming/SurroundFeed.{h,m}`.
 
 ## 1. Build
 
+**Result, 19 November 2026:** built clean on the first compile with no source changes,
+on Xcode 27.2 with the visionOS 27.2 SDK, for the device destination. All nine
+`Cinema/` files and `SurroundFeed.m` compiled. Xcode's Metal Toolchain component had to
+be downloaded first (`xcodebuild -downloadComponent MetalToolchain`). The steps below
+are kept for a fresh machine. Nothing has been run on a headset yet.
+
 0. Restore the binary dependencies. `Moonlight-6Dof-Vision/Dependencies` is
    gitignored, so a fresh checkout does not have it. From the repository root:
 
@@ -71,6 +77,11 @@ With **Effects off** the app should behave as it did before this branch.
 - [ ] In the theater with a stream, press the Digital Crown. The player window appears with the stream still running.
 - [ ] Close the player window. The stream ends and the launcher is usable.
 - [ ] Resize the player window to odd shapes. The picture letterboxes and is never stretched.
+- [ ] Audio through every switch. `Mac-onboarding.md` records an open bug where closing
+      the Settings window after connecting stops audio. Window mode opens and closes
+      windows around a live stream, so check sound continues when: the launcher closes,
+      the player window closes on the way to the theater, and the theater closes on the
+      way back. Diagnostics log `Audio scene resolved` each time the scene changes.
 
 Not built: the theater screen does not yet appear where the window was. It appears in
 front of the viewer at the saved distance.
