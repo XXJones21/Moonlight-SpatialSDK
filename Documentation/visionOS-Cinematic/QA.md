@@ -9,11 +9,30 @@ plus `Streaming/SurroundFeed.{h,m}`.
 
 ## 1. Build
 
+0. Restore the binary dependencies. `Moonlight-6Dof-Vision/Dependencies` is
+   gitignored, so a fresh checkout does not have it. From the repository root:
+
+   ```sh
+   python3 tools/visionos-portal/bootstrap_apple_dependencies.py
+   ```
+
+   It clones the pinned donor into `External/` and copies the OpenSSL framework and
+   Opus libraries and headers into place.
 1. Open `Moonlight-6Dof-Vision.xcodeproj`. The project uses folder-synchronized
    groups, so the new files are already members of the target.
 2. Confirm the Xcode SDK matches the headset's visionOS version. A mismatched SDK
    crashes before `main()` and looks like an app bug.
-3. Build for the device. Expect compile errors; fix them in place. The likeliest spots:
+3. Build for the device, not the simulator: the donor's simulator Opus library is
+   built for devices and the simulator linker rejects it. To check compilation
+   without signing:
+
+   ```sh
+   xcodebuild -project Moonlight-6Dof-Vision/Moonlight-6Dof-Vision.xcodeproj \
+     -scheme Moonlight-6Dof-Vision -destination 'generic/platform=visionOS' \
+     -derivedDataPath DerivedData CODE_SIGNING_ALLOWED=NO build
+   ```
+
+   Expect compile errors; fix them in place. The likeliest spots:
 
 | Where | What may not compile, and why |
 | --- | --- |
