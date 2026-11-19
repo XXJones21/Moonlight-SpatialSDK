@@ -22,8 +22,13 @@ struct PlayerWindowView: View {
             RealityView { content in
                 content.add(screen.entity)
             } update: { content in
-                let bounds = content.convert(proxy.frame(in: .local), from: .local, to: .scene)
-                screen.layout(width: bounds.extents.x, height: bounds.extents.y, aspect: aspect, texture: showPicture ? texture : nil)
+                // The window's size in scene metres, from its two opposite corners. The
+                // point conversion is the documented overload, so it is used twice
+                // instead of relying on a rectangle conversion.
+                let frame = proxy.frame(in: .local)
+                let low = content.convert(frame.min, from: .local, to: .scene)
+                let high = content.convert(frame.max, from: .local, to: .scene)
+                screen.layout(width: abs(high.x - low.x), height: abs(high.y - low.y), aspect: aspect, texture: showPicture ? texture : nil)
             }
         }
         .overlay { if !showPicture { status } }
