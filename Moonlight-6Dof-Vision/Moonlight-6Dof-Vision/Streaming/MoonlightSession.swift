@@ -27,6 +27,13 @@ import OSLog
     var onDecodedBuffer: ((CVImageBuffer) -> Bool)?
     var onPresentedFrame: ((PortalFrameIdentity?) -> Void)?
     var sampleLighting: ((CVPixelBuffer) -> Void)?
+    /// Decoder frame pacing for the next stream. Set from settings before `start`.
+    var useFramePacing = false
+    /// Whether the decoder also renders the small blurred copy of the picture that the
+    /// room light projects. Read on the decoder's thread, so it sits behind a lock.
+    let ambientSwitch = AmbientSwitch()
+    /// Delivers the texture backing that blurred copy, or nil when the stream ends.
+    var onAmbientTexture: ((TextureResource?) -> Void)?
     private var receivedPresentedFrame = false
     private var client: MLClient?
     private var decoder: DrawableVideoDecoder?
@@ -47,15 +54,24 @@ import OSLog
             logger.notice("Starting stream: codec=\(preferences.codec, privacy: .public), formatMask=\(formats), size=\(preferences.encodedWidth)x\(preferences.encodedHeight), fps=\(preferences.fps), HDR=\(preferences.hdr), 6DoF=\(preferences.metadata)")
             PortalDiagnostics.shared().record("Stream request: codec=\(preferences.codec), audio=\(preferences.audio), size=\(preferences.encodedWidth)x\(preferences.encodedHeight), HDR=\(preferences.hdr), 6DoF=\(preferences.metadata)")
             let texture = try StereoPreview.makeTexture(stereo: preferences.metadata)
+            // A stand-in until the decoder's ambient queue exists; the same resource
+            // then receives that queue's drawables.
+            let ambientTexture = try StereoPreview.makeTexture(stereo: false)
+            let ambientSwitch = self.ambientSwitch
+            let pacing = useFramePacing
             let client = MLClient()
             client.event = { [weak self] name, payload in
                 Task { @MainActor in guard let self, self.token == generation else { return }; self.handle(name, payload: payload) }
             }
             let decoder = DrawableVideoDecoder(texture: texture, callbacks: client, aspectRatio: Float(preferences.eyeWidth) / Float(preferences.eyeHeight),
-                useFramePacing: false, enableHDR: preferences.hdr, enableAmbilightProvider: { false },
-                callbackToRender: { [weak self] queue, _, resolution in
+                useFramePacing: pacing, enableHDR: preferences.hdr, enableAmbilightProvider: { ambientSwitch.isOn },
+                callbackToRender: { [weak self] queue, ambientQueue, resolution in
                     guard let self, self.token == generation else { return }
                     texture.replace(withDrawables: queue)
+                    if let ambientQueue, !preferences.metadata {
+                        ambientTexture.replace(withDrawables: ambientQueue)
+                        self.onAmbientTexture?(ambientTexture)
+                    }
                     let width = resolution?.0 ?? preferences.encodedWidth, height = resolution?.1 ?? preferences.encodedHeight
                     self.negotiatedWidth = width; self.negotiatedHeight = height
                     self.videoTexture = texture; self.onTexture?(texture, width, height)
@@ -73,13 +89,16 @@ import OSLog
             }
             decoder.sampleLighting = sampleLighting
             decoder.metadataRows = preferences.metadata ? 16 : 0
+            // Ordinary streams get a plain blurred copy for the room light. The 6DoF
+            // portal keeps the donor's halo shader and never enables it.
+            if !preferences.metadata { decoder.ambilightFragment = "copyFragmentShaderRoomLight" }
             let config = StreamConfiguration()
             config.host = server.address; config.appID = server.appID; config.appName = server.name
             config.width = Int32(preferences.encodedWidth); config.height = Int32(preferences.encodedHeight)
             config.frameRate = Int32(preferences.fps); config.bitRate = Int32(preferences.bitrateKbps ?? preferences.automaticBitrate)
             config.audioConfiguration = preferences.audioConfiguration; config.supportedVideoFormats = formats
             config.colorRange = preferences.fullRange ? 1 : 0; config.colorSpace = preferences.hdr ? 2 : 1
-            config.serverCert = certificate; config.gamepadMask = 1; config.useFramePacing = false
+            config.serverCert = certificate; config.gamepadMask = 1; config.useFramePacing = pacing
             self.client = client; self.decoder = decoder; self.activeConfiguration = preferences
             negotiatedHDR = nil
             state = .connecting; stage = "Connecting"
@@ -115,6 +134,7 @@ import OSLog
             // inside the shared task prevents a reconnect from racing another waiter's cleanup.
             PortalDiagnostics.shared().record("Native stream teardown complete")
             self.client = nil; self.decoder = nil; self.videoTexture = nil
+            self.onAmbientTexture?(nil)
             self.activeConfiguration = nil; self.negotiatedWidth = 0; self.negotiatedHeight = 0
             self.negotiatedHDR = nil
             self.statistics = "Not streaming"; self.state = .idle; self.stopping = nil
@@ -150,5 +170,15 @@ import OSLog
             }
         default: break
         }
+    }
+}
+
+/// A flag the decoder reads on its own thread.
+final class AmbientSwitch: @unchecked Sendable {
+    private let lock = NSLock()
+    private var value = false
+    var isOn: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return value }
+        set { lock.lock(); value = newValue; lock.unlock() }
     }
 }

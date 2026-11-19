@@ -8,5 +8,6 @@
 #import "HDRParsingUtils.h"
 #import "MLClient.h"
 #import "CoreAudioRenderer.h"
+#import "SurroundFeed.h"
 
 #import "../Diagnostics/PortalDiagnostics.h"

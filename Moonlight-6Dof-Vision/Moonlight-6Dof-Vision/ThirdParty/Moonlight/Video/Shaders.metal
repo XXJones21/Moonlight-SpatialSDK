@@ -613,3 +613,24 @@ fragment half4 copyFragmentShaderAmbilight(
     half4 previousColor = prevTex.sample(s, in.uv);
     return mix(previousColor, currentColor, 0.10);
 }
+
+// MARK: - Cinematic target: room light source
+//
+// Added for Moonlight's cinematic visionOS target; not part of the donor file.
+// Fills the small ambient texture with a soft copy of the whole picture, eased over
+// time so a cut does not flash across the room. `sourceTex` is a low mip level of the
+// frame, so the linear sample here is already a wide blur. The texture is projected
+// into the room by a spot light, which is why the alpha stays opaque.
+fragment half4 copyFragmentShaderRoomLight(
+    CopyVertexOut in [[stage_in]],
+    texture2d<half> sourceTex [[texture(0)]],
+    texture2d<half> prevTex [[texture(1)]],
+    constant int &isVolumeMode [[buffer(1)]]
+) {
+    constexpr sampler s(coord::normalized, address::clamp_to_edge, filter::linear);
+    half3 now = min(sourceTex.sample(s, in.uv).rgb, half3(4.0h));
+    half3 before = prevTex.sample(s, in.uv).rgb;
+    // About a tenth of a second to settle at 60 frames per second.
+    half3 eased = mix(before, now, 0.18h);
+    return half4(eased, 1.0h);
+}

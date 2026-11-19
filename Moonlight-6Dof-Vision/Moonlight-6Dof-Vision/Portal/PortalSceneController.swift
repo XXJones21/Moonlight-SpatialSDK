@@ -14,6 +14,17 @@ final class PortalSceneController {
     private var light: PointLight { panelHost.panel.light }
     var width: Float = 0.7 * 16 / 9
     var height: Float = 0.7
+    /// 0 is flat; 1 bends the screen through a 100 degree arc.
+    var curve: Float = 0 { didSet { if curve != oldValue { changed() } } }
+    /// Backward lean of the screen, in degrees. Positive tips the top away from the viewer.
+    var tiltDegrees: Float = 0 { didSet { if tiltDegrees != oldValue { changed() } } }
+    /// Where a freshly placed screen appears relative to the viewer.
+    var placeDistance: Float = 1
+    var placeHeightOffset: Float = -0.1
+    /// Called when a move, turn or resize ends, so the arrangement can be saved.
+    var onArrangementSettled: (() -> Void)?
+    /// The latest head pose from world tracking, if any.
+    var headTransform: simd_float4x4? { lastHead }
     var revision: UInt64 = 1
     var trackingEpoch: UInt64 = 1
     var trackingValid = false
@@ -141,13 +152,14 @@ final class PortalSceneController {
         if simd_length(back) <= 0.01 { back = SIMD3(-head.columns.0.z, 0, head.columns.0.x) }
         guard simd_length(back) > 0.01 else { return }
         let direction = simd_normalize(back)
-        root.position = SIMD3(head.columns.3.x, head.columns.3.y - 0.1, head.columns.3.z) - direction
+        root.position = SIMD3(head.columns.3.x, head.columns.3.y + placeHeightOffset, head.columns.3.z) - direction * max(0.4, placeDistance)
         root.orientation = simd_quatf(angle: atan2(direction.x, direction.z), axis: [0, 1, 0])
         placed = true; changed(); revealControls()
     }
     func setAspect(_ aspect: Float) {
         guard aspect.isFinite, aspect > 0, aspect != baseAspect else { return }
-        baseAspect = aspect; resetSize()
+        // Keep the width the viewer chose and let the height follow the new shape.
+        baseAspect = aspect; height = width / aspect; changed()
     }
     func calibrationChanged() { changed() }
     func setLightingColor(_ rgb: SIMD3<Float>, enabled: Bool) {
@@ -155,8 +167,37 @@ final class PortalSceneController {
         let color = UIColor(red: CGFloat(rgb.x), green: CGFloat(rgb.y), blue: CGFloat(rgb.z), alpha: 1)
         glow.model?.materials = [UnlitMaterial(color: color)]
         glow.components.set(OpacityComponent(opacity: 0.25))
-        glow.isEnabled = enabled; light.isEnabled = enabled
-        light.light.color = color; light.light.intensity = 50
+        glow.isEnabled = enabled
+        // The original point light only reached virtual objects. RoomLightRig's bias
+        // light replaces it and reaches the real wall.
+        light.isEnabled = false
+    }
+
+    /// Puts the screen back in front of the viewer using the current distance and height.
+    func placeInFrontOfViewer() {
+        guard let lastHead else { placed = false; return }
+        place(inFrontOf: lastHead)
+    }
+
+    /// The screen's current arrangement, measured from the viewer when tracking is available.
+    func arrangement() -> ScreenPreset {
+        var distance = placeDistance, offset = placeHeightOffset
+        if let head = lastHead {
+            let eye = SIMD3(head.columns.3.x, head.columns.3.y, head.columns.3.z)
+            let flat = SIMD3(root.position.x - eye.x, 0, root.position.z - eye.z)
+            distance = max(0.4, simd_length(flat)); offset = root.position.y - eye.y
+        }
+        return ScreenPreset(width: width, distance: distance, heightOffset: offset, curve: curve, tiltDegrees: tiltDegrees)
+    }
+
+    /// Applies a saved arrangement. With `reposition`, the screen also returns to its
+    /// saved distance and height in front of the viewer.
+    func apply(_ preset: ScreenPreset, reposition: Bool) {
+        width = min(10, max(0.5, preset.width)); height = width / baseAspect
+        curve = min(1, max(0, preset.curve)); tiltDegrees = min(30, max(-30, preset.tiltDegrees))
+        placeDistance = max(0.4, preset.distance); placeHeightOffset = preset.heightOffset
+        if reposition { placeInFrontOfViewer() }
+        changed()
     }
     func resetSize() { height = 0.7; width = min(10, max(0.5, height * baseAspect)); height = width / baseAspect; changed() }
     func revealControls() { shelfUntil = CACurrentMediaTime() + 3; cornersUntil = CACurrentMediaTime() + 1.5; shelfVisible = true; cornersVisible = true }
@@ -181,7 +222,7 @@ final class PortalSceneController {
             changed()
         }
     }
-    func endDrag() { dragStart = nil; sizeStart = nil; manipulating = false; revealControls() }
+    func endDrag() { dragStart = nil; sizeStart = nil; manipulating = false; revealControls(); onArrangementSettled?() }
     func rotate(_ value: EntityTargetValue<RotateGesture3D.Value>) {
         guard dragStart == nil else { return }
         if yawStart == nil { yawStart = root.orientation }
@@ -190,10 +231,13 @@ final class PortalSceneController {
         root.orientation = simd_quatf(angle: Float(value.rotation.angle.radians) * sign, axis: [0, 1, 0]) * yawStart!
         changed()
     }
-    func endRotate() { yawStart = nil; manipulating = false; revealControls() }
+    func endRotate() { yawStart = nil; manipulating = false; revealControls(); onArrangementSettled?() }
 
     private func changed() { revision &+= 1; updateGeometry(); onGeometryChanged?() }
     private func updateGeometry() {
-        panelHost.panel.updateGeometry(width: width, height: height, aspect: baseAspect)
+        panelHost.panel.updateGeometry(width: width, height: height, aspect: baseAspect, curve: curve)
+        // Tilt belongs to the panel, not the root: the root keeps a level heading so
+        // dragging and the speaker layout stay upright.
+        panelHost.panel.orientation = simd_quatf(angle: -tiltDegrees * .pi / 180, axis: [1, 0, 0])
     }
 }

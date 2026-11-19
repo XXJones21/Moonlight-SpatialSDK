@@ -4,6 +4,8 @@
 <dict>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Connect to your PC to pair Moonlight, stream games, and send portal tracking.</string>
+	<key>NSWorldSensingUsageDescription</key>
+	<string>Moonlight maps the surfaces of your room so the screen's light can fall on your real floor, walls and furniture.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationPreferredDefaultSceneSessionRole</key>

@@ -2,8 +2,9 @@ import SwiftUI
 
 struct ConnectionView: View {
     @Environment(AppModel.self) private var app
-    @Environment(\.openImmersiveSpace) private var openImmersiveSpace
+    private var switcher = PresentationSwitch()
     @State private var diagnosticURL: URL?
+    @State private var showCinema = false
     @State private var diagnosticError: String?
     @State private var showServer = false
     @State private var showOptions = false
@@ -13,6 +14,7 @@ struct ConnectionView: View {
 
     var body: some View {
         @Bindable var connection = app.connection
+        @Bindable var settings = app.settings
         ScrollView {
             VStack(spacing: 12) {
                 Label("Moonlight Connection", systemImage: "moon.stars.fill").font(.title2).frame(maxWidth: .infinity)
@@ -36,9 +38,16 @@ struct ConnectionView: View {
                         ForEach(connection.servers) { Text($0.name).tag($0.id) }
                     }.disabled(connection.busy)
                 }
-                StreamModeToggle()
-                Text(app.sixDoFEnabled ? "Selected mode: 6DoF game portal" : "Selected mode: Basic Moonlight desktop")
-                    .font(.caption).foregroundStyle(.secondary)
+                if AppFeatures.sixDoF {
+                    StreamModeToggle()
+                    Text(app.sixDoFEnabled ? "Selected mode: 6DoF game portal" : "Selected mode: Basic Moonlight desktop")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                if !app.sixDoFEnabled {
+                    Toggle("Start in a window", isOn: $settings.values.startInWindow)
+                    Text(settings.values.startInWindow ? "Connect opens the stream in a window. Theater is one tap away." : "Connect opens the stream in the theater.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
                 Text(connection.status).frame(maxWidth: .infinity, alignment: .leading).foregroundStyle(.secondary)
                 HStack(alignment: .top, spacing: 24) {
                     VStack(alignment: .leading, spacing: 8) {
@@ -84,7 +93,7 @@ struct ConnectionView: View {
                     if let diagnosticURL { ShareLink("Share Diagnostics", item: diagnosticURL) }
                 }
                 if let diagnosticError { Text(diagnosticError).foregroundStyle(.orange) }
-                Button("Launch Immersive Mode (No Connection)") { Task { await openPortal() } }.disabled(app.immersiveSpaceState == .inTransition)
+                Button("Launch Immersive Mode (No Connection)") { Task { await switcher.openTheater() } }.disabled(app.immersiveSpaceState == .inTransition)
             }.padding(16)
         }.frame(minWidth: 680, minHeight: 450).glassBackgroundEffect(in: .rect(cornerRadius: 16))
         .sheet(isPresented: $showServer) { ServerPairingSheet().streamControllerEvents() }
@@ -100,6 +109,9 @@ struct ConnectionView: View {
                 Button { showOptions = false; showEffects = true } label: {
                     VStack(alignment: .leading) { Text("Immersive Options"); Text("Enable immersive features").font(.caption).foregroundStyle(.secondary) }.frame(maxWidth: .infinity, alignment: .leading)
                 }
+                Button { showOptions = false; showCinema = true } label: {
+                    VStack(alignment: .leading) { Text("Cinema Options"); Text("Picture, light, sound and screen").font(.caption).foregroundStyle(.secondary) }.frame(maxWidth: .infinity, alignment: .leading)
+                }
                 if app.sixDoFEnabled {
                     DisclosureGroup("Advanced") { Button("Portal Calibration") { showOptions = false; showCalibration = true } }
                 }
@@ -107,24 +119,26 @@ struct ConnectionView: View {
             }.buttonStyle(.bordered).padding(24).streamControllerEvents()
         }
         .sheet(isPresented: $showEffects) { ImmersiveOptionsView().streamControllerEvents() }
+        .sheet(isPresented: $showCinema) { CinemaSettingsView().streamControllerEvents() }
         .onChange(of: app.sixDoFEnabled) { _, enabled in if !enabled { showCalibration = false } }
         .sheet(isPresented: $showCalibration) { PortalCalibrationView().streamControllerEvents() }
-        .task { if connection.paired { connection.loadApplications() } }
+        .task {
+            if connection.paired { connection.loadApplications() }
+            if app.shouldResumeOnLaunch() { launch() }
+        }
     }
     private func launch() {
         guard let server = app.connection.launchServer else { return }
         app.connection.saveSelection()
-        Task { if await openPortal() { await app.start(server: server) } }
-    }
-    @discardableResult private func openPortal() async -> Bool {
-        if app.immersiveSpaceState == .open { return true }
-        guard app.immersiveSpaceState == .closed else { return false }
-        app.immersiveSpaceState = .inTransition
-        switch await openImmersiveSpace(id: app.immersiveSpaceID) {
-        case .opened: app.immersiveSpaceState = .open; return true
-        case .userCancelled: app.immersiveSpaceState = .closed; return false
-        case .error: app.message = "The immersive space could not open"; app.immersiveSpaceState = .closed; return false
-        @unknown default: app.immersiveSpaceState = .closed; return false
+        Task {
+            // The window is only offered for ordinary streams, and only from a cold
+            // start: if the theater is already open the stream simply appears in it.
+            if app.settings.values.startInWindow && !app.sixDoFEnabled && app.immersiveSpaceState == .closed {
+                await switcher.openPlayerWindow()
+                await app.start(server: server)
+            } else if await switcher.openTheater() {
+                await app.start(server: server)
+            }
         }
     }
 }

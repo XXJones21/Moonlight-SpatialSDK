@@ -10,13 +10,17 @@ final class PortalLightingSampler: @unchecked Sendable {
     private var lastSample: TimeInterval = 0
     private var average = SIMD3<Float>(repeating: 0.5)
     var onColor: (@Sendable (SIMD3<Float>) -> Void)?
+    /// Rows at the bottom of the frame that carry frame identity instead of picture.
+    /// Only 6DoF streams have them.
+    var metadataRows = 0
     func sample(_ buffer: CVPixelBuffer) {
         lock.lock(); defer { lock.unlock() }
         let now = CACurrentMediaTime()
         guard now - lastSample >= 0.1 else { return }
         lastSample = now
         let source = CIImage(cvPixelBuffer: buffer)
-        let extent = CGRect(x: 0, y: 16, width: CVPixelBufferGetWidth(buffer), height: CVPixelBufferGetHeight(buffer) - 16)
+        let skip = min(max(0, metadataRows), max(0, CVPixelBufferGetHeight(buffer) - 1))
+        let extent = CGRect(x: 0, y: skip, width: CVPixelBufferGetWidth(buffer), height: CVPixelBufferGetHeight(buffer) - skip)
         let pixel = source.cropped(to: extent).applyingFilter("CIAreaAverage", parameters: [kCIInputExtentKey: CIVector(cgRect: extent)])
         var rgba = [UInt8](repeating: 0, count: 4)
         rgba.withUnsafeMutableBytes { bytes in

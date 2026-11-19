@@ -133,10 +133,14 @@ struct ImmersiveOptionsView: View {
         @Bindable var app = app
         VStack(alignment: .leading, spacing: 16) {
             Text("Immersive Options").font(.title2)
-            StreamModeToggle()
-            Text("Off streams the normal desktop. On uses the supported game's stereo portal output. Changing this restarts an active stream.")
+            if AppFeatures.sixDoF {
+                StreamModeToggle()
+                Text("Off streams the normal desktop. On uses the supported game's stereo portal output. Changing this restarts an active stream.")
+                    .font(.caption).foregroundStyle(.secondary)
+                if app.changingStreamMode { ProgressView("Changing stream mode…") }
+            }
+            Text("These take effect in the theater while Effects is on in the control bar. Cinema Options has the detail for each.")
                 .font(.caption).foregroundStyle(.secondary)
-            if app.changingStreamMode { ProgressView("Changing stream mode…") }
             Toggle("Enable spatial audio", isOn: $app.spatialAudio)
             Toggle("Room Dimming", isOn: $app.roomDimming)
             Toggle("Lighting Emission", isOn: $app.lightingEmission)

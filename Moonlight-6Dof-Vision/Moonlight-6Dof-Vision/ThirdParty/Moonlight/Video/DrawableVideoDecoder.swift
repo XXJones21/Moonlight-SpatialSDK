@@ -121,6 +121,10 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
     var drawableQueue: TextureResource.DrawableQueue?
     var ambilightQueue: TextureResource.DrawableQueue?
     var enableAmbilight: Bool = true
+    /// Fragment function that fills the small ambient texture. The donor's default draws
+    /// a hollow halo for a plane behind the screen; the cinematic target swaps in a plain
+    /// blurred copy of the picture, for a light to project.
+    var ambilightFragment = "copyFragmentShaderAmbilight"
 
     var session: VTDecompressionSession?
     var decoderCallback: VTDecompressionOutputCallbackRecord
@@ -546,7 +550,7 @@ class DrawableVideoDecoder: NSObject, AnyVideoDecoderRenderer {
             let mipLevel = min(targetMipLevel, drawable.texture.mipmapLevelCount - 1)
             
             if ambilightPipelineState == nil {
-                ambilightPipelineState = buildCopyPipeline(fragment: "copyFragmentShaderAmbilight")
+                ambilightPipelineState = buildCopyPipeline(fragment: ambilightFragment)
             }
             
             if prevAmbilightTexture == nil || prevAmbilightTexture!.width != ambDrawable.texture.width || prevAmbilightTexture!.height != ambDrawable.texture.height {

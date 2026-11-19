@@ -2,6 +2,7 @@
 #import <os/lock.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import "PortalAudioFormat.h"
+#import "SurroundFeed.h"
 #import "../Diagnostics/PortalDiagnostics.h"
 
 /// Opus callback -> bounded PCM buffers -> AVAudioEngine. All engine mutations use one queue.
@@ -36,6 +37,7 @@ static NSString *currentSceneIdentifier;
     _engine=[AVAudioEngine new]; _player=[AVAudioPlayerNode new]; _environment=[AVAudioEnvironmentNode new];
     [_engine attachNode:_player]; [_engine attachNode:_environment];
     @synchronized(CoreAudioRenderer.class) { current=self; _sceneIdentifier=[currentSceneIdentifier copy]; }
+    [SurroundFeed.shared configureWithChannels:_channels];
     __weak CoreAudioRenderer *weakSelf=self;
     _interruptionObserver=[NSNotificationCenter.defaultCenter addObserverForName:AVAudioSessionInterruptionNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
         CoreAudioRenderer *strongSelf=weakSelf; if(!strongSelf) return;
@@ -130,10 +132,19 @@ static NSString *currentSceneIdentifier;
         os_unfair_lock_lock(&self->_lock); self->_running=NO; ++self->_generation; self->_queued=0; os_unfair_lock_unlock(&self->_lock);
         [self->_player stop]; [self->_engine stop];
     });
+    [SurroundFeed.shared configureWithChannels:0];
 }
 - (void *)getAudioBuffer:(int *)size { *size=(int)_decodeBuffer.length; return _decodeBuffer.mutableBytes; }
 - (BOOL)submitAudio:(int)bytesWritten opusBytes:(int)opusBytes decodeStartTime:(CFTimeInterval)decodeStartTime {
     if(bytesWritten<=0 || bytesWritten>_decodeBuffer.length || bytesWritten%(_channels*sizeof(float))) return NO;
+    // RealityKit generators read from the feed. While they own playback the engine
+    // below stays silent, so the same audio is never heard twice.
+    SurroundFeed *feed = SurroundFeed.shared;
+    [feed writeInterleaved:(const float *)_decodeBuffer.bytes frames:bytesWritten/(int)(_channels*sizeof(float)) channels:_channels];
+    if (feed.active) {
+        os_unfair_lock_lock(&_lock); ++_receivedBuffers; os_unfair_lock_unlock(&_lock);
+        return YES;
+    }
     os_unfair_lock_lock(&_lock);
     ++_receivedBuffers;
     if(!_running || _interrupted) { os_unfair_lock_unlock(&_lock); return NO; }
@@ -188,9 +199,10 @@ static NSString *currentSceneIdentifier;
 }
 - (NSString *)getAudioStatsString {
     os_unfair_lock_lock(&_lock);
-    NSString *stats = [NSString stringWithFormat:@"Audio: %d ch, %d Hz; queued %lu/6; buffers %llu; queue drops %llu; decode errors %llu; PCM peak %.3f",
+    NSString *stats = [NSString stringWithFormat:@"Audio: %d ch, %d Hz; queued %lu/6; buffers %llu; queue drops %llu; decode errors %llu; PCM peak %.3f; spatial feed %@, gaps %llu",
         _channels, _sampleRate, (unsigned long)_queued, (unsigned long long)_receivedBuffers,
-        (unsigned long long)_queueDrops, (unsigned long long)_decodeErrors, _pcmPeak];
+        (unsigned long long)_queueDrops, (unsigned long long)_decodeErrors, _pcmPeak,
+        SurroundFeed.shared.active ? @"on" : @"off", (unsigned long long)SurroundFeed.shared.underruns];
     os_unfair_lock_unlock(&_lock);
     return stats;
 }

@@ -8,6 +8,11 @@ import Observation
     private var active = false
     private var observers: [NSObjectProtocol] = []
     private var hapticEngine: CHHapticEngine?
+    /// Called when Menu and Options are held together for a moment: the chord that
+    /// brings the on-screen controls back without reaching for the screen.
+    var onControlsChord: (() -> Void)?
+    private var chordHeld = false
+    private var chordTask: Task<Void, Never>?
     init() {
         for notification in [Notification.Name.GCControllerDidConnect, .GCControllerDidDisconnect] {
             observers.append(NotificationCenter.default.addObserver(forName: notification, object: nil, queue: .main) { [weak self] _ in
@@ -27,8 +32,22 @@ import Observation
     }
     func setActive(_ value: Bool) { if !value { release() }; active = value; if value { send() } }
     func release() { if active { LiSendMultiControllerEvent(0, 1, 0, 0, 0, 0, 0, 0, 0) } }
+    private func watchChord(_ pad: GCExtendedGamepad) {
+        let held = pad.buttonMenu.isPressed && pad.buttonOptions?.isPressed == true
+        guard held != chordHeld else { return }
+        chordHeld = held
+        chordTask?.cancel(); chordTask = nil
+        guard held else { return }
+        chordTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(600))
+            guard let self, !Task.isCancelled, self.chordHeld else { return }
+            self.onControlsChord?()
+        }
+    }
     private func send() {
-        guard active, let pad = controller?.extendedGamepad else { return }
+        guard let pad = controller?.extendedGamepad else { return }
+        watchChord(pad)
+        guard active else { return }
         var buttons: Int32 = 0
         let mapping: [(GCControllerButtonInput?, Int32)] = [
             (pad.dpad.up,1),(pad.dpad.down,2),(pad.dpad.left,4),(pad.dpad.right,8),
