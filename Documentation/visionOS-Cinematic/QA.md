@@ -17,8 +17,8 @@ plus `Streaming/SurroundFeed.{h,m}`.
 
 | Where | What may not compile, and why |
 | --- | --- |
-| `Cinema/PlayerWindowView.swift` | `content.convert(_:from:to:)` on `RealityViewContent`: written from memory of Apple's samples, not from a documentation page |
-| `Cinema/RoomLightRig.swift` | The `SpotLightComponent` and `PointLightComponent` initializers: the argument labels follow Hearth's working calls, but the colour argument's type is inferred |
+| `Cinema/PlayerWindowView.swift` | Sizing the picture uses the documented point conversion on the window's corners; the property names on the frame (`min`, `max`) are from memory |
+| `Cinema/RoomLightRig.swift` | Low risk: initializer labels and the colour type were confirmed against Apple's pages and match Hearth's working calls |
 | `Cinema/SurroundStage.swift` | Passing an Objective-C render block to `playAudio(configuration:_:)`: may need `@Sendable` handling |
 | `Cinema/StreamKeyboardMouse.swift` | GameController handler signatures and the C constant types from `Limelight.h` |
 | `Cinema/DisplayCriteriaHint.swift` | `UIWindow.avDisplayManager`: listed for visionOS, never used here before |
@@ -28,6 +28,10 @@ plus `Streaming/SurroundFeed.{h,m}`.
 4. Duplicate the target to create the 6DoF app. In the copy, add `PORTAL_6DOF` to
    *Active Compilation Conditions* and give it its own bundle identifier. The
    cinematic target leaves the flag unset, which hides every 6DoF control.
+
+Every Apple API named in the new code was checked against its documentation page for
+name, parameters and visionOS availability. That confirms the calls exist; it does not
+confirm they type-check together.
 
 ## 2. Nothing regressed
 
